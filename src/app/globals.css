@@ -1,0 +1,117 @@
+@import "tailwindcss";
+
+button {
+  cursor: pointer;
+}
+
+@theme {
+  --color-primary: #0e5aa7;
+  --color-primary-dark: #00387b;
+
+  --color-secondary: #e3000f;
+  --color-secondary-dark: #bb1e10;
+
+  --color-accent: #cf9e36;
+  --color-success: #237f52;
+
+  --color-background: #ffffff;
+  --color-surface: #f5f5f5;
+
+  --color-text-primary: #222222;
+  --color-text-secondary: #666666;
+
+  --color-border: #e5e5e5;
+  --color-border-light: #E0E7EF;
+  --color-border-subtle: #e0e7ef;
+  --color-discount: #bc1e20;
+
+  --font-family-body: var(--font-montserrat), sans-serif;
+  --font-family-heading: var(--font-playfair), serif;
+}
+
+@layer base {
+  body {
+    font-family: var(--font-family-body);
+  }
+
+  h1, h2, h3, h4 {
+    font-family: var(--font-family-heading);
+  }
+}
+
+:root {
+  --header-gradient-start: rgb(157, 176, 196);
+  --header-gradient-end: rgb(255, 255, 255);
+}
+
+[data-channel="fast-shipping"] {
+  --header-gradient-start: rgb(252, 238, 190);
+  --header-gradient-end: rgb(255, 253, 248);
+}
+
+@layer utilities {
+  .font-heading {
+    font-family: var(--font-family-heading);
+  }
+
+  .header-gradient {
+    background: linear-gradient(var(--header-gradient-start), var(--header-gradient-end));
+  }
+  .header-shadow {
+    box-shadow: 0 4px 24px 0 rgba(0, 0, 0, 0.06);
+  }
+  .card-shadow {
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.04), 0 1px 2px -1px rgba(0, 0, 0, 0.06);
+  }
+  .card-shadow-hover {
+    transition: box-shadow 0.3s ease, transform 0.3s ease;
+  }
+  .card-shadow-hover:hover {
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.08), 0 4px 10px -6px rgba(0, 0, 0, 0.04);
+    transform: translateY(-2px);
+  }
+  .no-scrollbar {
+    scrollbar-width: none;
+  }
+
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+
+  .auth-fall-item {
+    top: -14%;
+    transform: translate3d(-50%, -130%, 0);
+    animation-name: auth-fall-down;
+    animation-timing-function: linear;
+    animation-iteration-count: infinite;
+    will-change: transform;
+  }
+
+  .auth-fall-spin {
+    animation-name: auth-sway-spin;
+    animation-timing-function: ease-in-out;
+    animation-iteration-count: infinite;
+    will-change: transform;
+  }
+}
+
+@keyframes auth-fall-down {
+  0% {
+    transform: translate3d(-50%, -130%, 0);
+  }
+  100% {
+    transform: translate3d(calc(-50% + var(--drift-x)), 105vh, 0);
+  }
+}
+
+@keyframes auth-sway-spin {
+  0% {
+    transform: rotate(-16deg) scale(0.96);
+  }
+  50% {
+    transform: rotate(16deg) scale(1);
+  }
+  100% {
+    transform: rotate(-16deg) scale(0.96);
+  }
+}
