@@ -11,7 +11,7 @@ import Footer from "@/features/navigation/components/footer/Footer";
 import { AuthModal } from "@/features/auth/components/AuthModal";
 import { CartSyncProvider } from "@/features/cart/components/CartSyncProvider";
 import { ChannelThemeProvider } from "@/features/fast-shipping/components/ChannelThemeProvider";
-import { Montserrat, Playfair_Display } from "next/font/google";
+import { IBM_Plex_Sans_Arabic } from "next/font/google";
 import { cn } from "@/shared/utils/cn";
 import { getCachedSettings } from "@/features/settings/services/settingsService";
 
@@ -19,16 +19,10 @@ export function generateStaticParams() {
   return routing.locales.map((locale) => ({ locale }));
 }
 
-const montserrat = Montserrat({
-  weight: ["400", "500", "600", "700"],
-  subsets: ["latin"],
-  variable: "--font-montserrat",
-});
-
-const playfair = Playfair_Display({
-  weight: ["400", "500", "600", "700"],
-  subsets: ["latin"],
-  variable: "--font-playfair",
+const ibmPlexSansArabic = IBM_Plex_Sans_Arabic({
+  weight: ["300", "400", "500", "600", "700"],
+  subsets: ["arabic"],
+  variable: "--font-ibm-arabic",
 });
 
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
@@ -92,8 +86,8 @@ export default async function RootLayout({
   }
   
   return (
-      <html lang={locale} dir={dir} className="overflow-x-hidden">
-      <body className={cn("flex flex-col overflow-x-hidden", montserrat.variable, playfair.variable)}>
+      <html lang={locale} dir={dir} className={cn("overflow-x-hidden", ibmPlexSansArabic.variable)}>
+      <body className="flex flex-col overflow-x-hidden">
         <link rel="preconnect" href={process.env.NEXT_PUBLIC_API_URL} />
         <NextIntlClientProvider>
           <div className="hidden lg:block">

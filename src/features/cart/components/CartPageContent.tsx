@@ -7,19 +7,15 @@ import { useAuthStore } from "@/features/auth/store/useAuthStore";
 import { useGuestCartStore } from "../store/useGuestCartStore";
 import { useServerCartStore } from "../store/useServerCartStore";
 import { cartService } from "../services/cartService";
-import { productService } from "@/features/products/services/productService";
 import { CartSection } from "./CartSection";
 import { CartSummary } from "./CartSummary";
-import ProductSlider from "@/features/home/productSlider/ProductSlider";
 import AvailableCoupons from "@/features/coupons/components/AvailableCoupons";
 import { calcSubtotal, calcTotalQuantity } from "../utils";
-import type { ProductListItem } from "@/features/products/types";
 import type { AppliedCoupon } from "@/features/coupons/types";
 import type { Coupon } from "@/features/coupons/types";
 import { couponService } from "@/features/coupons/services/couponService";
 import { ApiError } from "@/shared/lib/api";
 import type { HydratedCartItem, CartApiItem, CartApiCart } from "../types";
-import { CartPageContentSkeleton } from "./skeletons/CartPageContentSkeleton";
 
 
 // ---------------------------------------------------------------------------
@@ -294,106 +290,16 @@ export function CartPageContent({ minimumOrderAmount }: CartPageContentProps) {
   }, [state.source, state.serverItems, setServerTotalQuantity]);
 
   // -------------------------------------------------------------------------
-  // Guest cart hydration (fetch product details for stored IDs)
-  // -------------------------------------------------------------------------
-  const [hydratedGuestItems, setHydratedGuestItems] = useState<HydratedCartItem[]>([]);
-  const [isHydrating, setIsHydrating] = useState(
-    !isAuthenticated && guestItems.length > 0,
-  );
-  const productCacheRef = useRef<Map<number, ProductListItem>>(new Map());
-  const fetchIdRef = useRef(0);
-
-  useEffect(() => {
-    if (isAuthenticated) return;
-
-    const ids = guestItems.map((i) => i.product_id);
-    const uncached = ids.filter((id) => !productCacheRef.current.has(id));
-
-    if (ids.length === 0) {
-      setHydratedGuestItems([]);
-      setIsHydrating(false);
-      return;
-    }
-
-    if (uncached.length === 0) {
-      setHydratedGuestItems(
-        guestItems.map((g) => {
-          const p = productCacheRef.current.get(g.product_id)!;
-          return {
-            ...g,
-            name: p.name,
-            image: p.image.thumbnail,
-            price: p.current_price,
-            current_price: p.current_price,
-            slug: p.slug,
-            sku: p.sku ?? "",
-            in_stock: p.quantity > 0,
-            stock_quantity: p.quantity,
-          };
-        }),
-      );
-      setIsHydrating(false);
-      return;
-    }
-
-    const fid = ++fetchIdRef.current;
-    setIsHydrating(true);
-
-    productService.getProductsByIds(uncached, locale).then((products) => {
-      if (fid !== fetchIdRef.current) return;
-
-      products.forEach((p) => {
-        productCacheRef.current.set(p.id, p);
-      });
-
-      setHydratedGuestItems(
-        guestItems.map((g) => {
-          const p = productCacheRef.current.get(g.product_id);
-          if (!p) {
-            return {
-              ...g,
-              name: `Product #${g.product_id}`,
-              image: "",
-              price: 0,
-              current_price: 0,
-              slug: "",
-              sku: "",
-              in_stock: false,
-              stock_quantity: 0,
-            };
-          }
-          return {
-            ...g,
-            name: p.name,
-            image: p.image.thumbnail,
-            price: p.current_price,
-            current_price: p.current_price,
-            slug: p.slug,
-            sku: p.sku ?? "",
-            in_stock: p.quantity > 0,
-            stock_quantity: p.quantity,
-          };
-        }),
-      );
-      setIsHydrating(false);
-    });
-  }, [isAuthenticated, guestItems, locale]);
-
-  // -------------------------------------------------------------------------
   // Handlers — optimistic update with snapshot rollback on error
   // -------------------------------------------------------------------------
   const handleUpdateQuantity = useCallback(
     async (productId: number, quantity: number) => {
-      // Guest path — mutate store + local hydrated state.
+      // Guest path — mutate store
       if (state.source !== "server") {
         if (quantity <= 0) {
           guestRemoveItem(productId);
-          setHydratedGuestItems((prev) => prev.filter((i) => i.product_id !== productId));
         } else {
           guestUpdateQuantity(productId, quantity);
-          setHydratedGuestItems((prev) =>
-            prev.map((i) => (i.product_id === productId ? { ...i, quantity } : i)),
-          );
         }
         return;
       }
@@ -471,21 +377,30 @@ export function CartPageContent({ minimumOrderAmount }: CartPageContentProps) {
   // -------------------------------------------------------------------------
   // Derived display data
   // -------------------------------------------------------------------------
-  const displayItems =
-    state.source === "server" ? state.serverItems : hydratedGuestItems;
+  const displayItems: HydratedCartItem[] =
+    state.source === "server" ? state.serverItems : guestItems.map((g) => ({
+      ...g,
+      name: g.name ?? `Product #${g.product_id}`,
+      image: g.image ?? "",
+      price: g.price ?? 0,
+      current_price: g.current_price ?? 0,
+      slug: g.slug ?? "",
+      sku: g.sku ?? "",
+      in_stock: g.in_stock ?? false,
+      stock_quantity: g.stock_quantity ?? 0,
+    }));
 
-  const subtotal =
-    state.source === "server" && serverSubtotal !== null
-      ? serverSubtotal
-      : calcSubtotal(
-          displayItems.map((i) => ({ price: i.current_price, quantity: i.quantity })),
-        );
-  const totalQuantity = calcTotalQuantity(displayItems);
-  const combinedTotal =
-    state.source === "server" && serverTotalAfterCoupon !== null
-      ? serverTotalAfterCoupon
-      : subtotal - couponDiscount;
-  const checkoutEnabled = combinedTotal >= minimumOrderAmount;
+  const scheduledItems = displayItems.filter((i) => i.deliveryType === "scheduled");
+  const fastItems = displayItems.filter((i) => i.deliveryType === "fast");
+
+  const scheduledSubtotal = calcSubtotal(
+    scheduledItems.map((i) => ({ price: i.current_price, quantity: i.quantity })),
+  );
+  const fastSubtotal = calcSubtotal(
+    fastItems.map((i) => ({ price: i.current_price, quantity: i.quantity })),
+  );
+  const scheduledQty = calcTotalQuantity(scheduledItems);
+  const fastQty = calcTotalQuantity(fastItems);
 
   // -------------------------------------------------------------------------
   // Render states
@@ -507,10 +422,6 @@ export function CartPageContent({ minimumOrderAmount }: CartPageContentProps) {
         </p>
       </div>
     );
-  }
-
-  if (isHydrating) {
-    return <CartPageContentSkeleton />;
   }
 
   if (state.source === "error") {
@@ -572,7 +483,15 @@ export function CartPageContent({ minimumOrderAmount }: CartPageContentProps) {
           <div className="lg:col-span-2 space-y-8">
             <CartSection
               deliveryType="scheduled"
-              items={displayItems}
+              items={scheduledItems}
+              pendingItemIds={state.pendingItemIds}
+              onUpdateQuantity={handleUpdateQuantity}
+              onRemove={handleRemove}
+              minimumOrderAmount={minimumOrderAmount}
+            />
+            <CartSection
+              deliveryType="fast"
+              items={fastItems}
               pendingItemIds={state.pendingItemIds}
               onUpdateQuantity={handleUpdateQuantity}
               onRemove={handleRemove}
@@ -592,10 +511,10 @@ export function CartPageContent({ minimumOrderAmount }: CartPageContentProps) {
           <div className="lg:col-span-1">
             <div className="sticky top-24">
               <CartSummary
-                subtotal={subtotal}
-                totalQuantity={totalQuantity}
-                checkoutEnabled={checkoutEnabled}
-                minimumOrderAmount={minimumOrderAmount}
+                scheduledSubtotal={scheduledSubtotal}
+                scheduledQty={scheduledQty}
+                fastSubtotal={fastSubtotal}
+                fastQty={fastQty}
                 appliedCoupon={appliedCoupon}
                 couponDiscount={couponDiscount}
                 onCouponApplied={async () => { await refreshCart(); }}

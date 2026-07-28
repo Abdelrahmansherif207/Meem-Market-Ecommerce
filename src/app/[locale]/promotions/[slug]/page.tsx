@@ -17,10 +17,10 @@ export async function generateMetadata({
     const promotion = await promotionService.getPromotion(slug, locale);
     return {
       title: promotion.name,
-      description: `Shop ${promotion.name} at Catch — limited time offer.`,
+      description: `Shop ${promotion.name} at Meem Market — limited time offer.`,
       openGraph: {
         title: promotion.name,
-        description: `Shop ${promotion.name} at Catch.`,
+        description: `Shop ${promotion.name} at Meem Market.`,
         images: [{ url: promotion.image.desktop }],
       },
     };

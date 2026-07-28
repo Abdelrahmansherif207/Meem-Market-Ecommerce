@@ -116,6 +116,7 @@
     "scheduledEta": "3-5 أيام عمل",
     "fastTitle": "توصيل سريع",
     "fastEta": "120 دقيقة",
+    "fastCheckout": "الشراء السريع",
     "minOrderProgress": "أضف {amount} ريال أخرى للحد الأدنى للطلب",
     "freeShippingProgress": "أضف {amount} ريال أخرى للشحن المجاني",
     "freeShippingAchieved": "تم تفعيل الشحن المجاني!"
@@ -371,6 +372,9 @@
     "noPromotion": "بدون عرض",
     "noPromotions": "لا توجد عروض متاحة لهذه السلة",
     "saveAmount": "وفر {amount} ريال",
+    "fastCheckout": "الشراء السريع",
+    "fastDelivery": "توصيل سريع",
+    "fastDeliveryDesc": "ادفع واحصل على منتجاتك السريعة فورًا",
     "payNow": "ادفع الآن",
     "placeOrderCod": "تأكيد الطلب (الدفع عند الاستلام)",
     "placeOrderCashier": "تأكيد الطلب",

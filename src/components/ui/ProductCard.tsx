@@ -57,10 +57,10 @@ export default function ProductCard({
   const safeOriginalPrice = originalPrice ?? 0;
 
   const handleAdd = useCallback(async () => {
-    await addItem({ quantity: 1, deliveryType });
+    await addItem({ quantity: 1, deliveryType, name: title, image, price: safePrice, current_price: safePrice, slug, sku, in_stock: isInStock, stock_quantity: stockQuantity });
     setAnimating(true);
     setTimeout(() => setAnimating(false), 300);
-  }, [addItem, deliveryType]);
+  }, [addItem, deliveryType, title, image, safePrice, slug, sku, isInStock, stockQuantity]);
 
   const handleIncrement = useCallback(async () => {
     await increment();

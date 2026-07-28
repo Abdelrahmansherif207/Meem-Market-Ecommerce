@@ -25,8 +25,8 @@ button {
   --color-border-subtle: #e0e7ef;
   --color-discount: #bc1e20;
 
-  --font-family-body: var(--font-montserrat), sans-serif;
-  --font-family-heading: var(--font-playfair), serif;
+  --font-family-body: var(--font-ibm-arabic), sans-serif;
+  --font-family-heading: var(--font-ibm-arabic), sans-serif;
 }
 
 @layer base {

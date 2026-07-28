@@ -17,10 +17,10 @@ export async function generateMetadata({
     const banner = await bannerService.getBanner(slug, locale);
     return {
       title: banner.title,
-      description: banner.description || `Explore ${banner.title} at Catch.`,
+      description: banner.description || `Explore ${banner.title} at Meem Market.`,
       openGraph: {
         title: banner.title,
-        description: banner.description || `Explore ${banner.title} at Catch.`,
+        description: banner.description || `Explore ${banner.title} at Meem Market.`,
         images: [{ url: banner.image.desktop }],
       },
     };

@@ -20,7 +20,7 @@ export async function generateMetadata({
       description: fs.description || `Shop ${fs.name} — limited time flash sale.`,
       openGraph: {
         title: fs.name,
-        description: fs.description || `Shop ${fs.name} at Catch.`,
+        description: fs.description || `Shop ${fs.name} at Meem Market.`,
         images: [{ url: fs.image.desktop }],
       },
     };

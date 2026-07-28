@@ -35,21 +35,21 @@ export interface GuestCartItem {
   product_variant_id?: number | null;
   quantity: number;
   deliveryType: DeliveryType;
-}
-
-export interface HydratedCartItem extends GuestCartItem {
-  cartItemId?: number;
   name: string;
   image: string;
   price: number;
   current_price: number;
-  total_price?: number;
-  discount_amount?: number;
-  promotion_id?: number | null;
   slug: string;
   sku: string;
   in_stock: boolean;
   stock_quantity: number;
+}
+
+export interface HydratedCartItem extends GuestCartItem {
+  cartItemId?: number;
+  total_price?: number;
+  discount_amount?: number;
+  promotion_id?: number | null;
 }
 
 export interface AddBulkPayload {

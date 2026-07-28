@@ -28,10 +28,10 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
 
   return {
     title: categoryName,
-    description: `Shop ${categoryName} at Catch — great prices on top brands.`,
+    description: `Shop ${categoryName} at Meem Market — great prices on top brands.`,
     openGraph: {
       title: categoryName,
-      description: `Shop ${categoryName} at Catch.`,
+      description: `Shop ${categoryName} at Meem Market.`,
     },
   };
 }
