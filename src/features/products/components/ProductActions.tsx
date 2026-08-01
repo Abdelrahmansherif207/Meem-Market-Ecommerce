@@ -26,15 +26,24 @@ export function ProductActions({ product, selectedVariant }: ProductActionsProps
   const locale = useLocale();
   const { addItem, isPending } = useCartActions(product.id);
 
+  const price = variant ? variant.current_price : getDisplayPrice(product);
+  const productImage = product.images?.thumbnail ?? '';
+
   async function handleAddToCart() {
     await addItem({
       quantity,
       deliveryType: product.is_fast_shipping_available ? "fast" : "scheduled",
       product_variant_id: variant?.id ?? null,
+      name: product.name,
+      image: productImage,
+      price,
+      current_price: price,
+      slug: product.slug,
+      sku: product.sku,
+      in_stock: stock.inStock,
+      stock_quantity: stock.remaining,
     });
   }
-
-  const price = variant ? variant.current_price : getDisplayPrice(product);
 
   return (
     <div className="space-y-4">

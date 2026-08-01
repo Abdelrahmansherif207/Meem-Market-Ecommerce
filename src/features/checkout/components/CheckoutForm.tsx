@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useRef, useState, useCallback } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
 import { Loader2, CreditCard, MapPin, Store, Truck, Plus } from "lucide-react";
 import { useShallow } from "zustand/react/shallow";
@@ -77,6 +77,8 @@ export function CheckoutForm() {
   const user = useAuthStore(
     useShallow((s) => ({ name: s.name, email: s.email, phone: s.phoneNumber })),
   );
+  const searchParams = useSearchParams();
+  const isFast = searchParams.get("type") === "fast";
   const selectedLocationId = usePickupLocationStore((s) => s.selectedLocationId);
   const clearLocation = usePickupLocationStore((s) => s.clear);
 
@@ -349,6 +351,48 @@ export function CheckoutForm() {
 
     setSubmitting(true);
 
+    if (isFast) {
+      const payload = {
+        name: form.name.trim(),
+        user_phone: form.user_phone.trim(),
+        user_email: form.user_email.trim(),
+        address: {
+          address: form.street_address.trim(),
+          city: form.city.trim(),
+          country: form.country.trim(),
+        },
+        notes: form.notes.trim() || undefined,
+        governorate_id: form.governorate_id!,
+        selected_promotion_id: form.selected_promotion_id,
+        selected_gift_product_id: form.selected_gift_product_id,
+      };
+
+      try {
+        const result = await checkoutService.processFastCheckout(payload);
+
+        if (result.url) {
+          window.location.href = result.url;
+        } else {
+          router.push("/payment");
+        }
+      } catch (err) {
+        if (err instanceof ApiError) {
+          setApiError(err.message);
+          if (Object.keys(err.fields).length > 0) {
+            const fieldErrors: FieldError[] = [];
+            for (const [field, messages] of Object.entries(err.fields)) {
+              fieldErrors.push({ field, message: messages[0] });
+            }
+            setErrors(fieldErrors);
+          }
+        } else {
+          setApiError(err instanceof Error ? err.message : t("errorProcessing"));
+        }
+        setSubmitting(false);
+      }
+      return;
+    }
+
     const payload = {
       name: form.name.trim(),
       user_phone: form.user_phone.trim(),
@@ -473,44 +517,48 @@ export function CheckoutForm() {
           </div>
 
           <div className="rounded-2xl border-2 border-border bg-white p-6 space-y-4">
-            <div className="flex items-center gap-2">
-              <div className="h-1 w-6 rounded-full bg-primary" />
-              <h2 className="text-sm font-bold uppercase tracking-wider text-text-primary">
-                {t("fulfillmentType")}
-              </h2>
-            </div>
-            <div className="flex gap-3">
-              <button
-                type="button"
-                onClick={() => handleFulfillmentChange("delivery")}
-                className={`flex-1 flex items-center justify-center gap-2 rounded-xl border-2 p-4 text-sm font-semibold transition-colors ${
-                  form.fulfillment_type === "delivery"
-                    ? "border-primary bg-primary/5 text-primary"
-                    : "border-border text-text-secondary hover:border-primary/50"
-                }`}
-              >
-                <Truck className="size-5" />
-                {t("delivery")}
-              </button>
-              <button
-                type="button"
-                onClick={() => handleFulfillmentChange("pickup")}
-                className={`flex-1 flex items-center justify-center gap-2 rounded-xl border-2 p-4 text-sm font-semibold transition-colors ${
-                  form.fulfillment_type === "pickup"
-                    ? "border-primary bg-primary/5 text-primary"
-                    : "border-border text-text-secondary hover:border-primary/50"
-                }`}
-              >
-                <MapPin className="size-5" />
-                {t("pickup")}
-              </button>
-            </div>
+            {!isFast && (
+              <>
+                <div className="flex items-center gap-2">
+                  <div className="h-1 w-6 rounded-full bg-primary" />
+                  <h2 className="text-sm font-bold uppercase tracking-wider text-text-primary">
+                    {t("fulfillmentType")}
+                  </h2>
+                </div>
+                <div className="flex gap-3">
+                  <button
+                    type="button"
+                    onClick={() => handleFulfillmentChange("delivery")}
+                    className={`flex-1 flex items-center justify-center gap-2 rounded-xl border-2 p-4 text-sm font-semibold transition-colors ${
+                      form.fulfillment_type === "delivery"
+                        ? "border-primary bg-primary/5 text-primary"
+                        : "border-border text-text-secondary hover:border-primary/50"
+                    }`}
+                  >
+                    <Truck className="size-5" />
+                    {t("delivery")}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handleFulfillmentChange("pickup")}
+                    className={`flex-1 flex items-center justify-center gap-2 rounded-xl border-2 p-4 text-sm font-semibold transition-colors ${
+                      form.fulfillment_type === "pickup"
+                        ? "border-primary bg-primary/5 text-primary"
+                        : "border-border text-text-secondary hover:border-primary/50"
+                    }`}
+                  >
+                    <MapPin className="size-5" />
+                    {t("pickup")}
+                  </button>
+                </div>
+              </>
+            )}
 
-            {form.fulfillment_type === "delivery" && (
+            {(form.fulfillment_type === "delivery" || isFast) && (
               <div className="space-y-4">
-                <div className="border-t border-border pt-4 space-y-4">
+                <div className={isFast ? "" : "border-t border-border pt-4 space-y-4"}>
                   <h3 className="text-xs font-bold uppercase tracking-wider text-text-secondary">
-                    {t("addressTitle")}
+                    {isFast ? t("fastDelivery") : t("addressTitle")}
                   </h3>
 
                   {addressesLoading ? (
@@ -652,40 +700,42 @@ export function CheckoutForm() {
             )}
           </div>
 
-          <div className="rounded-2xl border-2 border-border bg-white p-6 space-y-4">
-            <div className="flex items-center gap-2">
-              <div className="h-1 w-6 rounded-full bg-primary" />
-              <h2 className="text-sm font-bold uppercase tracking-wider text-text-primary">
-                {t("paymentMethod")}
-              </h2>
+          {!isFast && (
+            <div className="rounded-2xl border-2 border-border bg-white p-6 space-y-4">
+              <div className="flex items-center gap-2">
+                <div className="h-1 w-6 rounded-full bg-primary" />
+                <h2 className="text-sm font-bold uppercase tracking-wider text-text-primary">
+                  {t("paymentMethod")}
+                </h2>
+              </div>
+              <div className="space-y-2">
+                {((form.fulfillment_type === "delivery"
+                  ? ["online", "cod"]
+                  : ["online", "pay_at_cashier"]) as PaymentMethod[]).map((method) => (
+                  <label
+                    key={method}
+                    className={`flex items-center gap-3 rounded-xl border p-4 cursor-pointer transition-colors ${
+                      form.payment_method === method
+                        ? "border-primary bg-primary/5"
+                        : "border-border hover:border-primary/50"
+                    }`}
+                  >
+                    <input
+                      type="radio"
+                      name="payment_method"
+                      checked={form.payment_method === method}
+                      onChange={() => handlePaymentMethodChange(method)}
+                      className={radioClass}
+                    />
+                    <div>
+                      <span className="text-sm font-medium text-text-primary">{t(`${method}Label`)}</span>
+                      <p className="text-xs text-text-secondary mt-0.5">{t(`${method}Desc`)}</p>
+                    </div>
+                  </label>
+                ))}
+              </div>
             </div>
-            <div className="space-y-2">
-              {((form.fulfillment_type === "delivery"
-                ? ["online", "cod"]
-                : ["online", "pay_at_cashier"]) as PaymentMethod[]).map((method) => (
-                <label
-                  key={method}
-                  className={`flex items-center gap-3 rounded-xl border p-4 cursor-pointer transition-colors ${
-                    form.payment_method === method
-                      ? "border-primary bg-primary/5"
-                      : "border-border hover:border-primary/50"
-                  }`}
-                >
-                  <input
-                    type="radio"
-                    name="payment_method"
-                    checked={form.payment_method === method}
-                    onChange={() => handlePaymentMethodChange(method)}
-                    className={radioClass}
-                  />
-                  <div>
-                    <span className="text-sm font-medium text-text-primary">{t(`${method}Label`)}</span>
-                    <p className="text-xs text-text-secondary mt-0.5">{t(`${method}Desc`)}</p>
-                  </div>
-                </label>
-              ))}
-            </div>
-          </div>
+          )}
 
           <div className="rounded-2xl border-2 border-border bg-white p-6 space-y-3">
             <div className="flex items-center gap-2">
@@ -724,11 +774,13 @@ export function CheckoutForm() {
               className="flex w-full items-center justify-center gap-2 rounded-xl bg-primary py-3.5 text-sm font-bold text-white transition-all hover:opacity-90"
             >
               <CreditCard className="size-4" />
-              {form.payment_method === "online"
-                ? t("payNow")
-                : form.payment_method === "cod"
-                  ? t("placeOrderCod")
-                  : t("placeOrderCashier")}
+              {isFast
+                ? t("fastCheckout", { defaultValue: "Fast Checkout" })
+                : form.payment_method === "online"
+                  ? t("payNow")
+                  : form.payment_method === "cod"
+                    ? t("placeOrderCod")
+                    : t("placeOrderCashier")}
             </button>
           </div>
         </div>

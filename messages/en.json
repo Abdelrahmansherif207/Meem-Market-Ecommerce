@@ -84,16 +84,16 @@
     }
   },
   "home": {
-    "metaTitle": "Catch",
-    "metaDescription": "Shop the best products at Catch — electronics, fashion, home goods, and more."
+    "metaTitle": "Meem Market",
+    "metaDescription": "Shop the best products at Meem Market — electronics, fashion, home goods, and more."
   },
   "auth": {
     "metaTitle": "Sign In & Register",
-    "metaDescription": "Create an account or sign in to Catch."
+    "metaDescription": "Create an account or sign in to Meem Market."
   },
   "cartPage": {
     "metaTitle": "Cart",
-    "metaDescription": "Review your cart and checkout at Catch.",
+    "metaDescription": "Review your cart and checkout at Meem Market.",
     "title": "Cart",
     "breadcrumb": "Cart",
     "emptyTitle": "Your cart is empty",
@@ -116,6 +116,7 @@
     "scheduledEta": "3-5 business days",
     "fastTitle": "Fast Delivery",
     "fastEta": "120 mins",
+    "fastCheckout": "Fast Checkout",
     "minOrderProgress": "Add {amount} K.D more for minimum order",
     "freeShippingProgress": "Add {amount} K.D more for free shipping",
     "freeShippingAchieved": "Free shipping unlocked!"
@@ -152,7 +153,7 @@
   },
   "categories": {
     "metaTitle": "Categories",
-    "metaDescription": "Browse all product categories at Catch.",
+    "metaDescription": "Browse all product categories at Meem Market.",
     "title": "Categories",
     "viewAll": "View All"
   },
@@ -169,7 +170,7 @@
   },
   "payment": {
     "metaTitle": "Checkout",
-    "metaDescription": "Complete your checkout at Catch.",
+    "metaDescription": "Complete your checkout at Meem Market.",
     "breadcrumb": "Checkout",
     "title": "Billing Details",
     "name": "Full Name",
@@ -382,6 +383,9 @@
     "noPromotion": "No promotion",
     "noPromotions": "No promotions available for this cart",
     "saveAmount": "Save {amount} K.D",
+    "fastCheckout": "Fast Checkout",
+    "fastDelivery": "Fast Delivery",
+    "fastDeliveryDesc": "Pay and get your fast items shipped immediately",
     "payNow": "Pay Now",
     "placeOrderCod": "Place Order (COD)",
     "placeOrderCashier": "Place Order",

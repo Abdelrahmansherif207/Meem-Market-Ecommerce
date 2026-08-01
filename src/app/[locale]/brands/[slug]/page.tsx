@@ -17,7 +17,7 @@ export async function generateMetadata({
     const brand = await brandService.getBrand(slug, locale);
     return {
       title: brand.name,
-      description: `Shop ${brand.name} products at Catch.`,
+      description: `Shop ${brand.name} products at Meem Market.`,
       openGraph: {
         title: brand.name,
         images: [{ url: brand.image.desktop || brand.image.mobile }],

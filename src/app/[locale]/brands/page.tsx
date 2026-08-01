@@ -7,7 +7,7 @@ import BrandListingSkeleton from "@/features/brands/components/skeletons/BrandLi
 export async function generateMetadata({ params: _params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
   return {
     title: "Brands",
-    description: "Browse all brands at Catch.",
+    description: "Browse all brands at Meem Market.",
   };
 }
 

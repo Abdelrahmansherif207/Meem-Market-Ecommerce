@@ -17,10 +17,10 @@ export async function generateMetadata({
     const slider = await sliderService.getSlider(slug, locale);
     return {
       title: slider.title,
-      description: `Explore ${slider.title} at Catch.`,
+      description: `Explore ${slider.title} at Meem Market.`,
       openGraph: {
         title: slider.title,
-        description: `Explore ${slider.title} at Catch.`,
+        description: `Explore ${slider.title} at Meem Market.`,
         images: [{ url: slider.image.desktop }],
       },
     };
