@@ -25,13 +25,15 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
   const categories = await categoryMenuService.getMenu(locale);
   const categoryPath = findCategoryPath(categories, decodedSlug);
   const categoryName = categoryPath?.[categoryPath.length - 1]?.name ?? decodedSlug;
+  const t = await getTranslations({ locale, namespace: "meta.category" });
+  const description = t("description", { name: categoryName });
 
   return {
     title: categoryName,
-    description: `Shop ${categoryName} at Meem Market — great prices on top brands.`,
+    description,
     openGraph: {
       title: categoryName,
-      description: `Shop ${categoryName} at Meem Market.`,
+      description,
     },
   };
 }

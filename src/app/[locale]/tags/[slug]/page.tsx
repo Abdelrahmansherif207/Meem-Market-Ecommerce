@@ -13,14 +13,16 @@ export async function generateMetadata({
   params: Promise<{ locale: string; slug: string }>;
 }): Promise<Metadata> {
   const { locale, slug } = await params;
+  const t = await getTranslations({ locale, namespace: "meta.tag" });
+
   try {
     const tag = await tagService.getTagBySlug(decodeURIComponent(slug), locale);
     return {
       title: `#${tag.name}`,
-      description: `Browse products tagged with #${tag.name}.`,
+      description: t("description", { name: tag.name }),
     };
   } catch {
-    return { title: "Tag" };
+    return { title: t("title") };
   }
 }
 

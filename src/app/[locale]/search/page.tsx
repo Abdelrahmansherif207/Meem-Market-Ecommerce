@@ -11,14 +11,20 @@ import { ProductsSidebarSkeleton } from "@/features/categories/components/skelet
 import { CategoryProductsSkeleton } from "@/features/categories/components/skeletons/CategoryProductsSkeleton";
 
 export async function generateMetadata({
+  params,
   searchParams,
 }: {
+  params: Promise<{ locale: string }>;
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }): Promise<Metadata> {
+  const { locale } = await params;
   const resolved = await searchParams;
   const query = Array.isArray(resolved.q) ? resolved.q[0] : resolved.q;
+  const t = await getTranslations({ locale, namespace: "meta.search" });
+
   return {
-    title: query ? `Search: ${query}` : "Search",
+    title: query ? t("titleWithQuery", { query }) : t("title"),
+    description: query ? t("description", { query }) : undefined,
   };
 }
 

@@ -84,16 +84,15 @@
     }
   },
   "home": {
-    "metaTitle": "Meem Market",
-    "metaDescription": "Shop the best products at Meem Market — electronics, fashion, home goods, and more."
+    "metaDescription": "Shop the best products — electronics, fashion, home goods, and more."
   },
   "auth": {
     "metaTitle": "Sign In & Register",
-    "metaDescription": "Create an account or sign in to Meem Market."
+    "metaDescription": "Create an account or sign in to start shopping."
   },
   "cartPage": {
-    "metaTitle": "Cart",
-    "metaDescription": "Review your cart and checkout at Meem Market.",
+   "metaTitle": "Cart",
+    "metaDescription": "Review your cart and complete your checkout.",
     "title": "Cart",
     "breadcrumb": "Cart",
     "emptyTitle": "Your cart is empty",
@@ -153,13 +152,13 @@
   },
   "categories": {
     "metaTitle": "Categories",
-    "metaDescription": "Browse all product categories at Meem Market.",
+    "metaDescription": "Browse all product categories and find what you're looking for.",
     "title": "Categories",
     "viewAll": "View All"
   },
   "tags": {
     "metaTitle": "Tags",
-    "metaDescription": "Browse products by tag at Catch.",
+    "metaDescription": "Browse products by tag and discover new favorites.",
     "title": "All Tags",
     "description": "Explore products by tag",
     "exploreLabel": "Explore our Tags",
@@ -170,7 +169,7 @@
   },
   "payment": {
     "metaTitle": "Checkout",
-    "metaDescription": "Complete your checkout at Meem Market.",
+    "metaDescription": "Complete your checkout securely.",
     "breadcrumb": "Checkout",
     "title": "Billing Details",
     "name": "Full Name",
@@ -396,6 +395,85 @@
     "goToCart": "Go to Cart",
     "errorProcessing": "Something went wrong. Please try again.",
     "fixRequiredFields": "Please fill in all required fields."
+  },
+  "meta": {
+    "brands": {
+      "title": "Brands",
+      "description": "Shop top brands across all categories."
+    },
+    "brand": {
+      "title": "Brand",
+      "description": "Shop {name} products — authentic and at great prices."
+    },
+    "banner": {
+      "title": "Banner",
+      "description": "Explore {name} and grab the best offers."
+    },
+    "flashSale": {
+      "title": "Flash Sale",
+      "description": "Shop {name} — limited time flash sale."
+    },
+    "promotion": {
+      "title": "Promotion",
+      "description": "Shop {name} — limited time offer."
+    },
+    "slider": {
+      "title": "Slider",
+      "description": "Explore {name} and discover great deals."
+    },
+    "tag": {
+      "title": "Tag",
+      "description": "Browse products tagged with #{name}."
+    },
+    "category": {
+      "title": "Category",
+      "description": "Shop {name} — great prices on top brands."
+    },
+    "search": {
+      "title": "Search",
+      "titleWithQuery": "Search: {query}",
+      "description": "Search results for \"{query}\"."
+    },
+    "contact": {
+      "title": "Contact Us",
+      "description": "Have a question or feedback? We'd love to hear from you."
+    },
+    "about": {
+      "title": "About Us",
+      "description": "Learn more about us and why customers love shopping with us."
+    },
+    "faq": {
+      "title": "Frequently Asked Questions",
+      "description": "Get answers to the most common questions about orders, shipping, and returns."
+    },
+    "privacy": {
+      "title": "Privacy Policy",
+      "description": "Read our privacy policy to understand how we handle your data."
+    },
+    "terms": {
+      "title": "Terms & Conditions",
+      "description": "Read our terms and conditions before using our services."
+    },
+    "returns": {
+      "title": "Returns & Exchanges",
+      "description": "Learn about our returns and exchanges policy."
+    },
+    "shipping": {
+      "title": "Shipping & Delivery",
+      "description": "Learn about our shipping and delivery options."
+    },
+    "page": {
+      "title": "{name}",
+      "description": "{name}"
+    },
+    "info": {
+      "title": "{name}",
+      "description": "{name}"
+    },
+    "notFound": {
+      "title": "Page Not Found",
+      "description": "Sorry, we couldn't find the page you're looking for."
+    }
   },
   "notFound": {
     "title": "Page not found",

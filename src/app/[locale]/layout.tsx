@@ -1,5 +1,5 @@
 import "../globals.css";
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import type { ReactNode } from "react";
 import { NextIntlClientProvider } from "next-intl";
 import { routing } from "@/i18n/routing";
@@ -13,7 +13,7 @@ import { CartSyncProvider } from "@/features/cart/components/CartSyncProvider";
 import { ChannelThemeProvider } from "@/features/fast-shipping/components/ChannelThemeProvider";
 import { IBM_Plex_Sans_Arabic } from "next/font/google";
 import { cn } from "@/shared/utils/cn";
-import { getCachedSettings } from "@/features/settings/services/settingsService";
+import { getSiteMeta } from "@/features/settings/lib/metadata";
 
 export function generateStaticParams() {
   return routing.locales.map((locale) => ({ locale }));
@@ -27,42 +27,52 @@ const ibmPlexSansArabic = IBM_Plex_Sans_Arabic({
 
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
   const { locale } = await params;
+  const site = await getSiteMeta(locale);
 
-  const isAr = locale === "ar";
-  const DEFAULT_TITLE = isAr ? "ميم ماركت" : "Meem Market";
-  const DEFAULT_DESC = isAr ? "تسوق أفضل المنتجات في ميم ماركت - إلكترونيات، أزياء، منتجات المنزل والمزيد" : "Shop the best products at Meem Market — electronics, fashion, home goods, and more.";
-  const DEFAULT_FAVICON = "/meem-icon.jpeg";
-
-  let siteName = DEFAULT_TITLE;
-  let description = DEFAULT_DESC;
-  let icon = DEFAULT_FAVICON;
-
-  try {
-    const settings = await getCachedSettings(locale);
-    if (settings.site_name) siteName = settings.site_name;
-    if (settings.meta_desc) description = settings.meta_desc;
-    else if (settings.site_desc) description = settings.site_desc;
-    if (settings.favicon) icon = settings.favicon;
-  } catch {
-    // settings unavailable
-  }
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL;
+  const metadataBase = siteUrl ? new URL(siteUrl) : undefined;
+  const ogImages = site.logo
+    ? [{ url: site.logo, width: 800, height: 800, alt: site.siteName }]
+    : [];
 
   return {
+    metadataBase,
     title: {
-      default: siteName,
-      template: `%s | ${siteName}`,
+      default: site.siteName,
+      template: `%s | ${site.siteName}`,
     },
-    description,
+    description: site.description,
     icons: {
-      icon,
+      icon: site.favicon,
+    },
+    robots: {
+      index: true,
+      follow: true,
+      googleBot: {
+        index: true,
+        follow: true,
+      },
     },
     openGraph: {
-      title: siteName,
-      description,
-      siteName,
+      title: site.siteName,
+      description: site.description,
+      siteName: site.siteName,
+      locale: locale === "ar" ? "ar_AR" : "en_US",
+      type: "website",
+      ...(ogImages.length > 0 ? { images: ogImages } : {}),
+    },
+    twitter: {
+      card: "summary",
+      title: site.siteName,
+      description: site.description,
+      ...(ogImages.length > 0 ? { images: [ogImages[0].url] } : {}),
     },
   };
 }
+
+export const viewport: Viewport = {
+  themeColor: "#ffffff",
+};
 
 export default async function RootLayout({
   children,
@@ -79,8 +89,8 @@ export default async function RootLayout({
 
   let settingsLogo: string | null = null;
   try {
-    const settings = await getCachedSettings(locale);
-    if (settings.logo) settingsLogo = settings.logo;
+    const meta = await getSiteMeta(locale);
+    settingsLogo = meta.logo;
   } catch {
     // Use default
   }

@@ -13,19 +13,22 @@ export async function generateMetadata({
   params: Promise<{ locale: string; slug: string }>;
 }): Promise<Metadata> {
   const { locale, slug } = await params;
+  const t = await getTranslations({ locale, namespace: "meta.promotion" });
+
   try {
     const promotion = await promotionService.getPromotion(slug, locale);
+    const description = t("description", { name: promotion.name });
     return {
       title: promotion.name,
-      description: `Shop ${promotion.name} at Meem Market — limited time offer.`,
+      description,
       openGraph: {
         title: promotion.name,
-        description: `Shop ${promotion.name} at Meem Market.`,
+        description,
         images: [{ url: promotion.image.desktop }],
       },
     };
   } catch {
-    return { title: "Promotion" };
+    return { title: t("title") };
   }
 }
 
