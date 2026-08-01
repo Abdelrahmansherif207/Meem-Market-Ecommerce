@@ -1,39 +1,40 @@
 "use client";
 
-import { ShoppingBag, Truck, ChevronRight, Minus } from "lucide-react";
+import { Truck, Zap, Minus } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { useRouter } from "next/navigation";
 import { useAuthStore } from "@/features/auth/store/useAuthStore";
 import CouponInput from "@/features/coupons/components/CouponInput";
 import CouponBadge from "@/features/coupons/components/CouponBadge";
 import type { AppliedCoupon } from "@/features/coupons/types";
 
 interface CartSummaryProps {
-  subtotal: number;
-  totalQuantity: number;
-  checkoutEnabled: boolean;
-  minimumOrderAmount: number;
+  scheduledSubtotal: number;
+  scheduledQty: number;
+  fastSubtotal: number;
+  fastQty: number;
   appliedCoupon?: AppliedCoupon | null;
   couponDiscount?: number;
   onCouponApplied?: () => void;
 }
 
 export function CartSummary({
-  subtotal,
-  totalQuantity,
-  checkoutEnabled,
-  minimumOrderAmount,
+  scheduledSubtotal,
+  scheduledQty,
+  fastSubtotal,
+  fastQty,
   appliedCoupon,
   couponDiscount = 0,
   onCouponApplied,
 }: CartSummaryProps) {
   const t = useTranslations("cartPage");
-  const router = useRouter();
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
-  const total = subtotal - couponDiscount;
+
+  const totalQty = scheduledQty + fastQty;
+  const total = scheduledSubtotal + fastSubtotal - couponDiscount;
 
   const lines = [
-    { Icon: Truck, label: t("scheduledTitle"), qty: totalQuantity, sub: subtotal },
+    { Icon: Truck, label: t("scheduledTitle"), qty: scheduledQty, sub: scheduledSubtotal },
+    { Icon: Zap, label: t("fastTitle"), qty: fastQty, sub: fastSubtotal },
   ];
 
   return (
@@ -83,25 +84,9 @@ export function CartSummary({
           <span className="text-lg font-bold tabular-nums text-text-primary">{Math.max(0, total).toFixed(2)} K.D</span>
         </div>
         <p className="text-[11px] text-text-secondary text-right">
-          ({totalQuantity} {t("cartItems", { count: totalQuantity })})
+          ({totalQty} {t("cartItems", { count: totalQty })})
         </p>
       </div>
-
-      <button
-        disabled={!checkoutEnabled}
-        onClick={() => router.push(isAuthenticated ? "/payment" : "/auth?redirect=/payment")}
-        className="flex w-full items-center justify-center gap-2 rounded-xl bg-primary py-3.5 text-sm font-bold text-white transition-all hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40"
-      >
-        <ShoppingBag className="h-4 w-4" />
-        {t("checkout")}
-        <ChevronRight className="h-4 w-4" />
-      </button>
-
-      {!checkoutEnabled && (
-        <p className="text-center text-[11px] text-text-secondary">
-          {t("minimumOrder", { amount: minimumOrderAmount })}
-        </p>
-      )}
     </div>
   );
 }

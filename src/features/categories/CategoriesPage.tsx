@@ -17,7 +17,7 @@ export async function CategoriesPage({ locale }: { locale: string }) {
   if (!categories?.length) return null;
 
   return (
-    <main className="mx-auto max-w-7xl px-4 py-8">
+    <main className="px-4 py-8">
       <h1 className="mb-8 text-2xl font-bold">{t("title")}</h1>
 
       <div className="flex flex-col gap-10">

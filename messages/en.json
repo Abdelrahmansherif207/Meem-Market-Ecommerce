@@ -91,7 +91,7 @@
     "metaDescription": "Create an account or sign in to start shopping."
   },
   "cartPage": {
-    "metaTitle": "Cart",
+   "metaTitle": "Cart",
     "metaDescription": "Review your cart and complete your checkout.",
     "title": "Cart",
     "breadcrumb": "Cart",
@@ -115,6 +115,7 @@
     "scheduledEta": "3-5 business days",
     "fastTitle": "Fast Delivery",
     "fastEta": "120 mins",
+    "fastCheckout": "Fast Checkout",
     "minOrderProgress": "Add {amount} K.D more for minimum order",
     "freeShippingProgress": "Add {amount} K.D more for free shipping",
     "freeShippingAchieved": "Free shipping unlocked!"
@@ -381,6 +382,9 @@
     "noPromotion": "No promotion",
     "noPromotions": "No promotions available for this cart",
     "saveAmount": "Save {amount} K.D",
+    "fastCheckout": "Fast Checkout",
+    "fastDelivery": "Fast Delivery",
+    "fastDeliveryDesc": "Pay and get your fast items shipped immediately",
     "payNow": "Pay Now",
     "placeOrderCod": "Place Order (COD)",
     "placeOrderCashier": "Place Order",
