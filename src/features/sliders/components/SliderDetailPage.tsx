@@ -1,5 +1,5 @@
-import ProductCard from "@/components/ui/ProductCard";
 import { sliderService } from "../services/sliderService";
+import PaginatedProductGrid from "@/components/ui/PaginatedProductGrid";
 import type { SliderDetail } from "../types";
 
 interface SliderDetailPageProps {
@@ -29,7 +29,7 @@ export default async function SliderDetailPage({ slug, locale }: SliderDetailPag
 
   return (
     <div className="w-full flex flex-col gap-6">
-      <picture className="relative w-full block overflow-hidden rounded-xl aspect-[21/9]">
+      <picture className="relative h-[170px] w-full overflow-hidden rounded-[20px] sm:h-[230px] lg:h-[300px]">
         <source media="(min-width: 640px)" srcSet={image.desktop} />
         <img
           src={image.mobile}
@@ -53,29 +53,7 @@ export default async function SliderDetailPage({ slug, locale }: SliderDetailPag
           </a>
         </div>
       ) : (
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
-          {products.map((product) => {
-            const discountPercent =
-              product.discount_active && product.current_price < product.price
-                ? Math.round((1 - product.current_price / product.price) * 100)
-                : 0;
-            return (
-              <ProductCard
-                key={product.id}
-                productId={product.id}
-                image={product.image.thumbnail}
-                title={product.name}
-                price={product.current_price}
-                originalPrice={product.price}
-                discountPercent={discountPercent}
-                slug={product.slug}
-                hasVariants={product.has_variants}
-                deliveryType={product.is_fast_shipping_available ? "fast" : "scheduled"}
-                isInStock={product.in_stock ?? product.quantity > 0}
-              />
-            );
-          })}
-        </div>
+        <PaginatedProductGrid products={products} itemsPerPage={12} />
       )}
     </div>
   );

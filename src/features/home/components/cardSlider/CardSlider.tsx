@@ -88,7 +88,7 @@ export default function CardSlider({
           isRtl={isRtl}
           variant="card"
           strokeWidth={2}
-          iconClassName="h-7 w-7"
+          iconClassName="h-4 w-4"
         />
       ) : null}
     </section>

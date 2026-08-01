@@ -1,3 +1,5 @@
+import type { ProductTag } from "@/shared/types";
+
 export interface PromotionImage {
   desktop: string;
   mobile: string;
@@ -32,4 +34,5 @@ export interface PromotionProduct {
   };
   discount_active?: boolean;
   flash_sale_active?: boolean;
+  tags?: ProductTag[];
 }

@@ -1,3 +1,9 @@
+export interface ProductTag {
+  id: number;
+  name: string;
+  slug: string;
+}
+
 export interface ApiResponse<T> {
   status: number;
   message: string;

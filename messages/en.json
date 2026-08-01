@@ -157,6 +157,17 @@
     "title": "Categories",
     "viewAll": "View All"
   },
+  "tags": {
+    "metaTitle": "Tags",
+    "metaDescription": "Browse products by tag at Catch.",
+    "title": "All Tags",
+    "description": "Explore products by tag",
+    "exploreLabel": "Explore our Tags",
+    "exploreTitle": "Shop by Tag",
+    "exploreSubtitle": "Discover products that match your lifestyle",
+    "viewAll": "View All Tags",
+    "noProducts": "No products found for this tag."
+  },
   "payment": {
     "metaTitle": "Checkout",
     "metaDescription": "Complete your checkout at Meem Market.",

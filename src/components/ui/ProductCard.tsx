@@ -8,6 +8,10 @@ import { useLocale } from "next-intl";
 import { cn } from "@/shared/utils/cn";
 import { useCartActions } from "@/features/cart/hooks/useCartActions";
 import type { DeliveryType } from "@/features/cart/types";
+import type { ProductTag } from "@/shared/types";
+import { Autoplay } from "swiper/modules";
+import { Swiper, SwiperSlide } from "swiper/react";
+import "swiper/css";
 
 interface ProductCardProps {
   deliveryType?: DeliveryType;
@@ -27,6 +31,8 @@ interface ProductCardProps {
   badgeText?: string;
   isInStock?: boolean;
   flashSaleActive?: boolean;
+  theme?: "light" | "dark";
+  tags?: ProductTag[];
 }
 
 export default function ProductCard({
@@ -47,7 +53,10 @@ export default function ProductCard({
   badgeText,
   isInStock = true,
   flashSaleActive = false,
+  theme = "light",
+  tags,
 }: ProductCardProps) {
+  const isDark = theme === "dark";
   const locale = useLocale();
   const isRtl = locale === "ar";
   const { quantity, isPending, addItem, increment, decrement } = useCartActions(productId);
@@ -77,21 +86,21 @@ export default function ProductCard({
     : ".00";
 
   return (
-    <div className="w-full group/card transition-all duration-300 hover:-translate-y-1">
-      <div className="relative w-full aspect-square overflow-hidden rounded-xl shadow-sm transition-shadow duration-300 group-hover/card:shadow-md max-w-[150px] max-h-[150px] box-content border border-border-light p-2">
-        <div className="flex w-full z-[1] absolute start-0 bottom-0 max-w-[150px] max-h-[150px]">
+    <div className="flex flex-col w-full">
+      <div className={cn("relative w-full aspect-square overflow-hidden rounded-xl", isDark ? "border border-white/20 bg-white/10 backdrop-blur-md" : "border border-border-light bg-white")}>
+        <div className="absolute inset-0 flex z-[1] start-0 bottom-0 pointer-events-none">
           {flashSaleActive ? (
-            <div className="inline-flex items-center justify-center font-bold rounded-bl-xl rounded-br-xs rounded-tl-xs rounded-tr-xl px-2 py-1 text-[10px] bg-orange-600 text-white flex max-h-[20px] relative max-w-[95%] gap-1 animate-pulse">
+            <div className="inline-flex items-center justify-center font-bold rounded-bl-xl rounded-br-xs rounded-tl-xs rounded-tr-xl px-2 py-1 text-[10px] bg-orange-600 text-white gap-1 animate-pulse self-end">
               <span className="text-xs leading-4 font-bold truncate">Flash Sale</span>
             </div>
           ) : discountPercent && discountPercent > 0 ? (
-            <div className="inline-flex items-center justify-center font-bold rounded-bl-xl rounded-br-xs rounded-tl-xs rounded-tr-xl px-2 py-1 text-[10px] bg-discount text-white flex max-h-[20px] relative max-w-[95%] gap-1">
-              <span className="text-xs leading-4 font-bold truncate"><span>{discountPercent}% OFF</span></span>
+            <div className="inline-flex items-center justify-center font-bold rounded-bl-xl rounded-br-xs rounded-tl-xs rounded-tr-xl px-2 py-1 text-[10px] bg-discount text-white gap-1 self-end">
+              <span className="text-xs leading-4 font-bold truncate">{discountPercent}% OFF</span>
             </div>
           ) : null}
           {badgeText ? (
-            <div className="inline-flex items-center justify-center font-bold rounded-bl-xl rounded-br-xs rounded-tl-xs rounded-tr-xl px-2 py-1 text-[10px] bg-primary text-white flex max-h-[20px] relative max-w-[95%] gap-1">
-              <span className="text-xs leading-4 font-bold truncate"><span>{badgeText}</span></span>
+            <div className="inline-flex items-center justify-center font-bold rounded-bl-xl rounded-br-xs rounded-tl-xs rounded-tr-xl px-2 py-1 text-[10px] bg-primary text-white gap-1 self-end">
+              <span className="text-xs leading-4 font-bold truncate">{badgeText}</span>
             </div>
           ) : null}
         </div>
@@ -102,6 +111,7 @@ export default function ProductCard({
             fill
             alt={title}
             priority={priorityProp}
+            sizes="(max-width: 640px) 50vw, (max-width: 768px) 33vw, (max-width: 1024px) 25vw, 16vw"
           />
         </Link>
 
@@ -166,28 +176,68 @@ export default function ProductCard({
           </div>
         )}
       </div>
-        <Link href={`/products/${slug}`}>
-            <p className={cn("text-sm leading-4 font-medium line-clamp-2 md:text-md text-black hover:text-primary transition-colors cursor-pointer mt-3", isRtl ? "text-right" : "text-left")}>
-            {title}
-          </p>
-        </Link>
-      <div className="flex items-center gap-2">
-        <div className="flex mt-1 gap-px">
-          <span className="text-lg leading-5 font-bold md:text-xl">
+
+      <Link href={`/products/${slug}`} className="mt-2.5 px-0.5">
+        <p className={cn(
+          "text-sm leading-4 font-medium line-clamp-2 text-balance transition-colors cursor-pointer",
+          isDark ? "text-white hover:text-white/80" : "text-black hover:text-primary",
+          isRtl ? "text-right" : "text-left",
+        )}>
+          {title}
+        </p>
+      </Link>
+
+      {tags && tags.length > 0 && (
+        <div className="mt-1.5 px-0.5">
+          <Swiper
+            dir={isRtl ? "rtl" : "ltr"}
+            modules={[Autoplay]}
+            direction="vertical"
+            slidesPerView={1}
+            spaceBetween={4}
+            loop={tags.length > 1}
+            autoplay={{
+              delay: 3000,
+              disableOnInteraction: false,
+              pauseOnMouseEnter: true,
+            }}
+            className="h-6 w-full"
+          >
+            {tags.map((tag) => (
+              <SwiperSlide key={tag.id} className="flex items-center justify-center">
+                <Link
+                  href={`/tags/${tag.slug}`}
+                  className={cn(
+                    "inline-flex max-w-full items-center gap-0.5 rounded-full px-2 py-0.5 text-[10px] font-medium leading-4 transition-colors",
+                    isDark
+                      ? "bg-white/10 text-white/80 hover:bg-white/20 hover:text-white"
+                      : "bg-surface text-text-secondary hover:bg-primary/10 hover:text-primary",
+                  )}
+                >
+                  <span className={isDark ? "text-white/50" : "text-primary"}>#</span>
+                  <span className="truncate">{tag.name}</span>
+                </Link>
+              </SwiperSlide>
+            ))}
+          </Swiper>
+        </div>
+      )}
+
+      <div className="flex items-center gap-2 mt-1.5 px-0.5 flex-wrap">
+        <div className="flex items-baseline gap-px">
+          <span className={cn("text-lg leading-5 font-bold md:text-xl", isDark ? "text-white" : "text-gray-900")}>
             {integerPart}
           </span>
-          <div className="flex flex-col">
-            <div className="text-sm font-bold leading-none">{decimalPart}</div>
-            <div className="text-[10px] font-medium leading-none">
-              {currency}
-            </div>
+          <div className="flex flex-col items-start">
+            <span className={cn("text-sm font-bold leading-none", isDark ? "text-white" : "text-gray-900")}>{decimalPart}</span>
+            <span className={cn("text-[10px] font-medium leading-none", isDark ? "text-gray-300" : "text-gray-500")}>{currency}</span>
           </div>
         </div>
-        <div>
-          <p className="text-sm leading-4 font-medium text-gray-500 self-center line-through">
+        {safeOriginalPrice > safePrice && (
+          <span className={cn("text-sm leading-4 font-medium line-through", isDark ? "text-gray-400" : "text-gray-400")}>
             {currency} {safeOriginalPrice.toFixed(2)}
-          </p>
-        </div>
+          </span>
+        )}
       </div>
     </div>
   );

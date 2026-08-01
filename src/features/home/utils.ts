@@ -25,5 +25,6 @@ export function toProductItem(p: ApiProduct): ProductItem {
     isFastShippingAvailable: p.is_fast_shipping_available,
     isInStock: p.in_stock ?? p.quantity > 0,
     flashSaleActive: hasFlashSale,
+    tags: p.tags,
   };
 }

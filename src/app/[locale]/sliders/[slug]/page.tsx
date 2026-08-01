@@ -40,7 +40,8 @@ export default async function Page({
 
   try {
     await sliderService.getSlider(decodedSlug, locale);
-  } catch {
+  } catch (e) {
+    console.error("[SliderPage] Failed to fetch slider:", e);
     notFound();
   }
 

@@ -1,3 +1,5 @@
+import type { ProductTag } from "@/shared/types";
+
 export interface CategoryImage {
   desktop: string;
   mobile: string;
@@ -42,6 +44,7 @@ export interface CategoryProduct {
   in_stock?: boolean;
   is_fast_shipping_available: boolean;
   image: CategoryProductImage;
+  tags?: ProductTag[];
 }
 
 export interface CategoryFilters {

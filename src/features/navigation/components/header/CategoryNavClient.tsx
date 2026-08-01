@@ -60,7 +60,7 @@ export default function CategoryNavClient({
           onMouseLeave={() => setHoveredCategory(null)}
         >
           <div className="no-scrollbar overflow-x-auto overflow-y-hidden">
-            <ul className="flex w-max items-center whitespace-nowrap pe-2 text-sm text-primary-dark gap-4 sm:gap-6 md:gap-8">
+            <ul className="flex w-max items-center whitespace-nowrap pe-2 text-base text-primary-dark gap-4 sm:gap-6 md:gap-8">
               {categories.map((item) => (
                 <li
                   key={item.id}
@@ -70,15 +70,15 @@ export default function CategoryNavClient({
                 >
                   <Link
                     href={`/category/${item.slug}`}
-                    className="inline-flex items-center gap-1.5 rounded-md px-1.5 py-1 transition-colors font-bold leading-4"
+                    className="inline-flex items-center gap-2 rounded-md px-1.5 py-1 transition-colors font-medium leading-5"
                   >
                     {item.image?.desktop && (
                       <Image
                         src={item.image.desktop}
                         alt=""
-                        width={20}
-                        height={20}
-                        className="h-5 w-5 rounded-full object-cover"
+                        width={28}
+                        height={28}
+                        className="h-7 w-7 rounded-full object-cover"
                       />
                     )}
                     {item.name}

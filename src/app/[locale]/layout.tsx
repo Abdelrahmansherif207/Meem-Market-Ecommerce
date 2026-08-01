@@ -86,14 +86,14 @@ export default async function RootLayout({
   }
   
   return (
-      <html lang={locale} dir={dir} className={cn("overflow-x-hidden", ibmPlexSansArabic.variable)}>
-      <body className="flex flex-col overflow-x-hidden">
+      <html lang={locale} dir={dir} className="overflow-x-clip">
+      <body className={cn("flex flex-col overflow-x-clip", montserrat.variable, playfair.variable)}>
         <link rel="preconnect" href={process.env.NEXT_PUBLIC_API_URL} />
         <NextIntlClientProvider>
-          <div className="hidden lg:block">
+          <div className="hidden lg:block sticky top-0 z-50">
             <Header params={params} settingsLogo={settingsLogo} />
           </div>
-          <div className="block lg:hidden">
+          <div className="block lg:hidden sticky top-0 z-50">
             <MobileHeader />
           </div>
           <MobileBottomNav />

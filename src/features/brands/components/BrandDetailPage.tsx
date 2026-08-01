@@ -70,6 +70,7 @@ export default async function BrandDetailPage({ slug, locale }: BrandDetailPageP
                 discountPercent={discountPercent}
                 slug={product.slug}
                 isInStock
+                tags={product.tags}
               />
             );
           })}

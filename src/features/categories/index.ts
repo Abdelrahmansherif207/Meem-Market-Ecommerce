@@ -6,7 +6,7 @@ export { default as CategoryMenuClient } from "./components/CategoryMenuClient";
 export { default as CategorySidebar } from "./components/CategorySidebar";
 export { default as SubCategoryPane } from "./components/SubCategoryPane";
 export { categoryMenuService } from "./services/categoryMenuService";
-export { getCategoryPageData } from "./services/categoryProductsService";
+export { getCategoryPageData, getCachedCategoryPageData } from "./services/categoryProductsService";
 export { findCategoryPath } from "./utils/categoryBreadcrumbs";
 export type {
   CategoryFilters,

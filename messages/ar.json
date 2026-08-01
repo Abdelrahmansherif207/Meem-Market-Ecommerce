@@ -157,6 +157,17 @@
     "title": "التصنيفات",
     "viewAll": "عرض الكل"
   },
+  "tags": {
+    "metaTitle": "الوسوم",
+    "metaDescription": "تصفح المنتجات حسب الوسوم في كاتش",
+    "title": "جميع الوسوم",
+    "description": "استكشف المنتجات حسب الوسوم",
+    "exploreLabel": "استكشف وسومنا",
+    "exploreTitle": "تسوق حسب الوسم",
+    "exploreSubtitle": "اكتشف منتجات تناسب نمط حياتك",
+    "viewAll": "عرض جميع الوسوم",
+    "noProducts": "لا توجد منتجات لهذا الوسم."
+  },
   "payment": {
     "metaTitle": "إتمام الطلب",
     "metaDescription": "أكمل طلبك في كاتش.",
