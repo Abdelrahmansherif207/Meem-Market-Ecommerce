@@ -1,3 +1,5 @@
+import type { ProductTag } from "@/shared/types";
+
 export interface BannerImage {
   desktop: string;
   mobile: string;
@@ -29,6 +31,7 @@ export interface BannerProduct {
   };
   discount_active?: boolean;
   flash_sale_active?: boolean;
+  tags?: ProductTag[];
 }
 
 export interface BannerDetail extends Banner {

@@ -43,6 +43,7 @@ export async function ProductDetailsPage({ slug, locale }: ProductDetailsPagePro
     price: getDisplayPrice(rp),
     originalPrice: getOriginalPrice(rp),
     slug: rp.slug ?? `${rp.name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "")}-${rp.id}`,
+    tags: rp.tags,
   }));
 
   return (

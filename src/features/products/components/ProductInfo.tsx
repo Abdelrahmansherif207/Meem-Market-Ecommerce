@@ -3,6 +3,7 @@
 import { useTranslations } from "next-intl";
 import { Star } from "lucide-react";
 import { cn } from "@/shared/utils/cn";
+import { ProductTags } from "@/features/tags/components/ProductTags";
 import type { ProductDetail, ProductVariant } from "../types";
 import {
   getDisplayPrice,
@@ -71,6 +72,10 @@ export function ProductInfo({ product, selectedVariant }: ProductInfoProps) {
               {avgRating} ({product.reviews.length} {t("reviews")})
             </span>
         </div>
+      )}
+
+      {product.tags && product.tags.length > 0 && (
+        <ProductTags tags={product.tags} />
       )}
 
       <div className="flex items-baseline gap-3">

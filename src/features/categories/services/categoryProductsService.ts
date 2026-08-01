@@ -23,7 +23,7 @@ export async function getCategoryPageData(
   slug: string,
   locale: string,
   searchParams?: Record<string, string | string[] | undefined>,
-  filterKey?: "category" | "banner" | "promotion",
+  filterKey?: "category" | "banner" | "promotion" | "tag",
 ): Promise<{
   products: CategoryProduct[];
   filters: CategoryFilters;

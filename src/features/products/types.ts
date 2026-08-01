@@ -1,4 +1,6 @@
-﻿export interface ProductAttribute {
+﻿import type { ProductTag } from "@/shared/types";
+
+export interface ProductAttribute {
   attribute_name: string;
   value: string;
 }
@@ -58,6 +60,7 @@ export interface RelatedProduct {
   quantity: number;
   ratings: number;
   discount_valid?: boolean;
+  tags?: ProductTag[];
   image: {
     thumbnail: string;
     original: Record<string, string>;
@@ -95,6 +98,7 @@ export interface ProductDetail {
   reviews: ProductReview[];
   related_products: RelatedProduct[];
   categories: ProductCategory[];
+  tags?: ProductTag[];
 }
 
 export interface ProductSearchResult {
@@ -131,6 +135,7 @@ export interface ProductListItem {
   sku?: string;
   in_stock?: boolean;
   is_fast_shipping_available: boolean;
+  tags?: ProductTag[];
   image: {
     thumbnail: string;
     original: Record<string, string>;

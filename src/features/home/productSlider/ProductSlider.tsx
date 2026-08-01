@@ -17,6 +17,7 @@ export default function ProductSlider({
   badgeText,
   showTimer,
   timerEndAt,
+  theme,
 }: ProductSliderProps) {
   const locale = useLocale();
   const isRtl = locale === "ar";
@@ -34,14 +35,14 @@ export default function ProductSlider({
   }
 
   return (
-    <div className="group relative w-full overflow-hidden pb-4">
+    <div className="group relative w-full overflow-hidden pb-4 px-6 sm:px-10 lg:px-12">
       {title && <SectionTitle title={title} />}
       <div className="overflow-hidden">
       <Swiper
         key={locale}
         dir={isRtl ? "rtl" : "ltr"}
         modules={[Navigation, Pagination]}
-        spaceBetween={30}
+        spaceBetween={8}
         slidesPerView={Math.min(cols, 3)}
         onSwiper={(s) => {
           setSwiper(s);
@@ -61,6 +62,7 @@ export default function ProductSlider({
         {safeItems.map((product, index) => (
           <SwiperSlide key={product.id}>
             <ProductCard
+              theme={theme}
               image={product.image}
               title={product.title}
               price={product.price}
@@ -76,6 +78,7 @@ export default function ProductSlider({
               badgeText={badgeText}
               deliveryType={product.isFastShippingAvailable ? "fast" : "scheduled"}
               isInStock={product.isInStock}
+              tags={product.tags}
             />
           </SwiperSlide>
         ))}
@@ -89,7 +92,7 @@ export default function ProductSlider({
           isRtl={isRtl}
           variant="card"
           strokeWidth={2}
-          iconClassName="h-7 w-7"
+          iconClassName="h-4 w-4"
         />
       )}
     </div>

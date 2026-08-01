@@ -65,6 +65,8 @@ export default function BannerArrows({
     ? "bg-black/35 text-white hover:bg-black/55 focus-visible:outline-white"
     : "bg-white text-slate-500 border border-slate-500";
 
+  const paddingClass = isHero ? "p-2.5" : "p-1.5";
+
   return (
     <div className={cn("pointer-events-none absolute inset-0 z-30 max-md:hidden", className)}>
       {/* PREVIOUS BUTTON */}
@@ -73,7 +75,8 @@ export default function BannerArrows({
         onClick={onPrevious}
         aria-label={previousLabel}
         className={cn(
-          "pointer-events-auto absolute top-1/2 -translate-y-1/2 rounded-full p-2.5 transition duration-200 cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-2 disabled:opacity-0 disabled:pointer-events-none",
+          "pointer-events-auto absolute top-1/2 -translate-y-1/2 rounded-full transition duration-200 cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-2 disabled:opacity-0 disabled:pointer-events-none",
+          paddingClass,
           previousPositionClass,
           variantButtonStyles,
           buttonClassName, // Lets you pass arbitrary classes on top
@@ -92,7 +95,8 @@ export default function BannerArrows({
         onClick={onNext}
         aria-label={nextLabel}
         className={cn(
-          "pointer-events-auto absolute top-1/2 -translate-y-1/2 rounded-full p-2.5 transition duration-200 cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-2 disabled:opacity-0 disabled:pointer-events-none",
+          "pointer-events-auto absolute top-1/2 -translate-y-1/2 rounded-full transition duration-200 cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-2 disabled:opacity-0 disabled:pointer-events-none",
+          paddingClass,
           nextPositionClass,
           variantButtonStyles,
           buttonClassName, // Lets you pass arbitrary classes on top

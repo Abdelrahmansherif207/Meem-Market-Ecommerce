@@ -1,3 +1,5 @@
+import type { ProductTag } from "@/shared/types";
+
 export interface FlashSaleImage {
   desktop: string;
   mobile: string;
@@ -29,6 +31,7 @@ export interface FlashSaleProduct {
     original: Record<string, string>;
   };
   flash_sale_active?: boolean;
+  tags?: ProductTag[];
 }
 
 export interface FlashSaleDetail extends FlashSale {

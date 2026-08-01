@@ -1,4 +1,6 @@
-﻿export interface BannerItem {
+﻿import type { ProductTag } from "@/shared/types";
+
+export interface BannerItem {
   id: string;
   imageSrc: string;
   alt: string;
@@ -59,6 +61,7 @@ export interface ApiProduct {
   ratings: number;
   in_stock?: boolean;
   is_fast_shipping_available: boolean;
+  tags?: ProductTag[];
   image: {
     thumbnail: string;
     original: Record<string, string>;
@@ -79,6 +82,7 @@ export interface ProductItem {
   isFastShippingAvailable?: boolean;
   isInStock?: boolean;
   flashSaleActive?: boolean;
+  tags?: ProductTag[];
 }
 
 export interface BannerProps {
@@ -152,6 +156,7 @@ export interface ProductSliderProps {
   badgeText?: string;
   showTimer?: boolean;
   timerEndAt?: string;
+  theme?: "light" | "dark";
 }
 
 export interface SectionFrontSetting {

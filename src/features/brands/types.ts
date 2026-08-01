@@ -1,3 +1,5 @@
+import type { ProductTag } from "@/shared/types";
+
 export interface BrandImage {
   desktop: string;
   mobile: string;
@@ -21,6 +23,7 @@ export interface BrandProduct {
   image: {
     thumbnail: string;
   };
+  tags?: ProductTag[];
 }
 
 export interface BrandDetail extends Brand {

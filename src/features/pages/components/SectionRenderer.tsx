@@ -1,6 +1,6 @@
 import { Suspense } from "react";
 import type { HomePageSection, SectionFrontSetting } from "@/features/home/types";
-import FlashSalesSection from "@/features/home/components/cardSlider/FlashSalesSection";
+import FlashSaleSection from "@/features/home/components/cardSlider/FlashSaleSection";
 import ContentSection from "@/features/home/components/contentSection/ContentSection";
 import ProductSliderSection from "@/features/home/productSlider/ProductSliderSection";
 import FeaturedCategories from "@/features/home/components/featuredCategories/FeaturedCategories";
@@ -52,13 +52,13 @@ function SectionBlock({
       return <EndingSoonSection locale={locale} period="week" />;
     case "flash-sales":
     case "coupons":
-      return <FlashSalesSection type={type} title={title} locale={locale} setting={setting} endpoint={endpoint} />;
+      return <FlashSaleSection type={type} title={title} locale={locale} setting={setting} endpoint={endpoint} />;
     case "categories":
       return <ContentSection type={type} title={title} locale={locale} setting={setting} endpoint={endpoint} />;
     case "products":
       return <ProductSliderSection type={type} title={title} locale={locale} setting={setting} endpoint={endpoint} />;
     case "banners":
-      return <BannerSection endpoint={endpoint} locale={locale} title={title} />;
+      return <BannerSection endpoint={endpoint} locale={locale} title={title} setting={setting} />;
     case "featured_categories":
       return <FeaturedCategories locale={locale} />;
     default:
@@ -86,7 +86,7 @@ function getSectionSkeleton(type: string, setting?: SectionFrontSetting): React.
       return <EndingSoonSkeleton />;
     case "flash-sales":
     case "coupons":
-      return <FlashSalesSkeleton setting={setting} />;
+      return <FlashSalesSkeleton type={type} setting={setting} />;
     case "categories":
       return <ContentSectionSkeleton setting={setting} />;
     case "products":

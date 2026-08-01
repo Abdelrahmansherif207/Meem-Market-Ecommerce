@@ -11,11 +11,11 @@ export default function ContentItem({ item, isCircle }: ContentItemProps) {
   return (
     <Link
       href={`/category/${item.slug}`}
-      className="group flex flex-col items-center justify-between rounded-lg transition-all duration-300 overflow-hidden gap-2 hover:-translate-y-0.5"
+      className="group flex flex-col items-center justify-between rounded-lg transition-all duration-300 overflow-hidden gap-2"
     >
       <div
         className={cn(
-          "relative w-full aspect-square flex items-center justify-center bg-surface transition-all duration-300 group-hover:shadow-md",
+          "relative w-full aspect-square flex items-center justify-center overflow-hidden transition-all duration-300 before:pointer-events-none before:absolute before:inset-y-0 before:w-3/5 before:-skew-x-[45deg] before:bg-white/40 before:left-[-125%] before:transition-all before:duration-500 before:ease-out group-hover:before:left-[150%]",
           isCircle && "rounded-full",
         )}
       >
@@ -31,7 +31,7 @@ export default function ContentItem({ item, isCircle }: ContentItemProps) {
         )}
       </div>
       <div className="w-full text-center flex-1 flex items-center justify-center">
-        <p className="text-md font-bold line-clamp-2 leading-tight text-primary">
+        <p className="text-md font-medium line-clamp-2 leading-tight text-black">
           {item.name}
         </p>
       </div>

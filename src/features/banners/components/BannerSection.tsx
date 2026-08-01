@@ -1,15 +1,17 @@
 import { homePageService } from "@/features/home/services/homePageService";
 import SectionTitle from "@/components/ui/SectionTitle";
-import ProductCard from "@/components/ui/ProductCard";
+import ProductSlider from "@/features/home/productSlider/ProductSlider";
 import type { BannerDetail } from "../types";
+import type { ProductItem, SectionFrontSetting } from "@/features/home/types";
 
 interface BannerSectionProps {
   endpoint?: string;
   locale: string;
   title?: string;
+  setting?: SectionFrontSetting;
 }
 
-export default async function BannerSection({ endpoint, locale, title }: BannerSectionProps) {
+export default async function BannerSection({ endpoint, locale, title, setting }: BannerSectionProps) {
   if (!endpoint) return null;
 
   let data: BannerDetail | BannerDetail[] | null = null;
@@ -25,6 +27,22 @@ export default async function BannerSection({ endpoint, locale, title }: BannerS
   if (!banner) return null;
 
   const { title: bannerTitle, description, image, products } = banner;
+
+  const productItems: ProductItem[] = (products ?? []).map((p) => ({
+    id: p.id,
+    image: Object.values(p.image.original)[0] || p.image.thumbnail,
+    title: p.name,
+    price: p.current_price,
+    originalPrice: p.price,
+    slug: p.slug,
+    hasVariants: p.has_variants,
+    isFastShippingAvailable: p.is_fast_shipping_available,
+    isInStock: p.in_stock ?? p.quantity > 0,
+    flashSaleActive: p.flash_sale_active ?? false,
+    inStock: p.quantity,
+    stockQuantity: p.quantity,
+    tags: p.tags,
+  }));
 
   return (
     <section className="w-full flex flex-col gap-4">
@@ -54,30 +72,11 @@ export default async function BannerSection({ endpoint, locale, title }: BannerS
         </div>
       </a>
 
-      {products && products.length > 0 && (
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
-          {products.map((product) => {
-            const discountPercent =
-              product.discount_active && product.current_price < product.price
-                ? Math.round((1 - product.current_price / product.price) * 100)
-                : 0;
-            return (
-              <ProductCard
-                key={product.id}
-                productId={product.id}
-                image={product.image.thumbnail}
-                title={product.name}
-                price={product.current_price}
-                originalPrice={product.price}
-                discountPercent={discountPercent}
-                slug={product.slug}
-                hasVariants={product.has_variants}
-                deliveryType={product.is_fast_shipping_available ? "fast" : "scheduled"}
-                isInStock={product.in_stock ?? product.quantity > 0}
-              />
-            );
-          })}
-        </div>
+      {productItems.length > 0 && (
+        <ProductSlider
+          items={productItems}
+          columnsCount={setting?.columns_count}
+        />
       )}
     </section>
   );
