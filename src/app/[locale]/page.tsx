@@ -9,10 +9,8 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
   const t = await getTranslations({ locale, namespace: "home" });
 
   return {
-    title: { absolute: t("metaTitle") },
     description: t("metaDescription"),
     openGraph: {
-      title: t("metaTitle"),
       description: t("metaDescription"),
     },
   };
