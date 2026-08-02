@@ -148,7 +148,18 @@
     "options": "Options",
     "fromPrice": "{min} – {max}",
     "relatedProducts": "Related Products",
-    "anonymous": "Anonymous"
+    "anonymous": "Anonymous",
+    "writeReview": "Write a Review",
+    "yourRating": "Your Rating",
+    "yourReview": "Your Review",
+    "submitReview": "Submit Review",
+    "updateReview": "Update Review",
+    "reviewPlaceholder": "Share your thoughts about this product...",
+    "reviewSubmitted": "Your review has been submitted!",
+    "reviewUpdated": "Your review has been updated!",
+    "signInToReview": "Sign in to write a review",
+    "editReview": "Edit",
+    "cancelEdit": "Cancel"
   },
   "categories": {
     "metaTitle": "Categories",

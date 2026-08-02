@@ -148,7 +148,18 @@
     "options": "الخيارات",
     "fromPrice": "{min} – {max}",
     "relatedProducts": "منتجات ذات صلة",
-    "anonymous": "مجهول"
+    "anonymous": "مجهول",
+    "writeReview": "اكتب تقييماً",
+    "yourRating": "تقييمك",
+    "yourReview": "مراجعتك",
+    "submitReview": "إرسال التقييم",
+    "updateReview": "تحديث التقييم",
+    "reviewPlaceholder": "شارك رأيك في هذا المنتج...",
+    "reviewSubmitted": "تم إرسال تقييمك بنجاح!",
+    "reviewUpdated": "تم تحديث تقييمك بنجاح!",
+    "signInToReview": "سجل الدخول لكتابة تقييم",
+    "editReview": "تعديل",
+    "cancelEdit": "إلغاء"
   },
   "categories": {
     "metaTitle": "التصنيفات",

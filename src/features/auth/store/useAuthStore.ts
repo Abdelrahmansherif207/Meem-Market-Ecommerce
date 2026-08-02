@@ -9,6 +9,7 @@ import type { AuthLoginData, LoginPayload, RegisterPayload } from "../types";
 
 type AuthState = {
   token: string | null;
+  id: number | null;
   permissions: string[];
   role: string[];
   emailVerified: boolean;
@@ -41,6 +42,7 @@ function writeTokenToStorage(token: string | null) {
 
 const initialState = {
   token: null,
+  id: null as number | null,
   permissions: [],
   role: [],
   emailVerified: false,
@@ -62,6 +64,7 @@ export const useAuthStore = create<AuthState>()(
         writeTokenToStorage(authData.token);
         set({
           token: authData.token,
+          id: authData.id ?? null,
           permissions: authData.permissions ?? [],
           role: authData.role ?? [],
           emailVerified: authData.email_verified ?? false,
@@ -89,6 +92,7 @@ export const useAuthStore = create<AuthState>()(
           writeTokenToStorage(response.data.token);
           set({
             token: response.data.token,
+            id: response.data.id ?? null,
             permissions: response.data.permissions ?? [],
             role: response.data.role ?? [],
             emailVerified: response.data.email_verified ?? false,
@@ -118,6 +122,7 @@ export const useAuthStore = create<AuthState>()(
             writeTokenToStorage(data.token);
             set({
               token: data.token,
+              id: data.id ?? null,
               permissions: data.permissions ?? [],
               role: data.role ?? [],
               emailVerified: data.email_verified ?? false,
@@ -155,6 +160,7 @@ export const useAuthStore = create<AuthState>()(
       storage: createJSONStorage(() => localStorage),
       partialize: (state) => ({
         token: state.token,
+        id: state.id,
         permissions: state.permissions,
         role: state.role,
         emailVerified: state.emailVerified,

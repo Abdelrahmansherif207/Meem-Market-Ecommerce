@@ -65,6 +65,7 @@ export interface SocialLoginPayload {
 
 export interface AuthLoginData {
   token: string;
+  id?: number;
   permissions?: string[];
   email_verified?: boolean;
   role?: string[];
