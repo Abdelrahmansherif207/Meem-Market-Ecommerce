@@ -126,6 +126,7 @@
     "reviews": "reviews",
     "reviewsTitle": "Customer Reviews",
     "noReviews": "No reviews yet.",
+    "noReviewsDescription": "Be the first to share your thoughts on this product.",
     "inStock": "{count} in stock",
     "outOfStock": "Out of Stock",
     "sku": "SKU",
@@ -279,6 +280,7 @@
     "address": {
       "addNew": "Add New Address",
       "empty": "No saved addresses yet.",
+      "emptyDescription": "Add an address to make checkout faster.",
       "edit": "Edit",
       "delete": "Delete",
       "loadError": "Failed to load addresses.",
@@ -310,6 +312,7 @@
     },
     "orders": {
       "empty": "No orders yet.",
+      "emptyDescription": "When you place an order, it will show up here.",
       "loadError": "Failed to load orders.",
       "total": "Total",
       "discount": "Discount",
@@ -506,6 +509,35 @@
     "categoryErrorTitle": "Category unavailable",
     "categoryErrorDesc": "This category could not be loaded. Please try again.",
     "cartErrorTitle": "Cart unavailable",
-    "authErrorTitle": "Authentication service unavailable"
+    "authErrorTitle": "Authentication service unavailable",
+    "serverDownTitle": "We can't reach our servers",
+    "serverDownDesc": "Something went wrong on our end. Please try again in a few moments."
+  },
+  "emptyState": {
+    "browseProducts": "Browse all products",
+    "shopCollection": "Shop our collection",
+    "backToBrands": "Back to Brands",
+    "clearSearch": "Clear search",
+    "noProductsForTag": "No products found for this tag yet.",
+    "noProductsForBrand": "No products from this brand yet.",
+    "noProductsForCategory": "No products found in this category yet.",
+    "noProductsForBanner": "No products available for this banner yet.",
+    "noProductsForSlider": "No products available for this slider yet.",
+    "noProductsForFlashSale": "No products in this flash sale yet.",
+    "flashSaleNotFound": "This flash sale is unavailable or has ended.",
+    "flashSaleEnded": "This flash sale has ended.",
+    "noProductsForPromotion": "No products available for this promotion yet.",
+    "noBrands": "No brands yet.",
+    "noBrandsMatch": "No brands match \"{search}\".",
+    "noOrdersTitle": "No orders yet.",
+    "noOrdersDescription": "When you place an order, it will show up here.",
+    "noAddressesTitle": "No saved addresses yet.",
+    "noAddressesDescription": "Add an address to make checkout faster.",
+    "noSearchResults": "No results found",
+    "tryDifferentSearch": "Try a different search or browse our full collection.",
+    "noReviewTitle": "No reviews yet.",
+    "noReviewDescription": "Be the first to share your thoughts on this product.",
+    "noSuggestions": "No results found",
+    "noMapResults": "No results found. Try a different search."
   }
 }

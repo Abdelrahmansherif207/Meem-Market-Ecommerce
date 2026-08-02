@@ -126,6 +126,7 @@
     "reviews": "تقييم",
     "reviewsTitle": "تقييمات العملاء",
     "noReviews": "لا توجد تقييمات بعد",
+    "noReviewsDescription": "كن أول من يشارك رأيه حول هذا المنتج.",
     "inStock": "متوفر: {count} قطعة",
     "outOfStock": "غير متوفر",
     "sku": "رمز المنتج",
@@ -279,6 +280,7 @@
     "address": {
       "addNew": "إضافة عنوان جديد",
       "empty": "لا توجد عناوين محفوظة بعد.",
+      "emptyDescription": "أضف عنوانًا لتسريع عملية الدفع.",
       "edit": "تعديل",
       "delete": "حذف",
       "loadError": "فشل تحميل العناوين.",
@@ -310,6 +312,7 @@
     },
     "orders": {
       "empty": "لا توجد طلبات بعد.",
+      "emptyDescription": "عندما تقوم بطلب، سيظهر هنا.",
       "loadError": "فشل تحميل الطلبات.",
       "total": "الإجمالي",
       "discount": "الخصم",
@@ -506,6 +509,35 @@
     "categoryErrorTitle": "القسم غير متاح",
     "categoryErrorDesc": "تعذر تحميل هذا القسم. يرجى المحاولة مرة أخرى.",
     "cartErrorTitle": "السلة غير متاحة",
-    "authErrorTitle": "خدمة المصادقة غير متاحة"
+    "authErrorTitle": "خدمة المصادقة غير متاحة",
+    "serverDownTitle": "تعذر الوصول إلى الخوادم",
+    "serverDownDesc": "حدث خطأ من جهة الخادم. يرجى المحاولة مرة أخرى بعد قليل."
+  },
+  "emptyState": {
+    "browseProducts": "تصفح جميع المنتجات",
+    "shopCollection": "تسوق من مجموعتنا",
+    "backToBrands": "العودة إلى الماركات",
+    "clearSearch": "مسح البحث",
+    "noProductsForTag": "لا توجد منتجات لهذا الوسم بعد.",
+    "noProductsForBrand": "لا توجد منتجات من هذه الماركة بعد.",
+    "noProductsForCategory": "لا توجد منتجات في هذا القسم بعد.",
+    "noProductsForBanner": "لا توجد منتجات متاحة لهذا البانر بعد.",
+    "noProductsForSlider": "لا توجد منتجات متاحة لهذا السلايدر بعد.",
+    "noProductsForFlashSale": "لا توجد منتجات في هذا العرض الخاطف بعد.",
+    "flashSaleNotFound": "هذا العرض الخاطف غير متاح أو انتهى.",
+    "flashSaleEnded": "انتهى هذا العرض الخاطف.",
+    "noProductsForPromotion": "لا توجد منتجات متاحة لهذا العرض بعد.",
+    "noBrands": "لا توجد ماركات بعد.",
+    "noBrandsMatch": "لا توجد ماركات تطابق \"{search}\".",
+    "noOrdersTitle": "لا توجد طلبات بعد.",
+    "noOrdersDescription": "عندما تقوم بطلب، سيظهر هنا.",
+    "noAddressesTitle": "لا توجد عناوين محفوظة بعد.",
+    "noAddressesDescription": "أضف عنوانًا لتسريع عملية الدفع.",
+    "noSearchResults": "لا توجد نتائج",
+    "tryDifferentSearch": "جرّب بحثًا مختلفًا أو تصفح مجموعتنا الكاملة.",
+    "noReviewTitle": "لا توجد تقييمات بعد.",
+    "noReviewDescription": "كن أول من يشارك رأيه حول هذا المنتج.",
+    "noSuggestions": "لا توجد نتائج",
+    "noMapResults": "لا توجد نتائج. جرّب بحثًا مختلفًا."
   }
 }
