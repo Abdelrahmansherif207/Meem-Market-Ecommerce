@@ -22,6 +22,8 @@ import FlashSaleBannerSection from "@/features/flash-sales/components/FlashSaleB
 import EndingSoonSection from "@/features/flash-sales/components/EndingSoonSection";
 import FlashSaleBannerSkeleton from "@/features/flash-sales/components/FlashSaleBannerSkeleton";
 import EndingSoonSkeleton from "@/features/flash-sales/components/EndingSoonSkeleton";
+import { TagsBannerSection } from "@/features/tags";
+import TagsBannerSkeleton from "@/features/tags/components/skeletons/TagsBannerSkeleton";
 
 function SectionBlock({
   section,
@@ -61,6 +63,8 @@ function SectionBlock({
       return <BannerSection endpoint={endpoint} locale={locale} title={title} setting={setting} />;
     case "featured_categories":
       return <FeaturedCategories locale={locale} />;
+    case "tags":
+      return <TagsBannerSection type={type} title={title} locale={locale} setting={setting} endpoint={endpoint} />;
     default:
       console.warn(`[SectionRenderer] Unknown section type: ${type}`);
       return null;
@@ -93,6 +97,8 @@ function getSectionSkeleton(type: string, setting?: SectionFrontSetting): React.
       return <ProductSliderSkeleton />;
     case "banners":
       return <BannerHeroSkeleton />;
+    case "tags":
+      return <TagsBannerSkeleton />;
     default:
       return null;
   }

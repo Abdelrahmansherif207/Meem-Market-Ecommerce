@@ -2,7 +2,6 @@ import { withRetry } from "@/shared/utils/retry";
 import { homePageService } from "./services/homePageService";
 import type { HomeContentPage } from "./types";
 import { SectionSuspense } from "@/features/pages/components/SectionRenderer";
-import { TagsBannerSection } from "@/features/tags/components/TagsBannerSection";
 
 export async function HomePage({ locale }: { locale: string }) {
   let page: HomeContentPage;
@@ -18,7 +17,6 @@ export async function HomePage({ locale }: { locale: string }) {
       {page.sections.map((section) => (
         <SectionSuspense key={section.id} section={section} locale={locale} />
       ))}
-      <TagsBannerSection locale={locale} />
     </main>
   );
 }

@@ -1,6 +1,9 @@
 import { notFound } from "next/navigation";
 import { getTranslations } from "next-intl/server";
+import { ShoppingBag } from "lucide-react";
+import { Link } from "@/i18n/navigation";
 import ProductCard from "@/components/ui/ProductCard";
+import EmptyState from "@/components/ui/EmptyState";
 import { getCachedCategoryPageData } from "@/features/categories/services/categoryProductsService";
 import type { CategoryProduct } from "@/features/categories/types";
 import { tagService } from "../services/tagService";
@@ -12,6 +15,7 @@ interface TagDetailPageProps {
 
 export async function TagDetailPage({ slug, locale }: TagDetailPageProps) {
   const t = await getTranslations({ locale, namespace: "tags" });
+  const te = await getTranslations({ locale, namespace: "emptyState" });
 
   let tag;
   try {
@@ -40,7 +44,19 @@ export async function TagDetailPage({ slug, locale }: TagDetailPageProps) {
       </div>
 
       {products.length === 0 ? (
-        <p className="py-16 text-center text-text-secondary">{t("noProducts")}</p>
+        <EmptyState
+          variant="notFound"
+          title={te("noProductsForTag")}
+          actions={
+            <Link
+              href="/"
+              className="inline-flex items-center gap-2 rounded-xl bg-primary px-6 py-3 text-sm font-semibold text-white shadow-sm shadow-primary/40 transition-all hover:bg-primary-dark hover:shadow-md"
+            >
+              <ShoppingBag className="size-4" />
+              {te("browseProducts")}
+            </Link>
+          }
+        />
       ) : (
         <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6">
           {products.map((product) => {

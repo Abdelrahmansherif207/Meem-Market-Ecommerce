@@ -1,6 +1,8 @@
 import Image from "next/image";
 import Breadcrumb from "@/components/ui/Breadcrumb";
+import EmptyState from "@/components/ui/EmptyState";
 import { Link } from "@/i18n/navigation";
+import { getTranslations } from "next-intl/server";
 import type { InfoPage } from "../types";
 import { getInfoPageContent } from "../content/pageContent";
 
@@ -11,6 +13,7 @@ interface InfoPageRendererProps {
 
 export default async function InfoPageRenderer({ slug, locale }: InfoPageRendererProps) {
   const isRtl = locale === "ar";
+  const tf = await getTranslations({ locale, namespace: "notFound" });
   let page: InfoPage | null;
   try {
     page = getInfoPageContent(slug, locale);
@@ -20,10 +23,20 @@ export default async function InfoPageRenderer({ slug, locale }: InfoPageRendere
 
   if (!page) {
     return (
-      <main className="flex flex-col items-center gap-y-5 py-20 text-center">
-        <h1 className="text-2xl font-bold text-text-primary">Page not found</h1>
-        <p className="text-text-secondary">The requested page is not available.</p>
-        <Link href="/" className="text-primary hover:underline">Return home</Link>
+      <main className="flex flex-col items-center justify-center py-12">
+        <EmptyState
+          variant="notFound"
+          title={tf("title")}
+          description={tf("description")}
+          actions={
+            <Link
+              href="/"
+              className="inline-flex items-center gap-2 rounded-xl bg-primary px-6 py-3 text-sm font-semibold text-white shadow-sm shadow-primary/40 transition-all hover:bg-primary-dark hover:shadow-md"
+            >
+              {tf("goHome")}
+            </Link>
+          }
+        />
       </main>
     );
   }

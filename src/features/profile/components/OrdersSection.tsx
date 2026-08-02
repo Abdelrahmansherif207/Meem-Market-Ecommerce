@@ -2,11 +2,11 @@
 
 import { useState, useEffect } from "react";
 import { useTranslations } from "next-intl";
-import { PackageOpen } from "lucide-react";
 import { orderService } from "../services/orderService";
 import type { Order } from "../types";
 import { OrderCard } from "./OrderCard";
 import { OrdersSkeleton } from "./skeletons/OrdersSkeleton";
+import EmptyState from "@/components/ui/EmptyState";
 
 export function OrdersSection() {
   const t = useTranslations("profile.orders");
@@ -33,10 +33,12 @@ export function OrdersSection() {
 
   if (orders.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center py-16 text-center">
-        <PackageOpen className="mb-3 h-12 w-12 text-text-secondary/40" />
-        <p className="text-sm font-semibold text-text-secondary">{t("empty")}</p>
-      </div>
+      <EmptyState
+        size="compact"
+        variant="orders"
+        title={t("empty")}
+        description={t("emptyDescription")}
+      />
     );
   }
 

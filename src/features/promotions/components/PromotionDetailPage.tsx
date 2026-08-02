@@ -1,4 +1,8 @@
 import ProductCard from "@/components/ui/ProductCard";
+import { Link } from "@/i18n/navigation";
+import { getTranslations } from "next-intl/server";
+import { ShoppingBag } from "lucide-react";
+import EmptyState from "@/components/ui/EmptyState";
 import { promotionService } from "../services/promotionService";
 import type { PromotionDetail } from "../types";
 
@@ -8,20 +12,25 @@ interface PromotionDetailPageProps {
 }
 
 export default async function PromotionDetailPage({ slug, locale }: PromotionDetailPageProps) {
+  const te = await getTranslations({ locale, namespace: "emptyState" });
+
   let promotion: PromotionDetail;
   try {
     promotion = await promotionService.getPromotion(slug, locale);
   } catch {
     return (
-      <div className="flex flex-col items-center justify-center py-20 gap-4">
-        <p className="text-text-secondary text-lg">Failed to load promotion</p>
-        <a
-          href={`/${locale}`}
-          className="rounded-lg bg-primary px-6 py-2 text-white text-sm font-medium hover:bg-primary-dark transition-colors"
-        >
-          Go to homepage
-        </a>
-      </div>
+      <EmptyState
+        variant="notFound"
+        title={te("noProductsForPromotion")}
+        actions={
+          <Link
+            href="/"
+            className="inline-flex items-center gap-2 rounded-xl bg-primary px-6 py-3 text-sm font-semibold text-white shadow-sm shadow-primary/40 transition-all hover:bg-primary-dark hover:shadow-md"
+          >
+            {te("shopCollection")}
+          </Link>
+        }
+      />
     );
   }
 
@@ -44,9 +53,19 @@ export default async function PromotionDetailPage({ slug, locale }: PromotionDet
 
       {/* Products grid */}
       {products.length === 0 ? (
-        <p className="text-text-secondary text-center py-12">
-          No products available for this promotion.
-        </p>
+        <EmptyState
+          variant="notFound"
+          title={te("noProductsForPromotion")}
+          actions={
+            <Link
+              href="/"
+              className="inline-flex items-center gap-2 rounded-xl bg-primary px-6 py-3 text-sm font-semibold text-white shadow-sm shadow-primary/40 transition-all hover:bg-primary-dark hover:shadow-md"
+            >
+              <ShoppingBag className="size-4" />
+              {te("browseProducts")}
+            </Link>
+          }
+        />
       ) : (
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
           {products.map((product) => {

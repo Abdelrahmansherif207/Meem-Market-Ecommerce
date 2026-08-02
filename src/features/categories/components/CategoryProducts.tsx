@@ -1,5 +1,6 @@
 import ProductCard from "@/components/ui/ProductCard";
 import Pagination from "./Pagination";
+import EmptyCategory from "./EmptyCategory";
 import type { CategoryProduct, CategoryProductsResponse } from "../types";
 
 interface CategoryProductsProps {
@@ -12,11 +13,7 @@ export default function CategoryProducts({
   links,
 }: CategoryProductsProps) {
   if (products.length === 0) {
-    return (
-      <div className="text-center text-gray-500 py-12">
-        No products found in this category.
-      </div>
-    );
+    return <EmptyCategory />;
   }
 
   return (

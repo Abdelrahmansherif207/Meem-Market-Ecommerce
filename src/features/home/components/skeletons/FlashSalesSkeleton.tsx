@@ -36,7 +36,7 @@ export default function FlashSalesSkeleton({ type, setting }: FlashSalesSkeleton
   return (
     <section className="w-full max-w-[1600px] mx-auto px-4 sm:px-8 lg:px-12 my-16" aria-label="Loading flash sales">
       {/* Banner Skeleton */}
-      <div className="relative w-full h-[140px] sm:h-[180px] lg:h-[220px] rounded-[24px] rounded-b-none bg-gradient-to-br from-orange-400 to-orange-500 animate-pulse" />
+      <div className="relative w-full h-[140px] sm:h-[180px] lg:h-[220px] rounded-[24px] rounded-b-none bg-surface animate-pulse" />
 
       {/* Carousel Skeleton */}
       <div className="-mt-3 relative">

@@ -11,6 +11,14 @@ export const tagService = {
     return response.data;
   },
 
+  getTagsByEndpoint: async (endpoint: string, lang?: string): Promise<Tag[]> => {
+    const response = await apiFetch<ApiResponse<Tag[]>>(endpoint, {
+      next: { revalidate: 60 },
+      lang,
+    });
+    return response.data;
+  },
+
   getTagBySlug: async (slug: string, lang?: string): Promise<Tag> => {
     const response = await apiFetch<ApiResponse<Tag[]>>(
       `/general/tags?slugs=${encodeURIComponent(slug)}`,

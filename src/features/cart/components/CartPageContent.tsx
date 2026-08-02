@@ -16,6 +16,7 @@ import type { Coupon } from "@/features/coupons/types";
 import { couponService } from "@/features/coupons/services/couponService";
 import { ApiError } from "@/shared/lib/api";
 import type { HydratedCartItem, CartApiItem, CartApiCart } from "../types";
+import EmptyState from "@/components/ui/EmptyState";
 
 
 // ---------------------------------------------------------------------------
@@ -467,17 +468,19 @@ export function CartPageContent({ minimumOrderAmount }: CartPageContentProps) {
       </div>
 
       {displayItems.length === 0 ? (
-        <div className="flex flex-col items-center justify-center py-24 text-center">
-          <ShoppingBag className="mb-4 h-16 w-16 text-gray-200" />
-          <h2 className="text-xl font-bold">{t("emptyTitle")}</h2>
-          <p className="mt-1 text-sm text-gray-500">{t("emptyDescription")}</p>
-          <Link
-            href="/"
-            className="mt-6 rounded-xl bg-primary px-8 py-3 text-sm font-bold text-white transition-opacity hover:opacity-90"
-          >
-            {t("startShopping")}
-          </Link>
-        </div>
+        <EmptyState
+          variant="cart"
+          title={t("emptyTitle")}
+          description={t("emptyDescription")}
+          actions={
+            <Link
+              href="/"
+              className="inline-flex items-center gap-2 rounded-xl bg-primary px-8 py-3 text-sm font-bold text-white shadow-sm shadow-primary/40 transition-all hover:bg-primary-dark hover:shadow-md"
+            >
+              {t("startShopping")}
+            </Link>
+          }
+        />
       ) : (
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           <div className="lg:col-span-2 space-y-8">

@@ -1,7 +1,11 @@
 "use client";
 
 import { useState, useMemo } from "react";
+import { useTranslations } from "next-intl";
+import { ShoppingBag, X } from "lucide-react";
 import BrandCard from "./BrandCard";
+import EmptyState from "@/components/ui/EmptyState";
+import { Link } from "@/i18n/navigation";
 import type { Brand } from "../types";
 
 interface BrandListingClientProps {
@@ -12,6 +16,7 @@ interface BrandListingClientProps {
 type SortMode = "a-z" | "z-a" | "newest";
 
 export default function BrandListingClient({ brands, locale }: BrandListingClientProps) {
+  const t = useTranslations("emptyState");
   const [search, setSearch] = useState("");
   const [sort, setSort] = useState<SortMode>("a-z");
 
@@ -62,30 +67,34 @@ export default function BrandListingClient({ brands, locale }: BrandListingClien
 
       {/* Results */}
       {filtered.length === 0 ? (
-        <div className="flex flex-col items-center gap-4 py-16 text-center">
-          <p className="text-lg text-text-secondary">
-            {search.trim()
-              ? `No brands match "${search}"`
-              : "No brands yet"}
-          </p>
-          {search.trim() && (
-            <button
-              type="button"
-              onClick={() => setSearch("")}
-              className="rounded-lg bg-primary px-5 py-2 text-sm font-medium text-white hover:bg-primary-dark transition-colors"
-            >
-              Clear search
-            </button>
-          )}
-          {!search.trim() && (
-            <a
-              href={`/${locale}`}
-              className="rounded-lg bg-primary px-5 py-2 text-sm font-medium text-white hover:bg-primary-dark transition-colors"
-            >
-              Browse Products
-            </a>
-          )}
-        </div>
+        <EmptyState
+          variant="notFound"
+          title={
+            search.trim()
+              ? t("noBrandsMatch", { search })
+              : t("noBrands")
+          }
+          actions={
+            search.trim() ? (
+              <button
+                type="button"
+                onClick={() => setSearch("")}
+                className="inline-flex items-center gap-2 rounded-xl border border-border bg-white px-6 py-3 text-sm font-semibold text-text-primary transition-colors hover:border-primary/30 hover:bg-primary/5"
+              >
+                <X className="size-4" />
+                {t("clearSearch")}
+              </button>
+            ) : (
+              <Link
+                href="/"
+                className="inline-flex items-center gap-2 rounded-xl bg-primary px-6 py-3 text-sm font-semibold text-white shadow-sm shadow-primary/40 transition-all hover:bg-primary-dark hover:shadow-md"
+              >
+                <ShoppingBag className="size-4" />
+                {t("browseProducts")}
+              </Link>
+            )
+          }
+        />
       ) : (
         <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6">
           {filtered.map((brand, i) => (

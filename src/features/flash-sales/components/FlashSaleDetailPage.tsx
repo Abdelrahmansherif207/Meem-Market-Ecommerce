@@ -1,5 +1,9 @@
 import ProductCard from "@/components/ui/ProductCard";
 import CountdownTimer from "./CountdownTimer";
+import EmptyState from "@/components/ui/EmptyState";
+import { Link } from "@/i18n/navigation";
+import { getTranslations } from "next-intl/server";
+import { ShoppingBag } from "lucide-react";
 import { flashSaleService } from "../services/flashSaleService";
 import type { FlashSaleDetail } from "../types";
 
@@ -9,20 +13,26 @@ interface FlashSaleDetailPageProps {
 }
 
 export default async function FlashSaleDetailPage({ slug, locale }: FlashSaleDetailPageProps) {
+  const te = await getTranslations({ locale, namespace: "emptyState" });
+
   let flashSale: FlashSaleDetail;
   try {
     flashSale = await flashSaleService.getFlashSale(slug, locale);
   } catch {
     return (
-      <div className="flex flex-col items-center justify-center py-20 gap-4">
-        <p className="text-text-secondary text-lg">Flash sale not found</p>
-        <a
-          href={`/${locale}`}
-          className="rounded-lg bg-primary px-6 py-2 text-white text-sm font-medium hover:bg-primary-dark transition-colors"
-        >
-          Browse Products
-        </a>
-      </div>
+      <EmptyState
+        variant="notFound"
+        title={te("flashSaleNotFound")}
+        actions={
+          <Link
+            href="/"
+            className="inline-flex items-center gap-2 rounded-xl bg-primary px-6 py-3 text-sm font-semibold text-white shadow-sm shadow-primary/40 transition-all hover:bg-primary-dark hover:shadow-md"
+          >
+            <ShoppingBag className="size-4" />
+            {te("browseProducts")}
+          </Link>
+        }
+      />
     );
   }
 
@@ -30,15 +40,19 @@ export default async function FlashSaleDetailPage({ slug, locale }: FlashSaleDet
 
   if (isExpired) {
     return (
-      <div className="flex flex-col items-center justify-center py-20 gap-4">
-        <p className="text-text-secondary text-lg">This flash sale has ended</p>
-        <a
-          href={`/${locale}`}
-          className="rounded-lg bg-primary px-6 py-2 text-white text-sm font-medium hover:bg-primary-dark transition-colors"
-        >
-          Browse Products
-        </a>
-      </div>
+      <EmptyState
+        variant="notFound"
+        title={te("flashSaleEnded")}
+        actions={
+          <Link
+            href="/"
+            className="inline-flex items-center gap-2 rounded-xl bg-primary px-6 py-3 text-sm font-semibold text-white shadow-sm shadow-primary/40 transition-all hover:bg-primary-dark hover:shadow-md"
+          >
+            <ShoppingBag className="size-4" />
+            {te("browseProducts")}
+          </Link>
+        }
+      />
     );
   }
 
@@ -69,11 +83,19 @@ export default async function FlashSaleDetailPage({ slug, locale }: FlashSaleDet
       </div>
 
       {products.length === 0 ? (
-        <div className="flex flex-col items-center gap-4 py-16">
-          <p className="text-text-secondary text-center">
-            No products in this flash sale.
-          </p>
-        </div>
+        <EmptyState
+          variant="notFound"
+          title={te("noProductsForFlashSale")}
+          actions={
+            <Link
+              href="/"
+              className="inline-flex items-center gap-2 rounded-xl bg-primary px-6 py-3 text-sm font-semibold text-white shadow-sm shadow-primary/40 transition-all hover:bg-primary-dark hover:shadow-md"
+            >
+              <ShoppingBag className="size-4" />
+              {te("browseProducts")}
+            </Link>
+          }
+        />
       ) : (
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
           {products.map((product) => {

@@ -1,5 +1,9 @@
 import { sliderService } from "../services/sliderService";
+import { Link } from "@/i18n/navigation";
+import { getTranslations } from "next-intl/server";
+import { ShoppingBag } from "lucide-react";
 import PaginatedProductGrid from "@/components/ui/PaginatedProductGrid";
+import EmptyState from "@/components/ui/EmptyState";
 import type { SliderDetail } from "../types";
 
 interface SliderDetailPageProps {
@@ -8,20 +12,25 @@ interface SliderDetailPageProps {
 }
 
 export default async function SliderDetailPage({ slug, locale }: SliderDetailPageProps) {
+  const te = await getTranslations({ locale, namespace: "emptyState" });
+
   let slider: SliderDetail;
   try {
     slider = await sliderService.getSlider(slug, locale);
   } catch {
     return (
-      <div className="flex flex-col items-center justify-center py-20 gap-4">
-        <p className="text-text-secondary text-lg">Failed to load slider</p>
-        <a
-          href={`/${locale}`}
-          className="rounded-lg bg-primary px-6 py-2 text-white text-sm font-medium hover:bg-primary-dark transition-colors"
-        >
-          Go to homepage
-        </a>
-      </div>
+      <EmptyState
+        variant="notFound"
+        title={te("noProductsForSlider")}
+        actions={
+          <Link
+            href="/"
+            className="inline-flex items-center gap-2 rounded-xl bg-primary px-6 py-3 text-sm font-semibold text-white shadow-sm shadow-primary/40 transition-all hover:bg-primary-dark hover:shadow-md"
+          >
+            {te("shopCollection")}
+          </Link>
+        }
+      />
     );
   }
 
@@ -41,17 +50,19 @@ export default async function SliderDetailPage({ slug, locale }: SliderDetailPag
       <h1 className="text-2xl md:text-3xl font-bold text-text-primary">{title}</h1>
 
       {products.length === 0 ? (
-        <div className="flex flex-col items-center gap-4 py-16">
-          <p className="text-text-secondary text-center">
-            No products available for this slider.
-          </p>
-          <a
-            href={`/${locale}`}
-            className="rounded-lg bg-primary px-6 py-2 text-white text-sm font-medium hover:bg-primary-dark transition-colors"
-          >
-            Shop our collection
-          </a>
-        </div>
+        <EmptyState
+          variant="notFound"
+          title={te("noProductsForSlider")}
+          actions={
+            <Link
+              href="/"
+              className="inline-flex items-center gap-2 rounded-xl bg-primary px-6 py-3 text-sm font-semibold text-white shadow-sm shadow-primary/40 transition-all hover:bg-primary-dark hover:shadow-md"
+            >
+              <ShoppingBag className="size-4" />
+              {te("shopCollection")}
+            </Link>
+          }
+        />
       ) : (
         <PaginatedProductGrid products={products} itemsPerPage={12} />
       )}
