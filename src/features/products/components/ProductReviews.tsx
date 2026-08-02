@@ -6,6 +6,7 @@ import { Star, User, Pencil } from "lucide-react";
 import Image from "next/image";
 import { cn } from "@/shared/utils/cn";
 import { useAuthStore } from "@/features/auth/store/useAuthStore";
+import EmptyState from "@/components/ui/EmptyState";
 import type { ProductReview } from "../types";
 import { getAverageRating } from "../utils";
 import { ReviewForm } from "./ReviewForm";
@@ -141,9 +142,12 @@ export function ProductReviews({ productId, reviews, onReviewSuccess }: ProductR
       )}
 
       {reviews.length === 0 && (
-        <div className="py-4 text-center text-sm text-text-secondary">
-          {t("noReviews")}
-        </div>
+        <EmptyState
+          size="compact"
+          variant="orders"
+          title={t("noReviews")}
+          description={t("noReviewsDescription")}
+        />
       )}
     </div>
   );

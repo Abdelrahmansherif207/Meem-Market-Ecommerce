@@ -8,6 +8,7 @@ import type { Address, CreateAddressPayload } from "../types";
 import { AddressCard } from "./AddressCard";
 import { AddressFormModal } from "./AddressFormModal";
 import { AddressSkeleton } from "./skeletons/AddressSkeleton";
+import EmptyState from "@/components/ui/EmptyState";
 
 interface AddressSectionProps {
   customerId: number;
@@ -77,7 +78,12 @@ export function AddressSection({ customerId }: AddressSectionProps) {
       </button>
 
       {addresses.length === 0 ? (
-        <p className="text-center text-sm text-text-secondary py-8">{t("empty")}</p>
+        <EmptyState
+          size="compact"
+          variant="orders"
+          title={t("empty")}
+          description={t("emptyDescription")}
+        />
       ) : (
         <div className="space-y-3">
           {addresses.map((address) => (

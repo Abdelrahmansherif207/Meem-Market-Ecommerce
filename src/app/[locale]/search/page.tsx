@@ -4,6 +4,7 @@ import Breadcrumb from "@/components/ui/Breadcrumb";
 import CategoryProducts from "@/features/categories/components/CategoryProducts";
 import SidebarContent from "@/features/categories/components/SidebarContent";
 import MobileSidebarContent from "@/features/categories/components/MobileSidebarContent";
+import SearchEmptyState from "@/features/search/components/SearchEmptyState";
 import { getCachedSearchPageData } from "@/features/categories/services/categoryProductsService";
 import { getTranslations } from "next-intl/server";
 import { notFound } from "next/navigation";
@@ -38,11 +39,12 @@ async function SearchProductsGrid({
   const { products } = await getCachedSearchPageData(locale, searchParams);
 
   if (products.length === 0) {
-    notFound();
+    return <SearchEmptyState />;
   }
 
   return <CategoryProducts products={products} />;
 }
+
 
 export default async function Page({
   params,

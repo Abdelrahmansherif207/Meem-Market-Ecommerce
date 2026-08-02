@@ -1,5 +1,8 @@
 import { Link } from "@/i18n/navigation";
+import { getTranslations } from "next-intl/server";
+import { ShoppingBag } from "lucide-react";
 import ProductCard from "@/components/ui/ProductCard";
+import EmptyState from "@/components/ui/EmptyState";
 import { brandService } from "../services/brandService";
 
 interface BrandDetailPageProps {
@@ -8,20 +11,25 @@ interface BrandDetailPageProps {
 }
 
 export default async function BrandDetailPage({ slug, locale }: BrandDetailPageProps) {
+  const te = await getTranslations({ locale, namespace: "emptyState" });
+
   let brand;
   try {
     brand = await brandService.getBrand(slug, locale);
   } catch {
     return (
-      <div className="flex flex-col items-center justify-center gap-4 py-20">
-        <p className="text-lg text-text-secondary">Failed to load brand</p>
-        <a
-          href={`/${locale}/brands`}
-          className="rounded-lg bg-primary px-5 py-2 text-sm font-medium text-white hover:bg-primary-dark transition-colors"
-        >
-          Back to Brands
-        </a>
-      </div>
+      <EmptyState
+        variant="notFound"
+        title={te("noProductsForBrand")}
+        actions={
+          <Link
+            href="/brands"
+            className="inline-flex items-center gap-2 rounded-xl bg-primary px-6 py-3 text-sm font-semibold text-white shadow-sm shadow-primary/40 transition-all hover:bg-primary-dark hover:shadow-md"
+          >
+            {te("backToBrands")}
+          </Link>
+        }
+      />
     );
   }
 
@@ -43,15 +51,19 @@ export default async function BrandDetailPage({ slug, locale }: BrandDetailPageP
 
       {/* Products */}
       {products.length === 0 ? (
-        <div className="flex flex-col items-center gap-4 py-16 text-center">
-          <p className="text-lg text-text-secondary">No products from this brand yet.</p>
-          <Link
-            href="/"
-            className="rounded-lg bg-primary px-5 py-2 text-sm font-medium text-white hover:bg-primary-dark transition-colors"
-          >
-            Browse All Products
-          </Link>
-        </div>
+        <EmptyState
+          variant="notFound"
+          title={te("noProductsForBrand")}
+          actions={
+            <Link
+              href="/"
+              className="inline-flex items-center gap-2 rounded-xl bg-primary px-6 py-3 text-sm font-semibold text-white shadow-sm shadow-primary/40 transition-all hover:bg-primary-dark hover:shadow-md"
+            >
+              <ShoppingBag className="size-4" />
+              {te("browseProducts")}
+            </Link>
+          }
+        />
       ) : (
         <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6">
           {products.map((product) => {
