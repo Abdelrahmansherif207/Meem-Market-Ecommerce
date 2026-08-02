@@ -1,7 +1,8 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useCallback } from "react";
 import { useTranslations } from "next-intl";
+import { useRouter } from "@/i18n/navigation";
 import { ProductDeliveryInfo } from "./ProductDeliveryInfo";
 import { ProductGallery } from "./ProductGallery";
 import { ProductInfo } from "./ProductInfo";
@@ -17,6 +18,7 @@ interface ProductPageContentProps {
 
 export function ProductPageContent({ product }: ProductPageContentProps) {
   const t = useTranslations("product");
+  const router = useRouter();
   const [selectedVariantId, setSelectedVariantId] = useState<number | null>(
     () => product.variants.find((v) => v.quantity > 0)?.id ?? product.variants[0]?.id ?? null,
   );
@@ -26,6 +28,10 @@ export function ProductPageContent({ product }: ProductPageContentProps) {
     () => product.variants.find((v) => v.id === selectedVariantId) ?? null,
     [product.variants, selectedVariantId],
   );
+
+  const handleReviewSuccess = useCallback(() => {
+    router.refresh();
+  }, [router]);
 
   return (
     <div className="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-[280px_minmax(0,1fr)_minmax(300px,1fr)] lg:gap-8">
@@ -73,14 +79,16 @@ export function ProductPageContent({ product }: ProductPageContentProps) {
           </section>
         )}
 
-        {product.reviews.length > 0 && (
-          <section>
-            <h2 className="mb-3 text-lg font-bold text-text-primary">
-              {t("reviewsTitle")}
-            </h2>
-            <ProductReviews reviews={product.reviews} />
-          </section>
-        )}
+        <section>
+          <h2 className="mb-3 text-lg font-bold text-text-primary">
+            {t("reviewsTitle")}
+          </h2>
+          <ProductReviews
+            productId={product.id}
+            reviews={product.reviews}
+            onReviewSuccess={handleReviewSuccess}
+          />
+        </section>
       </main>
 
       <aside className="w-full order-first lg:order-3">
