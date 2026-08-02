@@ -97,7 +97,7 @@ export default async function RootLayout({
   
   return (
       <html lang={locale} dir={dir} className="overflow-x-clip">
-      <body className={cn("flex flex-col overflow-x-clip", ibmPlexSansArabic.variable)}>
+      <body className={cn("flex min-h-dvh flex-col overflow-x-clip", ibmPlexSansArabic.variable)}>
         <link rel="preconnect" href={process.env.NEXT_PUBLIC_API_URL} />
         <NextIntlClientProvider>
           <div className="hidden lg:block sticky top-0 z-50">
@@ -109,7 +109,7 @@ export default async function RootLayout({
           <MobileBottomNav />
           <ChannelThemeProvider />
           <CartSyncProvider>
-            <div className="container mx-auto px-4 flex flex-col min-h-screen pb-[56px] lg:pb-0">
+            <div className="container mx-auto flex flex-1 flex-col px-4 pb-[56px] lg:pb-0">
               {children}
             </div>
           </CartSyncProvider>

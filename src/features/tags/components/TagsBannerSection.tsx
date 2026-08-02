@@ -1,14 +1,33 @@
 import { Link } from "@/i18n/navigation";
 import { getTranslations } from "next-intl/server";
+import type { SectionFrontSetting } from "@/features/home/types";
 import { tagService } from "../services/tagService";
 import { TagPill } from "./TagPill";
+import styles from "./TagsBannerSection.module.css";
 
-export async function TagsBannerSection({ locale }: { locale: string }) {
+interface TagsBannerSectionProps {
+  title?: string;
+  type: string;
+  locale: string;
+  setting?: SectionFrontSetting;
+  endpoint?: string;
+}
+
+const MIN_MARQUEE_TAGS = 5;
+
+export async function TagsBannerSection({
+  title,
+  locale,
+  setting,
+  endpoint,
+}: TagsBannerSectionProps) {
   const t = await getTranslations({ locale, namespace: "tags" });
 
   let tags;
   try {
-    tags = await tagService.getTags(locale);
+    tags = endpoint
+      ? await tagService.getTagsByEndpoint(endpoint, locale)
+      : await tagService.getTags(locale);
   } catch (error) {
     console.error("[TagsBannerSection] Failed to load tags", error);
     return null;
@@ -18,7 +37,16 @@ export async function TagsBannerSection({ locale }: { locale: string }) {
     return null;
   }
 
-  const exampleTags = tags.slice(0, 8);
+  const isRtl = locale === "ar";
+  const autoplay = setting?.autoplay !== false;
+  const sliderSpeed = setting?.slider_speed ?? 5000;
+  const shouldMarquee = autoplay && tags.length >= MIN_MARQUEE_TAGS;
+  const marqueeDuration = (sliderSpeed * tags.length) / 4000;
+
+  const pills = (setIndex: number) =>
+    tags.map((tag) => (
+      <TagPill key={`${setIndex}-${tag.id}`} name={tag.name} slug={tag.slug} theme="dark" />
+    ));
 
   return (
     <section className="relative w-full overflow-hidden rounded-2xl bg-gradient-to-b from-black via-[#1a1a1a] to-[#2a2a2a] text-white">
@@ -32,18 +60,29 @@ export async function TagsBannerSection({ locale }: { locale: string }) {
             {t("exploreLabel")}
           </span>
           <h2 className="text-[28px] font-black leading-[1.05] tracking-tight text-white sm:text-[40px] lg:text-[48px]">
-            {t("exploreTitle")}
+            {title || t("exploreTitle")}
           </h2>
           <p className="text-base font-medium leading-tight text-white/90 sm:text-lg">
             {t("exploreSubtitle")}
           </p>
         </div>
 
-        <div className="flex flex-wrap gap-2.5">
-          {exampleTags.map((tag) => (
-            <TagPill key={tag.id} name={tag.name} slug={tag.slug} theme="dark" />
-          ))}
-        </div>
+        {shouldMarquee ? (
+          <div className={styles.marquee}>
+            <div
+              className={styles.track}
+              dir={isRtl ? "rtl" : "ltr"}
+              style={{ animationDuration: `${marqueeDuration}s` }}
+            >
+              <div className={styles.group}>{pills(0)}</div>
+              <div className={styles.group} aria-hidden>
+                {pills(1)}
+              </div>
+            </div>
+          </div>
+        ) : (
+          <div className="flex flex-wrap gap-2.5">{pills(0)}</div>
+        )}
 
         <div>
           <Link
