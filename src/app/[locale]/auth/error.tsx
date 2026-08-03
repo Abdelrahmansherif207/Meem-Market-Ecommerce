@@ -2,9 +2,10 @@
 
 import { useEffect } from "react";
 import { useTranslations } from "next-intl";
-import { RefreshCw, Home } from "lucide-react";
+import { Home } from "lucide-react";
 import Link from "next/link";
-import EmptyState from "@/components/ui/EmptyState";
+import ErrorState from "@/components/ui/ErrorState";
+import RetryButton from "@/components/ui/RetryButton";
 import { isServerDownError } from "@/shared/lib/errors";
 import { ApiError } from "@/shared/lib/api";
 import { useAuthModalStore } from "@/features/auth/store/useAuthModalStore";
@@ -20,7 +21,7 @@ export default function AuthError({
   const openAuthModal = useAuthModalStore((s) => s.open);
 
   useEffect(() => {
-    console.error("Auth page error:", error);
+    console.error("Auth page error:", error, error.digest ? `digest: ${error.digest}` : "");
   }, [error]);
 
   const isAuthError = error instanceof ApiError && error.status === 401;
@@ -28,21 +29,19 @@ export default function AuthError({
   if (isAuthError) {
     return (
       <div className="flex flex-1 flex-col justify-center py-12">
-        <EmptyState
+        <ErrorState
+          variant="generic"
           title={t("sessionExpired") ?? "Session expired"}
           description={error.message}
           actions={
             <>
-              <button
+              <RetryButton
+                label={t("signIn") ?? "Sign in"}
                 onClick={() => {
                   openAuthModal?.();
                   reset();
                 }}
-                className="inline-flex items-center gap-2 rounded-xl bg-primary px-6 py-3 text-sm font-semibold text-white shadow-sm shadow-primary/40 transition-all hover:bg-primary-dark hover:shadow-md"
-              >
-                <RefreshCw className="size-4" />
-                {t("signIn") ?? "Sign in"}
-              </button>
+              />
               <Link
                 href="/"
                 className="inline-flex items-center gap-2 rounded-xl border border-border bg-white px-6 py-3 text-sm font-semibold text-text-primary transition-colors hover:border-primary/30 hover:bg-primary/5"
@@ -61,7 +60,7 @@ export default function AuthError({
 
   return (
     <div className="flex flex-1 flex-col justify-center py-12">
-      <EmptyState
+      <ErrorState
         variant="serverError"
         title={
           serverDown
@@ -75,13 +74,7 @@ export default function AuthError({
         }
         actions={
           <>
-            <button
-              onClick={reset}
-              className="inline-flex items-center gap-2 rounded-xl bg-primary px-6 py-3 text-sm font-semibold text-white shadow-sm shadow-primary/40 transition-all hover:bg-primary-dark hover:shadow-md"
-            >
-              <RefreshCw className="size-4" />
-              {t("retry") ?? "Try again"}
-            </button>
+            <RetryButton label={t("retry") ?? "Try again"} onClick={reset} />
             <Link
               href="/"
               className="inline-flex items-center gap-2 rounded-xl border border-border bg-white px-6 py-3 text-sm font-semibold text-text-primary transition-colors hover:border-primary/30 hover:bg-primary/5"

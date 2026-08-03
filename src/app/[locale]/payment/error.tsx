@@ -2,9 +2,10 @@
 
 import { useEffect } from "react";
 import { useTranslations } from "next-intl";
-import { RefreshCw, ShoppingBag } from "lucide-react";
+import { ShoppingBag } from "lucide-react";
 import Link from "next/link";
-import EmptyState from "@/components/ui/EmptyState";
+import ErrorState from "@/components/ui/ErrorState";
+import RetryButton from "@/components/ui/RetryButton";
 import { isServerDownError } from "@/shared/lib/errors";
 
 export default function PaymentError({
@@ -17,14 +18,14 @@ export default function PaymentError({
   const t = useTranslations("error");
 
   useEffect(() => {
-    console.error("Payment page error:", error);
+    console.error("Payment page error:", error, error.digest ? `digest: ${error.digest}` : "");
   }, [error]);
 
   const serverDown = isServerDownError(error);
 
   return (
     <div className="flex flex-1 flex-col justify-center py-12">
-      <EmptyState
+      <ErrorState
         variant="serverError"
         title={
           serverDown
@@ -36,13 +37,7 @@ export default function PaymentError({
         }
         actions={
           <>
-            <button
-              onClick={reset}
-              className="inline-flex items-center gap-2 rounded-xl bg-primary px-6 py-3 text-sm font-semibold text-white shadow-sm shadow-primary/40 transition-all hover:bg-primary-dark hover:shadow-md"
-            >
-              <RefreshCw className="size-4" />
-              {t("retry") ?? "Try again"}
-            </button>
+            <RetryButton label={t("retry") ?? "Try again"} onClick={reset} />
             <Link
               href="/"
               className="inline-flex items-center gap-2 rounded-xl border border-border bg-white px-6 py-3 text-sm font-semibold text-text-primary transition-colors hover:border-primary/30 hover:bg-primary/5"
