@@ -58,11 +58,6 @@ export interface ChangePasswordPayload {
   newPassword_confirmation?: string;
 }
 
-export interface SocialLoginPayload {
-  provider: string;
-  access_token: string;
-}
-
 export interface AuthLoginData {
   token: string;
   id?: number;
@@ -77,4 +72,12 @@ export interface RegisterResponseData {
   message?: string;
   otp_status?: boolean;
   email?: string;
+}
+
+export interface SocialExchangeResponse {
+  success: boolean;
+  token?: string;
+  token_type?: string;
+  user?: Record<string, unknown>;
+  message?: string;
 }

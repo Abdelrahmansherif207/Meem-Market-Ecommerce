@@ -3,6 +3,7 @@
 import { useEffect, useRef } from "react";
 import { Mail } from "lucide-react";
 import { AuthTabs } from "./AuthTabs";
+import { GoogleLoginButton } from "./GoogleLoginButton";
 import { PhoneInputWithCountry } from "./PhoneInputWithCountry";
 import { PasswordInput } from "./PasswordInput";
 import type { ActionState } from "../actions/types";
@@ -114,6 +115,8 @@ export function LoginForm({
       >
         {pending ? "Signing in..." : "Sign in"}
       </button>
+
+      <GoogleLoginButton />
     </form>
   );
 }

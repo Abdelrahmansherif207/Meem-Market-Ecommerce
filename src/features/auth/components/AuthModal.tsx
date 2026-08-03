@@ -7,6 +7,7 @@ import { PhoneInputWithCountry } from "./PhoneInputWithCountry";
 import { PasswordInput } from "./PasswordInput";
 import { AuthTabs } from "./AuthTabs";
 import { AuthFeedback } from "./AuthFeedback";
+import { GoogleLoginButton } from "./GoogleLoginButton";
 import Logo from "@/components/ui/Logo";
 import { useAuthModalStore } from "../store/useAuthModalStore";
 import { useAuthStore } from "../store/useAuthStore";
@@ -162,6 +163,8 @@ function handleOverlayClick(e: React.MouseEvent<HTMLDivElement>) {
             >
               {pending ? "Signing in..." : "Sign in"}
             </button>
+
+            <GoogleLoginButton />
           </form>
 
           <p className="mt-2 text-center text-xs">
