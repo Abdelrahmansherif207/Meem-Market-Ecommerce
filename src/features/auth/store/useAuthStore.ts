@@ -23,6 +23,7 @@ type AuthState = {
   error: string | null;
   setAuthData: (authData: AuthLoginData) => void;
   setProfile: (id: number | null, name: string | null, image: string | null) => void;
+  setEmailVerified: (verified: boolean) => void;
   clearAuth: () => void;
   login: (payload: LoginPayload) => Promise<void>;
   register: (payload: RegisterPayload) => Promise<void>;
@@ -76,6 +77,9 @@ export const useAuthStore = create<AuthState>()(
       },
       setProfile: (id, name, image) => {
         set({ userId: id, name, image });
+      },
+      setEmailVerified: (verified) => {
+        set({ emailVerified: verified });
       },
       clearAuth: () => {
         writeTokenToStorage(null);

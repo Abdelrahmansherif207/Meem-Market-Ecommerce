@@ -8,7 +8,6 @@ import type {
   RegisterPayload,
   ResetPasswordPayload,
   SendOtpCodePayload,
-  SocialLoginPayload,
   VerifyPasswordPayload,
 } from "@/features/auth/types";
 import type { ApiResponse } from "@/shared/types";
@@ -144,17 +143,6 @@ export const authService = {
     lang?: string,
   ): Promise<MessageResponse> => {
     return apiFetch<MessageResponse>("/change-password", {
-      method: "POST",
-      body: JSON.stringify(payload),
-      lang,
-    });
-  },
-
-  socialLogin: async (
-    payload: SocialLoginPayload,
-    lang?: string,
-  ): Promise<ApiResponse<AuthLoginData | Record<string, unknown>>> => {
-    return apiFetch<ApiResponse<AuthLoginData | Record<string, unknown>>>("/social-login", {
       method: "POST",
       body: JSON.stringify(payload),
       lang,

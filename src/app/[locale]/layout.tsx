@@ -9,6 +9,7 @@ import MobileHeader from "@/features/navigation/components/mobile/MobileHeader";
 import MobileBottomNav from "@/features/navigation/components/mobile/MobileBottomNav";
 import Footer from "@/features/navigation/components/footer/Footer";
 import { AuthModal } from "@/features/auth/components/AuthModal";
+import { AuthSyncHandler } from "@/features/auth/components/AuthSyncHandler";
 import { CartSyncProvider } from "@/features/cart/components/CartSyncProvider";
 import { ChannelThemeProvider } from "@/features/fast-shipping/components/ChannelThemeProvider";
 import { IBM_Plex_Sans_Arabic } from "next/font/google";
@@ -108,6 +109,7 @@ export default async function RootLayout({
           </div>
           <MobileBottomNav />
           <ChannelThemeProvider />
+          <AuthSyncHandler />
           <CartSyncProvider>
             <div className="container mx-auto flex flex-1 flex-col px-4 pb-[56px] lg:pb-0">
               {children}
