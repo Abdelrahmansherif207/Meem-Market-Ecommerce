@@ -13,7 +13,7 @@ export async function CartPage({ locale }: CartPageProps) {
   const settings = await getCachedSettings(locale).catch(() => ({ minimumOrderAmount: 0 }));
 
   return (
-    <div className="py-6 min-h-screen">
+    <div className="py-6">
       <Breadcrumb
         items={[
           { label: tb("home"), href: "/" },

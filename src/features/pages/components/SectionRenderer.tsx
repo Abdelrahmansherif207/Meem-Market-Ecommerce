@@ -1,5 +1,6 @@
 import { Suspense } from "react";
 import type { HomePageSection, SectionFrontSetting } from "@/features/home/types";
+import { SectionErrorBoundary } from "./SectionErrorBoundary";
 import FlashSaleSection from "@/features/home/components/cardSlider/FlashSaleSection";
 import ContentSection from "@/features/home/components/contentSection/ContentSection";
 import ProductSliderSection from "@/features/home/productSlider/ProductSliderSection";
@@ -113,7 +114,9 @@ export function SectionSuspense({
 }) {
   return (
     <Suspense key={section.id} fallback={getSectionSkeleton(section.type, section.setting?.front)}>
-      <SectionBlock section={section} locale={locale} />
+      <SectionErrorBoundary>
+        <SectionBlock section={section} locale={locale} />
+      </SectionErrorBoundary>
     </Suspense>
   );
 }

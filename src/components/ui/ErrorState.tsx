@@ -1,41 +1,37 @@
 import type { ReactNode } from "react";
 import { cn } from "@/shared/utils/cn";
 
-type EmptyStateVariant = "cart" | "notFound" | "orders" | "serverError" | "default";
+export type ErrorStateVariant = "serverError" | "notFound" | "generic";
 
-interface EmptyStateProps {
+interface ErrorStateProps {
+  variant: ErrorStateVariant;
   title: string;
   description?: string;
   actions?: ReactNode;
   /** Smaller inline variant used inside cards/sections. */
-  size?: "full" | "compact";
-  /** Picks one of the 4 illustration SVGs from the empty-state design pack. */
-  variant?: EmptyStateVariant;
+  compact?: boolean;
   className?: string;
 }
 
-const ILLUSTRATIONS: Record<EmptyStateVariant, string> = {
-  cart: "/images/empty-state/cart.svg",
-  notFound: "/images/empty-state/not-found.svg",
-  orders: "/images/empty-state/orders.svg",
+const ILLUSTRATIONS: Record<ErrorStateVariant, string> = {
   serverError: "/images/empty-state/server-error.svg",
-  default: "/images/empty-state/not-found.svg",
+  notFound: "/images/empty-state/not-found.svg",
+  generic: "/images/empty-state/server-error.svg",
 };
 
-export default function EmptyState({
+export default function ErrorState({
+  variant,
   title,
   description,
   actions,
-  size = "full",
-  variant = "default",
+  compact = false,
   className,
-}: EmptyStateProps) {
-  const compact = size === "compact";
-
+}: ErrorStateProps) {
   return (
     <div
       className={cn(
-        "flex flex-col items-center",
+        "flex flex-col items-center justify-center",
+        compact ? "py-6" : "py-12",
         className,
       )}
     >
@@ -52,7 +48,7 @@ export default function EmptyState({
       <h2
         className={cn(
           "font-bold text-text-primary",
-          compact ? "text-sm" : " text-lg",
+          compact ? "text-sm" : "text-lg",
         )}
       >
         {title}
@@ -62,7 +58,9 @@ export default function EmptyState({
         <p
           className={cn(
             "text-text-secondary",
-            compact ? "mt-1 max-w-xs text-xs" : "mt-2 max-w-sm text-sm leading-relaxed",
+            compact
+              ? "mt-1 max-w-xs text-xs"
+              : "mt-2 max-w-sm text-sm leading-relaxed",
           )}
         >
           {description}
@@ -74,8 +72,6 @@ export default function EmptyState({
           {actions}
         </div>
       )}
-
-    
     </div>
   );
 }

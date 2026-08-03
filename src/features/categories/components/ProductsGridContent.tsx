@@ -1,8 +1,10 @@
+import { getTranslations } from "next-intl/server";
+import { guardLoad } from "@/shared/lib/guardedFetch";
 import { getCachedCategoryPageData } from "../services/categoryProductsService";
 import CategoryProducts from "./CategoryProducts";
-
 import ProductsToolbar from "./ProductsToolbar";
 import ActiveFilterChips from "./ActiveFilterChips";
+import ErrorState from "@/components/ui/ErrorState";
 
 interface ProductsGridContentProps {
   slug: string;
@@ -19,12 +21,25 @@ export default async function ProductsGridContent({
   filterKey = "category",
   renderToolbar,
 }: ProductsGridContentProps) {
-  const { products, links } = await getCachedCategoryPageData(
-    slug,
-    locale,
-    searchParams,
-    filterKey,
+  const result = await guardLoad(() =>
+    getCachedCategoryPageData(slug, locale, searchParams, filterKey),
   );
+
+  if (!result.ok) {
+    const te = await getTranslations({ locale, namespace: "error" });
+    return (
+      <div className="py-8">
+        <ErrorState
+          compact
+          variant="serverError"
+          title={te("serverDownTitle")}
+          description={te("serverDownDesc")}
+        />
+      </div>
+    );
+  }
+
+  const { products, links } = result.data;
 
   if (renderToolbar) {
     return <ProductsToolbar links={links} />;

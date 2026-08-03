@@ -16,15 +16,23 @@ import { getCategoryPageData, getCachedCategoryPageData, getBannerBySlug } from 
 import { findCategoryPath } from "@/features/categories/utils/categoryBreadcrumbs";
 import { getTranslations } from "next-intl/server";
 import { notFound } from "next/navigation";
+import ErrorState from "@/components/ui/ErrorState";
+import RetryButton from "@/components/ui/RetryButton";
+import { guardLoad } from "@/shared/lib/guardedFetch";
 import { ProductsSidebarSkeleton } from "@/features/categories/components/skeletons/ProductsSidebarSkeleton";
 import { CategoryProductsSkeleton } from "@/features/categories/components/skeletons/CategoryProductsSkeleton";
 
 export async function generateMetadata({ params }: { params: Promise<{ locale: string; slug: string }> }): Promise<Metadata> {
   const { locale, slug } = await params;
   const decodedSlug = decodeURIComponent(slug);
-  const categories = await categoryMenuService.getMenu(locale);
-  const categoryPath = findCategoryPath(categories, decodedSlug);
-  const categoryName = categoryPath?.[categoryPath.length - 1]?.name ?? decodedSlug;
+  let categoryName = decodedSlug;
+  try {
+    const categories = await categoryMenuService.getMenu(locale);
+    const categoryPath = findCategoryPath(categories, decodedSlug);
+    categoryName = categoryPath?.[categoryPath.length - 1]?.name ?? decodedSlug;
+  } catch {
+    // menu unavailable — fall back to the slug as the page title
+  }
   const t = await getTranslations({ locale, namespace: "meta.category" });
   const description = t("description", { name: categoryName });
 
@@ -51,17 +59,31 @@ async function BannerPromotionContent({
   seeMoreText: string;
   seeLessText: string;
 }) {
-  let result = await getCategoryPageData(slug, locale, searchParams, "banner");
-  if (result.products.length === 0) {
-    result = await getCategoryPageData(slug, locale, searchParams, "promotion");
+  let result = await guardLoad(() => getCategoryPageData(slug, locale, searchParams, "banner"));
+  if (result.ok && result.data.products.length === 0) {
+    result = await guardLoad(() => getCategoryPageData(slug, locale, searchParams, "promotion"));
   }
-  if (result.products.length === 0) {
+  if (!result.ok) {
+    const te = await getTranslations({ locale, namespace: "error" });
+    return (
+      <main className="flex flex-col py-10">
+        <ErrorState
+          variant="serverError"
+          title={te("serverDownTitle")}
+          description={te("serverDownDesc")}
+          actions={<RetryButton label={te("retry")} />}
+        />
+      </main>
+    );
+  }
+  const pageData = result.data;
+  if (pageData.products.length === 0) {
     const banner = await getBannerBySlug(slug, locale);
     if (!banner) {
       notFound();
     }
   }
-  const { products, filters, filterLabels, links } = result;
+  const { products, filters, filterLabels, links } = pageData;
 
   return (
     <div className="flex gap-5 max-[991px]:gap-0 items-stretch">
@@ -104,7 +126,23 @@ export default async function Page({
   const resolvedSearchParams = await searchParams;
   const t = await getTranslations({ locale, namespace: "header.breadcrumb" });
   const tf = await getTranslations({ locale, namespace: "header.filters" });
-  const categories = await categoryMenuService.getMenu(locale);
+  const menuResult = await guardLoad(() => categoryMenuService.getMenu(locale));
+
+  if (!menuResult.ok) {
+    const te = await getTranslations({ locale, namespace: "error" });
+    return (
+      <main className="flex flex-col py-10">
+        <ErrorState
+          variant="serverError"
+          title={te("serverDownTitle")}
+          description={te("serverDownDesc")}
+          actions={<RetryButton label={te("retry")} />}
+        />
+      </main>
+    );
+  }
+
+  const categories = menuResult.data;
 
   const decodedSlug = decodeURIComponent(slug);
   const categoryPath = findCategoryPath(categories, decodedSlug);
@@ -158,7 +196,13 @@ export default async function Page({
     })),
   ];
 
-  const sidebarPromise = getCachedCategoryPageData(decodedSlug, locale, resolvedSearchParams);
+  const sidebarPromise = getCachedCategoryPageData(decodedSlug, locale, resolvedSearchParams)
+    .catch(() => ({
+      products: [],
+      filters: {},
+      filterLabels: {},
+      links: {},
+    }));
 
   return (
     <div className="w-full flex flex-col flex-1">
