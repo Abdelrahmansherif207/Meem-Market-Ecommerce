@@ -58,7 +58,9 @@
       "arabic": "العربية",
       "currency": "Currency",
       "usd": "USD",
-      "sar": "SAR"
+      "sar": "SAR",
+      "openMenu": "Open menu",
+      "closeMenu": "Close menu"
     },
     "breadcrumb": {
       "home": "Home"

@@ -58,7 +58,9 @@
       "arabic": "العربية",
       "currency": "العملة",
       "usd": "USD",
-      "sar": "ريال سعودي"
+      "sar": "ريال سعودي",
+      "openMenu": "فتح القائمة",
+      "closeMenu": "إغلاق القائمة"
     },
     "breadcrumb": {
       "home": "الرئيسية"

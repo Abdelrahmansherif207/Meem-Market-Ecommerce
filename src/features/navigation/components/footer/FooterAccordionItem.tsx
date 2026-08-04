@@ -4,7 +4,7 @@ import { useState, type ReactNode } from "react";
 import ChevronIcon from "@/components/ui/icons/ChevronIcon";
 
 interface Props {
-  title: string;
+  title: ReactNode;
   children: ReactNode;
   defaultOpen?: boolean;
 }
