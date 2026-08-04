@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
 import { useChannelStore } from "@/features/fast-shipping/store/useChannelStore";
 import { useFastShippingStatusStore } from "@/features/fast-shipping/store/useFastShippingStatusStore";
@@ -12,10 +12,17 @@ export default function DeliveryModes() {
   const channel = useChannelStore((s) => s.channel);
   const setChannel = useChannelStore((s) => s.setChannel);
   const { status, fetchStatus } = useFastShippingStatusStore();
+  const [scrolled, setScrolled] = useState(false);
 
   useEffect(() => {
     fetchStatus();
   }, [fetchStatus]);
+
+  useEffect(() => {
+    const handleScroll = () => setScrolled(window.scrollY > 0);
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
   const isFastAvailable = status?.enabled && status?.available;
   const fee = status?.fee ?? 0;
@@ -36,18 +43,20 @@ export default function DeliveryModes() {
       <DeliveryModeButton
         label={t("scheduled")}
         icon={{ src: "/scheduled.avif", alt: "Scheduled" }}
-        bgClass={channel === "home" ? "bg-primary" : "bg-white"}
-        borderClass={channel === "home" ? "border-white" : "border-primary"}
+        bgClass={channel === "home" ? "bg-primary hover:bg-primary-active" : "bg-white hover:bg-primary/5"}
+        borderClass={channel === "home" ? "md:border-white" : "border-2 border-primary"}
         textClass={channel === "home" ? "text-white" : "text-primary"}
+        hideIcon={scrolled}
         onClick={() => handleChannelChange("home")}
       />
       <DeliveryModeButton
         label={t("now")}
         icon={{ src: "/now.avif", alt: "NOW" }}
-        bgClass={channel === "fast-shipping" ? "bg-accent" : "bg-white"}
-        borderClass={channel === "fast-shipping" ? "border-white" : "border-accent"}
+        bgClass={channel === "fast-shipping" ? "bg-accent hover:opacity-90" : "bg-white hover:bg-accent/5"}
+        borderClass={""}
         textClass={channel === "fast-shipping" ? "text-white" : "text-accent"}
         etaText={etaText}
+        hideIcon={scrolled}
         onClick={() => handleChannelChange("fast-shipping")}
         disabled={!isFastAvailable && channel !== "fast-shipping"}
       />
