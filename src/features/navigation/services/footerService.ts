@@ -1,6 +1,69 @@
 import { apiFetch } from "@/shared/lib/api";
+import { getCachedSettings } from "@/features/settings/services/settingsService";
 import type { ApiResponse } from "@/shared/types";
-import type { FooterData } from "../types";
+import type { FooterData, SocialLink } from "../types";
+
+export interface AssembledFooterContent {
+  data: FooterData;
+  logoSrc: string;
+  siteName: string;
+  copyright: string;
+  mergedSocialLinks: SocialLink[];
+}
+
+export async function assembleFooterContent(locale: string): Promise<AssembledFooterContent> {
+  const data = await footerService.getFooter(locale);
+
+  let logoSrc = "";
+  let siteName = "";
+  let copyright = "";
+  const settingsSocial: { platform: string; url: string }[] = [];
+  let fastShippingPublished = false;
+
+  try {
+    const settings = await getCachedSettings(locale);
+    logoSrc = settings.footer_logo || settings.logo || "";
+    siteName = settings.site_name || "";
+    copyright = settings.site_copy_right || "";
+    if (settings.fast_shipping_page_publish) fastShippingPublished = true;
+
+    const platformMap: Record<string, string> = {
+      facebook: settings.facebook,
+      instagram: settings.instagram,
+      linkedin: settings.linkedin,
+      youtube: settings.youtube,
+    };
+    for (const [platform, url] of Object.entries(platformMap)) {
+      if (url) settingsSocial.push({ platform, url });
+    }
+  } catch {
+    // use defaults
+  }
+
+  if (fastShippingPublished) {
+    const csColumn = data.columns.find(
+      (c) => c.title === "Customer Service" || c.title === "خدمة العملاء",
+    );
+    if (csColumn) {
+      csColumn.links.push({
+        id: 99,
+        label: locale === "ar" ? "الشحن السريع" : "Fast Shipping",
+        slug: "/fast-shipping",
+      });
+    }
+  }
+
+  const mergedSocialLinks: SocialLink[] =
+    settingsSocial.length > 0
+      ? settingsSocial.map((s) => ({
+          platform: s.platform as "facebook" | "twitter" | "instagram" | "youtube",
+          url: s.url,
+          label: s.platform.charAt(0).toUpperCase() + s.platform.slice(1),
+        }))
+      : data.socialLinks;
+
+  return { data, logoSrc, siteName, copyright, mergedSocialLinks };
+}
 
 // ---------------------------------------------------------------------------
 // Footer data is fully dynamic — all content (links, social, contact info,
@@ -81,7 +144,7 @@ function getMockFooterData(lang: string): FooterData {
     contactInfo: {
       stayInTouchText: isAr ? "ابق على تواصل معنا" : "Stay in touch with us",
       whatsappUrl: "https://api.whatsapp.com/send?phone=%2B201111185469",
-      assistanceText: isAr ? "تحدث معنا للمساعدة" : "Chat with us for assistance",
+      assistanceText: isAr ? "تحدث معنا للمساعدة" : "Have a question? We are here to help.",
       callUsText: isAr ? "اتصل بنا للمساعدة" : "Call us for assistance",
       phoneNumber: "16061",
     },
