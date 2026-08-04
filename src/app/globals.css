@@ -6,6 +6,7 @@ button {
 
 @theme {
   --color-primary: #0e5aa7;
+  --color-primary-active: #0a4d91;
   --color-primary-dark: #00387b;
 
   --color-secondary: #e3000f;
