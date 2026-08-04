@@ -4,7 +4,7 @@ import SectionTitle from "@/components/ui/SectionTitle";
 import { BannerArrows } from "../components/banner";
 import { useLocale } from "next-intl";
 import { useState } from "react";
-import { Navigation, Pagination } from "swiper/modules";
+import { Autoplay, Navigation, Pagination } from "swiper/modules";
 import "swiper/css";
 import { Swiper, SwiperSlide } from "swiper/react";
 import type { Swiper as SwiperType } from "swiper/types";
@@ -18,6 +18,8 @@ export default function ProductSlider({
   showTimer,
   timerEndAt,
   theme,
+  autoplay = true,
+  sliderSpeed = 4500,
 }: ProductSliderProps) {
   const locale = useLocale();
   const isRtl = locale === "ar";
@@ -41,9 +43,14 @@ export default function ProductSlider({
       <Swiper
         key={locale}
         dir={isRtl ? "rtl" : "ltr"}
-        modules={[Navigation, Pagination]}
+        modules={[Autoplay, Navigation, Pagination]}
         spaceBetween={8}
-        slidesPerView={Math.min(cols, 3)}
+        slidesPerView={Math.min(cols, 2)}
+        autoplay={
+          autoplay && safeItems.length > 1
+            ? { delay: sliderSpeed ?? 4500, disableOnInteraction: false, pauseOnMouseEnter: true }
+            : false
+        }
         onSwiper={(s) => {
           setSwiper(s);
           setIsLocked(s.isLocked);
@@ -53,7 +60,7 @@ export default function ProductSlider({
         loop={safeItems.length >= 6}
         watchOverflow={true}
         breakpoints={{
-          480: { slidesPerView: 3.5 },
+          480: { slidesPerView: 3 },
           768: { slidesPerView: 4 },
           1024: { slidesPerView: 8 },
         }}

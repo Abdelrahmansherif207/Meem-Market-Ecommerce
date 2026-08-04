@@ -26,6 +26,7 @@ export default function CardSlider({
   cardClassName = "aspect-3/4",
   imageClassName,
   slideSizes,
+  slidesPerView,
 }: CardSliderProps) {
   const locale = useLocale();
   const isRtl = locale === "ar";
@@ -63,7 +64,7 @@ export default function CardSlider({
         breakpoints={{
           480: { slidesPerView: 2 },
           768: { slidesPerView: 3 },
-          1024: { slidesPerView: 4 },
+          1024: { slidesPerView: slidesPerView ?? 4 },
         }}
         className="w-full"
       >
