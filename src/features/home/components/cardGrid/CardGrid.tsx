@@ -20,7 +20,7 @@ export default function CardGrid({
           <Slide
             key={slide.id}
             slide={slide}
-            hasBorder={false}
+            hasBorder={true}
             aspectClassName={cardClassName}
             imageClassName={imageClassName}
             sizes={slideSizes ?? "(max-width: 768px) 50vw, 25vw"}

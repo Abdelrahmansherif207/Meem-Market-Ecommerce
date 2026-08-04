@@ -124,6 +124,7 @@ export interface CardSliderProps {
   imageClassName?: string;
   slideSizes?: string;
   showArrows?: boolean;
+  slidesPerView?: number;
 }
 
 export interface CardGridProps {
@@ -157,6 +158,8 @@ export interface ProductSliderProps {
   showTimer?: boolean;
   timerEndAt?: string;
   theme?: "light" | "dark";
+  autoplay?: boolean;
+  sliderSpeed?: number;
 }
 
 export interface SectionFrontSetting {

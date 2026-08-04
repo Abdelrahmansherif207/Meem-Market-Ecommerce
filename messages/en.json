@@ -513,7 +513,7 @@
     "cartErrorTitle": "Cart unavailable",
     "authErrorTitle": "Authentication service unavailable",
     "serverDownTitle": "We can't reach our servers",
-    "serverDownDesc": "Something went wrong on our end. Please try again in a few moments."
+    "serverDownDesc": "Please try again in a few moments."
   },
   "emptyState": {
     "browseProducts": "Browse all products",

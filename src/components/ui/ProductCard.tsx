@@ -119,14 +119,14 @@ export default function ProductCard({
           <button
             type="button"
             disabled
-            className="absolute end-1 bottom-1 bg-gray-300 rounded-full w-10 h-10 text-white font-medium text-2xl flex items-center justify-center shadow-[0_2px_3px_1px_rgba(0,0,0,0.14)] z-10 cursor-not-allowed"
+            className="absolute end-1 bottom-1 w-9 h-9 sm:w-8 sm:h-8 z-10 flex items-center justify-center rounded-full bg-gray-300 text-white font-medium text-2xl border border-white shadow-[0_2px_0_rgba(0,0,0,0.15)] cursor-not-allowed"
           >
             <Plus className="h-5 w-5" />
           </button>
         ) : quantity === 0 && hasVariants ? (
           <Link
             href={`/products/${slug}`}
-            className="absolute end-1 bottom-1 bg-primary rounded-full w-10 h-10 text-white font-medium text-2xl flex items-center justify-center shadow-[0_2px_3px_1px_rgba(0,0,0,0.14)] z-10 transition-transform duration-200 hover:scale-105"
+            className="absolute end-1 bottom-1 w-9 h-9 sm:w-8 sm:h-8 z-10 flex items-center justify-center rounded-full bg-primary text-white font-medium text-2xl border border-white shadow-[0_2px_0_rgba(0,0,0,0.15)] transition-all duration-200 hover:brightness-90"
           >
             <Plus className="h-5 w-5" />
           </Link>
@@ -136,7 +136,16 @@ export default function ProductCard({
             onClick={handleAdd}
             disabled={isPending}
             className={cn(
-              "absolute end-1 bottom-1 bg-primary rounded-full w-10 h-10 text-white font-medium text-2xl flex items-center justify-center shadow-[0_2px_3px_1px_rgba(0,0,0,0.14)] z-10 transition-transform duration-200 hover:scale-105",
+              // Core layout
+              "absolute end-1 bottom-1 w-9 h-9 sm:w-8 sm:h-8 z-10 flex items-center justify-center rounded-full bg-primary text-white font-medium text-2xl",
+              
+              // Clean border and simple, static, light 3D shadow
+              "border border-white shadow-[0_2px_0_rgba(0,0,0,0.15)]", 
+              
+              // Interaction: Only darkens the circle on hover
+              "transition-all duration-200 hover:brightness-90", 
+              
+              // Conditional States
               animating && "scale-110",
               isPending && "opacity-70 cursor-not-allowed"
             )}
@@ -144,12 +153,12 @@ export default function ProductCard({
             <Plus className="h-5 w-5" />
           </button>
         ) : (
-          <div className={cn("absolute end-1 bottom-1 flex items-center gap-1 bg-primary rounded-full h-10 px-1 text-white shadow-[0_2px_3px_1px_rgba(0,0,0,0.14)] z-10 transition-all duration-300", isPending && "opacity-70 pointer-events-none")}>
+          <div className={cn("absolute end-1 bottom-1 flex items-center gap-1 bg-primary rounded-full h-11 sm:h-10 px-1 text-white shadow-[0_2px_3px_1px_rgba(0,0,0,0.14)] z-10 transition-all duration-300", isPending && "opacity-70 pointer-events-none")}>
             <button
               type="button"
               onClick={handleDecrement}
               disabled={isPending}
-              className="flex h-8 w-8 items-center justify-center rounded-full hover:bg-white/20 transition-colors"
+              className="flex h-9 w-9 sm:h-8 sm:w-8 items-center justify-center rounded-full hover:bg-white/20 transition-colors"
               aria-label="Decrease quantity"
             >
               {quantity === 1 ? (
@@ -166,7 +175,7 @@ export default function ProductCard({
               onClick={handleIncrement}
               disabled={isPending || !isInStock}
               className={cn(
-                "flex h-8 w-8 items-center justify-center rounded-full transition-colors",
+                "flex h-9 w-9 sm:h-8 sm:w-8 items-center justify-center rounded-full transition-colors",
                 !isInStock ? "cursor-not-allowed opacity-40" : "hover:bg-white/20",
               )}
               aria-label="Increase quantity"

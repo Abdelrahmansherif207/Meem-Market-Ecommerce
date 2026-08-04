@@ -46,6 +46,8 @@ export default async function ProductSliderSection({
       badgeText={setting?.badge_text}
       showTimer={setting?.show_timer}
       timerEndAt={setting?.timer_end_at}
+      autoplay={setting?.autoplay}
+      sliderSpeed={setting?.slider_speed}
     />
   );
 }
