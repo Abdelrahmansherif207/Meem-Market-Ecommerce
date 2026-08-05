@@ -3,7 +3,7 @@ import type { Metadata, Viewport } from "next";
 import type { ReactNode } from "react";
 import { NextIntlClientProvider } from "next-intl";
 import { routing } from "@/i18n/routing";
-import { setRequestLocale } from "next-intl/server"; 
+import { getMessages, setRequestLocale } from "next-intl/server";
 import Header from "@/features/navigation/components/header/Header";
 import MobileHeader from "@/features/navigation/components/mobile/MobileHeader";
 import MobileBottomNav from "@/features/navigation/components/mobile/MobileBottomNav";
@@ -88,6 +88,8 @@ export default async function RootLayout({
   
   const dir = locale === "ar" ? "rtl" : "ltr";
 
+  const messages = await getMessages();
+
   let settingsLogo: string | null = null;
   try {
     const meta = await getSiteMeta(locale);
@@ -100,7 +102,7 @@ export default async function RootLayout({
       <html lang={locale} dir={dir} className="overflow-x-clip">
       <body className={cn("flex min-h-dvh flex-col overflow-x-clip", ibmPlexSansArabic.variable)}>
         <link rel="preconnect" href={process.env.NEXT_PUBLIC_API_URL} />
-        <NextIntlClientProvider>
+        <NextIntlClientProvider locale={locale} messages={messages}>
           <div className="hidden lg:block sticky top-0 z-50">
             <Header params={params} settingsLogo={settingsLogo} />
           </div>
