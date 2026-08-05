@@ -1,6 +1,6 @@
 "use client";
 
-import { MapPin, Pencil, Trash2, Star } from "lucide-react";
+import { MapPin, Pencil, Trash2 } from "lucide-react";
 import { useTranslations } from "next-intl";
 import type { Address } from "../types";
 
@@ -14,19 +14,10 @@ export function AddressCard({ address, onEdit, onDelete }: AddressCardProps) {
   const t = useTranslations("profile.address");
 
   return (
-    <div className="relative rounded-2xl border-2 border-border bg-white p-4 pr-12 space-y-1.5">
-      {address.default && (
-        <span className="absolute right-3 top-3 text-amber-500">
-          <Star className="h-4 w-4 fill-amber-500" />
-        </span>
-      )}
-
+    <div className="relative rounded-2xl border-2 border-border bg-white p-4 space-y-1.5">
       <div className="flex items-center gap-2">
         <MapPin className="h-4 w-4 text-text-secondary shrink-0" />
         <span className="text-sm font-bold text-text-primary">{address.title}</span>
-        <span className="text-[10px] uppercase text-text-secondary bg-surface px-1.5 py-0.5 rounded">
-          {address.type}
-        </span>
       </div>
 
       <p className="text-sm text-text-secondary pl-6">

@@ -2,10 +2,12 @@
 import { useEffect, useRef, useState, useCallback } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
-import { Loader2, CreditCard, MapPin, Store, Truck, Plus } from "lucide-react";
+import { Loader2, CreditCard, MapPin, Store, Truck } from "lucide-react";
 import { useShallow } from "zustand/react/shallow";
 import { useAuthStore } from "@/features/auth/store/useAuthStore";
 import { usePickupLocationStore } from "@/features/pickup-location";
+import { MapPickerModal, useLocationStore } from "@/features/location";
+import type { PickedAddress } from "@/features/location";
 import { PickupSelector } from "./PickupSelector";
 import { cartService } from "@/features/cart/services/cartService";
 import { checkoutService } from "../services/checkoutService";
@@ -71,6 +73,7 @@ function validate(form: CheckoutFormData): FieldError[] {
 
 export function CheckoutForm() {
   const t = useTranslations("checkout");
+  const locationT = useTranslations("locationPicker");
   const router = useRouter();
   const locale = useLocale();
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
@@ -95,13 +98,13 @@ export function CheckoutForm() {
 
   const [savedAddresses, setSavedAddresses] = useState<Address[]>([]);
   const [addressesLoading, setAddressesLoading] = useState(false);
+  const [addressesError, setAddressesError] = useState(false);
   const [selectedAddressId, setSelectedAddressId] = useState<number | null>(null);
-  const [showAddAddress, setShowAddAddress] = useState(false);
-  const [newAddressTitle, setNewAddressTitle] = useState("");
-  const [newAddressZip, setNewAddressZip] = useState("");
-  const [newAddressDefault, setNewAddressDefault] = useState(false);
-  const [addingAddress, setAddingAddress] = useState(false);
+  const [mapModalOpen, setMapModalOpen] = useState(false);
+  const [savingLocation, setSavingLocation] = useState(false);
+  const [mapSaveError, setMapSaveError] = useState<string | null>(null);
   const [hydrated, setHydrated] = useState(false);
+  const browserCoords = useLocationStore((s) => s.coords);
 
   useEffect(() => {
     const unsub = useAuthStore.persist.onFinishHydration(() => setHydrated(true));
@@ -179,30 +182,38 @@ export function CheckoutForm() {
   }, [locale]);
 
   useEffect(() => {
+    if (!hydrated || !isAuthenticated) return;
     let cancelled = false;
     setAddressesLoading(true);
+    setAddressesError(false);
     addressService.getAll(locale)
       .then((data) => {
         if (cancelled) return;
         setSavedAddresses(data);
         setAddressesLoading(false);
-        const defaultAddr = data.find((a) => a.default);
-        if (defaultAddr) {
-          setSelectedAddressId(defaultAddr.id);
-          setForm((prev) => ({
-            ...prev,
-            city: defaultAddr.address.city,
-            state: defaultAddr.address.state,
-            country: defaultAddr.address.country,
-            street_address: defaultAddr.address.street_address,
-          }));
-        }
       })
       .catch(() => {
-        if (!cancelled) setAddressesLoading(false);
+        if (!cancelled) {
+          setAddressesLoading(false);
+          setAddressesError(true);
+        }
       });
     return () => { cancelled = true; };
-  }, [locale]);
+  }, [locale, hydrated, isAuthenticated]);
+
+  const handleRetryAddresses = () => {
+    setAddressesError(false);
+    setAddressesLoading(true);
+    addressService.getAll(locale)
+      .then((data) => {
+        setSavedAddresses(data);
+        setAddressesLoading(false);
+      })
+      .catch(() => {
+        setAddressesLoading(false);
+        setAddressesError(true);
+      });
+  };
 
   const handleRetryGovernorates = () => {
     setGovernoratesError(false);
@@ -221,7 +232,6 @@ export function CheckoutForm() {
   const handleAddressSelect = (id: number | null) => {
     setSelectedAddressId(id);
     if (id === null) {
-      setShowAddAddress(false);
       setForm((prev) => ({
         ...prev,
         city: "",
@@ -232,7 +242,6 @@ export function CheckoutForm() {
     } else {
       const addr = savedAddresses.find((a) => a.id === id);
       if (addr) {
-        setShowAddAddress(false);
         setForm((prev) => ({
           ...prev,
           city: addr.address.city,
@@ -244,32 +253,51 @@ export function CheckoutForm() {
     }
   };
 
-  const handleAddAddress = async () => {
-    if (!newAddressTitle.trim()) return;
-    setAddingAddress(true);
+  const handleMapPicked = async (picked: PickedAddress) => {
+    setMapSaveError(null);
+    setForm((prev) => ({
+      ...prev,
+      city: picked.city.trim() || prev.city,
+      state: picked.state.trim() || prev.state,
+      country: picked.country.trim() || prev.country,
+      street_address: picked.streetAddress.trim() || prev.street_address,
+    }));
+    setErrors((prev) => prev.filter((e) => !["city", "state", "country", "street_address"].includes(e.field)));
+
+    const normalize = (s: string) => s.trim().toLowerCase();
+    const pickedCity = normalize(picked.city);
+    const pickedState = normalize(picked.state);
+    const matched = governorates.find((g) => {
+      const name = normalize(g.name);
+      return name === pickedCity || name === pickedState ||
+        (pickedCity.length > 0 && name.includes(pickedCity)) ||
+        (pickedState.length > 0 && name.includes(pickedState));
+    });
+    if (matched) {
+      setForm((prev) => ({ ...prev, governorate_id: matched.id }));
+      setErrors((prev) => prev.filter((e) => e.field !== "governorate_id"));
+    }
+
+    setSavingLocation(true);
     try {
       const created = await addressService.create({
-        title: newAddressTitle.trim(),
-        type: "billing",
-        default: newAddressDefault ? "1" : "0",
+        title: picked.title.trim() || locationT("defaultTitle"),
         address: {
-          zip: newAddressZip.trim(),
-          city: form.city.trim() || " ",
-          state: form.state.trim() || " ",
-          country: form.country.trim() || " ",
-          street_address: form.street_address.trim() || " ",
+          zip: picked.zip.trim() || " ",
+          city: picked.city.trim() || " ",
+          state: picked.state.trim() || " ",
+          country: picked.country.trim() || " ",
+          street_address: picked.streetAddress.trim() || " ",
         },
+        location: { latitude: picked.coords.lat, longitude: picked.coords.lng },
       }, locale);
       setSavedAddresses((prev) => [...prev, created]);
       setSelectedAddressId(created.id);
-      setShowAddAddress(false);
-      setNewAddressTitle("");
-      setNewAddressZip("");
-      setNewAddressDefault(false);
+      setMapModalOpen(false);
     } catch {
-      setApiError(t("errorProcessing"));
+      setMapSaveError(locationT("saveError"));
     } finally {
-      setAddingAddress(false);
+      setSavingLocation(false);
     }
   };
 
@@ -563,6 +591,17 @@ export function CheckoutForm() {
 
                   {addressesLoading ? (
                     <div className="h-10 w-full animate-pulse rounded-xl bg-gray-200" />
+                  ) : addressesError ? (
+                    <div className="space-y-2">
+                      <p className="text-xs text-red-500">{t("addressesError")}</p>
+                      <button
+                        type="button"
+                        onClick={handleRetryAddresses}
+                        className="text-xs font-semibold text-primary underline underline-offset-2"
+                      >
+                        {t("governorateRetry")}
+                      </button>
+                    </div>
                   ) : savedAddresses.length > 0 && (
                     <div className="space-y-1.5">
                       <label className={labelClass}>{t("savedAddresses")}</label>
@@ -574,7 +613,7 @@ export function CheckoutForm() {
                         <option value="">{t("newAddress")}</option>
                         {savedAddresses.map((a) => (
                           <option key={a.id} value={a.id}>
-                            {a.title}{a.default ? ` (${t("default")})` : ""}
+                            {a.title}
                           </option>
                         ))}
                       </select>
@@ -641,56 +680,14 @@ export function CheckoutForm() {
                     {fieldError("street_address") && <p className="text-xs text-red-500">{fieldError("street_address")}</p>}
                   </div>
 
-                  {selectedAddressId === null && savedAddresses.length > 0 && (
-                    <button
-                      type="button"
-                      onClick={() => setShowAddAddress(!showAddAddress)}
-                      className="flex items-center gap-2 text-sm font-semibold text-primary"
-                    >
-                      <Plus className="size-4" />
-                      {t("addAddress")}
-                    </button>
-                  )}
-
-                  {showAddAddress && (
-                    <div className="rounded-xl border border-border p-4 space-y-3">
-                      <div className="space-y-1.5">
-                        <label className={labelClass}>{t("addressTitleLabel")}</label>
-                        <input
-                          className={inputClass}
-                          placeholder={t("addressTitlePlaceholder")}
-                          value={newAddressTitle}
-                          onChange={(e) => setNewAddressTitle(e.target.value)}
-                        />
-                      </div>
-                      <div className="space-y-1.5">
-                        <label className={labelClass}>{t("zip")}</label>
-                        <input
-                          className={inputClass}
-                          placeholder={t("zipPlaceholder")}
-                          value={newAddressZip}
-                          onChange={(e) => setNewAddressZip(e.target.value)}
-                        />
-                      </div>
-                      <label className="flex items-center gap-2 text-sm text-text-primary">
-                        <input
-                          type="checkbox"
-                          checked={newAddressDefault}
-                          onChange={(e) => setNewAddressDefault(e.target.checked)}
-                          className={radioClass}
-                        />
-                        {t("setDefault")}
-                      </label>
-                      <button
-                        type="button"
-                        disabled={addingAddress || !newAddressTitle.trim()}
-                        onClick={handleAddAddress}
-                        className="w-full rounded-xl bg-primary py-2.5 text-sm font-semibold text-white transition-all hover:opacity-90 disabled:opacity-50"
-                      >
-                        {addingAddress ? t("saving") : t("saveAddress")}
-                      </button>
-                    </div>
-                  )}
+                  <button
+                    type="button"
+                    onClick={() => { setMapSaveError(null); setMapModalOpen(true); }}
+                    className="flex items-center justify-center gap-2 rounded-xl border-2 border-dashed border-border px-4 py-3 text-sm font-semibold text-primary transition-all hover:border-primary hover:bg-primary/5"
+                  >
+                    <MapPin className="size-4" />
+                    {t("pickOnMap")}
+                  </button>
                 </div>
               </div>
             )}
@@ -785,6 +782,16 @@ export function CheckoutForm() {
           </div>
         </div>
       </div>
+
+      <MapPickerModal
+        open={mapModalOpen}
+        onClose={() => setMapModalOpen(false)}
+        onConfirm={handleMapPicked}
+        defaultCenter={browserCoords}
+        title={t("pickOnMapTitle")}
+        saving={savingLocation}
+        error={mapSaveError}
+      />
     </form>
   );
 }

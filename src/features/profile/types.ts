@@ -11,8 +11,6 @@ export interface Profile {
 export interface Address {
   id: number;
   title: string;
-  type: string;
-  default: string;
   address: {
     zip: string;
     city: string;
@@ -30,9 +28,7 @@ export interface Address {
 
 export interface CreateAddressPayload {
   title: string;
-  type: string;
   customer_id?: number;
-  default?: string;
   address: {
     zip: string;
     city: string;
