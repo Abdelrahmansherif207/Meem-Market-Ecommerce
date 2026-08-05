@@ -146,7 +146,7 @@ export function useCartActions(productId: number) {
         if (newQty === 0) {
           await cartService.removeItem(cartItemId, locale);
         } else {
-          await cartService.updateItem({ item: { product_id: productId, operation: "decrement", product_variant_id: undefined } }, locale);
+          await cartService.updateItem({ item: { product_id: productId, quantity: newQty, operation: "decrement", product_variant_id: undefined } }, locale);
         }
       } catch {
         setAuthQuantity((q) => q + 1);

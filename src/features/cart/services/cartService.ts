@@ -33,6 +33,7 @@ export const cartService = {
     payload: {
       item: {
         product_id: number;
+        quantity: number;
         operation: "increment" | "decrement";
         product_variant_id?: number | null;
       };
