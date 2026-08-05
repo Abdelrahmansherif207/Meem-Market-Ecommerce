@@ -134,7 +134,8 @@ export function useCartActions(productId: number) {
         return;
       }
 
-      const newQty = authQuantity - 1;
+      const currentQty = authQuantity;
+      const newQty = currentQty - 1;
 
       setAuthQuantity((q) => Math.max(0, q - 1));
       adjustQuantity(-1);
@@ -146,7 +147,7 @@ export function useCartActions(productId: number) {
         if (newQty === 0) {
           await cartService.removeItem(cartItemId, locale);
         } else {
-          await cartService.updateItem({ item: { product_id: productId, quantity: newQty, operation: "decrement", product_variant_id: undefined } }, locale);
+          await cartService.updateItem({ item: { product_id: productId, quantity: currentQty, operation: "decrement", product_variant_id: undefined } }, locale);
         }
       } catch {
         setAuthQuantity((q) => q + 1);
