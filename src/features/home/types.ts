@@ -61,6 +61,7 @@ export interface ApiProduct {
   ratings: number;
   in_stock?: boolean;
   is_fast_shipping_available: boolean;
+  in_wishlist?: boolean;
   tags?: ProductTag[];
   image: {
     thumbnail: string;
@@ -82,6 +83,7 @@ export interface ProductItem {
   isFastShippingAvailable?: boolean;
   isInStock?: boolean;
   flashSaleActive?: boolean;
+  inWishlist?: boolean;
   tags?: ProductTag[];
 }
 

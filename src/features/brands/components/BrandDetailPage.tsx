@@ -82,6 +82,7 @@ export default async function BrandDetailPage({ slug, locale }: BrandDetailPageP
                 discountPercent={discountPercent}
                 slug={product.slug}
                 isInStock
+                inWishlist={product.in_wishlist}
                 tags={product.tags}
               />
             );

@@ -61,6 +61,7 @@ export interface RelatedProduct {
   ratings: number;
   discount_valid?: boolean;
   tags?: ProductTag[];
+  in_wishlist?: boolean;
   image: {
     thumbnail: string;
     original: Record<string, string>;
@@ -135,6 +136,7 @@ export interface ProductListItem {
   sku?: string;
   in_stock?: boolean;
   is_fast_shipping_available: boolean;
+  in_wishlist?: boolean;
   tags?: ProductTag[];
   image: {
     thumbnail: string;

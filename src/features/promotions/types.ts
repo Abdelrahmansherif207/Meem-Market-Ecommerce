@@ -28,6 +28,7 @@ export interface PromotionProduct {
   in_stock?: boolean;
   is_fast_shipping_available: boolean;
   ratings: number;
+  in_wishlist?: boolean;
   image: {
     thumbnail: string;
     original: Record<string, string>;

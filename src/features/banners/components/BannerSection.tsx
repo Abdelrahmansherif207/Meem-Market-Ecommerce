@@ -39,6 +39,7 @@ export default async function BannerSection({ endpoint, locale, title, setting }
     isFastShippingAvailable: p.is_fast_shipping_available,
     isInStock: p.in_stock ?? p.quantity > 0,
     flashSaleActive: p.flash_sale_active ?? false,
+    inWishlist: p.in_wishlist,
     inStock: p.quantity,
     stockQuantity: p.quantity,
     tags: p.tags,
