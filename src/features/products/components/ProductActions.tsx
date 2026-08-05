@@ -5,6 +5,7 @@ import { useTranslations } from "next-intl";
 import { Minus, Plus, ShoppingCart, Loader2, Trash2 } from "lucide-react";
 import { cn } from "@/shared/utils/cn";
 import { useCartActions } from "@/features/cart/hooks/useCartActions";
+import { WishlistButton } from "@/features/wishlist/components/WishlistButton";
 import type { ProductDetail, ProductVariant } from "../types";
 import { getStockStatus, getDisplayPrice } from "../utils";
 
@@ -133,6 +134,14 @@ export function ProductActions({ product, selectedVariant }: ProductActionsProps
           {stock.inStock ? t("addToCart") : t("outOfStock")}
         </button>
       )}
+
+      <WishlistButton
+        productId={product.id}
+        variantId={selectedVariant?.id ?? null}
+        hasVariants={product.variants.length > 0}
+        fetchInitial
+        variant="full"
+      />
 
       <div className="space-y-1 text-xs text-text-secondary">
         <p>
