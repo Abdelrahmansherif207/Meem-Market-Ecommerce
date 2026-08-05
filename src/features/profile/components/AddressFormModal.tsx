@@ -2,7 +2,9 @@
 
 import { useState } from "react";
 import { useTranslations } from "next-intl";
-import { X, Loader2 } from "lucide-react";
+import { X, Loader2, MapPin } from "lucide-react";
+import { MapPickerModal, useLocationStore } from "@/features/location";
+import type { PickedAddress } from "@/features/location";
 import type { Address, CreateAddressPayload } from "../types";
 
 interface AddressFormModalProps {
@@ -19,7 +21,6 @@ export function AddressFormModal({ open, onClose, onSubmit, editingAddress, cust
     if (editingAddress) {
       return {
         title: editingAddress.title,
-        type: editingAddress.type,
         zip: editingAddress.address.zip,
         city: editingAddress.address.city,
         state: editingAddress.address.state,
@@ -27,15 +28,51 @@ export function AddressFormModal({ open, onClose, onSubmit, editingAddress, cust
         street_address: editingAddress.address.street_address,
       };
     }
-    return { title: "", type: "billing", zip: "", city: "", state: "", country: "", street_address: "" };
+    return { title: "", zip: "", city: "", state: "", country: "", street_address: "" };
   });
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [mapOpen, setMapOpen] = useState(false);
+  const [location, setLocation] = useState<{ latitude: number; longitude: number } | null>(
+    editingAddress?.location ?? null,
+  );
+  const browserCoords = useLocationStore((s) => s.coords);
 
   if (!open) return null;
 
+  const initialPicked: PickedAddress | null = editingAddress?.location
+    ? {
+        coords: {
+          lat: editingAddress.location.latitude,
+          lng: editingAddress.location.longitude,
+        },
+        title: editingAddress.title,
+        formattedAddress: "",
+        city: editingAddress.address.city,
+        state: editingAddress.address.state,
+        country: editingAddress.address.country,
+        zip: editingAddress.address.zip,
+        streetAddress: editingAddress.address.street_address,
+      }
+    : null;
+
   const set = (field: keyof typeof form) => (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     setForm((prev) => ({ ...prev, [field]: e.target.value }));
+    setError(null);
+  };
+
+  const handleMapPicked = (picked: PickedAddress) => {
+    setMapOpen(false);
+    setLocation({ latitude: picked.coords.lat, longitude: picked.coords.lng });
+    setForm((prev) => ({
+      ...prev,
+      title: picked.title.trim() || prev.title,
+      city: picked.city.trim() || prev.city,
+      state: picked.state.trim() || prev.state,
+      country: picked.country.trim() || prev.country,
+      street_address: picked.streetAddress.trim() || prev.street_address,
+      zip: picked.zip.trim() || prev.zip,
+    }));
     setError(null);
   };
 
@@ -52,7 +89,6 @@ export function AddressFormModal({ open, onClose, onSubmit, editingAddress, cust
     try {
       await onSubmit({
         title: form.title,
-        type: form.type,
         customer_id: customerId,
         address: {
           zip: form.zip,
@@ -61,6 +97,7 @@ export function AddressFormModal({ open, onClose, onSubmit, editingAddress, cust
           country: form.country,
           street_address: form.street_address,
         },
+        ...(location ? { location } : {}),
       });
       onClose();
     } catch (err) {
@@ -98,14 +135,6 @@ export function AddressFormModal({ open, onClose, onSubmit, editingAddress, cust
             <input className={inputClass} value={form.title} onChange={set("title")} placeholder={t("titlePlaceholder")} />
           </div>
 
-          <div className="space-y-1.5">
-            <label className={labelClass}>{t("type")}</label>
-            <select className={inputClass} value={form.type} onChange={set("type")}>
-              <option value="billing">{t("billing")}</option>
-              <option value="shipping">{t("shipping")}</option>
-            </select>
-          </div>
-
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
             <div className="space-y-1.5">
               <label className={labelClass}>{t("country")}</label>
@@ -126,6 +155,15 @@ export function AddressFormModal({ open, onClose, onSubmit, editingAddress, cust
             <input className={inputClass} value={form.street_address} onChange={set("street_address")} placeholder={t("streetPlaceholder")} />
           </div>
 
+          <button
+            type="button"
+            onClick={() => setMapOpen(true)}
+            className="flex w-full items-center justify-center gap-2 rounded-xl border-2 border-dashed border-border py-3 text-sm font-semibold text-primary transition-all hover:border-primary hover:bg-primary/5"
+          >
+            <MapPin className="h-4 w-4" />
+            {t("pickOnMap")}
+          </button>
+
           <div className="space-y-1.5">
             <label className={labelClass}>{t("zip")}</label>
             <input className={inputClass} value={form.zip} onChange={set("zip")} placeholder={t("zipPlaceholder")} />
@@ -140,6 +178,15 @@ export function AddressFormModal({ open, onClose, onSubmit, editingAddress, cust
             {submitting ? t("saving") : (editingAddress ? t("save") : t("add"))}
           </button>
         </form>
+
+        <MapPickerModal
+          open={mapOpen}
+          onClose={() => setMapOpen(false)}
+          onConfirm={handleMapPicked}
+          initialValue={initialPicked}
+          defaultCenter={initialPicked?.coords ?? browserCoords ?? null}
+          title={t("pickOnMapTitle")}
+        />
       </div>
     </div>
   );
