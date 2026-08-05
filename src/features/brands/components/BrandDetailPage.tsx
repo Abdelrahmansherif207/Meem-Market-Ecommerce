@@ -4,6 +4,7 @@ import { ShoppingBag } from "lucide-react";
 import ProductCard from "@/components/ui/ProductCard";
 import EmptyState from "@/components/ui/EmptyState";
 import { brandService } from "../services/brandService";
+import Image from "next/image";
 
 interface BrandDetailPageProps {
   slug: string;
@@ -38,15 +39,10 @@ export default async function BrandDetailPage({ slug, locale }: BrandDetailPageP
   return (
     <div className="flex flex-col gap-6 p-4 md:p-6">
       {/* Brand hero */}
-      <div className="flex items-center gap-6">
-        <div className="h-32 w-32 flex-shrink-0 overflow-hidden rounded-full bg-surface md:h-40 md:w-40">
-          <img
-            src={image.desktop || image.mobile}
-            alt={name}
-            className="h-full w-full object-cover"
-          />
+      <div className="w-full flex flex-col items-center gap-4 rounded-xl p-6 md:p-8">
+        <div className="shrink-0 overflow-hidden rounded-xl bg-white md:h-36 md:w-36">
+          <Image src={image.desktop || image.mobile} width={400} height={200} alt={name} />
         </div>
-        <h1 className="text-2xl font-bold text-text-primary md:text-3xl">{name}</h1>
       </div>
 
       {/* Products */}

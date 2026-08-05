@@ -318,7 +318,8 @@ export function CartPageContent({ minimumOrderAmount }: CartPageContentProps) {
           await cartService.removeItem(item.cartItemId, locale);
         } else {
           dispatch({ type: "UPDATE_ITEM", productId, quantity });
-          const updatedCart = await cartService.updateItem({ item: { product_id: productId, quantity, product_variant_id: item.product_variant_id ?? null } }, locale);
+          const operation = quantity > item.quantity ? "increment" : "decrement";
+          const updatedCart = await cartService.updateItem({ item: { product_id: productId, operation, product_variant_id: item.product_variant_id ?? null } }, locale);
           processCart(updatedCart);
         }
       } catch {
