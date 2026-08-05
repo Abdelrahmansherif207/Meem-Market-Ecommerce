@@ -11,6 +11,7 @@ import Footer from "@/features/navigation/components/footer/Footer";
 import { AuthModal } from "@/features/auth/components/AuthModal";
 import { AuthSyncHandler } from "@/features/auth/components/AuthSyncHandler";
 import { CartSyncProvider } from "@/features/cart/components/CartSyncProvider";
+import { WishlistSyncProvider } from "@/features/wishlist/components/WishlistSyncProvider";
 import { ChannelThemeProvider } from "@/features/fast-shipping/components/ChannelThemeProvider";
 import { IBM_Plex_Sans_Arabic } from "next/font/google";
 import { cn } from "@/shared/utils/cn";
@@ -117,6 +118,7 @@ export default async function RootLayout({
               {children}
             </div>
           </CartSyncProvider>
+          <WishlistSyncProvider />
           <Footer params={params} />
           <AuthModal />
         </NextIntlClientProvider>
