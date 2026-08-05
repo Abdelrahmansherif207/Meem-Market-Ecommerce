@@ -117,6 +117,7 @@ export default async function FlashSaleDetailPage({ slug, locale }: FlashSaleDet
                 deliveryType={product.is_fast_shipping_available ? "fast" : "scheduled"}
                 isInStock={product.in_stock ?? product.quantity > 0}
                 flashSaleActive={product.flash_sale_active}
+                inWishlist={product.in_wishlist}
                 tags={product.tags}
               />
             );

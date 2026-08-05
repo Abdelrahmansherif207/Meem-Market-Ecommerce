@@ -85,6 +85,7 @@ export default function ProductSlider({
               badgeText={badgeText}
               deliveryType={product.isFastShippingAvailable ? "fast" : "scheduled"}
               isInStock={product.isInStock}
+              inWishlist={product.inWishlist}
               tags={product.tags}
             />
           </SwiperSlide>

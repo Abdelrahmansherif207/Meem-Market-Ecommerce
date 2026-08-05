@@ -6,7 +6,7 @@ import { useAuthStore } from "../store/useAuthStore";
 import { Link } from "@/i18n/navigation";
 
 export function UserMenu() {
-  const { isAuthenticated, logout } = useAuthStore();
+  const { isAuthenticated, logout, name, image } = useAuthStore();
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
 
@@ -27,15 +27,28 @@ export function UserMenu() {
       <button
         type="button"
         onClick={() => setOpen(!open)}
-        className="inline-flex items-center gap-1 text-sm font-semibold text-text-primary transition hover:text-primary"
+        className="flex items-center gap-2 text-sm font-semibold text-text-primary transition hover:text-primary"
       >
-        <User className="h-5 w-5" />
-        <span className="hidden md:inline">Account</span>
-        <ChevronDown className="h-4 w-4" />
+        <span className="flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-full bg-primary/10 ring-1 ring-border">
+          {image ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={image}
+              alt={name ?? "user"}
+              className="h-full w-full object-cover"
+            />
+          ) : (
+            <User className="h-5 w-5 text-primary" />
+          )}
+        </span>
+        {name && (
+          <span className="hidden max-w-[7rem] truncate md:inline">{name}</span>
+        )}
+        <ChevronDown className="hidden h-4 w-4 md:inline" />
       </button>
 
       {open && (
-        <div className="absolute right-0 top-full mt-2 w-48 rounded-xl border border-border bg-white shadow-lg z-50 py-2">
+        <div className="absolute end-0 top-full mt-2 w-48 rounded-xl border border-border bg-white shadow-lg z-50 py-2">
           <Link
             href="/profile"
             onClick={() => setOpen(false)}

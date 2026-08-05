@@ -7,6 +7,7 @@ import { Trash2, Plus, Minus } from "lucide-react";
 import { useLocale } from "next-intl";
 import { cn } from "@/shared/utils/cn";
 import { useCartActions } from "@/features/cart/hooks/useCartActions";
+import { WishlistButton } from "@/features/wishlist/components/WishlistButton";
 import type { DeliveryType } from "@/features/cart/types";
 import type { ProductTag } from "@/shared/types";
 import { Autoplay } from "swiper/modules";
@@ -33,6 +34,8 @@ interface ProductCardProps {
   flashSaleActive?: boolean;
   theme?: "light" | "dark";
   tags?: ProductTag[];
+  inWishlist?: boolean;
+  showWishlist?: boolean;
 }
 
 export default function ProductCard({
@@ -55,6 +58,8 @@ export default function ProductCard({
   flashSaleActive = false,
   theme = "light",
   tags,
+  inWishlist,
+  showWishlist = true,
 }: ProductCardProps) {
   const isDark = theme === "dark";
   const locale = useLocale();
@@ -104,6 +109,13 @@ export default function ProductCard({
             </div>
           ) : null}
         </div>
+        {showWishlist && (
+          <WishlistButton
+            productId={productId}
+            initialInWishlist={inWishlist}
+            variant="icon"
+          />
+        )}
         <Link href={`/products/${slug}`} className="block w-full h-full relative">
           <Image
             className="object-cover object-center"

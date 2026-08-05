@@ -20,6 +20,7 @@ export interface BrandProduct {
   price: number;
   price_after_discount: number;
   rating: number;
+  in_wishlist?: boolean;
   image: {
     thumbnail: string;
   };

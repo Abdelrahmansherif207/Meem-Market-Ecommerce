@@ -1,7 +1,8 @@
 import { getLocale, getTranslations } from "next-intl/server";
 import DeliveryModes from "../header/DeliveryModes";
 import { SearchInput } from "../header/SearchInput";
-import MobileLocaleSwitcher from "./MobileLocaleSwitcher";
+import { LocaleSwitcher } from "../header/LocaleSwitcher";
+import { WishlistIcon } from "../header/WishlistIcon";
 import MobileFooterDrawer from "./MobileFooterDrawer";
 import { assembleFooterContent } from "../../services/footerService";
 
@@ -16,7 +17,10 @@ export default async function MobileHeader() {
         <div className="flex items-center gap-3">
           <MobileFooterDrawer {...footerContent} />
           <DeliveryModes />
-          <MobileLocaleSwitcher />
+          <div className="flex items-center gap-2 ms-auto">
+            <WishlistIcon />
+            <LocaleSwitcher />
+          </div>
         </div>
         <SearchInput
           prefixText={t("mainPlaceholderPrefix")}
