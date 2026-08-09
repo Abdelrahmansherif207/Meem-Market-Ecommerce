@@ -1,7 +1,6 @@
 import { apiFetch } from "@/shared/lib/api";
 import type { ApiResponse } from "@/shared/types";
-import SectionTitle from "@/components/ui/SectionTitle";
-import ContentItem from "../contentSection/ContentItem";
+import CategoryGridSlider from "../categoryGridSlider/CategoryGridSlider";
 
 interface FeaturedCategory {
   id: number;
@@ -29,22 +28,6 @@ export default async function FeaturedCategories({ locale }: { locale: string })
   if (!categories?.length) return null;
 
   return (
-    <div className="w-full">
-      <SectionTitle title="Featured Categories" />
-      <div className="grid grid-cols-3 gap-x-4 gap-y-4 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 xl:gap-x-6">
-        {categories.map((category) => (
-          <ContentItem
-            key={category.id}
-            item={{
-              id: category.id,
-              name: category.name,
-              slug: category.slug,
-              image: category.image,
-            }}
-            isCircle
-          />
-        ))}
-      </div>
-    </div>
+    <CategoryGridSlider title="Featured Categories" categories={categories} isCircle />
   );
 }
