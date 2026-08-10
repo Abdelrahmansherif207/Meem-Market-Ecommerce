@@ -450,6 +450,31 @@
     "errorProcessing": "Something went wrong. Please try again.",
     "fixRequiredFields": "Please fill in all required fields."
   },
+  "siteReviews": {
+    "metaTitle": "Customer Reviews",
+    "metaDescription": "See what customers think about our website.",
+    "breadcrumb": "Reviews",
+    "title": "Customer Reviews",
+    "subtitle": "Read what our customers think about their experience with us.",
+    "wallTitle": "Recent Reviews",
+    "formTitle": "Share Your Feedback",
+    "emptyTitle": "No reviews yet",
+    "emptyDescription": "Be the first to share your experience with our website.",
+    "loadError": "Failed to load reviews. Please try again.",
+    "retry": "Retry",
+    "yourRating": "Your Rating",
+    "titleLabel": "Title (optional)",
+    "titlePlaceholder": "e.g. Excellent Website",
+    "commentLabel": "Your Review",
+    "commentPlaceholder": "Tell us about your experience...",
+    "submit": "Submit Review",
+    "submitting": "Submitting...",
+    "ratingRequired": "Please select a rating.",
+    "commentRequired": "Please write your review.",
+    "submittedMessage": "Your review has been submitted and is awaiting moderation",
+    "submitError": "Could not submit your review. Please try again.",
+    "guestNote": "You'll be asked to sign in before submitting."
+  },
   "meta": {
     "brands": {
       "title": "Brands",

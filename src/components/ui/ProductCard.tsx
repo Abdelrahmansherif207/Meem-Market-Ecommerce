@@ -245,7 +245,7 @@ export default function ProductCard({
       )}
 
       <div className="flex items-center gap-2 mt-1.5 px-0.5 flex-wrap">
-        <div className="flex items-baseline gap-px">
+        <div className="flex items-baseline gap-px" dir="ltr">
           <span className={cn("text-lg leading-5 font-bold md:text-xl", isDark ? "text-white" : "text-gray-900")}>
             {integerPart}
           </span>

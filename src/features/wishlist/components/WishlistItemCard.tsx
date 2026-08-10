@@ -59,7 +59,7 @@ export function WishlistItemCard({
         )}
 
         <div className="mt-auto flex items-baseline gap-2 pt-2">
-          <span className="flex items-baseline gap-px">
+          <span className="flex items-baseline gap-px" dir="ltr">
             <span className="text-base font-bold leading-5 text-gray-900">
               {integerPart}
             </span>
