@@ -24,7 +24,7 @@ export function AuthModal() {
 }
 
 function AuthModalContent({ close }: { close: () => void }) {
-  const [method, setMethod] = useState<ContactMethod>("email");
+  const [method, setMethod] = useState<ContactMethod>("phone");
   const [state, formAction, pending] = useActionState(loginAction, null);
   const setAuthData = useAuthStore((s) => s.setAuthData);
   const router = useRouter();
@@ -55,8 +55,7 @@ function AuthModalContent({ close }: { close: () => void }) {
 
   /* Handle login success */
   useEffect(() => {
-    if (state?.success && state.data) {
-      setAuthData(state.data);
+    if (state?.success && state.data && setAuthData(state.data)) {
       close();
     }
   }, [state, setAuthData, close]);

@@ -1,6 +1,6 @@
 import { getLocale, getTranslations } from "next-intl/server";
 import DeliveryModes from "../header/DeliveryModes";
-import { SearchInput } from "../header/SearchInput";
+import { SearchAutocomplete } from "../header/SearchAutocomplete";
 import { LocaleSwitcher } from "../header/LocaleSwitcher";
 import { WishlistIcon } from "../header/WishlistIcon";
 import MobileFooterDrawer from "./MobileFooterDrawer";
@@ -22,9 +22,10 @@ export default async function MobileHeader() {
             <LocaleSwitcher />
           </div>
         </div>
-        <SearchInput
+        <SearchAutocomplete
           prefixText={t("mainPlaceholderPrefix")}
           highlightText={t("mainPlaceholderHighlight")}
+          wrapperClassName="w-full"
         />
       </div>
     </header>

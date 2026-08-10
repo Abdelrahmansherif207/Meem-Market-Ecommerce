@@ -5,6 +5,7 @@ import { createJSONStorage, persist } from "zustand/middleware";
 
 import { AUTH_TOKEN_STORAGE_KEY } from "@/shared/constants/storageKeys";
 import { authService } from "../services/authService";
+import { isSessionActive } from "../utils/sessionExpiration";
 import type { AuthLoginData, LoginPayload, RegisterPayload } from "../types";
 
 type AuthState = {
@@ -19,9 +20,10 @@ type AuthState = {
   name: string | null;
   image: string | null;
   userId: number | null;
+  expiresAt: string | null;
   loading: boolean;
   error: string | null;
-  setAuthData: (authData: AuthLoginData) => void;
+  setAuthData: (authData: AuthLoginData) => boolean;
   setProfile: (id: number | null, name: string | null, image: string | null) => void;
   setEmailVerified: (verified: boolean) => void;
   clearAuth: () => void;
@@ -55,13 +57,25 @@ const initialState = {
   userId: null as number | null,
   loading: false,
   error: null as string | null,
+  expiresAt: null as string | null,
 };
 
 export const useAuthStore = create<AuthState>()(
   persist(
-    (set) => ({
+    (set, get) => ({
       ...initialState,
       setAuthData: (authData) => {
+        const currentState = get();
+        const expiresAt =
+          authData.expires_at ??
+          (currentState.token === authData.token ? currentState.expiresAt : null);
+
+        if (!authData.token || !isSessionActive(expiresAt)) {
+          writeTokenToStorage(null);
+          set({ ...initialState });
+          return false;
+        }
+
         writeTokenToStorage(authData.token);
         set({
           token: authData.token,
@@ -69,11 +83,13 @@ export const useAuthStore = create<AuthState>()(
           permissions: authData.permissions ?? [],
           role: authData.role ?? [],
           emailVerified: authData.email_verified ?? false,
-          isAuthenticated: Boolean(authData.token),
+          isAuthenticated: true,
           email: authData.email ?? null,
           phoneNumber: authData.phone_number ?? null,
+          expiresAt,
           error: null,
         });
+        return true;
       },
       setProfile: (id, name, image) => {
         set({ userId: id, name, image });
@@ -93,19 +109,10 @@ export const useAuthStore = create<AuthState>()(
             throw new Error(response.message || "Unable to login.");
           }
 
-          writeTokenToStorage(response.data.token);
-          set({
-            token: response.data.token,
-            id: response.data.id ?? null,
-            permissions: response.data.permissions ?? [],
-            role: response.data.role ?? [],
-            emailVerified: response.data.email_verified ?? false,
-            isAuthenticated: Boolean(response.data.token),
-            email: response.data.email ?? null,
-            phoneNumber: response.data.phone_number ?? null,
-            loading: false,
-            error: null,
-          });
+          if (!get().setAuthData(response.data)) {
+            throw new Error("The login response contained an invalid expiration date.");
+          }
+          set({ loading: false, error: null });
         } catch (error) {
           const message =
             error instanceof Error ? error.message : "Login request failed.";
@@ -123,19 +130,12 @@ export const useAuthStore = create<AuthState>()(
 
           const data = response.data as AuthLoginData;
           if (data?.token) {
-            writeTokenToStorage(data.token);
-            set({
-              token: data.token,
-              id: data.id ?? null,
-              permissions: data.permissions ?? [],
-              role: data.role ?? [],
-              emailVerified: data.email_verified ?? false,
-              isAuthenticated: true,
-              email: data.email ?? null,
-              phoneNumber: data.phone_number ?? null,
-              loading: false,
-              error: null,
-            });
+            if (!get().setAuthData(data)) {
+              throw new Error(
+                "The registration response contained an invalid expiration date.",
+              );
+            }
+            set({ loading: false, error: null });
             return;
           }
 
@@ -151,8 +151,8 @@ export const useAuthStore = create<AuthState>()(
         set({ loading: true, error: null });
         try {
           await authService.logout();
-        } catch (_e) {
-          // Token may be expired — still clear local state
+        } catch {
+          // Token may be expired — still clear local state.
         } finally {
           writeTokenToStorage(null);
           set({ ...initialState });
@@ -174,11 +174,26 @@ export const useAuthStore = create<AuthState>()(
         name: state.name,
         image: state.image,
         userId: state.userId,
+        expiresAt: state.expiresAt,
       }),
-      onRehydrateStorage: () => (state) => {
-        if (state?.token) {
-          writeTokenToStorage(state.token);
+      merge: (persistedState, currentState) => {
+        const persisted = persistedState as Partial<AuthState>;
+        const hasValidSession =
+          Boolean(persisted.token) && isSessionActive(persisted.expiresAt);
+
+        if (!hasValidSession) {
+          writeTokenToStorage(null);
+          return { ...currentState, ...initialState };
         }
+
+        writeTokenToStorage(persisted.token ?? null);
+        return {
+          ...currentState,
+          ...persisted,
+          token: persisted.token ?? null,
+          expiresAt: persisted.expiresAt ?? null,
+          isAuthenticated: true,
+        };
       },
     },
   ),

@@ -11,7 +11,6 @@ import { LoginForm } from "./LoginForm";
 import { RegisterForm } from "./RegisterForm";
 import { OtpForm } from "./OtpForm";
 import { ForgotPasswordForm } from "./ForgotPasswordForm";
-import { OtpLoginForm } from "./OtpLoginForm";
 import { AuthFeedback } from "./AuthFeedback";
 import {
   loginAction,
@@ -23,13 +22,13 @@ import {
 import { useAuthStore } from "../store/useAuthStore";
 import { useSocialLoginError } from "../hooks/useSocialLoginError";
 
-type AuthMode = "login" | "register" | "otp" | "forgot-password" | "otp-login";
+type AuthMode = "login" | "register" | "otp" | "forgot-password";
 
 export default function AuthGateway() {
   const locale = useLocale();
   const isRtl = locale === "ar";
   const [mode, setMode] = useState<AuthMode>("login");
-  const [loginMethod, setLoginMethod] = useState<"email" | "phone">("email");
+  const [loginMethod, setLoginMethod] = useState<"email" | "phone">("phone");
   const [otpMethod, setOtpMethod] = useState<"email" | "phone">("email");
   const [profilePreview, setProfilePreview] = useState<string | null>(null);
   const [profileFileName, setProfileFileName] = useState<string | undefined>();
@@ -99,18 +98,20 @@ export default function AuthGateway() {
   }, [registerState]);
 
   useEffect(() => {
-    if (otpState?.success && otpState.data) {
-      setAuthData(otpState.data);
+    if (otpState?.success && otpState.data && setAuthData(otpState.data)) {
       router.push(redirectTo);
     }
-  }, [otpState, setAuthData, router]);
+  }, [otpState, setAuthData, router, redirectTo]);
 
   useEffect(() => {
-    if (loginState?.success && loginState.data) {
-      setAuthData(loginState.data);
+    if (
+      loginState?.success &&
+      loginState.data &&
+      setAuthData(loginState.data)
+    ) {
       router.push(redirectTo);
     }
-  }, [loginState, setAuthData, router]);
+  }, [loginState, setAuthData, router, redirectTo]);
 
   function onProfileImageChange(file: File | null) {
     setProfileFileName(file?.name);
@@ -134,7 +135,6 @@ export default function AuthGateway() {
             onMethodChange={setLoginMethod}
             onToggleMode={() => setMode("register")}
             onForgotPassword={() => setMode("forgot-password")}
-            onOtpLogin={() => setMode("otp-login")}
           />
         );
       case "register":
@@ -163,16 +163,6 @@ export default function AuthGateway() {
             onAskMeLater={handleAskMeLater}
             onResend={handleResend}
             onMethodChange={handleOtpMethodChange}
-          />
-        );
-      case "otp-login":
-        return (
-          <OtpLoginForm
-            onSuccess={(data) => {
-              if (data) setAuthData(data);
-              router.push(redirectTo);
-            }}
-            onBack={() => setMode("login")}
           />
         );
       case "forgot-password":
@@ -218,12 +208,12 @@ export default function AuthGateway() {
   return (
     <section
       dir={isRtl ? "rtl" : "ltr"}
-      className="relative isolate min-h-[760px] overflow-hidden rounded-3xl"
+      className="relative isolate min-h-190 overflow-hidden rounded-3xl"
     >
       <PatternTiles />
 
-      <div className="relative z-10 flex min-h-[760px] items-center justify-center p-2">
-        <div className="w-full max-w-[480px] rounded-xl border border-border/80 bg-white/92 p-4 shadow-[0_16px_38px_rgba(0,74,151,0.15)] backdrop-blur-md sm:p-6">
+      <div className="relative z-10 flex min-h-190 items-center justify-center p-2">
+        <div className="w-full max-w-120 rounded-xl border border-border/80 bg-white/92 p-4 shadow-[0_16px_38px_rgba(0,74,151,0.15)] backdrop-blur-md sm:p-6">
           <AuthHeader isLogin={mode === "login"} isOtp={mode === "otp"} />
 
           {socialError ? (

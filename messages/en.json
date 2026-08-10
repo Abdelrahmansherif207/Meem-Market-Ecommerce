@@ -46,7 +46,8 @@
       "mainPlaceholderPrefix": "Search ",
       "mainPlaceholderHighlight": "50,000+ items",
       "button": "Search",
-      "noResults": "No products found"
+      "noResults": "No products found",
+      "searching": "Searching..."
     },
     "cart": {
       "label": "Cart",
@@ -77,9 +78,13 @@
       "filters": "Filters",
       "filtersTitle": "Filters",
       "close": "Close filters",
-      "clearAll": "Clear All",
+      "clearAll": "Clear all",
       "show": "Show results",
-      "searchBrand": "Search Brand"
+      "searchBrand": "Search brands",
+      "clearBrandSearch": "Clear brand search",
+      "noBrandsFound": "No brands match your search",
+      "activeFilters": "{count} active",
+      "refineResults": "Refine your results"
     },
     "location": {
       "loading": "Detecting..."
@@ -90,7 +95,27 @@
   },
   "auth": {
     "metaTitle": "Sign In & Register",
-    "metaDescription": "Create an account or sign in to start shopping."
+    "metaDescription": "Create an account or sign in to start shopping.",
+    "email": "Email",
+    "phone": "Phone",
+    "password": "Password",
+    "emailPlaceholder": "name@example.com",
+    "phonePlaceholder": "Enter your phone number",
+    "passwordPlaceholder": "Enter your password",
+    "forgotPassword": "Forgot password?",
+    "dontHaveAccount": "Don't have an account?",
+    "signUp": "Sign up",
+    "signIn": "Sign in",
+    "signingIn": "Signing in...",
+    "firstName": "First name",
+    "lastName": "Last name",
+    "createPassword": "Create a password",
+    "confirmPassword": "Confirm your password",
+    "agreeTo": "I agree to the",
+    "terms": "Terms & Conditions",
+    "privacy": "Privacy Policy",
+    "alreadyHaveAccount": "Already have an account?",
+    "creatingAccount": "Creating account..."
   },
   "cartPage": {
    "metaTitle": "Cart",

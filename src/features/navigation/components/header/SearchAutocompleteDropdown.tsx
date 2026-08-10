@@ -2,7 +2,11 @@
 
 import { Search, ArrowUpRight } from "lucide-react";
 import { useRouter } from "@/i18n/navigation";
+import Image from "next/image";
+import { useTranslations } from "next-intl";
+import { cn } from "@/shared/utils/cn";
 import type { ProductSearchResult } from "@/features/products/types";
+
 
 function highlightMatch(name: string, query: string) {
   if (!query) return name;
@@ -33,6 +37,7 @@ export function SearchAutocompleteDropdown({
   onClose,
 }: SearchAutocompleteDropdownProps) {
   const router = useRouter();
+  const t = useTranslations("header.search");
 
   if (!isOpen) return null;
 
@@ -45,17 +50,27 @@ export function SearchAutocompleteDropdown({
     <div className="absolute left-0 right-0 top-full z-50 mt-1 rounded-lg border border-gray-200 bg-white shadow-lg">
       <div className="max-h-80 overflow-y-auto">
         {isLoading && (
-          <div className="flex items-center gap-3 px-4 py-3">
-            <div className="h-4 w-4 animate-spin rounded-full border-2 border-gray-300 border-t-primary" />
-            <span className="text-sm text-text-secondary">
-              Searching...
+          <div className={cn(
+            "flex flex-col items-center justify-center gap-2 py-8 px-4",
+            results.length > 0 && "border-b border-gray-100 py-4"
+          )}>
+            <Image
+              src="/images/search.gif"
+              alt=""
+              width={150}
+              height={150}
+              unoptimized
+              aria-hidden="true"
+            />
+            <span className="text-xs font-medium text-text-secondary">
+              {t("searching")}
             </span>
           </div>
         )}
 
         {!isLoading && results.length === 0 && query.length >= 2 && (
           <div className="px-4 py-6 text-center text-sm text-text-secondary">
-            No results found
+            {t("noResults")}
           </div>
         )}
 

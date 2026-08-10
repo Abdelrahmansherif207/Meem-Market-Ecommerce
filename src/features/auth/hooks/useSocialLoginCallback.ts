@@ -25,13 +25,22 @@ export function useSocialLoginCallback() {
           throw new Error(response.message || "Invalid or expired authorization code.");
         }
 
-        setAuthData({
+        const userExpiry = response.user?.expires_at;
+        const expiresAt =
+          response.expires_at ??
+          (typeof userExpiry === "string" ? userExpiry : undefined);
+        const stored = setAuthData({
           token: response.token,
           ...(response.user as Record<string, unknown>),
           email_verified:
             response.user?.email_verified === true ||
             typeof response.user?.email_verified_at === "string",
+          expires_at: expiresAt,
         });
+
+        if (!stored) {
+          throw new Error("The social login response has no valid expiration date.");
+        }
         clearAuthorizationCode(window.location.pathname);
       })
       .catch(() => {

@@ -1,6 +1,7 @@
 "use client";
 
 import { Mail, Phone } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { cn } from "@/shared/utils/cn";
 
 type ContactMethod = "email" | "phone";
@@ -12,22 +13,10 @@ interface AuthTabsProps {
 }
 
 export function AuthTabs({ method, onMethodChange, isLogin }: AuthTabsProps) {
+  const t = useTranslations("auth");
   if (isLogin) {
     return (
       <div className="grid grid-cols-2 gap-2 rounded-xl bg-surface p-1">
-        <button
-          type="button"
-          onClick={() => onMethodChange("email")}
-          className={cn(
-            "flex items-center justify-center gap-2 rounded-lg px-3 py-2 text-xs font-semibold transition",
-            method === "email"
-              ? "bg-primary text-white"
-              : "text-text-secondary hover:bg-white",
-          )}
-        >
-          <Mail className="h-4 w-4" />
-          Email
-        </button>
         <button
           type="button"
           onClick={() => onMethodChange("phone")}
@@ -39,7 +28,20 @@ export function AuthTabs({ method, onMethodChange, isLogin }: AuthTabsProps) {
           )}
         >
           <Phone className="h-4 w-4" />
-          Phone
+          {t("phone")}
+        </button>
+        <button
+          type="button"
+          onClick={() => onMethodChange("email")}
+          className={cn(
+            "flex items-center justify-center gap-2 rounded-lg px-3 py-2 text-xs font-semibold transition",
+            method === "email"
+              ? "bg-primary text-white"
+              : "text-text-secondary hover:bg-white",
+          )}
+        >
+          <Mail className="h-4 w-4" />
+          {t("email")}
         </button>
       </div>
     );
@@ -47,19 +49,6 @@ export function AuthTabs({ method, onMethodChange, isLogin }: AuthTabsProps) {
 
   return (
     <div className="grid grid-cols-2 gap-2 rounded-xl bg-surface p-1">
-      <button
-        type="button"
-        onClick={() => onMethodChange("email")}
-        className={cn(
-          "flex items-center justify-center gap-2 rounded-lg px-3 py-2 text-xs font-semibold transition",
-          method === "email"
-            ? "bg-primary text-white"
-            : "text-text-secondary hover:bg-white",
-        )}
-      >
-        <Mail className="h-4 w-4" />
-        Email
-      </button>
       <button
         type="button"
         onClick={() => onMethodChange("phone")}
@@ -71,7 +60,20 @@ export function AuthTabs({ method, onMethodChange, isLogin }: AuthTabsProps) {
         )}
       >
         <Phone className="h-4 w-4" />
-        Phone
+        {t("phone")}
+      </button>
+      <button
+        type="button"
+        onClick={() => onMethodChange("email")}
+        className={cn(
+          "flex items-center justify-center gap-2 rounded-lg px-3 py-2 text-xs font-semibold transition",
+          method === "email"
+            ? "bg-primary text-white"
+            : "text-text-secondary hover:bg-white",
+        )}
+      >
+        <Mail className="h-4 w-4" />
+        {t("email")}
       </button>
     </div>
   );

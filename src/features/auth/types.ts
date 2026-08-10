@@ -66,6 +66,7 @@ export interface AuthLoginData {
   role?: string[];
   email?: string;
   phone_number?: string;
+  expires_at?: string;
 }
 
 export interface RegisterResponseData {
@@ -78,6 +79,7 @@ export interface SocialExchangeResponse {
   success: boolean;
   token?: string;
   token_type?: string;
+  expires_at?: string;
   user?: Record<string, unknown>;
   message?: string;
 }

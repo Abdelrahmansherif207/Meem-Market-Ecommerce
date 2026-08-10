@@ -6,6 +6,7 @@ import { Search, X } from "lucide-react";
 import { useTranslations } from "next-intl";
 import type { CategoryFilters } from "../types";
 import ExpandableList from "./ExpandableList";
+import FilterCheckbox from "./FilterCheckbox";
 
 interface MobileFiltersModalProps {
   isOpen: boolean;
@@ -30,23 +31,16 @@ export default function MobileFiltersModal({
   const searchParams = useSearchParams();
   const [brandSearchQuery, setBrandSearchQuery] = useState("");
 
-  // Local draft state — only applied when user taps "Show"
-  const [draft, setDraft] = useState<Record<string, string[]>>({});
-  const scrollRef = useRef<HTMLDivElement>(null);
-
-  // Sync draft from URL params whenever modal opens
-  useEffect(() => {
-    if (!isOpen) return;
+  // The modal mounts on open, so the local draft always starts from the URL.
+  const [draft, setDraft] = useState<Record<string, string[]>>(() => {
     const initial: Record<string, string[]> = {};
     Object.keys(filters).forEach((key) => {
-      const val = searchParams.get(key);
-      initial[key] = val ? val.split(",").filter(Boolean) : [];
+      const value = searchParams.get(key);
+      initial[key] = value ? value.split(",").filter(Boolean) : [];
     });
-    setDraft(initial);
-    setBrandSearchQuery("");
-    // Scroll to top on open
-    scrollRef.current?.scrollTo({ top: 0 });
-  }, [isOpen, filters, searchParams]);
+    return initial;
+  });
+  const scrollRef = useRef<HTMLDivElement>(null);
 
   // Lock body scroll when open
   useEffect(() => {
@@ -149,18 +143,39 @@ export default function MobileFiltersModal({
 
                 {key === "brand" && (
                   <div className="relative mb-3">
-                    <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-[18px] w-[18px] text-gray-400" />
+                    <Search
+                      className="pointer-events-none absolute inset-s-3.5 top-1/2 size-4.5 -translate-y-1/2 text-text-secondary"
+                      aria-hidden="true"
+                    />
                     <input
-                      type="text"
+                      type="search"
+                      autoComplete="off"
+                      aria-label={t("searchBrand")}
                       placeholder={t("searchBrand")}
                       value={brandSearchQuery}
-                      onChange={(e) => setBrandSearchQuery(e.target.value)}
-                      className="w-full rounded-full border border-gray-300 bg-transparent py-2 pl-10 pr-4 text-sm text-gray-900 placeholder:text-gray-400 focus:border-primary focus:outline-none transition-colors"
+                      onChange={(event) =>
+                        setBrandSearchQuery(event.target.value)
+                      }
+                      className="h-10 w-full rounded-xl border border-border-subtle bg-surface/60 ps-10 pe-10 text-sm text-text-primary outline-none transition-all placeholder:text-text-secondary/70 focus:border-primary focus:bg-background focus:ring-3 focus:ring-primary/10"
                     />
+                    {brandSearchQuery && (
+                      <button
+                        type="button"
+                        onClick={() => setBrandSearchQuery("")}
+                        aria-label={t("clearBrandSearch")}
+                        className="absolute inset-e-2 top-1/2 flex size-7 -translate-y-1/2 items-center justify-center rounded-lg text-text-secondary transition-colors hover:bg-border-subtle hover:text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/25"
+                      >
+                        <X className="size-3.5" aria-hidden="true" />
+                      </button>
+                    )}
                   </div>
                 )}
 
-                {isLong ? (
+                {itemsToDisplay.length === 0 ? (
+                  <p className="rounded-xl bg-surface px-3 py-4 text-center text-xs text-text-secondary">
+                    {t("noBrandsFound")}
+                  </p>
+                ) : isLong ? (
                   <ExpandableList
                     items={itemsToDisplay}
                     seeMoreText={seeMoreText}
@@ -169,23 +184,16 @@ export default function MobileFiltersModal({
                     onToggle={(value) => handleToggle(key, value)}
                   />
                 ) : (
-                  itemsToDisplay.map((value: string) => {
-                    const isChecked = checkedItems.includes(value);
-                    return (
-                      <label
+                  <div className="space-y-0.5">
+                    {itemsToDisplay.map((value: string) => (
+                      <FilterCheckbox
                         key={value}
-                        className="flex items-center justify-between text-sm cursor-pointer py-2.5 border-b border-gray-50 last:border-0"
-                      >
-                        <span className="text-gray-800">{value}</span>
-                        <input
-                          type="checkbox"
-                          className="accent-primary w-4 h-4"
-                          checked={isChecked}
-                          onChange={() => handleToggle(key, value)}
-                        />
-                      </label>
-                    );
-                  })
+                        value={value}
+                        checked={checkedItems.includes(value)}
+                        onChange={() => handleToggle(key, value)}
+                      />
+                    ))}
+                  </div>
                 )}
               </div>
             );

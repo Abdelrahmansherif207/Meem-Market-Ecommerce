@@ -68,9 +68,13 @@ export function VerifyEmailModal({ email, onClose }: VerifyEmailModalProps) {
           email_verified: true,
           email: result.data?.email || email,
           phone_number: result.data?.phone_number,
+          expires_at: result.data?.expires_at,
         };
-        setAuthData(updatedData);
-        onClose();
+        if (setAuthData(updatedData)) {
+          onClose();
+        } else {
+          setError("Your session has expired. Please sign in again.");
+        }
       } else {
         setError(result.message || "Verification failed.");
       }
@@ -81,7 +85,7 @@ export function VerifyEmailModal({ email, onClose }: VerifyEmailModalProps) {
     if (e.target === overlayRef.current) onClose();
   }
 
-  const handleOtpComplete = (value: string) => {
+  const handleOtpComplete = () => {
     handleVerify();
   };
 
@@ -94,7 +98,7 @@ export function VerifyEmailModal({ email, onClose }: VerifyEmailModalProps) {
       role="dialog"
       aria-label="Verify email"
     >
-      <div className="relative w-full max-w-[440px] rounded-2xl bg-white p-6 shadow-2xl">
+      <div className="relative w-full max-w-110 rounded-2xl bg-white p-6 shadow-2xl">
         <button
           type="button"
           onClick={onClose}

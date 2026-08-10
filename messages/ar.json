@@ -46,7 +46,8 @@
       "mainPlaceholderPrefix": "ابحث عن ",
       "mainPlaceholderHighlight": "50,000+ منتج",
       "button": "بحث",
-      "noResults": "لم يتم العثور على منتجات"
+      "noResults": "لم يتم العثور على منتجات",
+      "searching": "جاري البحث..."
     },
     "cart": {
       "label": "سلة التسوق",
@@ -79,7 +80,11 @@
       "close": "إغلاق الفلاتر",
       "clearAll": "مسح الكل",
       "show": "عرض النتائج",
-      "searchBrand": "البحث عن ماركة"
+      "searchBrand": "البحث عن علامة تجارية",
+      "clearBrandSearch": "مسح بحث العلامة التجارية",
+      "noBrandsFound": "لا توجد علامات تجارية مطابقة",
+      "activeFilters": "{count} محدد",
+      "refineResults": "خصص نتائج البحث"
     },
     "location": {
       "loading": "جاري التحديد..."
@@ -90,7 +95,27 @@
   },
   "auth": {
     "metaTitle": "تسجيل الدخول والتسجيل",
-    "metaDescription": "أنشئ حسابًا أو سجل الدخول لبدء التسوق"
+    "metaDescription": "أنشئ حسابًا أو سجل الدخول لبدء التسوق",
+    "email": "البريد الإلكتروني",
+    "phone": "رقم الهاتف",
+    "password": "كلمة المرور",
+    "emailPlaceholder": "example@domain.com",
+    "phonePlaceholder": "أدخل رقم هاتفك",
+    "passwordPlaceholder": "أدخل كلمة المرور",
+    "forgotPassword": "هل نسيت كلمة المرور؟",
+    "dontHaveAccount": "ليس لديك حساب؟",
+    "signUp": "إنشاء حساب",
+    "signIn": "تسجيل الدخول",
+    "signingIn": "جاري تسجيل الدخول...",
+    "firstName": "الاسم الأول",
+    "lastName": "اسم العائلة",
+    "createPassword": "أنشئ كلمة مرور",
+    "confirmPassword": "تأكيد كلمة المرور",
+    "agreeTo": "أوافق على",
+    "terms": "الشروط والأحكام",
+    "privacy": "سياسة الخصوصية",
+    "alreadyHaveAccount": "لديك حساب بالفعل؟",
+    "creatingAccount": "جاري إنشاء الحساب..."
   },
   "cartPage": {
     "metaTitle": "سلة التسوق",

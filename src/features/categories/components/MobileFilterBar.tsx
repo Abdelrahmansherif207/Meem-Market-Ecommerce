@@ -52,14 +52,16 @@ export default function MobileFilterBar({
       </div>
 
       {/* Modal */}
-      <MobileFiltersModal
-        isOpen={filtersOpen}
-        onClose={() => setFiltersOpen(false)}
-        filters={filters}
-        filterLabels={filterLabels}
-        seeMoreText={seeMoreText}
-        seeLessText={seeLessText}
-      />
+      {filtersOpen && (
+        <MobileFiltersModal
+          isOpen={filtersOpen}
+          onClose={() => setFiltersOpen(false)}
+          filters={filters}
+          filterLabels={filterLabels}
+          seeMoreText={seeMoreText}
+          seeLessText={seeLessText}
+        />
+      )}
     </>
   );
 }

@@ -65,6 +65,7 @@ export function useSearchAutocomplete() {
     abortRef.current = controller;
 
     dispatch({ type: "FETCH_START" });
+    setIsOpen(true);
 
     productService
       .searchProducts(debouncedQuery)

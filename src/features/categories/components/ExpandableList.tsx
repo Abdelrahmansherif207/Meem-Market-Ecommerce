@@ -1,6 +1,8 @@
 "use client";
 
+import { ChevronDown } from "lucide-react";
 import { useState } from "react";
+import FilterCheckbox from "./FilterCheckbox";
 
 interface ExpandableListProps {
   items: string[];
@@ -24,32 +26,33 @@ export default function ExpandableList({
   const remaining = items.length - maxVisible;
 
   return (
-    <>
-      {visibleItems.map((value) => {
-        const isChecked = checkedItems.includes(value);
-        return (
-          <label
-            key={value}
-            className="flex items-center gap-2 text-sm cursor-pointer"
-          >
-            <input
-              type="checkbox"
-              className="accent-primary"
-              checked={isChecked}
-              onChange={() => onToggle(value)}
-            />
-            {value}
-          </label>
-        );
-      })}
+    <div className="space-y-0.5">
+      {visibleItems.map((value) => (
+        <FilterCheckbox
+          key={value}
+          value={value}
+          checked={checkedItems.includes(value)}
+          onChange={() => onToggle(value)}
+        />
+      ))}
       {hasMore && (
         <button
-          onClick={() => setExpanded(!expanded)}
-          className="text-sm text-primary font-medium hover:underline mt-1"
+          type="button"
+          onClick={() => setExpanded((current) => !current)}
+          aria-expanded={expanded}
+          className="mt-1 flex min-h-9 w-full items-center justify-between rounded-xl px-2.5 py-2 text-sm font-semibold text-primary transition-colors hover:bg-primary/[0.07] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/25"
         >
-          {expanded ? seeLessText : `${seeMoreText} (+${remaining})`}
+          <span>
+            {expanded ? seeLessText : `${seeMoreText} (+${remaining})`}
+          </span>
+          <ChevronDown
+            className={`size-4 transition-transform duration-200 ${
+              expanded ? "rotate-180" : ""
+            }`}
+            aria-hidden="true"
+          />
         </button>
       )}
-    </>
+    </div>
   );
 }
