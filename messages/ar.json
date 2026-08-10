@@ -450,6 +450,31 @@
     "errorProcessing": "حدث خطأ ما. يرجى المحاولة مرة أخرى.",
     "fixRequiredFields": "يرجى ملء جميع الحقول المطلوبة."
   },
+  "siteReviews": {
+    "metaTitle": "آراء العملاء",
+    "metaDescription": "اكتشف ما يراه العملاء في موقعنا الإلكتروني.",
+    "breadcrumb": "الآراء",
+    "title": "آراء العملاء",
+    "subtitle": "اقرأ ما يعتقده عملاؤنا حول تجربتهم معنا.",
+    "wallTitle": "أحدث الآراء",
+    "formTitle": "شاركنا رأيك",
+    "emptyTitle": "لا توجد آراء بعد",
+    "emptyDescription": "كن أول من يشارك تجربته مع موقعنا الإلكتروني.",
+    "loadError": "تعذر تحميل الآراء. حاول مرة أخرى.",
+    "retry": "إعادة المحاولة",
+    "yourRating": "تقييمك",
+    "titleLabel": "العنوان (اختياري)",
+    "titlePlaceholder": "مثال: موقع ممتاز",
+    "commentLabel": "مراجعتك",
+    "commentPlaceholder": "أخبرنا عن تجربتك...",
+    "submit": "إرسال التقييم",
+    "submitting": "جارٍ الإرسال...",
+    "ratingRequired": "يرجى اختيار التقييم.",
+    "commentRequired": "يرجى كتابة رأيك.",
+    "submittedMessage": "تم إرسال تقييمك وهو بانتظار المراجعة",
+    "submitError": "تعذر إرسال التقييم. حاول مرة أخرى.",
+    "guestNote": "سيتعين عليك تسجيل الدخول قبل الإرسال."
+  },
   "meta": {
     "brands": {
       "title": "العلامات التجارية",

@@ -74,7 +74,7 @@ export function ProductCartItem({
 
           <div className="flex items-center gap-2 mt-2">
             {hasDiscount && (
-              <div className="flex items-center gap-1">
+              <div className="flex items-center gap-1" dir="ltr">
                 <span className="text-xs leading-4 font-medium text-gray-500 line-through">
                   {origInt}
                 </span>
@@ -84,7 +84,7 @@ export function ProductCartItem({
                 </div>
               </div>
             )}
-            <div className="flex items-center gap-1">
+            <div className="flex items-center gap-1" dir="ltr">
               <span className="text-base leading-5 font-bold">{intPart}</span>
               <div className="flex flex-col">
                 <span className="text-sm font-bold leading-3">{decPart}</span>
