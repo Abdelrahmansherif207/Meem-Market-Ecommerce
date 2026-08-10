@@ -41,14 +41,14 @@ export function SearchInput({
         )}
       />
 
-      <div className="pointer-events-none absolute inset-y-0 start-3 hidden items-center text-sm text-text-secondary peer-placeholder-shown:flex gap-1">
+      <div className="pointer-events-none absolute inset-y-0 inset-s-3 hidden items-center text-sm text-text-secondary peer-placeholder-shown:flex gap-1">
         <span>{prefixText}</span>
         <span className="font-semibold text-text-secondary">
           {highlightText}
         </span>
       </div>
 
-      <span className="absolute inset-y-0 end-3 flex items-center">
+      <span className="absolute inset-y-0 inset-e-3 flex items-center">
         <Search className={cn("h-5 w-5 text-text-secondary", iconClassName)} />
       </span>
     </form>

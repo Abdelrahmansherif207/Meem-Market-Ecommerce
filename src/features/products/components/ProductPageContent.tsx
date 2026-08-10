@@ -35,18 +35,22 @@ export function ProductPageContent({ product }: ProductPageContentProps) {
 
   return (
     <div className="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-[280px_minmax(0,1fr)_minmax(300px,1fr)] lg:gap-8">
-      <aside className="space-y-6 order-last lg:order-1">
+      <aside className="hidden space-y-6 lg:order-1 lg:block">
         <ProductDeliveryInfo />
         <ProductActions product={product} selectedVariant={selectedVariant} />
       </aside>
 
-      <main className="space-y-8 border-x border-border/40 px-0 lg:px-6 lg:order-2">
+      <main className="space-y-8 border-x border-border/40 px-0 lg:order-2 lg:px-6">
         <ProductInfo product={product} selectedVariant={selectedVariant} />
         <ProductVariants
           variants={product.variants}
           selectedVariantId={selectedVariantId}
           onSelectVariant={setSelectedVariantId}
         />
+
+        <section className="lg:hidden">
+          <ProductDeliveryInfo />
+        </section>
 
         <section>
           <h2 className="mb-3 text-lg font-bold text-text-primary">
@@ -78,6 +82,10 @@ export function ProductPageContent({ product }: ProductPageContentProps) {
             </div>
           </section>
         )}
+
+        <section className="lg:hidden">
+          <ProductActions product={product} selectedVariant={selectedVariant} />
+        </section>
 
         <section>
           <h2 className="mb-3 text-lg font-bold text-text-primary">

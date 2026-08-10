@@ -4,6 +4,7 @@ import { getLocale } from "next-intl/server";
 import { validateLoginForm } from "../utils/validation/Login";
 import { authService } from "../services/authService";
 import { ApiError } from "@/shared/lib/api";
+import { isSessionActive } from "../utils/sessionExpiration";
 import type { ActionState } from "./types";
 
 export async function loginAction(
@@ -33,7 +34,19 @@ export async function loginAction(
 
   try {
     const response = await authService.login(payload, locale);
-    return { success: true, message: response.message || "Login successful.", data: response.data };
+    if (!response.data?.token || !isSessionActive(response.data.expires_at)) {
+      return {
+        success: false,
+        message: "The server returned an invalid session expiration date.",
+        payload: { email, phone, method },
+      };
+    }
+
+    return {
+      success: true,
+      message: response.message || "Login successful.",
+      data: response.data,
+    };
   } catch (error) {
     if (error instanceof ApiError) {
       const mapped: Record<string, string> = {};

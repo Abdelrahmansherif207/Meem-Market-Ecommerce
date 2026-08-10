@@ -1,4 +1,5 @@
 import { AUTH_TOKEN_STORAGE_KEY, CHANNEL_STORAGE_KEY } from "@/shared/constants/storageKeys";
+import { notifyUnauthorized } from "@/shared/lib/unauthorizedEvent";
 
 export class ApiError extends Error {
   status: number;
@@ -83,11 +84,17 @@ export async function apiFetch<T>(
 
   const cleanEndpoint = endpoint.startsWith("/") ? endpoint : `/${endpoint}`;
   const url = `${BASE_URL}${cleanEndpoint}`;
+  const {
+    lang,
+    timeout: timeoutMs = 15_000,
+    channel: includeChannel = true,
+    ...requestOptions
+  } = options;
   const authToken = getAuthToken();
-  const headers = new Headers(options.headers);
+  const headers = new Headers(requestOptions.headers);
 
   const hasFormDataBody =
-    typeof FormData !== "undefined" && options.body instanceof FormData;
+    typeof FormData !== "undefined" && requestOptions.body instanceof FormData;
 
   if (!headers.has("Content-Type") && !hasFormDataBody) {
     headers.set("Content-Type", "application/json");
@@ -97,20 +104,18 @@ export async function apiFetch<T>(
     headers.set("Authorization", `Bearer ${authToken}`);
   }
 
-  if (options.lang && !headers.has("lang")) {
-    headers.set("lang", options.lang);
+  if (lang && !headers.has("lang")) {
+    headers.set("lang", lang);
   }
 
-  const channel = options.channel !== false ? await getChannel() : null;
+  const channel = includeChannel ? await getChannel() : null;
   if (channel && !headers.has("X-Channel")) {
     headers.set("X-Channel", channel);
   }
 
   const enableLogs = process.env.NEXT_PUBLIC_XHR_LOGS === "true";
-  const method = (options.method ?? "GET").toUpperCase();
+  const method = (requestOptions.method ?? "GET").toUpperCase();
   const start = Date.now();
-
-  const timeoutMs = options.timeout ?? 15000;
   const controller = new AbortController();
   let timeoutId: ReturnType<typeof setTimeout> | undefined;
 
@@ -118,34 +123,37 @@ export async function apiFetch<T>(
     timeoutId = setTimeout(() => controller.abort(), timeoutMs);
   }
 
-  const userSignal = options.signal;
+  const userSignal = requestOptions.signal;
   if (userSignal) {
     if (userSignal.aborted) {
       controller.abort();
     } else {
-      userSignal.addEventListener("abort", () => controller.abort());
+      userSignal.addEventListener("abort", () => controller.abort(), {
+        once: true,
+      });
     }
   }
 
   let response: Response;
   try {
     response = await fetch(url, {
-      ...options,
+      ...requestOptions,
       signal: controller.signal,
       headers,
     });
-  } catch (err: any) {
+  } catch (error: unknown) {
     if (enableLogs) {
-      console.error("? " + method + " " + url + " - network error", err?.message ?? err);
+      const message = error instanceof Error ? error.message : error;
+      console.error("? " + method + " " + url + " - network error", message);
     }
-    throw err;
+    throw error;
   } finally {
     clearTimeout(timeoutId);
   }
 
   const duration = Date.now() - start;
 
-  let parsedBody: any = null;
+  let parsedBody: unknown = null;
   try {
     const ct = response.headers.get("content-type") || "";
     if (ct.includes("application/json")) {
@@ -164,15 +172,25 @@ export async function apiFetch<T>(
     return parsedBody as T;
   }
 
+  if (
+    response.status === 401 &&
+    authToken &&
+    typeof window !== "undefined"
+  ) {
+    window.localStorage.removeItem(AUTH_TOKEN_STORAGE_KEY);
+    notifyUnauthorized();
+  }
+
   let errorMessage = "API Error: " + response.status + " " + response.statusText;
 
   if (parsedBody && typeof parsedBody === "object") {
-    const apiMessage = extractApiMessage(parsedBody);
+    const body = parsedBody as Record<string, unknown>;
+    const apiMessage = extractApiMessage(body);
     if (apiMessage) {
       errorMessage = apiMessage;
     }
 
-    const apiErrors = extractApiErrors(parsedBody);
+    const apiErrors = extractApiErrors(body);
     if (apiErrors) {
       throw new ApiError(errorMessage, response.status, apiErrors);
     }

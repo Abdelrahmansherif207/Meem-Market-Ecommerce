@@ -1,7 +1,8 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+
 import { Mail, User } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { PhoneInputWithCountry } from "./PhoneInputWithCountry";
 import { PasswordInput } from "./PasswordInput";
 import { ProfileImageUpload } from "./ProfileImageUpload";
@@ -40,18 +41,12 @@ export function RegisterForm({
   onToggleMode,
   onPasswordChange,
 }: RegisterFormProps) {
+  const t = useTranslations("auth");
   const fieldErrors = state?.fieldErrors ?? {};
   const p = state?.payload ?? {};
-  const formKey = useRef(0);
-
-  useEffect(() => {
-    if (state?.success) {
-      formKey.current += 1;
-    }
-  }, [state]);
 
   return (
-    <form key={formKey.current} className="mx-auto mt-4 max-w-md space-y-2.5" action={action}>
+    <form className="mx-auto mt-4 max-w-md space-y-2.5" action={action}>
       <div className="grid grid-cols-2 gap-2.5">
         <div>
           <div className="relative">
@@ -59,7 +54,7 @@ export function RegisterForm({
             <input
               type="text"
               name="firstName"
-              placeholder="First name"
+              placeholder={t("firstName")}
               defaultValue={p.firstName || ""}
               className={inputClass(fieldErrors.first_name)}
             />
@@ -72,7 +67,7 @@ export function RegisterForm({
             <input
               type="text"
               name="lastName"
-              placeholder="Last name"
+              placeholder={t("lastName")}
               defaultValue={p.lastName || ""}
               className={inputClass(fieldErrors.last_name)}
             />
@@ -87,7 +82,7 @@ export function RegisterForm({
           <input
             type="email"
             name="email"
-            placeholder="name@example.com"
+            placeholder={t("emailPlaceholder")}
             defaultValue={p.email || ""}
             className={inputClass(fieldErrors.email)}
           />
@@ -97,14 +92,14 @@ export function RegisterForm({
 
       <PhoneInputWithCountry
         name="phone"
-        placeholder="Enter your phone number"
+        placeholder={t("phonePlaceholder")}
         error={fieldErrors.phone}
         defaultValue={p.phone || ""}
       />
 
       <PasswordInput
         name="password"
-        placeholder="Create a password"
+        placeholder={t("createPassword")}
         error={fieldErrors.password}
         defaultValue={p.password || ""}
         onChange={onPasswordChange ? (e) => onPasswordChange(e.target.value) : undefined}
@@ -112,7 +107,7 @@ export function RegisterForm({
 
       <PasswordInput
         name="passwordConfirmation"
-        placeholder="Confirm your password"
+        placeholder={t("confirmPassword")}
         error={fieldErrors.password_confirmation}
         defaultValue={p.passwordConfirmation || ""}
       />
@@ -132,26 +127,26 @@ export function RegisterForm({
           className={"mt-0.5 h-4 w-4 rounded border-border text-primary focus:ring-primary" + (fieldErrors.policy ? " border-red-500" : "")}
         />
         <span>
-          I agree to the{" "}
+          {t("agreeTo")}{" "}
           <a href="#" className="text-primary underline hover:text-primary-dark">
-            Terms & Conditions
+            {t("terms")}
           </a>{" "}
           and{" "}
           <a href="#" className="text-primary underline hover:text-primary-dark">
-            Privacy Policy
+            {t("privacy")}
           </a>
         </span>
       </label>
       <ErrorMsg message={fieldErrors.policy} />
 
       <div className="flex items-center justify-center gap-2 text-xs text-text-secondary">
-        <span>Already have an account?</span>
+        <span>{t("alreadyHaveAccount")}</span>
         <button
           type="button"
           onClick={onToggleMode}
           className="rounded-md border border-border px-2 py-1 text-xs font-semibold text-text-primary transition hover:border-primary hover:text-primary"
         >
-          Sign in
+          {t("signIn")}
         </button>
       </div>
 
@@ -160,7 +155,7 @@ export function RegisterForm({
         disabled={pending}
         className="w-full rounded-xl bg-primary px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-primary-dark disabled:cursor-not-allowed disabled:opacity-70"
       >
-        {pending ? "Creating account..." : "Create account"}
+        {pending ? t("creatingAccount") : t("signUp")}
       </button>
     </form>
   );
