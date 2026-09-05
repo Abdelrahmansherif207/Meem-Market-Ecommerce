@@ -42,7 +42,7 @@ export default function DeliveryModes({ compact = false }: { compact?: boolean }
 
   if (compact) {
     return (
-      <div className="flex w-fit max-w-full items-stretch gap-1 rounded-xl border border-text-muted/20 bg-white/60 p-0.5 shadow-elev-1">
+      <div className="flex w-full items-stretch gap-1 rounded-xl border border-text-muted/20 bg-white/60 p-0.5 shadow-elev-1">
         <DeliveryModeButton
           label={t("scheduled")}
           icon={{ src: "/scheduled.avif", alt: "Scheduled" }}
