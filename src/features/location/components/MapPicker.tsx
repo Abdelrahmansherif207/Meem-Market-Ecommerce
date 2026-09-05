@@ -155,12 +155,15 @@ export function MapPicker({
     setPredictionsLoading(value.trim().length >= 3);
   };
 
-  const reverseGeocode = (lat: number, lng: number) => {
+  const reverseGeocode = async (lat: number, lng: number) => {
     setSelectedCoords({ lat, lng });
-    const geocoder = new google.maps.Geocoder();
-    geocoder.geocode({ location: { lat, lng } }, (results, status) => {
-      if (status === "OK" && results?.[0]) {
-        const place = results[0];
+    try {
+      const response = await fetch(
+        `https://maps.googleapis.com/maps/api/geocode/json?latlng=${lat},${lng}&language=${locale === "ar" ? "ar" : "en"}&key=${process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY}`,
+      );
+      const data = await response.json();
+      if (data.status === "OK" && data.results?.[0]) {
+        const place = data.results[0];
         const addr = extractAddressComponents(place.address_components);
         setCity(addr.city);
         setState(addr.state);
@@ -169,7 +172,9 @@ export function MapPicker({
         setCountry(addr.country);
         setSearchValue(place.formatted_address || "");
       }
-    });
+    } catch {
+      // silently fail
+    }
   };
 
   const handlePredictionSelect = async (prediction: AutocompletePrediction) => {
@@ -211,12 +216,12 @@ export function MapPicker({
 
   const handleMarkerDragEnd = (e: google.maps.MapMouseEvent) => {
     if (!e.latLng) return;
-    reverseGeocode(e.latLng.lat(), e.latLng.lng());
+    void reverseGeocode(e.latLng.lat(), e.latLng.lng());
   };
 
   const handleMapClick = (e: google.maps.MapMouseEvent) => {
     if (!e.latLng) return;
-    reverseGeocode(e.latLng.lat(), e.latLng.lng());
+    void reverseGeocode(e.latLng.lat(), e.latLng.lng());
   };
 
   const hasPicked = city.trim().length > 0 && streetAddress.trim().length > 0;
@@ -244,7 +249,7 @@ export function MapPicker({
           <p className="text-xs text-text-secondary mt-1">{currentLocation.streetAddress}</p>
           <button
             type="button"
-            onClick={() => reverseGeocode(currentLocation.coords.lat, currentLocation.coords.lng)}
+            onClick={() => void reverseGeocode(currentLocation.coords.lat, currentLocation.coords.lng)}
             className="mt-2 text-xs font-semibold text-primary underline underline-offset-2"
           >
             {t("editOnMap")}
