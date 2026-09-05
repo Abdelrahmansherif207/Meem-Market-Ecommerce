@@ -95,7 +95,7 @@ export default async function FlashSaleSection({
     if (!products.length) return null;
 
     return (
-      <section className="w-full bg-gradient-to-b from-secondary via-secondary to-secondary-dark text-white">
+      <section className="w-full bg-gradient-to-b from-black via-[#1a1a1a] to-[#2a2a2a] text-white">
         <FlashSaleBanner locale={locale} title={title} />
         <div className="relative">
           <ProductSlider

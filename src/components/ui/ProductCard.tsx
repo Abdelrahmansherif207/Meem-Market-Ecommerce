@@ -91,7 +91,7 @@ export default function ProductCard({
   return (
     <div className="flex flex-col w-full">
       <div className={cn("relative w-full aspect-square overflow-hidden rounded-xl", isDark ? "border border-white/20 bg-white/10 backdrop-blur-md" : "border border-border-light bg-white")}>
-        <div className="absolute inset-0 flex start-0 bottom-0 pointer-events-none">
+        <div className="absolute inset-0 z-30 flex start-0 bottom-0 pointer-events-none">
           {flashSaleActive ? (
             <Badge tone="flash" className="animate-pulse self-end">Flash Sale</Badge>
           ) : discountPercent && discountPercent > 0 ? (

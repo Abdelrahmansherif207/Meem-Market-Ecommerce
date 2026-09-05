@@ -49,7 +49,7 @@ export async function TagsBannerSection({
     ));
 
   return (
-    <section className="relative w-full overflow-hidden rounded-2xl bg-gradient-to-b from-secondary via-secondary to-secondary-dark text-white">
+    <section className="relative w-full overflow-hidden rounded-2xl bg-gradient-to-b from-black via-[#1a1a1a] to-[#2a2a2a] text-white">
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_right,_rgba(255,255,255,0.25)_0%,_transparent_70%)]" />
       <div className="absolute -top-20 -right-20 h-80 w-80 rounded-full bg-white/10 blur-3xl" />
       <div className="absolute -bottom-16 -left-16 h-64 w-64 rounded-full bg-white/5 blur-3xl" />

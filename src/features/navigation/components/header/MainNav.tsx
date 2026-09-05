@@ -37,7 +37,7 @@ export default function MainNav({ settingsLogo }: { settingsLogo?: string | null
   return (
     <div className="grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-3 md:gap-6">
       <div className="flex items-center gap-2 md:gap-3 shrink-0">
-        <Logo src={settingsLogo || "/catch-logo.png"} alt="Logo" priority className="rounded-full" width={60} height={60} />
+        <Logo src={settingsLogo || "/meem-new.png"} alt="Logo" priority className="rounded-full" width={140} height={91} />
         <LocationDisplay />
       </div>
 
@@ -68,7 +68,7 @@ export default function MainNav({ settingsLogo }: { settingsLogo?: string | null
             <button
               type="button"
               onClick={() => openAuthModal()}
-              className="group inline-flex items-center gap-2 rounded-full border border-border-light bg-surface px-3 py-1.5 whitespace-nowrap transition-all duration-200 hover:border-primary/30 hover:bg-primary/5"
+              className="group inline-flex items-center gap-2 rounded-full border border-primary/50 bg-surface px-3 py-1.5 whitespace-nowrap transition-all duration-200 hover:border-primary hover:bg-primary/5"
             >
               <div className="flex h-5 w-5 items-center justify-center rounded-full bg-primary/10 transition-colors group-hover:bg-primary/15">
                 <User className="h-3 w-3 text-primary" />

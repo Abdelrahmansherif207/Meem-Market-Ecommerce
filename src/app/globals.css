@@ -5,18 +5,15 @@ button {
 }
 
 @theme {
-  /* Velvet crimson/berry red */
-  --color-primary: #b81d24;
-  --color-primary-active: #9d151b;
-  --color-primary-dark: #8c1217;
+  --color-primary: #0e5aa7;
+  --color-primary-active: #0a4d91;
+  --color-primary-dark: #00387b;
 
-  /* Rich onyx black for solid structure */
-  --color-secondary: #1c1a1a;
-  --color-secondary-dark: #0b0a0a;
+  --color-secondary: #e3000f;
+  --color-secondary-dark: #bb1e10;
 
-  /* Soft, warm rose-nude accent */
-  --color-accent: #e0b0b0;
-  --color-success: #2d7a4d;
+  --color-accent: #cf9e36;
+  --color-success: #237f52;
   --color-success-surface: #edf6f0;
   --color-warning: #a3620a;
   --color-warning-surface: #fdf4e7;
@@ -24,18 +21,16 @@ button {
   --color-error-surface: #fbeeed;
 
   --color-background: #ffffff;
-  /* Creamy, warm cosmetic powder surface */
-  --color-surface: #faf6f5;
+  --color-surface: #f5f5f5;
 
-  --color-text-primary: #1c1a1a;
-  --color-text-secondary: #706565;
+  --color-text-primary: #222222;
+  --color-text-secondary: #666666;
   --color-text-muted: #9b8f8f;
 
-  /* Warm neutral borders to wrap around product cards */
-  --color-border: #ede4e2;
-  --color-border-light: #e9dedb;
-  --color-border-subtle: #f5eeed;
-  --color-discount: #b81d24;
+  --color-border: #e5e5e5;
+  --color-border-light: #e0e7ef;
+  --color-border-subtle: #e0e7ef;
+  --color-discount: #bc1e20;
 
   --font-family-body: var(--font-ibm-arabic), sans-serif;
   --font-family-heading: var(--font-ibm-arabic), sans-serif;
@@ -92,8 +87,13 @@ button {
 }
 
 :root {
-  --header-gradient-start: rgb(245, 235, 235);
+  --header-gradient-start: rgb(157, 176, 196);
   --header-gradient-end: rgb(255, 255, 255);
+}
+
+[data-channel="fast-shipping"] {
+  --header-gradient-start: rgb(252, 238, 190);
+  --header-gradient-end: rgb(255, 253, 248);
 }
 
 @layer utilities {

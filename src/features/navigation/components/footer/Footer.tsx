@@ -33,7 +33,7 @@ export default async function Footer({ params }: FooterProps) {
         <div className="hidden lg:block">
           <div className="grid grid-cols-5 gap-4">
             <div>
-              <Logo src={logoSrc || ""} alt={siteName || "Logo"} textFallback={logoSrc ? undefined : (siteName || undefined)} width={60} height={60} />
+              <Logo src={logoSrc || ""} alt={siteName || "Logo"} textFallback={logoSrc ? undefined : (siteName || undefined)} width={140} height={90} />
               <p className="mt-4 text-xs leading-normal font-normal text-white">{data.contactInfo.stayInTouchText}</p>
               <div className="mt-2 flex">
                 {mergedSocialLinks.map((s) => (

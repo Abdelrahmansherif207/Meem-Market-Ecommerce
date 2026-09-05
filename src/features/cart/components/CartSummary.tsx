@@ -1,6 +1,6 @@
 "use client";
 
-import { Truck, Minus } from "lucide-react";
+import { Truck, Zap, Minus } from "lucide-react";
 import { useTranslations, useLocale } from "next-intl";
 import { formatMoney } from "@/shared/utils/formatMoney";
 import { useAuthStore } from "@/features/auth/store/useAuthStore";
@@ -9,16 +9,20 @@ import CouponBadge from "@/features/coupons/components/CouponBadge";
 import type { AppliedCoupon } from "@/features/coupons/types";
 
 interface CartSummaryProps {
-  subtotal: number;
-  quantity: number;
+  scheduledSubtotal: number;
+  scheduledQty: number;
+  fastSubtotal: number;
+  fastQty: number;
   appliedCoupon?: AppliedCoupon | null;
   couponDiscount?: number;
   onCouponApplied?: () => void;
 }
 
 export function CartSummary({
-  subtotal,
-  quantity,
+  scheduledSubtotal,
+  scheduledQty,
+  fastSubtotal,
+  fastQty,
   appliedCoupon,
   couponDiscount = 0,
   onCouponApplied,
@@ -27,8 +31,13 @@ export function CartSummary({
   const locale = useLocale();
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
 
-  const totalQty = quantity;
-  const total = subtotal - couponDiscount;
+  const totalQty = scheduledQty + fastQty;
+  const total = scheduledSubtotal + fastSubtotal - couponDiscount;
+
+  const lines = [
+    { Icon: Truck, label: t("scheduledTitle"), qty: scheduledQty, sub: scheduledSubtotal },
+    { Icon: Zap, label: t("fastTitle"), qty: fastQty, sub: fastSubtotal },
+  ];
 
   return (
     <div className="rounded-2xl border-2 border-border bg-white p-5 space-y-5">
@@ -38,16 +47,18 @@ export function CartSummary({
       </div>
 
       <div className="space-y-3">
-        {totalQty > 0 && (
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <Truck className="h-3.5 w-3.5 text-text-secondary shrink-0" />
-              <span className="text-sm text-text-secondary">
-                {t("scheduledTitle")} <span className="text-xs text-text-secondary">({totalQty} {t("cartItems", { count: totalQty })})</span>
-              </span>
+        {lines.map((l) =>
+          l.qty > 0 ? (
+            <div key={l.label} className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <l.Icon className="h-3.5 w-3.5 text-text-secondary shrink-0" />
+                <span className="text-sm text-text-secondary">
+                  {l.label} <span className="text-xs text-text-secondary">({l.qty} {t("cartItems", { count: l.qty })})</span>
+                </span>
+              </div>
+              <span className="text-sm font-semibold tabular-nums text-text-primary">{formatMoney(l.sub, locale)}</span>
             </div>
-            <span className="text-sm font-semibold tabular-nums text-text-primary">{formatMoney(subtotal, locale)}</span>
-          </div>
+          ) : null,
         )}
       </div>
 

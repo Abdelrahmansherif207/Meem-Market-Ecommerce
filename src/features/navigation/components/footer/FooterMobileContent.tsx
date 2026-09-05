@@ -33,8 +33,8 @@ export default function FooterMobileContent({
             src={logoSrc || ""}
             alt={siteName || "Logo"}
             textFallback={logoSrc ? undefined : siteName || undefined}
-            width={60}
-            height={60}
+            width={140}
+            height={90}
           />
         }
         defaultOpen

@@ -18,6 +18,7 @@ import {
   NotificationRealtimeProvider,
   NotificationToast,
 } from "@/features/notifications";
+import { ChannelThemeProvider } from "@/features/fast-shipping/components/ChannelThemeProvider";
 import { IBM_Plex_Sans_Arabic } from "next/font/google";
 import { cn } from "@/shared/utils/cn";
 import { getSiteMeta } from "@/features/settings/lib/metadata";
@@ -105,7 +106,7 @@ export default async function RootLayout({
   }
   
   return (
-      <html lang={locale} dir={dir}>
+      <html lang={locale} dir={dir} className="overflow-x-clip">
       <body className={cn("flex min-h-dvh flex-col overflow-x-clip", ibmPlexSansArabic.variable)}>
         <link rel="preconnect" href={process.env.NEXT_PUBLIC_API_URL} />
         <NextIntlClientProvider locale={locale} messages={messages}>
@@ -116,6 +117,7 @@ export default async function RootLayout({
             <MobileHeader />
           </div>
           <MobileBottomNav />
+          <ChannelThemeProvider />
           <AuthSyncHandler />
           <NotificationSyncHandler />
           <NotificationRealtimeProvider />
@@ -129,7 +131,7 @@ export default async function RootLayout({
           </CartSyncProvider>
           <WishlistSyncProvider />
           <ScrollToTopButton />
-          <AuthModal />
+          <AuthModal logo={settingsLogo} />
           <NotificationToast />
         </NextIntlClientProvider>
       </body>

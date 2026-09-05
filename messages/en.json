@@ -75,6 +75,19 @@
     },
     "location": {
       "loading": "Detecting..."
+    },
+    "deliveryModes": {
+      "title": "Delivery Options",
+      "scheduled": "Scheduled",
+      "now": "NOW",
+      "nowEta": "120 mins",
+      "electronics": "Electronic…",
+      "fastDelivery": "Fast Delivery",
+      "fastDeliveryDesc": "Get it by tomorrow",
+      "standardDelivery": "Standard Delivery",
+      "standardDeliveryDesc": "Delivery in 3-5 business days",
+      "freeShipping": "Free Shipping",
+      "freeShippingDesc": "On orders over $50"
     }
   },
   "home": {
@@ -152,7 +165,10 @@
     "inStock": "In Stock",
     "removeItem": "Remove item",
     "decreaseQuantity": "Decrease quantity",
-    "increaseQuantity": "Increase quantity"
+    "increaseQuantity": "Increase quantity",
+    "fastTitle": "Fast Delivery",
+    "fastEta": "120 mins",
+    "fastCheckout": "Fast Checkout"
   },
   "wishlist": {
     "metaTitle": "Wishlist",
@@ -404,7 +420,8 @@
         "pending": "Pending",
         "cancelled": "Cancelled",
         "processing": "Processing",
-        "delivered": "Delivered"
+        "delivered": "Delivered",
+        "shipped": "Shipped"
       }
     },
     "invoices": {
@@ -544,7 +561,10 @@
       "cityRequired": "City is required",
       "countryRequired": "Country is required",
       "streetRequired": "Street address is required"
-    }
+    },
+    "fastCheckout": "Fast Checkout",
+    "fastDelivery": "Fast Delivery",
+    "fastDeliveryDesc": "Pay and get your fast items shipped immediately"
   },
   "siteReviews": {
     "metaTitle": "Customer Reviews",

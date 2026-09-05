@@ -2,18 +2,18 @@ import type { Metadata } from "next";
 import { getCachedSettings } from "../services/settingsService";
 
 export const DEFAULT_SITE_NAME: Record<string, string> = {
-  ar: "كيتش بيوتي",
-  en: "Catch Beauty",
+  ar: "ميم ماركت",
+  en: "Meem Market",
 };
 
 export const DEFAULT_SITE_DESCRIPTION: Record<string, string> = {
-  ar: "تسوق أفضل المنتجات في كيتش بيوتي - إلكترونيات، أزياء، منتجات المنزل والمزيد",
-  en: "Shop the best products at Catch Beauty — electronics, fashion, home goods, and more.",
+  ar: "تسوق أفضل المنتجات في ميم ماركت - إلكترونيات، أزياء، منتجات المنزل والمزيد",
+  en: "Shop the best products at Meem Market — electronics, fashion, home goods, and more.",
 };
 
-export const DEFAULT_FAVICON = "/catch-footer-logo.jpeg";
-export const DEFAULT_LOGO = "/catch-logo.png";
-export const DEFAULT_FOOTER_LOGO = "/catch-footer-logo.jpeg";
+export const DEFAULT_FAVICON = "/meem-icon.jpeg";
+export const DEFAULT_LOGO = "/meem-new.png";
+export const DEFAULT_FOOTER_LOGO = "/new-footer-logo.png";
 
 export interface SiteMeta {
   siteName: string;
@@ -42,7 +42,7 @@ export async function getSiteMeta(locale: string): Promise<SiteMeta> {
     if (settings.favicon) meta.favicon = settings.favicon;
     if (settings.logo) meta.logo = settings.logo;
   } catch {
-    // settings unavailable — keep locale-aware Catch Beauty defaults
+    // settings unavailable — keep locale-aware Meem Market defaults
   }
 
   return meta;

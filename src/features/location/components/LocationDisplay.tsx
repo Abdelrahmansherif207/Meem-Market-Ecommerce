@@ -39,7 +39,7 @@ export function LocationDisplay() {
 
   if (loading) {
     return (
-      <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-surface border border-border-light">
+      <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-surface border border-primary/50">
         <Loader2 className="h-3.5 w-3.5 text-primary animate-spin" />
         <span className="text-xs text-text-secondary whitespace-nowrap">{t("loading")}</span>
       </div>
@@ -55,7 +55,7 @@ export function LocationDisplay() {
       <button
         type="button"
         onClick={() => setSidebarOpen(true)}
-        className="group inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-surface border border-border-light hover:border-primary/30 hover:bg-primary/5 transition-all duration-200 whitespace-nowrap"
+        className="group inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-surface border border-primary/50 hover:border-primary hover:bg-primary/5 transition-all duration-200 whitespace-nowrap"
       >
         <div className="flex items-center justify-center w-5 h-5 rounded-full bg-primary/10">
           <MapPin className={`h-3 w-3 ${deliveryCoords ? "text-primary fill-primary" : "text-primary"}`} />

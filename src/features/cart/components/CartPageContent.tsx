@@ -157,7 +157,7 @@ export function CartPageContent({ minimumOrderAmount }: CartPageContentProps) {
   // processCart — map server cart data into all local state
   // -------------------------------------------------------------------------
   const processCart = useCallback((cart: CartApiCart) => {
-    const mapItem = (item: CartApiItem): HydratedCartItem => ({
+    const mapItem = (item: CartApiItem, deliveryType: "scheduled" | "fast"): HydratedCartItem => ({
       product_id: item.product_id,
       product_variant_id: item.product_variant_id ?? null,
       cartItemId: item.id,
@@ -175,12 +175,16 @@ export function CartPageContent({ minimumOrderAmount }: CartPageContentProps) {
       // count — leave stock_quantity unset rather than fabricating one.
       in_stock: true,
       stock_quantity: undefined,
+      deliveryType,
     });
 
     const items: HydratedCartItem[] = [];
 
     if (cart.normal_items) {
-      items.push(...cart.normal_items.map(mapItem));
+      items.push(...cart.normal_items.map((i) => mapItem(i, "scheduled")));
+    }
+    if (cart.fast_items) {
+      items.push(...cart.fast_items.map((i) => mapItem(i, "fast")));
     }
 
     dispatch({ type: "SET_SERVER", items });
@@ -375,6 +379,7 @@ export function CartPageContent({ minimumOrderAmount }: CartPageContentProps) {
   const displayItems: HydratedCartItem[] =
     state.source === "server" ? state.serverItems : guestItems.map((g) => ({
       ...g,
+      deliveryType: g.deliveryType ?? "scheduled",
       name: g.name ?? `Product #${g.product_id}`,
       image: g.image ?? "",
       price: g.price ?? 0,
@@ -385,10 +390,17 @@ export function CartPageContent({ minimumOrderAmount }: CartPageContentProps) {
       stock_quantity: g.stock_quantity ?? 0,
     }));
 
-  const subtotal = calcSubtotal(
-    displayItems.map((i) => ({ price: i.current_price, quantity: i.quantity })),
+  const scheduledItems = displayItems.filter((i) => i.deliveryType === "scheduled");
+  const fastItems = displayItems.filter((i) => i.deliveryType === "fast");
+
+  const scheduledSubtotal = calcSubtotal(
+    scheduledItems.map((i) => ({ price: i.current_price, quantity: i.quantity })),
   );
-  const totalQuantity = calcTotalQuantity(displayItems);
+  const fastSubtotal = calcSubtotal(
+    fastItems.map((i) => ({ price: i.current_price, quantity: i.quantity })),
+  );
+  const scheduledQty = calcTotalQuantity(scheduledItems);
+  const fastQty = calcTotalQuantity(fastItems);
 
   // -------------------------------------------------------------------------
   // Render states
@@ -472,31 +484,42 @@ export function CartPageContent({ minimumOrderAmount }: CartPageContentProps) {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           <div className="lg:col-span-2 space-y-8">
             <CartSection
-              items={displayItems}
+              deliveryType="scheduled"
+              items={scheduledItems}
               pendingItemIds={state.pendingItemIds}
               onUpdateQuantity={handleUpdateQuantity}
               onRemove={handleRemove}
               minimumOrderAmount={minimumOrderAmount}
             />
-            <AvailableCoupons
-              onSelectCoupon={async (coupon) => {
-                if (isAuthenticated) {
-                  await couponService.removeCoupon(locale);
-                }
-                await couponService.applyCoupon(coupon.code, locale);
-                await refreshCart();
-              }}
+            <CartSection
+              deliveryType="fast"
+              items={fastItems}
+              pendingItemIds={state.pendingItemIds}
+              onUpdateQuantity={handleUpdateQuantity}
+              onRemove={handleRemove}
+              minimumOrderAmount={minimumOrderAmount}
             />
           </div>
 
           <div className="lg:col-span-1">
-            <div className="sticky top-24">
+            <div className="sticky top-24 space-y-6">
               <CartSummary
-                subtotal={subtotal}
-                quantity={totalQuantity}
+                scheduledSubtotal={scheduledSubtotal}
+                scheduledQty={scheduledQty}
+                fastSubtotal={fastSubtotal}
+                fastQty={fastQty}
                 appliedCoupon={appliedCoupon}
                 couponDiscount={couponDiscount}
                 onCouponApplied={async () => { await refreshCart(); }}
+              />
+              <AvailableCoupons
+                onSelectCoupon={async (coupon) => {
+                  if (isAuthenticated) {
+                    await couponService.removeCoupon(locale);
+                  }
+                  await couponService.applyCoupon(coupon.code, locale);
+                  await refreshCart();
+                }}
               />
             </div>
           </div>

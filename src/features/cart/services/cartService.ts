@@ -17,7 +17,7 @@ export const cartService = {
       product_id: number;
       quantity: number;
       product_variant_id?: number | null;
-      shipping_method?: "scheduled";
+      shipping_method?: "scheduled" | "fast";
     },
     lang?: string,
   ): Promise<CartItem> => {

@@ -5,6 +5,7 @@ import { useAuthStore } from "@/features/auth/store/useAuthStore";
 import { useGuestCartStore } from "../store/useGuestCartStore";
 import { useServerCartStore } from "../store/useServerCartStore";
 import { cartService } from "../services/cartService";
+import type { DeliveryType } from "../types";
 
 /**
  * Unified cart-mutation hook.
@@ -51,6 +52,7 @@ export function useCartActions(productId: number) {
     async (item: {
       quantity: number;
       product_variant_id?: number | null;
+      deliveryType?: DeliveryType;
       name: string;
       image: string;
       price: number;
@@ -65,6 +67,7 @@ export function useCartActions(productId: number) {
           product_id: productId,
           quantity: item.quantity,
           product_variant_id: item.product_variant_id ?? null,
+          deliveryType: item.deliveryType ?? "scheduled",
           name: item.name,
           image: item.image,
           price: item.price,
@@ -87,7 +90,7 @@ export function useCartActions(productId: number) {
           product_id: productId,
           quantity: item.quantity,
           product_variant_id: item.product_variant_id ?? null,
-          shipping_method: "scheduled",
+          shipping_method: item.deliveryType ?? "scheduled",
         }, locale);
       } catch {
         // Rollback on failure.

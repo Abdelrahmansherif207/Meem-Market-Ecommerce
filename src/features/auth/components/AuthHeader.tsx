@@ -2,14 +2,16 @@
 
 import { useTranslations } from "next-intl";
 import Logo from "@/components/ui/Logo";
+import { DEFAULT_LOGO } from "@/features/settings/lib/metadata";
 
 interface AuthHeaderProps {
   isLogin: boolean;
   isOtp?: boolean;
   onToggleMode?: () => void;
+  logo?: string | null;
 }
 
-export function AuthHeader({ isLogin, isOtp }: AuthHeaderProps) {
+export function AuthHeader({ isLogin, isOtp, logo }: AuthHeaderProps) {
   const t = useTranslations("auth");
 
   if (isOtp) {
@@ -28,7 +30,7 @@ export function AuthHeader({ isLogin, isOtp }: AuthHeaderProps) {
   return (
     <>
       <div className="mb-4 flex justify-center">
-        <Logo src="/catch-footer-logo.jpeg" alt="Catch Beauty" width={100} height={40} className="rounded-lg" />
+        <Logo src={logo || DEFAULT_LOGO} alt="Meem Market" width={100} height={40} className="rounded-lg" />
       </div>
       {!isLogin && (
         <h2 className="text-center text-2xl font-semibold text-text-primary sm:text-3xl">

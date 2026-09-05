@@ -1,5 +1,4 @@
 import { getCachedSettings } from "@/features/settings/services/settingsService";
-import { DEFAULT_SITE_NAME } from "@/features/settings/lib/metadata";
 import type { FooterData, SocialLink } from "../types";
 
 export interface AssembledFooterContent {
@@ -13,20 +12,23 @@ export interface AssembledFooterContent {
 export async function assembleFooterContent(locale: string): Promise<AssembledFooterContent> {
   const data = await footerService.getFooter(locale);
 
-  let logoSrc = "/catch-footer-logo.jpeg";
-  let siteName = DEFAULT_SITE_NAME[locale] ?? DEFAULT_SITE_NAME.en;
+  let logoSrc = "/new-footer-logo.png";
+  let siteName = "";
   let copyright = "";
   const settingsSocial: { platform: string; url: string }[] = [];
+  let fastShippingPublished = false;
 
   try {
     const settings = await getCachedSettings(locale);
     logoSrc = settings.footer_logo || settings.logo || logoSrc;
     siteName = settings.site_name || siteName;
     copyright = settings.site_copy_right || "";
+    if (settings.fast_shipping_page_publish) fastShippingPublished = true;
 
     const platformMap: Record<string, string> = {
       facebook: settings.facebook,
       instagram: settings.instagram,
+      linkedin: settings.linkedin,
       youtube: settings.youtube,
       tiktok: settings.tiktok,
       snapchat: settings.snapchat,
@@ -36,6 +38,19 @@ export async function assembleFooterContent(locale: string): Promise<AssembledFo
     }
   } catch {
     // use defaults
+  }
+
+  if (fastShippingPublished) {
+    const csColumn = data.columns.find(
+      (c) => c.title === "Customer Service" || c.title === "خدمة العملاء",
+    );
+    if (csColumn) {
+      csColumn.links.push({
+        id: 99,
+        label: locale === "ar" ? "الشحن السريع" : "Fast Shipping",
+        slug: "/fast-shipping",
+      });
+    }
   }
 
   const baseLinks: SocialLink[] = data.socialLinks;
@@ -101,7 +116,7 @@ function getMockFooterData(lang: string): FooterData {
         id: 3,
         title: isAr ? "معلومات عنا" : "About Us",
         links: [
-          { id: 6, label: isAr ? "عن كيتش بيوتي" : "About Catch Beauty", slug: "/info/about" },
+          { id: 6, label: isAr ? "عن ميم ماركت" : "About Meem Market", slug: "/info/about" },
           { id: 7, label: isAr ? "شركتنا" : "Our Company", slug: "/info/company" },
           { id: 8, label: isAr ? "المسؤولية المجتمعية" : "Community & Society", slug: "/info/community" },
           { id: 9, label: isAr ? "النشرة البريدية" : "Newsletter", slug: "/info/newsletter" },
@@ -131,6 +146,7 @@ function getMockFooterData(lang: string): FooterData {
     ],
     socialLinks: [
       { platform: "facebook", url: "#", label: "Facebook" },
+      { platform: "twitter", url: "#", label: "Twitter" },
       { platform: "instagram", url: "#", label: "Instagram" },
       { platform: "youtube", url: "#", label: "YouTube" },
       { platform: "tiktok", url: "#", label: "TikTok" },

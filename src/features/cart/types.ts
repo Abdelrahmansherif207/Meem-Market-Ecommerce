@@ -28,10 +28,13 @@ export interface CartItem {
   total: number;
 }
 
+export type DeliveryType = "scheduled" | "fast";
+
 export interface GuestCartItem {
   product_id: number;
   product_variant_id?: number | null;
   quantity: number;
+  deliveryType: DeliveryType;
   name: string;
   image: string;
   price: number;
@@ -54,7 +57,7 @@ export interface AddBulkPayload {
     product_id: number;
     quantity: number;
     product_variant_id?: number | null;
-    shipping_method?: "scheduled";
+    shipping_method?: "scheduled" | "fast";
   }>;
 }
 
@@ -99,6 +102,8 @@ export interface CartApiCart {
   coupon_discount: number;
   total_after_coupon: number;
   normal_items: CartApiItem[];
+  fast_items: CartApiItem[];
   normal_items_count: number;
+  fast_items_count: number;
   has_eligible_promotion: boolean;
 }

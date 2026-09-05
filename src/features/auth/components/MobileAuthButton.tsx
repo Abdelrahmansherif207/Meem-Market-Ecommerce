@@ -19,7 +19,7 @@ export function MobileAuthButton() {
     <button
       type="button"
       onClick={() => openAuthModal()}
-      className="group inline-flex items-center justify-center rounded-full border border-border-light bg-surface p-1.5 transition-all duration-200 hover:border-primary/30 hover:bg-primary/5"
+      className="group inline-flex items-center justify-center rounded-full border border-primary/50 bg-surface p-1.5 transition-all duration-200 hover:border-primary hover:bg-primary/5"
       aria-label={t("loginRegister")}
     >
       <div className="flex h-7 w-7 items-center justify-center rounded-full bg-primary/10 transition-colors group-hover:bg-primary/15">

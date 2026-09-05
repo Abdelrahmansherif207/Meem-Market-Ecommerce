@@ -3,28 +3,28 @@
 import { useEffect, useRef, useState, useActionState } from "react";
 import { X, Mail } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { PatternTiles } from "./PatternTiles";
 import { PhoneInputWithCountry } from "./PhoneInputWithCountry";
 import { PasswordInput } from "./PasswordInput";
 import { AuthTabs } from "./AuthTabs";
 import { AuthFeedback } from "./AuthFeedback";
 import { GoogleLoginButton } from "./GoogleLoginButton";
 import Logo from "@/components/ui/Logo";
+import { DEFAULT_LOGO } from "@/features/settings/lib/metadata";
 import { useAuthModalStore } from "../store/useAuthModalStore";
 import { useAuthStore } from "../store/useAuthStore";
 import { loginAction } from "../actions";
 import { useRouter } from "@/i18n/navigation";
 type ContactMethod = "email" | "phone";
 
-export function AuthModal() {
+export function AuthModal({ logo }: { logo?: string | null }) {
   const { isOpen, close } = useAuthModalStore();
 
   if (!isOpen) return null;
 
-  return <AuthModalContent close={close} />;
+  return <AuthModalContent close={close} logo={logo} />;
 }
 
-function AuthModalContent({ close }: { close: () => void }) {
+function AuthModalContent({ close, logo }: { close: () => void; logo?: string | null }) {
   const t = useTranslations("auth");
   const [method, setMethod] = useState<ContactMethod>("phone");
   const [state, formAction, pending] = useActionState(loginAction, null);
@@ -74,7 +74,7 @@ function handleOverlayClick(e: React.MouseEvent<HTMLDivElement>) {
     <div
       ref={overlayRef}
       onClick={handleOverlayClick}
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4 backdrop-blur-sm"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4"
       aria-modal="true"
       role="dialog"
       aria-label="Authentication"
@@ -82,26 +82,21 @@ function handleOverlayClick(e: React.MouseEvent<HTMLDivElement>) {
       {/* ?? Modal card ?? */}
       <div className="relative w-full max-w-[480px] overflow-hidden rounded-2xl bg-background shadow-2xl">
 
-        {/* ?? Top: animated pattern banner ?? */}
-        <div className="relative h-52 overflow-hidden bg-surface">
-          <PatternTiles />
+        {/* Close button */}
+        <button
+          type="button"
+          onClick={close}
+          aria-label={t("close")}
+          className="absolute end-3 top-3 z-20 flex h-8 w-8 items-center justify-center rounded-full bg-white/80 text-text-primary shadow backdrop-blur-sm transition hover:bg-white hover:shadow-md"
+        >
+          <X className="h-4 w-4" />
+        </button>
 
-          {/* Close button */}
-          <button
-            type="button"
-            onClick={close}
-            aria-label={t("close")}
-            className="absolute end-3 top-3 z-20 flex h-8 w-8 items-center justify-center rounded-full bg-white/80 text-text-primary shadow backdrop-blur-sm transition hover:bg-white hover:shadow-md"
-          >
-            <X className="h-4 w-4" />
-          </button>
-        </div>
-
-        {/* ?? Bottom: form area ?? */}
-        <div className="px-6 pb-7 pt-5">
+        {/* ?? Form area ?? */}
+        <div className="px-6 pb-7 pt-10">
           {/* Heading */}
           <div className="mb-4 flex justify-center">
-            <Logo src="/catch-footer-logo.jpeg" alt="Catch Beauty" width={100} height={40} className="rounded-lg" />
+            <Logo src={logo || DEFAULT_LOGO} alt="Meem Market" width={180} height={70} className="rounded-lg" />
           </div>
           <h2 className="mb-4 text-center text-xl font-bold text-text-primary">
             {t("welcomeHeading")}
@@ -117,34 +112,34 @@ function handleOverlayClick(e: React.MouseEvent<HTMLDivElement>) {
           >
             <input type="hidden" name="method" value={method} />
 
-            {method === "email" ? (
-              <div>
-                <div className="relative">
-                  <Mail className="absolute start-3 top-1/2 h-5 w-5 -translate-y-1/2 text-text-secondary" />
-                  <input
-                    ref={inputRef}
-                    type="email"
-                    name="email"
-                    placeholder={t("emailPlaceholder")}
-                    defaultValue={payload.email || ""}
-                    className={
-                      "w-full rounded-xl border bg-background ps-10 pe-4 py-3 text-sm text-text-primary outline-none transition placeholder:text-text-secondary/70 focus:border-primary focus:ring-2 focus:ring-primary/10 " +
-                      (fieldErrors.email ? "border-error" : "border-border")
-                    }
-                  />
-                </div>
-                {fieldErrors.email && (
-                  <p className="mt-1 text-xs text-error">{fieldErrors.email}</p>
-                )}
+            <div hidden={method !== "email"} className="animate-in fade-in duration-200">
+              <div className="relative">
+                <Mail className="absolute start-3 top-1/2 h-5 w-5 -translate-y-1/2 text-text-secondary" />
+                <input
+                  ref={inputRef}
+                  type="email"
+                  name="email"
+                  placeholder={t("emailPlaceholder")}
+                  defaultValue={payload.email || ""}
+                  className={
+                    "w-full rounded-xl border bg-background ps-10 pe-4 py-3 text-sm text-text-primary outline-none transition placeholder:text-text-secondary/70 focus:border-primary focus:ring-2 focus:ring-primary/10 " +
+                    (fieldErrors.email ? "border-error" : "border-border")
+                  }
+                />
               </div>
-            ) : (
+              {fieldErrors.email && (
+                <p className="mt-1 text-xs text-error">{fieldErrors.email}</p>
+              )}
+            </div>
+
+            <div hidden={method !== "phone"} className="animate-in fade-in duration-200">
               <PhoneInputWithCountry
                 name="phone"
                 placeholder={t("phonePlaceholder")}
                 error={fieldErrors.phone}
                 defaultValue={payload.phone || ""}
               />
-            )}
+            </div>
 
             <PasswordInput
               name="password"
