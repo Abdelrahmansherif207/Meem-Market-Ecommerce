@@ -55,7 +55,7 @@ export function DeliveryModeButton({
       >
         <div
           className={cn(
-            "relative size-5 shrink-0 overflow-hidden drop-shadow-sm",
+            "relative size-6 shrink-0 overflow-hidden drop-shadow-sm",
             hideIcon && "hidden",
           )}
         >
