@@ -124,6 +124,7 @@ export function MapPicker({
   const { isLoaded, loadError } = useJsApiLoader({
     id: "google-map-script",
     googleMapsApiKey: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY!,
+    language: locale === "ar" ? "ar" : "en",
   });
 
   useEffect(() => {
