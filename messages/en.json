@@ -81,6 +81,7 @@
       "scheduled": "Scheduled",
       "now": "NOW",
       "nowEta": "120 mins",
+      "unavailable": "Currently unavailable",
       "electronics": "Electronic…",
       "fastDelivery": "Fast Delivery",
       "fastDeliveryDesc": "Get it by tomorrow",

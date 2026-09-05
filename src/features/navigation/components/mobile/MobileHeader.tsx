@@ -2,6 +2,7 @@ import { getLocale, getTranslations } from "next-intl/server";
 import { SearchAutocomplete } from "../header/SearchAutocomplete";
 import { LocaleSwitcher } from "../header/LocaleSwitcher";
 import { WishlistIcon } from "../header/WishlistIcon";
+import DeliveryModes from "../header/DeliveryModes";
 import { NotificationBell } from "@/features/notifications";
 import { LocationDisplay } from "@/features/location";
 import { MobileAuthButton } from "@/features/auth/components/MobileAuthButton";
@@ -15,7 +16,7 @@ export default async function MobileHeader() {
 
   return (
     <header className="header-gradient header-shadow mb-5 block lg:hidden">
-      <div className="flex flex-col gap-3 px-4 py-2.5">
+      <div className="flex flex-col gap-1 px-4 py-2.5">
         <div className="flex items-center gap-3">
           <MobileFooterDrawer {...footerContent} />
           <LocationDisplay />
@@ -31,6 +32,7 @@ export default async function MobileHeader() {
           highlightText={t("mainPlaceholderHighlight")}
           wrapperClassName="w-full"
         />
+        <DeliveryModes compact />
       </div>
     </header>
   );

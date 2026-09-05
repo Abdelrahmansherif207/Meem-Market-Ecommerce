@@ -198,12 +198,12 @@ export function PickupLocationSelector() {
                     className="w-full h-full"
                     loading="lazy"
                     referrerPolicy="no-referrer-when-downgrade"
-                    src={`https://maps.google.com/maps?q=${loc.latitude},${loc.longitude}&z=15&output=embed`}
+                    src={`https://maps.google.com/maps?q=${loc.latitude},${loc.longitude}&z=15&hl=${locale === "ar" ? "ar" : "en"}&output=embed`}
                   />
                 </div>
 
                 <a
-                  href={`https://www.google.com/maps/dir/?api=1&destination=${loc.latitude},${loc.longitude}`}
+                  href={`https://www.google.com/maps/dir/?api=1&destination=${loc.latitude},${loc.longitude}&hl=${locale === "ar" ? "ar" : "en"}`}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="inline-flex items-center gap-1.5 text-xs font-medium text-primary hover:underline"

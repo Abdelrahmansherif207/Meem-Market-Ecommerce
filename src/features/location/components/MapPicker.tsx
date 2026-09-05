@@ -124,6 +124,7 @@ export function MapPicker({
   const { isLoaded, loadError } = useJsApiLoader({
     id: "google-map-script",
     googleMapsApiKey: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY!,
+    language: locale === "ar" ? "ar" : "en",
   });
 
   useEffect(() => {
@@ -154,21 +155,50 @@ export function MapPicker({
     setPredictionsLoading(value.trim().length >= 3);
   };
 
-  const reverseGeocode = (lat: number, lng: number) => {
+  const reverseGeocode = async (lat: number, lng: number) => {
     setSelectedCoords({ lat, lng });
-    const geocoder = new google.maps.Geocoder();
-    geocoder.geocode({ location: { lat, lng } }, (results, status) => {
-      if (status === "OK" && results?.[0]) {
-        const place = results[0];
-        const addr = extractAddressComponents(place.address_components);
+    try {
+      const response = await fetch(
+        "https://places.googleapis.com/v1/places:searchNearby",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "X-Goog-Api-Key": process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY!,
+            "X-Goog-FieldMask": "places.id,places.formattedAddress,places.addressComponents,places.location,places.displayName",
+          },
+          body: JSON.stringify({
+            locationRestriction: {
+              circle: {
+                center: { latitude: lat, longitude: lng },
+                radius: 200,
+              },
+            },
+            rankPreference: "DISTANCE",
+            maxResultCount: 1,
+          }),
+        },
+      );
+      if (!response.ok) return;
+      const data = await response.json();
+      const place = data.places?.[0];
+      if (place?.location) {
+        const legacyComponents = (place.addressComponents ?? []).map((c: PlaceAddressComponent) => ({
+          long_name: c.longText,
+          short_name: c.shortText,
+          types: c.types,
+        }));
+        const addr = extractAddressComponents(legacyComponents);
         setCity(addr.city);
         setState(addr.state);
         setZip(addr.zip);
-        setStreetAddress(addr.street || place.formatted_address?.split(",")[0]?.trim() || "");
+        setStreetAddress(addr.street || place.formattedAddress?.split(",")[0]?.trim() || "");
         setCountry(addr.country);
-        setSearchValue(place.formatted_address || "");
+        setSearchValue(place.formattedAddress || "");
       }
-    });
+    } catch {
+      // silently fail
+    }
   };
 
   const handlePredictionSelect = async (prediction: AutocompletePrediction) => {
@@ -210,7 +240,12 @@ export function MapPicker({
 
   const handleMarkerDragEnd = (e: google.maps.MapMouseEvent) => {
     if (!e.latLng) return;
-    reverseGeocode(e.latLng.lat(), e.latLng.lng());
+    void reverseGeocode(e.latLng.lat(), e.latLng.lng());
+  };
+
+  const handleMapClick = (e: google.maps.MapMouseEvent) => {
+    if (!e.latLng) return;
+    void reverseGeocode(e.latLng.lat(), e.latLng.lng());
   };
 
   const hasPicked = city.trim().length > 0 && streetAddress.trim().length > 0;
@@ -238,7 +273,7 @@ export function MapPicker({
           <p className="text-xs text-text-secondary mt-1">{currentLocation.streetAddress}</p>
           <button
             type="button"
-            onClick={() => reverseGeocode(currentLocation.coords.lat, currentLocation.coords.lng)}
+            onClick={() => void reverseGeocode(currentLocation.coords.lat, currentLocation.coords.lng)}
             className="mt-2 text-xs font-semibold text-primary underline underline-offset-2"
           >
             {t("editOnMap")}
@@ -304,6 +339,7 @@ export function MapPicker({
             mapContainerStyle={mapContainerStyle}
             center={selectedCoords}
             zoom={16}
+            onClick={handleMapClick}
           >
             <Marker position={selectedCoords} draggable onDragEnd={handleMarkerDragEnd} />
           </GoogleMap>
