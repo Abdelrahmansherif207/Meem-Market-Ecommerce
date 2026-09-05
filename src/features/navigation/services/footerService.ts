@@ -4,6 +4,7 @@ import type { FooterData, SocialLink } from "../types";
 export interface AssembledFooterContent {
   data: FooterData;
   logoSrc: string;
+  mainLogoSrc: string;
   siteName: string;
   copyright: string;
   mergedSocialLinks: SocialLink[];
@@ -13,6 +14,7 @@ export async function assembleFooterContent(locale: string): Promise<AssembledFo
   const data = await footerService.getFooter(locale);
 
   let logoSrc = "/new-footer-logo.png";
+  let mainLogoSrc = "/meem-new.png";
   let siteName = "";
   let copyright = "";
   const settingsSocial: { platform: string; url: string }[] = [];
@@ -20,6 +22,7 @@ export async function assembleFooterContent(locale: string): Promise<AssembledFo
 
   try {
     const settings = await getCachedSettings(locale);
+    mainLogoSrc = settings.logo || mainLogoSrc;
     logoSrc = settings.footer_logo || settings.logo || logoSrc;
     siteName = settings.site_name || siteName;
     copyright = settings.site_copy_right || "";
@@ -71,7 +74,7 @@ export async function assembleFooterContent(locale: string): Promise<AssembledFo
       })()
     : baseLinks;
 
-  return { data, logoSrc, siteName, copyright, mergedSocialLinks };
+  return { data, logoSrc, mainLogoSrc, siteName, copyright, mergedSocialLinks };
 }
 
 // ---------------------------------------------------------------------------

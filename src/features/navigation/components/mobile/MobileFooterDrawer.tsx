@@ -10,7 +10,7 @@ import FooterContactCard from "../footer/FooterContactCard";
 
 interface Props {
   data: FooterData;
-  logoSrc: string;
+  mainLogoSrc: string;
   siteName: string;
   copyright: string;
   mergedSocialLinks: SocialLink[];
@@ -18,7 +18,7 @@ interface Props {
 
 export default function MobileFooterDrawer({
   data,
-  logoSrc,
+  mainLogoSrc,
   siteName,
   copyright,
   mergedSocialLinks,
@@ -77,7 +77,7 @@ export default function MobileFooterDrawer({
             <div className="flex-1 overflow-y-auto px-4 py-2 text-text-primary [&_span]:text-text-primary [&_a]:text-text-primary [&_.border-b]:border-black/20 [&_button]:text-text-primary [&_svg]:text-text-primary">
               <FooterMobileContent
                 data={data}
-                logoSrc={logoSrc}
+                logoSrc={mainLogoSrc}
                 siteName={siteName}
                 copyright={copyright}
                 mergedSocialLinks={mergedSocialLinks}
