@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Image from "next/image";
 import { Link } from "@/i18n/navigation";
-import { Heart, Truck, Star } from "lucide-react";
+import { Heart, Star } from "lucide-react";
 import { cn } from "@/shared/utils/cn";
 
 export interface FlashSaleCardItem {
@@ -16,7 +16,6 @@ export interface FlashSaleCardItem {
   rating?: number;
   reviewCount?: number;
   hasVariants?: boolean;
-  isFastShipping?: boolean;
   colorVariants?: string[];
 }
 
@@ -36,9 +35,9 @@ export default function FlashSaleCard({ item, priority }: FlashSaleCardProps) {
     val.toLocaleString("en-US", { minimumFractionDigits: 0, maximumFractionDigits: 3 });
 
   return (
-    <div className="group/card flex flex-col w-full bg-white rounded-lg border border-gray-100 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-md overflow-hidden">
+    <div className="group/card flex flex-col w-full bg-white rounded-lg border border-border-subtle shadow-elev-1 transition-all duration-300 hover:-translate-y-1 hover:shadow-elev-2 overflow-hidden">
       {/* Image Area */}
-      <div className="relative w-full aspect-square bg-gray-50 overflow-hidden">
+      <div className="relative w-full aspect-square bg-surface overflow-hidden">
         <Link href={`/products/${item.slug ?? item.id}`} className="block w-full h-full">
           <Image
             src={item.image}
@@ -52,7 +51,7 @@ export default function FlashSaleCard({ item, priority }: FlashSaleCardProps) {
 
         {/* Best Seller Badge (top-left) */}
         {discountPercent > 0 && (
-          <span className="absolute top-2 left-2 z-10 bg-emerald-700 text-white text-[10px] font-bold px-2 py-0.5 rounded-md leading-normal">
+          <span className="absolute top-2 left-2 z-10 bg-success text-white text-2xs font-bold px-2 py-0.5 rounded-md leading-normal">
             Best Seller
           </span>
         )}
@@ -60,11 +59,11 @@ export default function FlashSaleCard({ item, priority }: FlashSaleCardProps) {
         {/* Wishlist Toggle (top-right) */}
         <button
           onClick={() => setWishlisted((p) => !p)}
-          className="absolute top-2 right-2 z-10 flex items-center justify-center w-7 h-7 rounded-full bg-white/80 backdrop-blur-sm shadow-sm transition-colors hover:bg-white"
+          className="absolute top-2 right-2 z-10 flex items-center justify-center w-7 h-7 rounded-full bg-white/80 backdrop-blur-sm shadow-elev-1 transition-colors hover:bg-white"
           aria-label={wishlisted ? "Remove from wishlist" : "Add to wishlist"}
         >
           <Heart
-            className={cn("size-3.5 transition-colors", wishlisted ? "fill-red-500 text-red-500" : "text-gray-600")}
+            className={cn("size-3.5 transition-colors", wishlisted ? "fill-discount text-discount" : "text-text-secondary")}
           />
         </button>
 
@@ -74,12 +73,12 @@ export default function FlashSaleCard({ item, priority }: FlashSaleCardProps) {
             {item.colorVariants.slice(0, 3).map((color, i) => (
               <span
                 key={i}
-                className="block w-3 h-3 rounded-full border border-white shadow-sm"
+                className="block w-3 h-3 rounded-full border border-white shadow-elev-1"
                 style={{ backgroundColor: color }}
               />
             ))}
             {item.colorVariants.length > 3 && (
-              <span className="text-[10px] font-medium text-gray-500 ml-0.5">
+              <span className="text-2xs font-medium text-text-muted ml-0.5">
                 +{item.colorVariants.length - 3}
               </span>
             )}
@@ -91,7 +90,7 @@ export default function FlashSaleCard({ item, priority }: FlashSaleCardProps) {
       <div className="flex flex-col gap-1.5 p-2.5">
         {/* Product Name */}
         <Link href={`/products/${item.slug ?? item.id}`}>
-          <p className="text-sm font-medium text-gray-900 leading-tight line-clamp-2 hover:text-primary transition-colors">
+          <p className="text-sm font-medium text-text-primary leading-tight line-clamp-2 hover:text-primary transition-colors">
             {item.name}
           </p>
         </Link>
@@ -99,47 +98,32 @@ export default function FlashSaleCard({ item, priority }: FlashSaleCardProps) {
         {/* Rating */}
         {item.rating != null && (
           <div className="flex items-center gap-1">
-            <Star className="size-3 fill-emerald-600 text-emerald-600" />
-            <span className="text-xs font-semibold text-gray-800">{item.rating.toFixed(1)}</span>
+            <Star className="size-3 fill-success text-success" />
+            <span className="text-xs font-semibold text-text-primary">{item.rating.toFixed(1)}</span>
             {item.reviewCount != null && (
-              <span className="text-xs text-gray-400">({item.reviewCount})</span>
+              <span className="text-xs text-text-muted">({item.reviewCount})</span>
             )}
           </div>
         )}
 
         {/* Pricing */}
         {item.price != null && (
-          <div className="flex items-baseline gap-1.5 flex-wrap">
-            <span className="text-sm font-bold text-gray-900">
-              EGP {formatPrice(item.price)}
+          <div className="flex items-baseline gap-1.5 flex-wrap" dir="ltr">
+            <span className="text-sm font-bold text-text-primary">
+              {formatPrice(item.price)} EGP
             </span>
             {item.originalPrice != null && item.originalPrice > item.price && (
               <>
-                <span className="text-xs text-gray-400 line-through">
+                <span className="text-xs text-text-muted line-through">
                   {formatPrice(item.originalPrice)}
                 </span>
-                <span className="text-xs font-semibold text-emerald-600">
+                <span className="text-xs font-semibold text-success">
                   {discountPercent}%
                 </span>
               </>
             )}
           </div>
         )}
-
-        {/* Fulfillment Badges */}
-        <div className="flex items-center gap-2 mt-0.5">
-          {item.isFastShipping && (
-            <span className="inline-flex items-center gap-0.5 text-[10px] font-bold italic text-amber-700 bg-amber-100 px-1.5 py-0.5 rounded-sm leading-normal">
-              express
-            </span>
-          )}
-          {item.isFastShipping && (
-            <span className="inline-flex items-center gap-0.5 text-[10px] text-gray-500 leading-normal">
-              <Truck className="size-2.5" />
-              Free Delivery
-            </span>
-          )}
-        </div>
       </div>
     </div>
   );

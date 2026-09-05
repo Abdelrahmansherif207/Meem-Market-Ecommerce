@@ -233,7 +233,7 @@ export function WishlistPageContent() {
     return (
       <div className="flex flex-col items-center justify-center py-16 text-center">
         <AlertTriangle className="mb-3 size-10 text-red-400" />
-        <p className="text-sm text-gray-500">{state.loadError}</p>
+        <p className="text-sm text-text-secondary">{state.loadError}</p>
         <RetryButton
           label={t("retry")}
           onClick={handleRetryLoad}

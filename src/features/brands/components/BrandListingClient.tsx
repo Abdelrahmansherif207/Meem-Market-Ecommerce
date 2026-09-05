@@ -15,7 +15,7 @@ interface BrandListingClientProps {
 
 type SortMode = "a-z" | "z-a" | "newest";
 
-export default function BrandListingClient({ brands, locale }: BrandListingClientProps) {
+export default function BrandListingClient({ brands }: BrandListingClientProps) {
   const t = useTranslations("emptyState");
   const [search, setSearch] = useState("");
   const [sort, setSort] = useState<SortMode>("a-z");

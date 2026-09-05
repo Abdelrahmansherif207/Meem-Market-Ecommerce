@@ -122,12 +122,12 @@ export default function OtpInput({
             className={cn(
               "h-14 w-12 rounded-3xl border bg-background text-center text-2xl font-semibold text-text-primary outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/10 sm:w-14",
               disabled && "cursor-not-allowed opacity-50",
-              error ? "border-red-500" : "border-border"
+              error ? "border-error" : "border-border"
             )}
           />
         ))}
       </div>
-      {error && <p className="mt-2 text-center text-xs text-red-500">{error}</p>}
+      {error && <p className="mt-2 text-center text-xs text-error">{error}</p>}
     </div>
   );
 }

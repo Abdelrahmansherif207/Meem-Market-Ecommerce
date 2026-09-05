@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import Logo from "@/components/ui/Logo";
 
 interface AuthHeaderProps {
@@ -9,14 +10,16 @@ interface AuthHeaderProps {
 }
 
 export function AuthHeader({ isLogin, isOtp }: AuthHeaderProps) {
+  const t = useTranslations("auth");
+
   if (isOtp) {
     return (
       <>
         <h2 className="text-center text-2xl font-semibold text-text-primary sm:text-3xl">
-          Verify your email
+          {t("verifyEmailHeading")}
         </h2>
         <p className="mt-1 text-center text-sm text-text-secondary">
-          Enter the verification code sent to your email.
+          {t("verifyEmailDesc")}
         </p>
       </>
     );
@@ -25,17 +28,15 @@ export function AuthHeader({ isLogin, isOtp }: AuthHeaderProps) {
   return (
     <>
       <div className="mb-4 flex justify-center">
-        <Logo src="/meem-logo.png" alt="Meem Market" />
+        <Logo src="/catch-footer-logo.jpeg" alt="Catch Beauty" width={100} height={40} className="rounded-lg" />
       </div>
       {!isLogin && (
         <h2 className="text-center text-2xl font-semibold text-text-primary sm:text-3xl">
-          Create your account
+          {t("createAccountHeading")}
         </h2>
       )}
       <p className="mt-1 text-center text-sm text-text-secondary">
-        {isLogin
-          ? "Please enter your login details below to continue."
-          : "Use your details below to create a new account."}
+        {isLogin ? t("loginSubtitle") : t("registerSubtitle")}
       </p>
     </>
   );

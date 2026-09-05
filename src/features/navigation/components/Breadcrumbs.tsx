@@ -24,7 +24,7 @@ export default function Breadcrumbs({ items, locale }: BreadcrumbsProps) {
           return (
             <li key={item.label + index} className="flex items-center gap-1">
               {index > 0 && (
-                <Separator className="h-3.5 w-3.5 shrink-0 text-gray-400" />
+                <Separator className="h-3.5 w-3.5 shrink-0 text-text-muted" />
               )}
               {isLast || !item.href ? (
                 <span

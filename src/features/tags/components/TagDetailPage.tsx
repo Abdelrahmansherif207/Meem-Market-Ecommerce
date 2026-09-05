@@ -14,7 +14,6 @@ interface TagDetailPageProps {
 }
 
 export async function TagDetailPage({ slug, locale }: TagDetailPageProps) {
-  const t = await getTranslations({ locale, namespace: "tags" });
   const te = await getTranslations({ locale, namespace: "emptyState" });
 
   let tag;
@@ -75,7 +74,6 @@ export async function TagDetailPage({ slug, locale }: TagDetailPageProps) {
                 discountPercent={discountPercent}
                 slug={product.slug}
                 hasVariants={product.has_variants}
-                deliveryType={product.is_fast_shipping_available ? "fast" : "scheduled"}
                 isInStock={product.in_stock ?? product.quantity > 0}
                 inWishlist={product.in_wishlist}
                 tags={product.tags}

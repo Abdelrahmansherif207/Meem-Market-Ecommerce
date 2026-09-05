@@ -1,18 +1,5 @@
 {
   "header": {
-    "deliveryModes": {
-      "title": "خيارات التسليم",
-      "scheduled": "توصيل ب موعد",
-      "now": "توصيل سريع",
-      "nowEta": "120 دقيقة",
-      "electronics": "إلكترونيات…",
-      "fastDelivery": "التسليم السريع",
-      "fastDeliveryDesc": "احصل عليه غدًا",
-      "standardDelivery": "التسليم العادي",
-      "standardDeliveryDesc": "التسليم في 3-5 أيام عمل",
-      "freeShipping": "شحن مجاني",
-      "freeShippingDesc": "على الطلبات فوق 50 ريال"
-    },
     "mainNav": {
       "shop": "المتجر",
       "deals": "العروض",
@@ -115,7 +102,21 @@
     "terms": "الشروط والأحكام",
     "privacy": "سياسة الخصوصية",
     "alreadyHaveAccount": "لديك حساب بالفعل؟",
-    "creatingAccount": "جاري إنشاء الحساب..."
+    "creatingAccount": "جاري إنشاء الحساب...",
+    "welcomeHeading": "أهلاً! لنبدأ",
+    "termsAgreement": "بالمتابعة، أنت توافق على <terms>شروط الاستخدام</terms> و<privacy>سياسة الخصوصية</privacy>.",
+    "close": "إغلاق",
+    "or": "أو",
+    "continueWithGoogle": "المتابعة عبر جوجل",
+    "redirecting": "جاري التحويل...",
+    "googleError": "تعذر بدء تسجيل الدخول عبر جوجل. حاول مرة أخرى.",
+    "verifyEmailHeading": "تحقق من بريدك الإلكتروني",
+    "verifyEmailDesc": "أدخل رمز التحقق المرسل إلى بريدك الإلكتروني.",
+    "createAccountHeading": "أنشئ حسابك",
+    "loginSubtitle": "يرجى إدخال تفاصيل تسجيل الدخول أدناه للمتابعة.",
+    "registerSubtitle": "استخدم تفاصيلك أدناه لإنشاء حساب جديد.",
+    "showPassword": "إظهار كلمة المرور",
+    "hidePassword": "إخفاء كلمة المرور"
   },
   "cartPage": {
     "metaTitle": "سلة التسوق",
@@ -140,12 +141,18 @@
     "cartItems": "{count, plural, =0 {0 عناصر} one {# عنصر} other {# عناصر}}",
     "scheduledTitle": "توصيل عادي",
     "scheduledEta": "3-5 أيام عمل",
-    "fastTitle": "توصيل سريع",
-    "fastEta": "120 دقيقة",
-    "fastCheckout": "الشراء السريع",
     "minOrderProgress": "أضف {amount} ريال أخرى للحد الأدنى للطلب",
     "freeShippingProgress": "أضف {amount} ريال أخرى للشحن المجاني",
-    "freeShippingAchieved": "تم تفعيل الشحن المجاني!"
+    "freeShippingAchieved": "تم تفعيل الشحن المجاني!",
+    "milestoneStart": "البداية",
+    "milestoneMinimum": "الحد الأدنى",
+    "milestoneFreeShipping": "الشحن المجاني",
+    "orderSummary": "ملخص الطلب",
+    "discount": "الخصم",
+    "inStock": "متوفر",
+    "removeItem": "إزالة العنصر",
+    "decreaseQuantity": "تقليل الكمية",
+    "increaseQuantity": "زيادة الكمية"
   },
   "wishlist": {
     "metaTitle": "قائمة الرغبات",
@@ -210,7 +217,10 @@
     "reviewUpdated": "تم تحديث تقييمك بنجاح!",
     "signInToReview": "سجل الدخول لكتابة تقييم",
     "editReview": "تعديل",
-    "cancelEdit": "إلغاء"
+    "cancelEdit": "إلغاء",
+    "increaseQuantity": "زيادة الكمية",
+    "decreaseQuantity": "تقليل الكمية",
+    "removeItem": "إزالة العنصر"
   },
   "categories": {
     "metaTitle": "التصنيفات",
@@ -303,6 +313,7 @@
     "tabs": {
       "info": "المعلومات الشخصية",
       "orders": "الطلبات",
+      "invoices": "الفواتير",
       "addresses": "العناوين",
       "security": "الأمان"
     },
@@ -363,6 +374,29 @@
       "empty": "لا توجد طلبات بعد.",
       "emptyDescription": "عندما تقوم بطلب، سيظهر هنا.",
       "loadError": "فشل تحميل الطلبات.",
+      "detailLoadError": "فشل تحميل تفاصيل الطلب.",
+      "viewDetails": "عرض التفاصيل",
+      "viewInvoice": "عرض الفاتورة",
+      "invoiceNotReady": "فاتورة PDF غير متاحة بعد.",
+      "invoiceLoadError": "فشل تحميل الفاتورة.",
+      "orderNumber": "طلب #{number}",
+      "paymentMethod": "طريقة الدفع",
+      "fulfillmentType": "طريقة الاستلام",
+      "pickup": "استلام شخصي",
+      "delivery": "توصيل",
+      "pickupLocation": "موقع الاستلام",
+      "all": "الكل",
+      "pending": "قيد الانتظار",
+      "processing": "قيد المعالجة",
+      "completed": "مكتمل",
+      "delivered": "تم التوصيل",
+      "cancelled": "ملغي",
+      "items": "المنتجات",
+      "subtotal": "المجموع الفرعي",
+      "shipping": "الشحن",
+      "fastShipping": "شحن سريع",
+      "promotionDiscount": "خصم العروض",
+      "couponDiscount": "خصم الكوبون",
       "total": "الإجمالي",
       "discount": "الخصم",
       "status": {
@@ -370,8 +404,38 @@
         "pending": "قيد الانتظار",
         "cancelled": "ملغي",
         "processing": "قيد المعالجة",
-        "shipped": "تم الشحن"
+        "delivered": "تم التوصيل"
       }
+    },
+    "invoices": {
+      "tab": "الفواتير",
+      "empty": "لا توجد فواتير بعد.",
+      "emptyDescription": "ستظهر الفواتير هنا بعد أول طلب لك.",
+      "loadError": "فشل تحميل الفواتير.",
+      "detailLoadError": "فشل تحميل تفاصيل الفاتورة.",
+      "invoiceNumber": "فاتورة #{number}",
+      "orderNumber": "طلب #{number}",
+      "date": "التاريخ",
+      "total": "الإجمالي",
+      "subtotal": "المجموع الفرعي",
+      "shipping": "الشحن",
+      "discount": "الخصم",
+      "status": {
+        "ready": "جاهزة",
+        "generated": "تم الإنشاء"
+      },
+      "viewDetails": "عرض التفاصيل",
+      "downloadPdf": "تحميل PDF",
+      "verify": "التحقق من الفاتورة",
+      "items": "المنتجات",
+      "pricing": "تفاصيل التسعير",
+      "paymentMethod": "طريقة الدفع",
+      "fulfillment": "الاستلام",
+      "pickupLocation": "موقع الاستلام",
+      "pickupInfo": "معلومات الاستلام",
+      "customerName": "العميل",
+      "deliveryAddress": "عنوان التوصيل",
+      "learnMore": "اعرف المزيد"
     }
   },
   "contact": {
@@ -461,9 +525,6 @@
     "noPromotion": "بدون عرض",
     "noPromotions": "لا توجد عروض متاحة لهذه السلة",
     "saveAmount": "وفر {amount} ريال",
-    "fastCheckout": "الشراء السريع",
-    "fastDelivery": "توصيل سريع",
-    "fastDeliveryDesc": "ادفع واحصل على منتجاتك السريعة فورًا",
     "payNow": "ادفع الآن",
     "placeOrderCod": "تأكيد الطلب (الدفع عند الاستلام)",
     "placeOrderCashier": "تأكيد الطلب",
@@ -473,7 +534,17 @@
     "cartExpiredDesc": "المنتجات في سلتك لم تعد متاحة. يرجى بدء طلب جديد.",
     "goToCart": "الذهاب إلى السلة",
     "errorProcessing": "حدث خطأ ما. يرجى المحاولة مرة أخرى.",
-    "fixRequiredFields": "يرجى ملء جميع الحقول المطلوبة."
+    "fixRequiredFields": "يرجى ملء جميع الحقول المطلوبة.",
+    "validation": {
+      "nameRequired": "الاسم مطلوب",
+      "phoneRequired": "رقم الهاتف مطلوب",
+      "emailRequired": "البريد الإلكتروني مطلوب",
+      "emailInvalid": "يرجى إدخال بريد إلكتروني صحيح",
+      "governorateRequired": "يرجى اختيار المحافظة",
+      "cityRequired": "المدينة مطلوبة",
+      "countryRequired": "الدولة مطلوبة",
+      "streetRequired": "عنوان الشارع مطلوب"
+    }
   },
   "siteReviews": {
     "metaTitle": "آراء العملاء",
@@ -601,7 +672,9 @@
     "cartErrorTitle": "السلة غير متاحة",
     "authErrorTitle": "خدمة المصادقة غير متاحة",
     "serverDownTitle": "تعذر الوصول إلى الخوادم",
-    "serverDownDesc": "حدث خطأ من جهة الخادم. يرجى المحاولة مرة أخرى بعد قليل."
+    "serverDownDesc": "حدث خطأ من جهة الخادم. يرجى المحاولة مرة أخرى بعد قليل.",
+    "genericErrorTitle": "حدث خطأ ما",
+    "genericErrorDesc": "تعذر تحميل هذه الصفحة. يرجى المحاولة مرة أخرى."
   },
   "emptyState": {
     "browseProducts": "تصفح جميع المنتجات",
@@ -629,5 +702,30 @@
     "noReviewDescription": "كن أول من يشارك رأيه حول هذا المنتج.",
     "noSuggestions": "لا توجد نتائج",
     "noMapResults": "لا توجد نتائج. جرّب بحثًا مختلفًا."
+  },
+  "notifications": {
+    "title": "الإشعارات",
+    "metaTitle": "الإشعارات",
+    "metaDescription": "إشعاراتك وتحديثات النشاط",
+    "empty": "لا توجد إشعارات بعد",
+    "emptyDescription": "عندما تصلك إشعارات جديدة، ستظهر هنا.",
+    "markAllRead": "تحديد الكل كمقروء",
+    "markRead": "تحديد كمقروء",
+    "delete": "حذف",
+    "viewAll": "عرض الكل",
+    "loginRequired": "سجّل الدخول لعرض إشعاراتك.",
+    "login": "تسجيل الدخول",
+    "allCaughtUp": "جميع الإشعارات مقروءة",
+    "unreadCount": "{count} إشعار غير مقروء",
+    "loadMore": "تحميل المزيد",
+    "loading": "جارٍ التحميل...",
+    "showing": "عرض {shown} من {total}",
+    "error": "فشل تحميل الإشعارات.",
+    "justNow": "الآن",
+    "minAgo": "منذ {count} دقيقة",
+    "hrAgo": "منذ {count} ساعة",
+    "dayAgo": "منذ {count} يوم",
+    "weekAgo": "منذ {count} أسبوع",
+    "retry": "إعادة المحاولة"
   }
 }

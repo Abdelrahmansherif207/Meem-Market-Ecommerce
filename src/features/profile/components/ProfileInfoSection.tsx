@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { User, Mail, Phone, ShieldCheck } from "lucide-react";
 import { useTranslations } from "next-intl";
 import type { Profile } from "../types";
@@ -23,9 +24,11 @@ export function ProfileInfoSection({ profile }: ProfileInfoSectionProps) {
       <div className="flex flex-col items-center gap-4 sm:flex-row">
         <div className="flex h-20 w-20 items-center justify-center rounded-full bg-primary/10">
           {profile.image ? (
-            <img
+            <Image
               src={profile.image}
               alt={profile.name}
+              width={80}
+              height={80}
               className="h-20 w-20 rounded-full object-cover"
             />
           ) : (

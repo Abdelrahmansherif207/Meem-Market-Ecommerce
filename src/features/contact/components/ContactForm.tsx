@@ -13,7 +13,7 @@ export default function ContactForm() {
     return (
       <div className="flex flex-col items-center justify-center py-16 gap-4 text-center">
         <div className="rounded-full bg-green-100 p-4">
-          <svg className="h-8 w-8 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+          <svg className="h-8 w-8 text-success" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
           </svg>
         </div>
@@ -43,7 +43,7 @@ export default function ContactForm() {
           placeholder={t("namePlaceholder")}
         />
         {state?.fieldErrors?.name && (
-          <p className="text-xs text-red-500">{state.fieldErrors.name}</p>
+          <p className="text-xs text-error">{state.fieldErrors.name}</p>
         )}
       </div>
 
@@ -60,7 +60,7 @@ export default function ContactForm() {
           placeholder={t("emailPlaceholder")}
         />
         {state?.fieldErrors?.email && (
-          <p className="text-xs text-red-500">{state.fieldErrors.email}</p>
+          <p className="text-xs text-error">{state.fieldErrors.email}</p>
         )}
       </div>
 
@@ -77,7 +77,7 @@ export default function ContactForm() {
           placeholder={t("subjectPlaceholder")}
         />
         {state?.fieldErrors?.subject && (
-          <p className="text-xs text-red-500">{state.fieldErrors.subject}</p>
+          <p className="text-xs text-error">{state.fieldErrors.subject}</p>
         )}
       </div>
 
@@ -94,7 +94,7 @@ export default function ContactForm() {
           placeholder={t("messagePlaceholder")}
         />
         {state?.fieldErrors?.message && (
-          <p className="text-xs text-red-500">{state.fieldErrors.message}</p>
+          <p className="text-xs text-error">{state.fieldErrors.message}</p>
         )}
       </div>
 

@@ -73,13 +73,13 @@ export function SiteReviewForm() {
 
   const inputClasses =
     "w-full rounded-xl border bg-background px-4 py-3 text-sm text-text-primary outline-none transition placeholder:text-text-secondary/70 focus:border-primary focus:ring-2 focus:ring-primary/10";
-  const errorInput = "border-red-500";
+  const errorInput = "border-error";
   const normalInput = "border-border";
 
   return (
     <div className="rounded-xl border border-border bg-surface p-4">
       {successMessage && (
-        <div className="mb-4 rounded-lg bg-green-50 px-4 py-3 text-sm font-medium text-green-700" role="status">
+        <div className="mb-4 rounded-lg bg-success-surface px-4 py-3 text-sm font-medium text-success" role="status">
           {successMessage}
         </div>
       )}
@@ -103,14 +103,14 @@ export function SiteReviewForm() {
                     "size-7 cursor-pointer transition-colors",
                     star <= (hoverRating || rating)
                       ? "fill-yellow-400 text-yellow-400"
-                      : "fill-gray-200 text-gray-200",
+                      : "fill-border text-border",
                   )}
                 />
               </button>
             ))}
           </div>
           {fieldErrors.rating && (
-            <p className="mt-1.5 text-xs text-red-500">{fieldErrors.rating}</p>
+            <p className="mt-1.5 text-xs text-error">{fieldErrors.rating}</p>
           )}
         </div>
 
@@ -128,7 +128,7 @@ export function SiteReviewForm() {
             className={cn(inputClasses, fieldErrors.title ? errorInput : normalInput)}
           />
           {fieldErrors.title && (
-            <p className="mt-1.5 text-xs text-red-500">{fieldErrors.title}</p>
+            <p className="mt-1.5 text-xs text-error">{fieldErrors.title}</p>
           )}
         </div>
 
@@ -146,11 +146,11 @@ export function SiteReviewForm() {
             className={cn(inputClasses, "resize-none", fieldErrors.comment ? errorInput : normalInput)}
           />
           {fieldErrors.comment && (
-            <p className="mt-1.5 text-xs text-red-500">{fieldErrors.comment}</p>
+            <p className="mt-1.5 text-xs text-error">{fieldErrors.comment}</p>
           )}
         </div>
 
-        {formError && <p className="text-xs text-red-500">{formError}</p>}
+        {formError && <p className="text-xs text-error">{formError}</p>}
 
         <div className="flex flex-col gap-2">
           <button

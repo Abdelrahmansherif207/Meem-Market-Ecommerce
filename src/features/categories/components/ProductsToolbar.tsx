@@ -57,13 +57,13 @@ export default function ProductsToolbar({
   return (
     <div className="flex flex-wrap items-center gap-3 mb-4">
       <form onSubmit={handleSearchSubmit} className="relative flex-1 min-w-[180px] max-w-xs">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-text-muted" />
         <input
           type="text"
           value={searchValue}
           onChange={(e) => setSearchValue(e.target.value)}
           placeholder="Search in category..."
-          className="w-full h-9 pl-9 pr-8 rounded-md border border-gray-200 text-sm bg-background focus:outline-none focus:border-primary transition-colors"
+          className="w-full h-9 pl-9 pr-8 rounded-md border border-border text-sm bg-background focus:outline-none focus:border-primary transition-colors"
         />
         {searchValue && (
           <button
@@ -72,7 +72,7 @@ export default function ProductsToolbar({
             className="absolute right-2 top-1/2 -translate-y-1/2"
             aria-label="Clear search"
           >
-            <X className="h-4 w-4 text-gray-400" />
+            <X className="h-4 w-4 text-text-muted" />
           </button>
         )}
       </form>
@@ -80,7 +80,7 @@ export default function ProductsToolbar({
       <select
         value={currentSort}
         onChange={(e) => updateParam("sort", e.target.value)}
-        className="h-9 rounded-md border border-gray-200 text-sm bg-background px-3 focus:outline-none focus:border-primary transition-colors"
+        className="h-9 rounded-md border border-border text-sm bg-background px-3 focus:outline-none focus:border-primary transition-colors"
         aria-label="Sort products"
       >
         {sortOptions.map((opt) => (

@@ -7,6 +7,8 @@ type LogoProps = {
   priority?: boolean;
   className?: string;
   textFallback?: string;
+  width?: number;
+  height?: number;
 };
 
 export default function Logo({
@@ -15,6 +17,8 @@ export default function Logo({
   priority = false,
   className,
   textFallback,
+  width = 120,
+  height = 52,
 }: LogoProps) {
   if (textFallback && !src) {
     return (
@@ -29,8 +33,8 @@ export default function Logo({
       <Image
         src={src}
         alt={alt}
-        width={120}
-        height={52}
+        width={width}
+        height={height}
         priority={priority}
         className={className}
         style={{ maxWidth: "100%", height: "auto" }}

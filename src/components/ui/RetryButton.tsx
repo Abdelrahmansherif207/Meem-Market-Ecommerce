@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { RefreshCw } from "lucide-react";
-import { cn } from "@/shared/utils/cn";
+import { Button } from "./Button";
 
 interface RetryButtonProps {
   label?: string;
@@ -20,7 +20,7 @@ export default function RetryButton({
   const router = useRouter();
 
   return (
-    <button
+    <Button
       onClick={() => {
         if (onClick) {
           onClick();
@@ -28,14 +28,11 @@ export default function RetryButton({
           router.refresh();
         }
       }}
-      className={cn(
-        "inline-flex items-center gap-2 rounded-xl bg-primary px-6 py-3 text-sm font-semibold text-white shadow-sm shadow-primary/40 transition-all hover:bg-primary-dark hover:shadow-md",
-        compact && "px-4 py-2 text-xs",
-        className,
-      )}
+      size={compact ? "sm" : "md"}
+      className={className}
     >
-      <RefreshCw className={compact ? "size-3.5" : "size-4"} />
+      <RefreshCw className={compact ? "size-3.5" : "size-4"} aria-hidden />
       {label}
-    </button>
+    </Button>
   );
 }

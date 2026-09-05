@@ -43,21 +43,23 @@ export function OtpForm(props: OtpFormProps) {
     if (state && !state.success) {
       const msg = state.message || "";
       if (msg.toLowerCase().includes("too many") || msg.includes("429")) {
-        setRateLimitCooldown(RATE_LIMIT_COOLDOWN);
+        setRateLimitCooldown(RATE_LIMIT_COOLDOWN); // eslint-disable-line react-hooks/set-state-in-effect
       } else {
         setAttempts((prev) => Math.max(0, prev - 1));
       }
     }
   }, [state]);
 
+  const shouldRunCooldown = resendCooldown > 0 || rateLimitCooldown > 0;
+
   useEffect(() => {
-    if (resendCooldown <= 0 && rateLimitCooldown <= 0) return;
+    if (!shouldRunCooldown) return;
     cooldownRef.current = setInterval(() => {
       setResendCooldown((prev) => Math.max(0, prev - 1));
       setRateLimitCooldown((prev) => Math.max(0, prev - 1));
     }, 1000);
     return () => { if (cooldownRef.current) clearInterval(cooldownRef.current); };
-  }, [resendCooldown > 0 || rateLimitCooldown > 0]);
+  }, [shouldRunCooldown]);
 
   const handleResend = useCallback(() => {
     if (resendCooldown > 0 || !onResend) return;

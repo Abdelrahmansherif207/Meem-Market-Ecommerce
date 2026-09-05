@@ -6,11 +6,11 @@ import Image from "next/image";
 import { cn } from "@/shared/utils/cn";
 
 const COUNTRIES = [
-  { code: "EG", name: "Egypt", dialCode: "+20" },
+  { code: "QA", name: "Qatar", dialCode: "+974" },
   { code: "SA", name: "Saudi Arabia", dialCode: "+966" },
   { code: "AE", name: "United Arab Emirates", dialCode: "+971" },
   { code: "KW", name: "Kuwait", dialCode: "+965" },
-  { code: "QA", name: "Qatar", dialCode: "+974" },
+  { code: "EG", name: "Egypt", dialCode: "+20" },
   { code: "BH", name: "Bahrain", dialCode: "+973" },
   { code: "OM", name: "Oman", dialCode: "+968" },
   { code: "JO", name: "Jordan", dialCode: "+962" },
@@ -54,64 +54,64 @@ export function PhoneInputWithCountry({
 
   return (
     <div>
-      <div className="relative">
-        <Phone className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-text-secondary" />
-        <div className="flex">
-          <div className="relative">
-            <button
-              type="button"
-              onClick={() => setIsOpen(!isOpen)}
-              className={
-                "flex items-center gap-2 rounded-l-xl border border-r-0 bg-background px-3 py-2.5 text-sm font-semibold transition hover:bg-surface " +
-                (error ? "border-red-500" : "border-border")
-              }
-            >
-              <Image
-                src={getFlagUrl(selectedCountry.code)}
-                alt={selectedCountry.code}
-                width={24}
-                height={16}
-                className="h-4 w-6 rounded object-cover"
-              />
-              <span className="text-text-secondary">{selectedCountry.dialCode}</span>
-              <ChevronDown className="h-4 w-4 text-text-secondary" />
-            </button>
+      <div className="flex">
+        <div className="relative">
+          <button
+            type="button"
+            onClick={() => setIsOpen(!isOpen)}
+            className={
+              "flex items-center gap-2 rounded-s-xl border border-e-0 bg-background px-3 py-2.5 text-sm font-semibold transition hover:bg-surface " +
+              (error ? "border-error" : "border-border")
+            }
+          >
+            <Image
+              src={getFlagUrl(selectedCountry.code)}
+              alt={selectedCountry.code}
+              width={24}
+              height={16}
+              className="h-4 w-6 rounded object-cover"
+            />
+            <span className="text-text-secondary">{selectedCountry.dialCode}</span>
+            <ChevronDown className="h-4 w-4 text-text-secondary" />
+          </button>
 
-            {isOpen && (
-              <div className="absolute left-0 top-full z-50 mt-1 max-h-60 w-64 overflow-y-auto rounded-lg border border-border bg-white shadow-lg">
-                {COUNTRIES.map((country) => (
-                  <button
-                    key={country.code}
-                    type="button"
-                    onClick={() => handleCountrySelect(country)}
-                    className={cn(
-                      "flex w-full items-center gap-3 px-4 py-2.5 text-sm transition hover:bg-surface",
-                      selectedCountry.code === country.code && "bg-primary/10",
-                    )}
-                  >
-                    <Image
-                      src={getFlagUrl(country.code)}
-                      alt={country.code}
-                      width={24}
-                      height={16}
-                      className="h-4 w-6 rounded object-cover"
-                    />
-                    <span className="flex-1 text-left">{country.name}</span>
-                    <span className="text-text-secondary">{country.dialCode}</span>
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
+          {isOpen && (
+            <div className="absolute start-0 top-full z-50 mt-1 max-h-60 w-64 overflow-y-auto rounded-lg border border-border bg-white shadow-lg">
+              {COUNTRIES.map((country) => (
+                <button
+                  key={country.code}
+                  type="button"
+                  onClick={() => handleCountrySelect(country)}
+                  className={cn(
+                    "flex w-full items-center gap-3 px-4 py-2.5 text-sm transition hover:bg-surface",
+                    selectedCountry.code === country.code && "bg-primary/10",
+                  )}
+                >
+                  <Image
+                    src={getFlagUrl(country.code)}
+                    alt={country.code}
+                    width={24}
+                    height={16}
+                    className="h-4 w-6 rounded object-cover"
+                  />
+                  <span className="flex-1 text-start">{country.name}</span>
+                  <span className="text-text-secondary">{country.dialCode}</span>
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
 
+        <div className="relative flex-1">
+          <Phone className="absolute start-3 top-1/2 h-5 w-5 -translate-y-1/2 text-text-secondary" />
           <input
             type="tel"
             placeholder={placeholder}
             defaultValue={defaultValue}
             onChange={(e) => { setPhoneValue(e.target.value); onChange?.(e.target.value); }}
             className={
-              "flex-1 rounded-r-xl border bg-background px-4 py-2.5 text-sm text-text-primary outline-none transition focus:border-primary " +
-              (error ? "border-red-500" : "border-border")
+              "w-full rounded-e-xl border bg-background ps-10 pe-4 py-2.5 text-sm text-text-primary outline-none transition focus:border-primary " +
+              (error ? "border-error" : "border-border")
             }
           />
         </div>
@@ -119,7 +119,7 @@ export function PhoneInputWithCountry({
       {name && (
         <input type="hidden" name={name} value={`${selectedCountry.dialCode}${phoneValue}`} />
       )}
-      {error && <p className="mt-1 text-xs text-red-500">{error}</p>}
+      {error && <p className="mt-1 text-xs text-error">{error}</p>}
     </div>
   );
 }

@@ -2,6 +2,9 @@
 import Image from "next/image";
 import Link from "next/link";
 import { Minus, Plus, Trash2, Loader2 } from "lucide-react";
+import { useTranslations } from "next-intl";
+import { cn } from "@/shared/utils/cn";
+import { currencyLabel } from "@/shared/utils/formatMoney";
 import type { HydratedCartItem } from "../types";
 import { getDisplayPrice, getOriginalPrice } from "@/features/products";
 import type { PriceInfo } from "@/features/products/types";
@@ -31,6 +34,7 @@ export function ProductCartItem({
   onUpdateQuantity,
   onRemove,
 }: ProductCartItemProps) {
+  const t = useTranslations("cartPage");
   const priceInfo = toPriceInfo(item);
   const displayPrice = getDisplayPrice(priceInfo);
   const originalPrice = getOriginalPrice(priceInfo);
@@ -66,21 +70,21 @@ export function ProductCartItem({
             {item.sku && (
               <p className="mt-0.5 text-[11px] text-text-secondary">SKU: {item.sku}</p>
             )}
-            <p className="text-[11px] text-text-secondary">
-              {item.in_stock ? "In Stock" : "Out of Stock"}
-              {item.stock_quantity != null && ` (${item.stock_quantity})`}
+            <p className={cn("text-[11px]", item.in_stock ? "text-success" : "text-error")}>
+              {item.in_stock ? t("inStock") : t("outOfStock")}
+              {item.in_stock && item.stock_quantity != null && ` (${item.stock_quantity})`}
             </p>
           </div>
 
           <div className="flex items-center gap-2 mt-2">
             {hasDiscount && (
               <div className="flex items-center gap-1" dir="ltr">
-                <span className="text-xs leading-4 font-medium text-gray-500 line-through">
+                <span className="text-xs leading-4 font-medium text-text-muted line-through">
                   {origInt}
                 </span>
                 <div className="flex flex-col">
-                  <span className="text-[10px] leading-3 font-medium text-gray-500 line-through">{origDec}</span>
-                  <span className="text-[8px] leading-3 font-medium text-gray-500 line-through">K.D</span>
+                  <span className="text-[10px] leading-3 font-medium text-text-muted line-through">{origDec}</span>
+                  <span className="text-[8px] leading-3 font-medium text-text-muted line-through">{currencyLabel()}</span>
                 </div>
               </div>
             )}
@@ -88,11 +92,11 @@ export function ProductCartItem({
               <span className="text-base leading-5 font-bold">{intPart}</span>
               <div className="flex flex-col">
                 <span className="text-sm font-bold leading-3">{decPart}</span>
-                <span className="text-[10px] font-medium leading-3">K.D</span>
+                <span className="text-[10px] font-medium leading-3">{currencyLabel()}</span>
               </div>
             </div>
             {hasDiscount && (
-              <span className="text-[10px] font-bold text-discount bg-red-50 px-1 py-0.5 rounded">
+              <span className="text-[10px] font-bold text-discount bg-error-surface px-1 py-0.5 rounded">
                 -{discountPercent}%
               </span>
             )}
@@ -101,43 +105,43 @@ export function ProductCartItem({
 
         <div className="flex flex-col items-end justify-center gap-2 shrink-0">
           {isPending ? (
-            <div className="flex h-7 w-[calc(4*28px+2px)] items-center justify-center">
+            <div className="flex h-11 w-[calc(4*28px+2px)] items-center justify-center">
               <Loader2 className="h-4 w-4 animate-spin text-primary" />
             </div>
           ) : (
-            <div className="flex items-center gap-1 rounded-lg border border-border">
+            <div className="flex items-center gap-0.5 rounded-lg border border-border">
               <button
                 onClick={() => onRemove(item.product_id)}
                 disabled={isPending}
-                className="flex h-7 w-7 items-center justify-center text-text-secondary hover:text-red-500 transition-colors disabled:opacity-30"
-                aria-label="Remove item"
+                className="flex h-11 w-11 items-center justify-center text-text-secondary hover:text-error transition-colors disabled:opacity-30"
+                aria-label={t("removeItem")}
               >
-                <Trash2 className="h-3 w-3" />
+                <Trash2 className="h-4 w-4" />
               </button>
-              <div className="h-4 w-px bg-border" />
+              <div className="h-5 w-px bg-border" />
               <button
                 onClick={() => onUpdateQuantity(item.product_id, item.quantity - 1)}
                 disabled={isPending || item.quantity <= 1}
-                className="flex h-7 w-7 items-center justify-center text-text-secondary hover:text-primary disabled:opacity-30 transition-colors"
-                aria-label="Decrease quantity"
+                className="flex h-11 w-11 items-center justify-center text-text-secondary hover:text-primary disabled:opacity-30 transition-colors"
+                aria-label={t("decreaseQuantity")}
               >
-                <Minus className="h-3 w-3" />
+                <Minus className="h-4 w-4" />
               </button>
-              <span className="flex h-7 w-9 items-center justify-center text-sm font-medium tabular-nums">
+              <span className="flex h-11 w-9 items-center justify-center text-sm font-medium tabular-nums">
                 {item.quantity}
               </span>
               <button
                 onClick={() => onUpdateQuantity(item.product_id, item.quantity + 1)}
-                disabled={isPending || item.quantity >= item.stock_quantity}
-                className="flex h-7 w-7 items-center justify-center text-text-secondary hover:text-primary disabled:opacity-30 transition-colors"
-                aria-label="Increase quantity"
+                disabled={isPending || (item.stock_quantity != null && item.quantity >= item.stock_quantity)}
+                className="flex h-11 w-11 items-center justify-center text-text-secondary hover:text-primary disabled:opacity-30 transition-colors"
+                aria-label={t("increaseQuantity")}
               >
-                <Plus className="h-3 w-3" />
+                <Plus className="h-4 w-4" />
               </button>
             </div>
           )}
-          <span className="text-xs font-semibold tabular-nums text-text-secondary">
-            {lineTotal.toFixed(2)} K.D
+          <span className="text-xs font-semibold tabular-nums text-text-secondary" dir="ltr">
+            {lineTotal.toFixed(2)} {currencyLabel()}
           </span>
         </div>
       </div>

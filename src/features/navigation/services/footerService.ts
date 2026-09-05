@@ -1,6 +1,5 @@
-import { apiFetch } from "@/shared/lib/api";
 import { getCachedSettings } from "@/features/settings/services/settingsService";
-import type { ApiResponse } from "@/shared/types";
+import { DEFAULT_SITE_NAME } from "@/features/settings/lib/metadata";
 import type { FooterData, SocialLink } from "../types";
 
 export interface AssembledFooterContent {
@@ -14,24 +13,23 @@ export interface AssembledFooterContent {
 export async function assembleFooterContent(locale: string): Promise<AssembledFooterContent> {
   const data = await footerService.getFooter(locale);
 
-  let logoSrc = "";
-  let siteName = "";
+  let logoSrc = "/catch-footer-logo.jpeg";
+  let siteName = DEFAULT_SITE_NAME[locale] ?? DEFAULT_SITE_NAME.en;
   let copyright = "";
   const settingsSocial: { platform: string; url: string }[] = [];
-  let fastShippingPublished = false;
 
   try {
     const settings = await getCachedSettings(locale);
-    logoSrc = settings.footer_logo || settings.logo || "";
-    siteName = settings.site_name || "";
+    logoSrc = settings.footer_logo || settings.logo || logoSrc;
+    siteName = settings.site_name || siteName;
     copyright = settings.site_copy_right || "";
-    if (settings.fast_shipping_page_publish) fastShippingPublished = true;
 
     const platformMap: Record<string, string> = {
       facebook: settings.facebook,
       instagram: settings.instagram,
-      linkedin: settings.linkedin,
       youtube: settings.youtube,
+      tiktok: settings.tiktok,
+      snapchat: settings.snapchat,
     };
     for (const [platform, url] of Object.entries(platformMap)) {
       if (url) settingsSocial.push({ platform, url });
@@ -40,27 +38,23 @@ export async function assembleFooterContent(locale: string): Promise<AssembledFo
     // use defaults
   }
 
-  if (fastShippingPublished) {
-    const csColumn = data.columns.find(
-      (c) => c.title === "Customer Service" || c.title === "خدمة العملاء",
-    );
-    if (csColumn) {
-      csColumn.links.push({
-        id: 99,
-        label: locale === "ar" ? "الشحن السريع" : "Fast Shipping",
-        slug: "/fast-shipping",
-      });
-    }
-  }
+  const baseLinks: SocialLink[] = data.socialLinks;
 
-  const mergedSocialLinks: SocialLink[] =
-    settingsSocial.length > 0
-      ? settingsSocial.map((s) => ({
-          platform: s.platform as "facebook" | "twitter" | "instagram" | "youtube",
-          url: s.url,
-          label: s.platform.charAt(0).toUpperCase() + s.platform.slice(1),
-        }))
-      : data.socialLinks;
+  const mergedSocialLinks: SocialLink[] = settingsSocial.length > 0
+    ? (() => {
+        const map = new Map<string, SocialLink>(
+          baseLinks.map((l) => [l.platform, l])
+        );
+        for (const s of settingsSocial) {
+          map.set(s.platform, {
+            platform: s.platform as SocialLink["platform"],
+            url: s.url,
+            label: s.platform.charAt(0).toUpperCase() + s.platform.slice(1),
+          });
+        }
+        return Array.from(map.values());
+      })()
+    : baseLinks;
 
   return { data, logoSrc, siteName, copyright, mergedSocialLinks };
 }
@@ -107,7 +101,7 @@ function getMockFooterData(lang: string): FooterData {
         id: 3,
         title: isAr ? "معلومات عنا" : "About Us",
         links: [
-          { id: 6, label: isAr ? "عن كريم شوب" : "About Kareem Shop", slug: "/info/about" },
+          { id: 6, label: isAr ? "عن كيتش بيوتي" : "About Catch Beauty", slug: "/info/about" },
           { id: 7, label: isAr ? "شركتنا" : "Our Company", slug: "/info/company" },
           { id: 8, label: isAr ? "المسؤولية المجتمعية" : "Community & Society", slug: "/info/community" },
           { id: 9, label: isAr ? "النشرة البريدية" : "Newsletter", slug: "/info/newsletter" },
@@ -137,9 +131,10 @@ function getMockFooterData(lang: string): FooterData {
     ],
     socialLinks: [
       { platform: "facebook", url: "#", label: "Facebook" },
-      { platform: "twitter", url: "#", label: "Twitter" },
       { platform: "instagram", url: "#", label: "Instagram" },
       { platform: "youtube", url: "#", label: "YouTube" },
+      { platform: "tiktok", url: "#", label: "TikTok" },
+      { platform: "snapchat", url: "#", label: "Snapchat" },
     ],
     contactInfo: {
       stayInTouchText: isAr ? "ابق على تواصل معنا" : "Stay in touch with us",

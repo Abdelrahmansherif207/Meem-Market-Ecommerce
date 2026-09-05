@@ -60,21 +60,21 @@ export default function MobileFooterDrawer({
           />
           <div
             className={cn(
-              "relative flex h-[calc(100%-56px)] w-[320px] max-w-[85vw] flex-col bg-black text-white shadow-xl",
+              "relative flex h-[calc(100%-56px)] w-[320px] max-w-[85vw] flex-col bg-white text-text-primary shadow-xl",
               "animate-in slide-in-from-left duration-300",
             )}
           >
-            <div className="flex shrink-0 items-center justify-end border-b border-white/20 px-4 py-3">
+            <div className="flex shrink-0 items-center justify-end border-b border-black/20 px-4 py-3">
               <button
                 type="button"
                 onClick={close}
                 aria-label={t("closeMenu")}
-                className="p-1 rounded transition-colors hover:bg-white/10"
+                className="p-1 rounded transition-colors hover:bg-surface"
               >
                 <X className="h-5 w-5" />
               </button>
             </div>
-            <div className="flex-1 overflow-y-auto px-4 py-2">
+            <div className="flex-1 overflow-y-auto px-4 py-2 text-text-primary [&_span]:text-text-primary [&_a]:text-text-primary [&_.border-b]:border-black/20 [&_button]:text-text-primary [&_svg]:text-text-primary">
               <FooterMobileContent
                 data={data}
                 logoSrc={logoSrc}
@@ -85,10 +85,10 @@ export default function MobileFooterDrawer({
                 showCopyright={false}
               />
             </div>
-            <div className="shrink-0 border-t border-white/20 px-4 py-3">
+            <div className="shrink-0 border-t border-black/20 px-4 py-3 text-text-primary [&_span]:text-text-primary">
               <FooterContactCard contactInfo={data.contactInfo} vertical />
               {copyright && (
-                <p className="mt-2 pb-1 text-center text-xs text-white/60">
+                <p className="mt-2 pb-1 text-center text-xs text-text-secondary">
                   {copyright}
                 </p>
               )}

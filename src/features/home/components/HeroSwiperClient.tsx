@@ -88,7 +88,7 @@ export default function HeroSwiperClient({ banners, title, setting }: HeroSwiper
   return (
     <section className="w-full" dir={isRtl ? "rtl" : "ltr"} aria-label="Hero promotions">
       {title ? <SectionTitle title={title} /> : null}
-      <div className="group relative h-[170px] w-full overflow-hidden rounded-[20px] sm:h-[230px] lg:h-[300px]">
+      <div className="group relative h-[220px] w-full overflow-hidden rounded-lg sm:h-[300px] lg:h-[380px]">
         <Swiper
           modules={[Autoplay, A11y, Keyboard]}
           loop={total > 1}

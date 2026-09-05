@@ -19,7 +19,7 @@ export function PromotionsPanel({ selectedId, onSelect }: PromotionsPanelProps) 
 
   useEffect(() => {
     let cancelled = false;
-    setLoading(true);
+    setLoading(true); // eslint-disable-line react-hooks/set-state-in-effect
     setError(false);
 
     checkoutService.getEligiblePromotions(locale)
@@ -48,8 +48,8 @@ export function PromotionsPanel({ selectedId, onSelect }: PromotionsPanelProps) 
         </div>
         {[1, 2].map((i) => (
           <div key={i} className="animate-pulse rounded-xl border border-border p-4 space-y-2">
-            <div className="h-4 w-3/4 rounded bg-gray-200" />
-            <div className="h-3 w-1/2 rounded bg-gray-200" />
+            <div className="h-4 w-3/4 rounded bg-border" />
+            <div className="h-3 w-1/2 rounded bg-border" />
           </div>
         ))}
       </div>
@@ -124,7 +124,7 @@ export function PromotionsPanel({ selectedId, onSelect }: PromotionsPanelProps) 
                 {p.type === "fixed_rate" ? (
                   <Tag className="h-4 w-4 text-blue-600 shrink-0" />
                 ) : (
-                  <Percent className="h-4 w-4 text-green-600 shrink-0" />
+                  <Percent className="h-4 w-4 text-success shrink-0" />
                 )}
                 <span className="text-sm font-medium text-text-primary">{p.title}</span>
               </div>

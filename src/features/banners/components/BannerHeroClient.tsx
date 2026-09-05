@@ -55,7 +55,7 @@ export default function BannerHeroClient({ banners }: BannerHeroClientProps) {
 
   return (
     <section className="w-full" dir={isRtl ? "rtl" : "ltr"} aria-label="Hero banners">
-      <div className="group relative h-[170px] w-full overflow-hidden rounded-[20px] sm:h-[230px] lg:h-[300px]">
+      <div className="group relative h-[220px] w-full overflow-hidden rounded-lg sm:h-[300px] lg:h-[380px]">
         <Swiper
           modules={[Autoplay, Keyboard]}
           loop={total > 1}

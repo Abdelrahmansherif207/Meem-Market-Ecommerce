@@ -3,19 +3,19 @@
 import { useState, useCallback } from "react";
 import Image from "next/image";
 import { Link } from "@/i18n/navigation";
-import { Trash2, Plus, Minus } from "lucide-react";
+import { Plus } from "lucide-react";
 import { useLocale } from "next-intl";
 import { cn } from "@/shared/utils/cn";
 import { useCartActions } from "@/features/cart/hooks/useCartActions";
 import { WishlistButton } from "@/features/wishlist/components/WishlistButton";
-import type { DeliveryType } from "@/features/cart/types";
+import { Badge } from "./Badge";
+import { QuantityStepper } from "./QuantityStepper";
 import type { ProductTag } from "@/shared/types";
 import { Autoplay } from "swiper/modules";
 import { Swiper, SwiperSlide } from "swiper/react";
 import "swiper/css";
 
 interface ProductCardProps {
-  deliveryType?: DeliveryType;
   image: string;
   title: string;
   price: number;
@@ -48,9 +48,7 @@ export default function ProductCard({
   productId,
   slug = "",
   sku = "",
-  inStock = 10,
   stockQuantity = 10,
-  deliveryType = "scheduled",
   priority: priorityProp,
   hasVariants = false,
   badgeText,
@@ -71,10 +69,10 @@ export default function ProductCard({
   const safeOriginalPrice = originalPrice ?? 0;
 
   const handleAdd = useCallback(async () => {
-    await addItem({ quantity: 1, deliveryType, name: title, image, price: safePrice, current_price: safePrice, slug, sku, in_stock: isInStock, stock_quantity: stockQuantity });
+    await addItem({ quantity: 1, name: title, image, price: safePrice, current_price: safePrice, slug, sku, in_stock: isInStock, stock_quantity: stockQuantity });
     setAnimating(true);
     setTimeout(() => setAnimating(false), 300);
-  }, [addItem, deliveryType, title, image, safePrice, slug, sku, isInStock, stockQuantity]);
+  }, [addItem, title, image, safePrice, slug, sku, isInStock, stockQuantity]);
 
   const handleIncrement = useCallback(async () => {
     await increment();
@@ -93,20 +91,14 @@ export default function ProductCard({
   return (
     <div className="flex flex-col w-full">
       <div className={cn("relative w-full aspect-square overflow-hidden rounded-xl", isDark ? "border border-white/20 bg-white/10 backdrop-blur-md" : "border border-border-light bg-white")}>
-        <div className="absolute inset-0 flex z-[1] start-0 bottom-0 pointer-events-none">
+        <div className="absolute inset-0 flex start-0 bottom-0 pointer-events-none">
           {flashSaleActive ? (
-            <div className="inline-flex items-center justify-center font-bold rounded-bl-xl rounded-br-xs rounded-tl-xs rounded-tr-xl px-2 py-1 text-[10px] bg-orange-600 text-white gap-1 animate-pulse self-end">
-              <span className="text-xs leading-4 font-bold truncate">Flash Sale</span>
-            </div>
+            <Badge tone="flash" className="animate-pulse self-end">Flash Sale</Badge>
           ) : discountPercent && discountPercent > 0 ? (
-            <div className="inline-flex items-center justify-center font-bold rounded-bl-xl rounded-br-xs rounded-tl-xs rounded-tr-xl px-2 py-1 text-[10px] bg-discount text-white gap-1 self-end">
-              <span className="text-xs leading-4 font-bold truncate">{discountPercent}% OFF</span>
-            </div>
+            <Badge tone="discount" className="self-end">{discountPercent}% OFF</Badge>
           ) : null}
           {badgeText ? (
-            <div className="inline-flex items-center justify-center font-bold rounded-bl-xl rounded-br-xs rounded-tl-xs rounded-tr-xl px-2 py-1 text-[10px] bg-primary text-white gap-1 self-end">
-              <span className="text-xs leading-4 font-bold truncate">{badgeText}</span>
-            </div>
+            <Badge tone="primary" className="self-end">{badgeText}</Badge>
           ) : null}
         </div>
         {showWishlist && (
@@ -131,77 +123,54 @@ export default function ProductCard({
           <button
             type="button"
             disabled
-            className="absolute end-1 bottom-1 w-9 h-9 sm:w-8 sm:h-8 z-10 flex items-center justify-center rounded-full bg-gray-300 text-white font-medium text-2xl border border-white shadow-[0_2px_0_rgba(0,0,0,0.15)] cursor-not-allowed"
+            className="absolute end-1 bottom-1 w-9 h-9 sm:w-8 sm:h-8 z-10 flex items-center justify-center rounded-full bg-text-muted text-white font-medium border border-white shadow-elev-1 cursor-not-allowed"
+            aria-label="Out of stock"
           >
-            <Plus className="h-5 w-5" />
+            <Plus className="h-5 w-5" aria-hidden />
           </button>
         ) : quantity === 0 && hasVariants ? (
           <Link
             href={`/products/${slug}`}
-            className="absolute end-1 bottom-1 w-9 h-9 sm:w-8 sm:h-8 z-10 flex items-center justify-center rounded-full bg-primary text-white font-medium text-2xl border border-white shadow-[0_2px_0_rgba(0,0,0,0.15)] transition-all duration-200 hover:brightness-90"
+            className="absolute end-1 bottom-1 w-9 h-9 sm:w-8 sm:h-8 z-10 flex items-center justify-center rounded-full bg-primary text-white border border-white shadow-elev-1 transition-all duration-200 hover:brightness-90"
+            aria-label="Select options"
           >
-            <Plus className="h-5 w-5" />
+            <Plus className="h-5 w-5" aria-hidden />
           </Link>
         ) : quantity === 0 ? (
           <button
             type="button"
             onClick={handleAdd}
             disabled={isPending}
+            aria-label="Add to cart"
             className={cn(
-              // Core layout
-              "absolute end-1 bottom-1 w-9 h-9 sm:w-8 sm:h-8 z-10 flex items-center justify-center rounded-full bg-primary text-white font-medium text-2xl",
-              
-              // Clean border and simple, static, light 3D shadow
-              "border border-white shadow-[0_2px_0_rgba(0,0,0,0.15)]", 
-              
-              // Interaction: Only darkens the circle on hover
-              "transition-all duration-200 hover:brightness-90", 
-              
-              // Conditional States
+              "absolute end-1 bottom-1 w-9 h-9 sm:w-8 sm:h-8 z-10 flex items-center justify-center rounded-full bg-primary text-white",
+              "border border-white shadow-elev-1",
+              "transition-all duration-200 hover:brightness-90",
               animating && "scale-110",
-              isPending && "opacity-70 cursor-not-allowed"
+              isPending && "opacity-70 cursor-not-allowed",
             )}
           >
-            <Plus className="h-5 w-5" />
+            <Plus className="h-5 w-5" aria-hidden />
           </button>
         ) : (
-          <div className={cn("absolute end-1 bottom-1 flex items-center gap-1 bg-primary rounded-full h-11 sm:h-10 px-1 text-white shadow-[0_2px_3px_1px_rgba(0,0,0,0.14)] z-10 transition-all duration-300", isPending && "opacity-70 pointer-events-none")}>
-            <button
-              type="button"
-              onClick={handleDecrement}
-              disabled={isPending}
-              className="flex h-9 w-9 sm:h-8 sm:w-8 items-center justify-center rounded-full hover:bg-white/20 transition-colors"
-              aria-label="Decrease quantity"
-            >
-              {quantity === 1 ? (
-                <Trash2 className="h-4 w-4" />
-              ) : (
-                <Minus className="h-4 w-4" />
-              )}
-            </button>
-            <span className="min-w-[1.5rem] text-center text-sm font-bold tabular-nums">
-              {quantity}
-            </span>
-            <button
-              type="button"
-              onClick={handleIncrement}
-              disabled={isPending || !isInStock}
-              className={cn(
-                "flex h-9 w-9 sm:h-8 sm:w-8 items-center justify-center rounded-full transition-colors",
-                !isInStock ? "cursor-not-allowed opacity-40" : "hover:bg-white/20",
-              )}
-              aria-label="Increase quantity"
-            >
-              <Plus className="h-4 w-4" />
-            </button>
-          </div>
+          <QuantityStepper
+            value={quantity}
+            onIncrement={handleIncrement}
+            onDecrement={handleDecrement}
+            decrementAsRemove
+            incrementDisabled={!isInStock}
+            disabled={isPending}
+            variant="pill"
+            size="sm"
+            className="absolute end-1 bottom-1 z-10"
+          />
         )}
       </div>
 
       <Link href={`/products/${slug}`} className="mt-2.5 px-0.5">
         <p className={cn(
           "text-sm leading-4 font-medium line-clamp-2 text-balance transition-colors cursor-pointer",
-          isDark ? "text-white hover:text-white/80" : "text-black hover:text-primary",
+          isDark ? "text-white hover:text-white/80" : "text-text-primary hover:text-primary",
           isRtl ? "text-right" : "text-left",
         )}>
           {title}
@@ -246,16 +215,16 @@ export default function ProductCard({
 
       <div className="flex items-center gap-2 mt-1.5 px-0.5 flex-wrap">
         <div className="flex items-baseline gap-px" dir="ltr">
-          <span className={cn("text-lg leading-5 font-bold md:text-xl", isDark ? "text-white" : "text-gray-900")}>
+          <span className={cn("text-lg leading-5 font-bold md:text-xl", isDark ? "text-white" : "text-text-primary")}>
             {integerPart}
           </span>
           <div className="flex flex-col items-start">
-            <span className={cn("text-sm font-bold leading-none", isDark ? "text-white" : "text-gray-900")}>{decimalPart}</span>
-            <span className={cn("text-[10px] font-medium leading-none", isDark ? "text-gray-300" : "text-gray-500")}>{currency}</span>
+            <span className={cn("text-sm font-bold leading-none", isDark ? "text-white" : "text-text-primary")}>{decimalPart}</span>
+            <span className={cn("text-2xs font-medium leading-none", isDark ? "text-white/60" : "text-text-muted")}>{currency}</span>
           </div>
         </div>
         {safeOriginalPrice > safePrice && (
-          <span className={cn("text-sm leading-4 font-medium line-through", isDark ? "text-gray-400" : "text-gray-400")}>
+          <span className={cn("text-sm leading-4 font-normal line-through", isDark ? "text-white/50" : "text-text-muted")}>
             {currency} {safeOriginalPrice.toFixed(2)}
           </span>
         )}

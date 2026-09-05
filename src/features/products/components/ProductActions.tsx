@@ -2,10 +2,11 @@
 
 import { useState } from "react";
 import { useTranslations } from "next-intl";
-import { Minus, Plus, ShoppingCart, Loader2, Trash2 } from "lucide-react";
-import { cn } from "@/shared/utils/cn";
+import { ShoppingCart } from "lucide-react";
 import { useCartActions } from "@/features/cart/hooks/useCartActions";
 import { WishlistButton } from "@/features/wishlist/components/WishlistButton";
+import { QuantityStepper } from "@/components/ui/QuantityStepper";
+import { Button } from "@/components/ui/Button";
 import type { ProductDetail, ProductVariant } from "../types";
 import { getStockStatus, getDisplayPrice } from "../utils";
 
@@ -38,7 +39,6 @@ export function ProductActions({ product, selectedVariant }: ProductActionsProps
   async function handleAddToCart() {
     await addItem({
       quantity: selectedQuantity,
-      deliveryType: product.is_fast_shipping_available ? "fast" : "scheduled",
       product_variant_id: variant?.id ?? null,
       name: product.name,
       image: productImage,
@@ -55,33 +55,14 @@ export function ProductActions({ product, selectedVariant }: ProductActionsProps
     <div className="space-y-4">
       <div className="flex items-center justify-between gap-4">
         <span className="text-sm font-semibold text-text-primary">{t("quantity")}</span>
-        <div className="flex items-center rounded-lg border border-border">
-          <button
-            type="button"
-            onClick={() => setSelectedQuantity((q) => Math.max(1, q - 1))}
-            disabled={selectedQuantity <= 1}
-            className={cn(
-              "flex size-10 items-center justify-center text-text-primary transition hover:bg-surface",
-              selectedQuantity <= 1 && "cursor-not-allowed opacity-40",
-            )}
-          >
-            <Minus className="size-4" />
-          </button>
-          <span className="flex min-w-[3rem] items-center justify-center text-sm font-semibold text-text-primary">
-            {selectedQuantity}
-          </span>
-          <button
-            type="button"
-            onClick={() => setSelectedQuantity((q) => Math.min(maxQuantity, q + 1))}
-            disabled={selectedQuantity >= maxQuantity}
-            className={cn(
-              "flex size-10 items-center justify-center text-text-primary transition hover:bg-surface",
-              selectedQuantity >= maxQuantity && "cursor-not-allowed opacity-40",
-            )}
-          >
-            <Plus className="size-4" />
-          </button>
-        </div>
+        <QuantityStepper
+          value={selectedQuantity}
+          onIncrement={() => setSelectedQuantity((q) => Math.min(maxQuantity, q + 1))}
+          onDecrement={() => setSelectedQuantity((q) => Math.max(1, q - 1))}
+          incrementDisabled={selectedQuantity >= maxQuantity}
+          incrementLabel={t("increaseQuantity")}
+          decrementLabel={t("decreaseQuantity")}
+        />
       </div>
 
       <div className="flex items-center justify-between gap-4">
@@ -91,48 +72,29 @@ export function ProductActions({ product, selectedVariant }: ProductActionsProps
       </div>
 
       {cartQuantity > 0 ? (
-        <div className="flex w-full items-center justify-between gap-2 rounded-xl bg-primary px-3 py-2 text-white">
-          <button
-            type="button"
-            onClick={() => decrement()}
-            disabled={isPending || cartQuantity <= 1}
-            aria-label="Decrease quantity"
-            className="flex size-9 items-center justify-center rounded-full transition-colors hover:bg-white/20 disabled:cursor-not-allowed disabled:opacity-40"
-          >
-            {cartQuantity === 1 ? <Trash2 className="size-4" /> : <Minus className="size-4" />}
-          </button>
-          <span className="min-w-[2rem] text-center text-sm font-bold tabular-nums">
-            {cartQuantity}
-          </span>
-          <button
-            type="button"
-            onClick={() => increment()}
-            disabled={isPending || !stock.inStock || cartQuantity >= maxQuantity}
-            aria-label="Increase quantity"
-            className="flex size-9 items-center justify-center rounded-full transition-colors hover:bg-white/20 disabled:cursor-not-allowed disabled:opacity-40"
-          >
-            <Plus className="size-4" />
-          </button>
-        </div>
+        <QuantityStepper
+          value={cartQuantity}
+          onIncrement={() => increment()}
+          onDecrement={() => decrement()}
+          decrementAsRemove
+          incrementDisabled={!stock.inStock || cartQuantity >= maxQuantity}
+          disabled={isPending}
+          variant="pill"
+          incrementLabel={t("increaseQuantity")}
+          decrementLabel={t("decreaseQuantity")}
+          removeLabel={t("removeItem")}
+        />
       ) : (
-        <button
-          type="button"
+        <Button
+          full
+          size="lg"
+          loading={isPending}
+          disabled={!stock.inStock}
           onClick={handleAddToCart}
-          disabled={!stock.inStock || isPending}
-          className={cn(
-            "flex w-full items-center justify-center gap-3 rounded-xl px-6 py-3 text-sm font-semibold transition",
-            stock.inStock && !isPending
-              ? "bg-primary text-white hover:bg-primary-dark"
-              : "cursor-not-allowed bg-gray-300 text-gray-500",
-          )}
         >
-          {isPending ? (
-            <Loader2 className="size-5 animate-spin" />
-          ) : (
-            <ShoppingCart className="size-5" />
-          )}
+          {!isPending && <ShoppingCart className="size-5" aria-hidden />}
           {stock.inStock ? t("addToCart") : t("outOfStock")}
-        </button>
+        </Button>
       )}
 
       <WishlistButton
@@ -147,7 +109,7 @@ export function ProductActions({ product, selectedVariant }: ProductActionsProps
         <p>
           {t("sku")}: {product.sku}
         </p>
-        <p className={stock.inStock ? "text-green-600" : "text-red-500"}>
+        <p className={stock.inStock ? "text-success" : "text-error"}>
           {stock.inStock
             ? t("inStock", { count: stock.remaining })
             : t("outOfStock")}

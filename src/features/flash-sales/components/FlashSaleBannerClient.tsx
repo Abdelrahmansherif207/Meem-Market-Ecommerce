@@ -31,7 +31,7 @@ export default function FlashSaleBannerClient({ flashSales }: FlashSaleBannerCli
 
   return (
     <section className="w-full group" dir={isRtl ? "rtl" : "ltr"} aria-label="Flash sales">
-      <div className="relative h-[200px] w-full overflow-hidden rounded-[20px] sm:h-[260px] lg:h-[340px]">
+      <div className="relative h-[260px] w-full overflow-hidden rounded-lg sm:h-[340px] lg:h-[420px]">
         <Swiper
           modules={[Autoplay, Keyboard]}
           loop={total > 1}

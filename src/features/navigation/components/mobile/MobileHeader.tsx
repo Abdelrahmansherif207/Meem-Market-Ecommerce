@@ -1,8 +1,10 @@
 import { getLocale, getTranslations } from "next-intl/server";
-import DeliveryModes from "../header/DeliveryModes";
 import { SearchAutocomplete } from "../header/SearchAutocomplete";
 import { LocaleSwitcher } from "../header/LocaleSwitcher";
 import { WishlistIcon } from "../header/WishlistIcon";
+import { NotificationBell } from "@/features/notifications";
+import { LocationDisplay } from "@/features/location";
+import { MobileAuthButton } from "@/features/auth/components/MobileAuthButton";
 import MobileFooterDrawer from "./MobileFooterDrawer";
 import { assembleFooterContent } from "../../services/footerService";
 
@@ -16,8 +18,10 @@ export default async function MobileHeader() {
       <div className="flex flex-col gap-3 px-4 py-2.5">
         <div className="flex items-center gap-3">
           <MobileFooterDrawer {...footerContent} />
-          <DeliveryModes />
+          <LocationDisplay />
           <div className="flex items-center gap-2 ms-auto">
+            <MobileAuthButton />
+            <NotificationBell />
             <WishlistIcon />
             <LocaleSwitcher />
           </div>

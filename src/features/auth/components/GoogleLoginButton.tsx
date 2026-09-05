@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 import { loginWithGoogle } from "../services/socialService";
 
 function GoogleIcon() {
@@ -27,6 +28,7 @@ function GoogleIcon() {
 }
 
 export function GoogleLoginButton() {
+  const t = useTranslations("auth");
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -38,7 +40,7 @@ export function GoogleLoginButton() {
       const url = await loginWithGoogle();
       window.location.href = url;
     } catch {
-      setError("Unable to start Google login. Please try again.");
+      setError(t("googleError"));
       setPending(false);
     }
   }
@@ -47,7 +49,7 @@ export function GoogleLoginButton() {
     <>
       <div className="my-3 flex items-center gap-3">
         <span className="h-px flex-1 bg-border" />
-        <span className="text-xs text-text-secondary">or</span>
+        <span className="text-xs text-text-secondary">{t("or")}</span>
         <span className="h-px flex-1 bg-border" />
       </div>
 
@@ -58,10 +60,10 @@ export function GoogleLoginButton() {
         className="flex w-full items-center justify-center gap-2.5 rounded-xl border border-border bg-background px-4 py-2.5 text-sm font-semibold text-text-primary transition hover:border-primary hover:bg-surface disabled:cursor-not-allowed disabled:opacity-70"
       >
         <GoogleIcon />
-        {pending ? "Redirecting..." : "Continue with Google"}
+        {pending ? t("redirecting") : t("continueWithGoogle")}
       </button>
 
-      {error ? <p className="mt-1 text-center text-xs text-red-500">{error}</p> : null}
+      {error ? <p className="mt-1 text-center text-xs text-error">{error}</p> : null}
     </>
   );
 }

@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState, useActionState } from "react";
 import { X, Mail } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { PatternTiles } from "./PatternTiles";
 import { PhoneInputWithCountry } from "./PhoneInputWithCountry";
 import { PasswordInput } from "./PasswordInput";
@@ -24,6 +25,7 @@ export function AuthModal() {
 }
 
 function AuthModalContent({ close }: { close: () => void }) {
+  const t = useTranslations("auth");
   const [method, setMethod] = useState<ContactMethod>("phone");
   const [state, formAction, pending] = useActionState(loginAction, null);
   const setAuthData = useAuthStore((s) => s.setAuthData);
@@ -88,8 +90,8 @@ function handleOverlayClick(e: React.MouseEvent<HTMLDivElement>) {
           <button
             type="button"
             onClick={close}
-            aria-label="Close"
-            className="absolute right-3 top-3 z-20 flex h-8 w-8 items-center justify-center rounded-full bg-white/80 text-text-primary shadow backdrop-blur-sm transition hover:bg-white hover:shadow-md"
+            aria-label={t("close")}
+            className="absolute end-3 top-3 z-20 flex h-8 w-8 items-center justify-center rounded-full bg-white/80 text-text-primary shadow backdrop-blur-sm transition hover:bg-white hover:shadow-md"
           >
             <X className="h-4 w-4" />
           </button>
@@ -99,10 +101,10 @@ function handleOverlayClick(e: React.MouseEvent<HTMLDivElement>) {
         <div className="px-6 pb-7 pt-5">
           {/* Heading */}
           <div className="mb-4 flex justify-center">
-            <Logo src="/meem-logo.png" alt="Meem Market" />
+            <Logo src="/catch-footer-logo.jpeg" alt="Catch Beauty" width={100} height={40} className="rounded-lg" />
           </div>
           <h2 className="mb-4 text-center text-xl font-bold text-text-primary">
-            Hala! Let&apos;s get started
+            {t("welcomeHeading")}
           </h2>
 
           {/* Email / Phone method tabs */}
@@ -118,27 +120,27 @@ function handleOverlayClick(e: React.MouseEvent<HTMLDivElement>) {
             {method === "email" ? (
               <div>
                 <div className="relative">
-                  <Mail className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-text-secondary" />
+                  <Mail className="absolute start-3 top-1/2 h-5 w-5 -translate-y-1/2 text-text-secondary" />
                   <input
                     ref={inputRef}
                     type="email"
                     name="email"
-                    placeholder="name@example.com"
+                    placeholder={t("emailPlaceholder")}
                     defaultValue={payload.email || ""}
                     className={
-                      "w-full rounded-xl border bg-background pl-10 pr-4 py-3 text-sm text-text-primary outline-none transition placeholder:text-text-secondary/70 focus:border-primary focus:ring-2 focus:ring-primary/10 " +
-                      (fieldErrors.email ? "border-red-500" : "border-border")
+                      "w-full rounded-xl border bg-background ps-10 pe-4 py-3 text-sm text-text-primary outline-none transition placeholder:text-text-secondary/70 focus:border-primary focus:ring-2 focus:ring-primary/10 " +
+                      (fieldErrors.email ? "border-error" : "border-border")
                     }
                   />
                 </div>
                 {fieldErrors.email && (
-                  <p className="mt-1 text-xs text-red-500">{fieldErrors.email}</p>
+                  <p className="mt-1 text-xs text-error">{fieldErrors.email}</p>
                 )}
               </div>
             ) : (
               <PhoneInputWithCountry
                 name="phone"
-                placeholder="Enter your phone number"
+                placeholder={t("phonePlaceholder")}
                 error={fieldErrors.phone}
                 defaultValue={payload.phone || ""}
               />
@@ -146,7 +148,7 @@ function handleOverlayClick(e: React.MouseEvent<HTMLDivElement>) {
 
             <PasswordInput
               name="password"
-              placeholder="Enter your password"
+              placeholder={t("passwordPlaceholder")}
               error={fieldErrors.password}
               defaultValue={payload.password || ""}
             />
@@ -160,7 +162,7 @@ function handleOverlayClick(e: React.MouseEvent<HTMLDivElement>) {
               disabled={pending}
               className="w-full rounded-xl bg-primary py-3 text-sm font-bold uppercase tracking-widest text-white transition hover:bg-primary-dark disabled:cursor-not-allowed disabled:opacity-70"
             >
-              {pending ? "Signing in..." : "Sign in"}
+              {pending ? t("signingIn") : t("signIn")}
             </button>
 
             <GoogleLoginButton />
@@ -175,12 +177,12 @@ function handleOverlayClick(e: React.MouseEvent<HTMLDivElement>) {
               }}
               className="font-medium text-amber-600 hover:text-amber-700 hover:underline"
             >
-              Forgot password?
+              {t("forgotPassword")}
             </button>
           </p>
 
           <p className="mt-4 text-center text-xs text-text-secondary">
-            Don&apos;t have an account?{" "}
+            {t("dontHaveAccount")}{" "}
             <button
               type="button"
               onClick={() => {
@@ -189,21 +191,24 @@ function handleOverlayClick(e: React.MouseEvent<HTMLDivElement>) {
               }}
               className="font-medium text-primary hover:underline"
             >
-              Sign up
+              {t("signUp")}
             </button>
           </p>
 
           {/* Terms & Privacy */}
           <p className="mt-4 text-center text-xs text-text-secondary">
-            By continuing, you agree to our{" "}
-            <span className="cursor-pointer font-medium text-primary hover:underline">
-              Terms of Use
-            </span>{" "}
-            &amp;{" "}
-            <span className="cursor-pointer font-medium text-primary hover:underline">
-              Privacy Policy
-            </span>
-            .
+            {t.rich("termsAgreement", {
+              terms: (chunks) => (
+                <span className="cursor-pointer font-medium text-primary hover:underline">
+                  {chunks}
+                </span>
+              ),
+              privacy: (chunks) => (
+                <span className="cursor-pointer font-medium text-primary hover:underline">
+                  {chunks}
+                </span>
+              ),
+            })}
           </p>
         </div>
       </div>

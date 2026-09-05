@@ -70,7 +70,7 @@ export function ProductVariants({
               <span
                 className={cn(
                   "text-xs",
-                  inStock ? "text-green-600" : "text-red-500",
+                  inStock ? "text-success" : "text-error",
                 )}
               >
                 {inStock

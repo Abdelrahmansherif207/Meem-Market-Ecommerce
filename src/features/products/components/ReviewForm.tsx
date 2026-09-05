@@ -80,7 +80,7 @@ export function ReviewForm({ productId, existingReview, onSuccess, onCancel }: R
   return (
     <div ref={formRef} className="rounded-xl border border-border bg-surface p-4">
       {successMessage && (
-        <div className="mb-4 rounded-lg bg-green-50 px-4 py-3 text-sm font-medium text-green-700">
+        <div className="mb-4 rounded-lg bg-success-surface px-4 py-3 text-sm font-medium text-success">
           {successMessage}
         </div>
       )}
@@ -104,7 +104,7 @@ export function ReviewForm({ productId, existingReview, onSuccess, onCancel }: R
                     "size-7 cursor-pointer transition-colors",
                     star <= (hoverRating || rating)
                       ? "fill-yellow-400 text-yellow-400"
-                      : "fill-gray-200 text-gray-200",
+                      : "fill-border text-border",
                   )}
                 />
               </button>
@@ -123,7 +123,7 @@ export function ReviewForm({ productId, existingReview, onSuccess, onCancel }: R
         </div>
 
         {error && (
-          <p className="text-xs text-red-500">{error}</p>
+          <p className="text-xs text-error">{error}</p>
         )}
 
         <div className="flex items-center gap-3">

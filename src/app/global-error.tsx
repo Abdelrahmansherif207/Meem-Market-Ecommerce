@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
+import Image from "next/image";
 
 export default function GlobalError({
   error,
@@ -26,10 +27,12 @@ export default function GlobalError({
           }}
         >
           <div style={{ textAlign: "center", maxWidth: "420px" }}>
-            <img
+            <Image
               src="/images/empty-state/server-error.svg"
               alt=""
               aria-hidden
+              width={300}
+              height={300}
               style={{ width: "100%", maxWidth: "300px", margin: "0 auto" }}
             />
             <h1
@@ -37,7 +40,7 @@ export default function GlobalError({
                 marginTop: "16px",
                 fontSize: "20px",
                 fontWeight: 700,
-                color: "#111827",
+                color: "#1c1a1a",
               }}
             >
               Something went wrong
@@ -47,7 +50,7 @@ export default function GlobalError({
                 marginTop: "8px",
                 fontSize: "14px",
                 lineHeight: "1.5",
-                color: "#6b7280",
+                color: "#706565",
               }}
             >
               A critical error occurred. Please try again.
@@ -57,7 +60,7 @@ export default function GlobalError({
               style={{
                 marginTop: "24px",
                 borderRadius: "12px",
-                background: "#111827",
+                background: "#b81d24",
                 padding: "10px 24px",
                 fontSize: "14px",
                 fontWeight: 600,

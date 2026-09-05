@@ -22,22 +22,6 @@ export interface Governorate {
   name: string;
   country_id: number;
   status: boolean;
-  is_fast_shipping_enabled: boolean;
-}
-
-export interface FastCheckoutRequest {
-  name: string;
-  user_phone: string;
-  user_email: string;
-  address: {
-    address?: string;
-    city: string;
-    country: string;
-  };
-  notes?: string;
-  governorate_id: number;
-  selected_promotion_id?: number | null;
-  selected_gift_product_id?: number | null;
 }
 
 export interface CheckoutRequest {

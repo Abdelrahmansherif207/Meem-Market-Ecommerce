@@ -31,11 +31,11 @@ export default function MobileFilterBar({
   return (
     <>
       {/* Action bar */}
-      <div className="flex items-center gap-2 px-3 py-2.5 border-b border-gray-100">
+      <div className="flex items-center gap-2 px-3 py-2.5 border-b border-border-subtle">
         <button
           id="mobile-filters-btn"
           onClick={() => setFiltersOpen(true)}
-          className="flex items-center gap-1.5 px-4 py-2 rounded-full border border-gray-300 text-sm font-medium text-gray-800 hover:bg-gray-50 active:bg-gray-100 transition-colors"
+          className="flex items-center gap-1.5 px-4 py-2 rounded-full border border-border text-sm font-medium text-text-primary hover:bg-surface active:bg-surface transition-colors"
           aria-haspopup="dialog"
           aria-expanded={filtersOpen}
         >

@@ -29,7 +29,7 @@ function AccordionGroup({
   };
 
   return (
-    <ul className={cn(level > 0 && "ms-3 border-s border-gray-200 ps-3")}>
+    <ul className={cn(level > 0 && "ms-3 border-s border-border ps-3")}>
       {items.map((item) => {
         const hasChildren = item.children?.length > 0;
         const isExpanded = expanded.has(item.id);
@@ -78,7 +78,7 @@ export default function MobileHamburgerMenu() {
 
   useEffect(() => {
     if (!open || categories.length > 0) return;
-    setLoading(true);
+    setLoading(true); // eslint-disable-line react-hooks/set-state-in-effect
     categoryMenuWithCache.getMenu(locale)
       .then(setCategories)
       .catch(() => setCategories([]))
@@ -124,7 +124,7 @@ export default function MobileHamburgerMenu() {
               "animate-in slide-in-from-left duration-300",
             )}
           >
-            <div className="flex items-center justify-between border-b border-gray-200 px-4 py-3">
+            <div className="flex items-center justify-between border-b border-border px-4 py-3">
               <span className="text-lg font-bold">Categories</span>
               <button
                 type="button"

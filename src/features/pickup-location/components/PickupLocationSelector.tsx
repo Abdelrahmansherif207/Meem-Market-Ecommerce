@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
-import { MapPin, Phone, Mail, Clock, ExternalLink, Loader2, AlertTriangle, ChevronDown, ChevronUp } from "lucide-react";
+import { MapPin, Phone, Mail, Clock, ExternalLink, ChevronDown, ChevronUp } from "lucide-react";
 import { pickupLocationService } from "../services/pickupLocationService";
 import { usePickupLocationStore } from "../store/usePickupLocationStore";
 import type { PickupLocation } from "../types";
@@ -18,7 +18,7 @@ export function PickupLocationSelector() {
 
   useEffect(() => {
     let cancelled = false;
-    setLoading(true);
+    setLoading(true); // eslint-disable-line react-hooks/set-state-in-effect
     setError(false);
 
     pickupLocationService.getAll(locale)
@@ -26,6 +26,10 @@ export function PickupLocationSelector() {
         if (cancelled) return;
         setLocations(data);
         setLoading(false);
+        if (selectedId === null) {
+          const defaultLoc = data.find((l) => l.is_default);
+          if (defaultLoc) setSelectedId(defaultLoc.id);
+        }
       })
       .catch(() => {
         if (cancelled) return;
@@ -34,9 +38,7 @@ export function PickupLocationSelector() {
       });
 
     return () => { cancelled = true; };
-  }, [locale]);
-
-  const selectedLocation = locations.find((l) => l.id === selectedId);
+  }, [locale, selectedId, setSelectedId]);
 
   const isClosed = (open: string) => open === "CLOSED";
 
@@ -50,8 +52,8 @@ export function PickupLocationSelector() {
         <div className="space-y-3">
           {[1, 2, 3].map((i) => (
             <div key={i} className="animate-pulse rounded-xl border border-border p-4 space-y-2">
-              <div className="h-4 w-3/4 rounded bg-gray-200" />
-              <div className="h-3 w-1/2 rounded bg-gray-200" />
+              <div className="h-4 w-3/4 rounded bg-border" />
+              <div className="h-3 w-1/2 rounded bg-border" />
             </div>
           ))}
         </div>
@@ -141,7 +143,7 @@ export function PickupLocationSelector() {
             </label>
 
             {expandedId === loc.id && selectedId === loc.id && (
-              <div className="mt-2 ml-7 rounded-xl border border-border bg-gray-50 p-4 space-y-3">
+              <div className="mt-2 ml-7 rounded-xl border border-border bg-surface p-4 space-y-3">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <a
                     href={`tel:${loc.phone}`}
@@ -174,8 +176,8 @@ export function PickupLocationSelector() {
                     </thead>
                     <tbody>
                       {loc.working_hours.map((wh) => (
-                        <tr key={wh.day} className="border-b border-border/50 last:border-0">
-                          <td className="py-1 pr-2 text-text-primary">{wh.day}</td>
+                        <tr key={wh.day.en} className="border-b border-border/50 last:border-0">
+                          <td className="py-1 pr-2 text-text-primary">{("ar" in wh.day && locale === "ar") ? wh.day.ar : wh.day.en}</td>
                           {isClosed(wh.open) ? (
                             <td className="py-1 pr-2 text-text-secondary" colSpan={2}>{t("closed")}</td>
                           ) : (
@@ -190,7 +192,7 @@ export function PickupLocationSelector() {
                   </table>
                 </div>
 
-                <div className="h-40 rounded-lg overflow-hidden bg-gray-200 relative">
+                <div className="h-40 rounded-lg overflow-hidden bg-border relative">
                   <iframe
                     title={loc.store_name}
                     className="w-full h-full"

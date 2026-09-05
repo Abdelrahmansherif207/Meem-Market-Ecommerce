@@ -72,7 +72,7 @@ export function CategoryMobileLayout({
       style={{ height: "calc(100dvh - 90px - 56px)" }}
     >
       {/* Sidebar panel — independent scroll */}
-      <div className="shrink-0 w-[85px] bg-[#f4f5f7] overflow-y-auto overflow-x-hidden">
+      <div className="shrink-0 w-[92px] bg-surface overflow-y-auto overflow-x-hidden">
         {sidebar}
       </div>
 

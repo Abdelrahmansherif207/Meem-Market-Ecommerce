@@ -15,8 +15,6 @@ export default function ProductSlider({
   items,
   columnsCount,
   badgeText,
-  showTimer,
-  timerEndAt,
   theme,
   autoplay = true,
   sliderSpeed = 4500,
@@ -83,7 +81,6 @@ export default function ProductSlider({
               priority={index < Math.round(cols)}
               hasVariants={product.hasVariants}
               badgeText={badgeText}
-              deliveryType={product.isFastShippingAvailable ? "fast" : "scheduled"}
               isInStock={product.isInStock}
               inWishlist={product.inWishlist}
               tags={product.tags}

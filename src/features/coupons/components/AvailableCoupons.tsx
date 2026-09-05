@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Image from "next/image";
 import { useLocale } from "next-intl";
 import { Copy, Check } from "lucide-react";
 import { couponService } from "../services/couponService";
@@ -53,12 +54,12 @@ export default function AvailableCoupons({ onSelectCoupon }: AvailableCouponsPro
   return (
     <div className="space-y-2">
       <h4 className="text-sm font-medium text-text-secondary">Available Coupons</h4>
-      <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-thin">
+      <div className="flex gap-3 overflow-x-auto pb-2 no-scrollbar">
         {coupons.map((coupon) => (
           <div
             key={coupon.id}
             className="flex flex-col flex-shrink-0 w-36 rounded-xl overflow-hidden border-2 cursor-pointer hover:shadow-md transition-shadow"
-            style={{ borderColor: coupon.borderColor || "#e5e7eb" }}
+            style={{ borderColor: coupon.borderColor || "#ede4e2" }}
           >
             <button
               type="button"
@@ -66,9 +67,11 @@ export default function AvailableCoupons({ onSelectCoupon }: AvailableCouponsPro
               onClick={() => onSelectCoupon(coupon)}
               title={`Use code: ${coupon.code}`}
             >
-              <img
+              <Image
                 src={coupon.image.desktop || coupon.image.mobile}
                 alt={coupon.name}
+                width={144}
+                height={192}
                 className="h-full w-full object-cover"
                 loading="lazy"
               />

@@ -5,7 +5,6 @@ import type {
   CategoryFilters,
   CategoryProduct,
   CategoryProductsResponse,
-  SubCategory,
 } from "../types";
 
 interface RawFilterDisplay {

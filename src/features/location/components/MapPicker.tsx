@@ -291,11 +291,11 @@ export function MapPicker({
 
       <div className="h-[38vh] sm:h-64 lg:h-72 w-full rounded-xl overflow-hidden border border-border">
         {loadError ? (
-          <div className="flex items-center justify-center h-full bg-gray-100 text-xs text-red-500 px-4 text-center">
+          <div className="flex items-center justify-center h-full bg-surface text-xs text-error px-4 text-center">
             {t("mapsLoadFailed")}
           </div>
         ) : !isLoaded ? (
-          <div className="flex items-center justify-center h-full bg-gray-100 text-xs text-text-secondary gap-2">
+          <div className="flex items-center justify-center h-full bg-surface text-xs text-text-secondary gap-2">
             <Loader2 className="h-3 w-3 animate-spin" />
             {t("loading")}
           </div>
@@ -365,7 +365,7 @@ export function MapPicker({
         </div>
       </div>
 
-      {error && <p className="text-xs text-red-500">{error}</p>}
+      {error && <p className="text-xs text-error">{error}</p>}
 
       {confirmDisabled && confirmDisabledHint && (
         <p className="text-xs text-text-secondary text-center">{confirmDisabledHint}</p>

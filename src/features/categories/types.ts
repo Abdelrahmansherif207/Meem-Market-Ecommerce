@@ -42,7 +42,6 @@ export interface CategoryProduct {
   discount_valid: boolean;
   ratings: number;
   in_stock?: boolean;
-  is_fast_shipping_available: boolean;
   in_wishlist?: boolean;
   image: CategoryProductImage;
   tags?: ProductTag[];

@@ -33,7 +33,7 @@ export default function FlashSaleBanner({ locale, title }: FlashSaleBannerProps)
         {/* Right: CTA */}
         <Link
           href={`/${locale}/flash-sales`}
-          className="inline-flex items-center justify-center w-[140px] sm:w-[155px] lg:w-[170px] h-[48px] sm:h-[52px] lg:h-[56px] rounded-[16px] bg-white text-[#111] text-[16px] sm:text-[17px] lg:text-[18px] font-bold shadow-sm transition-all duration-200 hover:scale-103 hover:shadow-lg hover:bg-gray-50 shrink-0"
+          className="inline-flex items-center justify-center w-[140px] sm:w-[155px] lg:w-[170px] h-[48px] sm:h-[52px] lg:h-[56px] rounded-[16px] bg-white text-text-primary text-[16px] sm:text-[17px] lg:text-[18px] font-bold shadow-sm transition-all duration-200 hover:scale-103 hover:shadow-lg hover:bg-surface shrink-0"
         >
           SHOP NOW
         </Link>

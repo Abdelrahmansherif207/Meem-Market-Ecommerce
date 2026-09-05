@@ -84,7 +84,6 @@ export default async function PromotionDetailPage({ slug, locale }: PromotionDet
                 discountPercent={discountPercent}
                 slug={product.slug}
                 hasVariants={product.has_variants}
-                deliveryType={product.is_fast_shipping_available ? "fast" : "scheduled"}
                 isInStock={product.in_stock ?? product.quantity > 0}
                 inWishlist={product.in_wishlist}
                 tags={product.tags}

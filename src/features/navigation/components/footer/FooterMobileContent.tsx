@@ -1,6 +1,5 @@
-import Image from "next/image";
 import type { FooterData, SocialLink } from "../../types";
-import { SOCIAL_ICON_URLS } from "../../constants";
+import { SocialIcon } from "./SocialIcons";
 import Logo from "@/components/ui/Logo";
 import FooterAccordion from "./FooterAccordion";
 import FooterAccordionItem from "./FooterAccordionItem";
@@ -34,6 +33,8 @@ export default function FooterMobileContent({
             src={logoSrc || ""}
             alt={siteName || "Logo"}
             textFallback={logoSrc ? undefined : siteName || undefined}
+            width={60}
+            height={60}
           />
         }
         defaultOpen
@@ -50,13 +51,7 @@ export default function FooterMobileContent({
                 aria-label={s.label}
                 className="pr-2 transition-opacity hover:opacity-80"
               >
-                <Image
-                  alt={s.label}
-                  width={24}
-                  height={24}
-                  src={SOCIAL_ICON_URLS[s.platform] || SOCIAL_ICON_URLS.facebook}
-                  unoptimized
-                />
+                <SocialIcon platform={s.platform} className="h-6 w-6" />
               </a>
             ))}
           </div>
@@ -65,7 +60,7 @@ export default function FooterMobileContent({
 
       <FooterAccordion columns={data.columns} />
 
-      <FooterAccordionItem title={data.bottomRow.title}>
+      <FooterAccordionItem title={data.bottomRow.title} defaultOpen>
         <div>
           <FooterBottomRow data={data.bottomRow} />
         </div>

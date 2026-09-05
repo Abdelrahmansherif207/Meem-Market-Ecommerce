@@ -94,7 +94,7 @@ export function WishlistButton({
             <Loader2 className="size-5 animate-spin" />
           ) : (
             <Heart
-              className={cn("size-5", inWishlist && "fill-red-500 text-red-500")}
+              className={cn("size-5", inWishlist && "fill-discount text-error")}
             />
           )}
           {inWishlist ? t("inWishlist") : t("addToWishlist")}
@@ -104,7 +104,7 @@ export function WishlistButton({
           <p
             className={cn(
               "mt-2 text-center text-xs",
-              error ? "text-red-500" : "text-amber-600",
+              error ? "text-error" : "text-amber-600",
             )}
           >
             {message}
@@ -129,7 +129,7 @@ export function WishlistButton({
       <Heart
         className={cn(
           "size-4 transition-colors",
-          inWishlist ? "fill-red-500 text-red-500" : "text-gray-600",
+          inWishlist ? "fill-discount text-error" : "text-text-secondary",
           isPending && "opacity-60",
         )}
       />

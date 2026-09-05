@@ -10,6 +10,7 @@ export function useAuthProfileSync() {
   const token = useAuthStore((s) => s.token);
   const setEmailVerified = useAuthStore((s) => s.setEmailVerified);
   const setProfile = useAuthStore((s) => s.setProfile);
+  const setEmail = useAuthStore((s) => s.setEmail);
 
   useEffect(() => {
     if (!token) return;
@@ -22,6 +23,7 @@ export function useAuthProfileSync() {
         if (cancelled) return;
         setEmailVerified(Boolean(profile.email_verified_at));
         setProfile(profile.id, profile.name, profile.image);
+        if (profile.email) setEmail(profile.email);
       })
       .catch(() => {
         // Keep current flags if the profile can't be fetched.
@@ -30,5 +32,5 @@ export function useAuthProfileSync() {
     return () => {
       cancelled = true;
     };
-  }, [token, locale, setEmailVerified, setProfile]);
+  }, [token, locale, setEmailVerified, setProfile, setEmail]);
 }

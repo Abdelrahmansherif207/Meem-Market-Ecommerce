@@ -7,7 +7,7 @@ interface FlashSalePromoBannerProps {
 
 export default function FlashSalePromoBanner({ locale, title }: FlashSalePromoBannerProps) {
   return (
-    <div className="relative w-full overflow-hidden rounded-2xl bg-gradient-to-br from-[#FF6B00] to-[#FF5500] min-h-[180px] sm:min-h-[200px]">
+    <div className="relative w-full overflow-hidden rounded-2xl bg-gradient-to-br from-discount to-primary-dark min-h-[180px] sm:min-h-[200px]">
       {/* Diagonal overlay for depth */}
       <div className="absolute inset-0">
         <div className="absolute -top-12 -right-12 w-64 h-64 rounded-full bg-white/5" />
@@ -35,7 +35,7 @@ export default function FlashSalePromoBanner({ locale, title }: FlashSalePromoBa
         {/* CTA */}
         <Link
           href={`/${locale}/flash-sales`}
-          className="inline-flex items-center gap-1.5 rounded-full bg-white px-6 py-2.5 text-sm font-bold text-gray-900 shadow-sm transition-all duration-200 hover:scale-105 hover:shadow-md shrink-0"
+          className="inline-flex items-center gap-1.5 rounded-full bg-white px-6 py-2.5 text-sm font-bold text-text-primary shadow-sm transition-all duration-200 hover:scale-105 hover:shadow-md shrink-0"
         >
           SHOP NOW
           <span className="text-base leading-none" aria-hidden="true">→</span>

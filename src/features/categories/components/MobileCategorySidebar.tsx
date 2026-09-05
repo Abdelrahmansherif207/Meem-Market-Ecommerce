@@ -1,6 +1,6 @@
 "use client";
 
-import { useTranslations, useLocale } from "next-intl";
+import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import Image from "next/image";
 import type { SubCategory } from "../types";
@@ -19,78 +19,71 @@ export default function MobileCategorySidebar({
   parentSlug,
 }: MobileCategorySidebarProps) {
   const t = useTranslations("header.categoryNav");
-  const locale = useLocale();
 
   if (!subCategories || subCategories.length === 0) return null;
 
+  const circleClasses = (isActive: boolean) =>
+    cn(
+      "flex h-[64px] w-[64px] items-center justify-center rounded-full border transition-all duration-200",
+      isActive
+        ? "border-primary bg-primary/10 shadow-elev-1 ring-2 ring-primary/25"
+        : "border-border bg-gradient-to-b from-white to-surface",
+    );
+
+  const labelClasses = (isActive: boolean) =>
+    cn(
+      "px-0.5 text-2xs font-medium leading-tight text-center line-clamp-2 min-h-[2.5em]",
+      isActive ? "text-primary" : "text-text-secondary",
+    );
+
+  const imageSrc = (image: SubCategory["image"] | undefined) =>
+    image?.mobile || image?.desktop;
+
   return (
-    <div className="w-[85px] bg-[#f4f5f7] py-4 h-full">
-      <div className="flex flex-col items-center gap-6 h-full justify-start">
+    <div className="h-full w-[92px] bg-surface py-4">
+      <div className="flex flex-col items-center gap-4">
         <Link
           href={`/category/${parentSlug}`}
-          className="flex flex-col items-center gap-2 px-1 w-full"
+          className="flex w-full flex-col items-center gap-1.5 px-1"
         >
-          <div
-            className={cn(
-              "w-[56px] h-[56px] rounded-full flex justify-center items-center transition-colors shadow-sm",
-              currentSlug === parentSlug
-                ? "bg-white border-2 border-primary"
-                : "bg-white border border-transparent",
-            )}
-          >
+          <div className={circleClasses(currentSlug === parentSlug)}>
             <AllCategoryIcon
               className={cn(
-                "rounded-full stroke-2 transition-colors",
+                "h-[28px] w-[28px] rounded-full stroke-2 transition-colors",
                 currentSlug === parentSlug
                   ? "text-primary"
-                  : "text-foreground"
+                  : "text-text-muted",
               )}
             />
           </div>
-          <span 
-            className={cn(
-              "text-[11px] leading-tight font-medium text-center",
-              currentSlug === parentSlug ? "text-primary" : "text-foreground",
-            )}
-          >
+          <span className={labelClasses(currentSlug === parentSlug)}>
             {t("all")}
           </span>
         </Link>
 
         {subCategories.map((subcat) => {
           const isActive = currentSlug === subcat.slug;
+          const src = imageSrc(subcat.image);
           return (
             <Link
               key={subcat.id}
               href={`/category/${subcat.slug}`}
-              className="flex flex-col items-center gap-2 px-1 w-full"
+              className="flex w-full flex-col items-center gap-1.5 px-1"
             >
-              <div
-                className={cn(
-                  "w-[56px] h-[56px] rounded-full overflow-hidden flex items-end justify-center p-1 transition-colors shadow-sm",
-                  isActive
-                    ? "bg-white border-2 border-primary"
-                    : "bg-white border border-transparent",
-                )}
-              >
-                <div className="relative rounded-full overflow-hidden w-full h-full flex items-end justify-center">
-                  {subcat.image?.mobile || subcat.image?.desktop ? (
+              <div className={circleClasses(isActive)}>
+                {src && (
+                  <div className="flex h-[48px] w-[48px] items-center justify-center overflow-hidden rounded-full bg-white">
                     <Image
-                      src={subcat.image.mobile || subcat.image.desktop}
+                      src={src}
                       alt={subcat.name}
                       width={48}
                       height={48}
                       className="object-contain"
                     />
-                  ) : null}
-                </div>
-              </div>
-              <span
-                className={cn(
-                  "text-[11px] leading-tight font-medium text-center line-clamp-3",
-                  isActive ? "text-primary" : "text-foreground",
+                  </div>
                 )}
-              >
+              </div>
+              <span className={labelClasses(isActive)}>
                 {subcat.name}
               </span>
             </Link>

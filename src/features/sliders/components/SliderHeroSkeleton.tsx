@@ -3,7 +3,7 @@ import Skeleton from "@/components/ui/Skeleton";
 export default function SliderHeroSkeleton() {
   return (
     <section className="w-full" aria-label="Loading hero sliders">
-      <div className="relative h-[170px] w-full overflow-hidden rounded-[20px] sm:h-[230px] lg:h-[300px]">
+      <div className="relative h-[220px] w-full overflow-hidden rounded-lg sm:h-[300px] lg:h-[380px]">
         <Skeleton className="h-full w-full" />
       </div>
     </section>

@@ -9,7 +9,7 @@ import "swiper/css";
 import "swiper/css/pagination";
 
 import SectionTitle from "@/components/ui/SectionTitle";
-import { cn } from "@/shared/utils/cn";
+
 import { BannerArrows } from "@/features/home/components/banner";
 import type { Promotion } from "../types";
 
@@ -54,7 +54,7 @@ export default function PromotionsSectionClient({ promotions }: PromotionsSectio
             <SwiperSlide key={promo.id}>
               <a
                 href={`/${locale}/promotions/${promo.slug}`}
-                className="relative block w-full overflow-hidden rounded-xl aspect-[16/7] sm:aspect-[16/6] md:aspect-[16/5]"
+                className="relative block w-full overflow-hidden rounded-xl aspect-[16/8] sm:aspect-[16/7] md:aspect-[16/6]"
               >
                 <picture className="absolute inset-0">
                   <source media="(min-width: 640px)" srcSet={promo.image.desktop} />
