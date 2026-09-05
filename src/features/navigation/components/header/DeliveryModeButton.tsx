@@ -44,7 +44,7 @@ export function DeliveryModeButton({
         onClick={onClick}
         disabled={disabled}
         className={cn(
-          "relative flex min-w-0 flex-1 items-center gap-1.5 overflow-hidden rounded-lg px-2 py-1 text-start transition-all duration-200 ease-out",
+          "relative flex min-w-0 flex-1 items-center justify-center gap-1.5 overflow-hidden rounded-lg px-2 py-1 text-center transition-all duration-200 ease-out",
           "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60",
           "disabled:cursor-not-allowed",
           disabled && "border border-dashed border-text-muted/40 opacity-70 saturate-[0.6] hover:opacity-70",
@@ -67,7 +67,7 @@ export function DeliveryModeButton({
           />
         </div>
 
-        <span className="min-w-0 flex-1 overflow-hidden text-ellipsis text-[12px] leading-4 font-bold">
+        <span className="min-w-0 flex-1 overflow-hidden text-ellipsis text-center text-[12px] leading-4 font-bold">
           {label}
         </span>
 
