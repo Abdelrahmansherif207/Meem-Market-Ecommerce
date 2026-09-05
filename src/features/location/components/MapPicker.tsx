@@ -214,6 +214,11 @@ export function MapPicker({
     reverseGeocode(e.latLng.lat(), e.latLng.lng());
   };
 
+  const handleMapClick = (e: google.maps.MapMouseEvent) => {
+    if (!e.latLng) return;
+    reverseGeocode(e.latLng.lat(), e.latLng.lng());
+  };
+
   const hasPicked = city.trim().length > 0 && streetAddress.trim().length > 0;
 
   const handleConfirm = () => {
@@ -305,6 +310,7 @@ export function MapPicker({
             mapContainerStyle={mapContainerStyle}
             center={selectedCoords}
             zoom={16}
+            onClick={handleMapClick}
           >
             <Marker position={selectedCoords} draggable onDragEnd={handleMarkerDragEnd} />
           </GoogleMap>
