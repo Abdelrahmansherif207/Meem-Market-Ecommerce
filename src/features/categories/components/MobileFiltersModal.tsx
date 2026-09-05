@@ -107,13 +107,13 @@ export default function MobileFiltersModal({
       {/* Sheet */}
       <div className="relative z-10 w-full bg-white rounded-t-2xl shadow-2xl flex flex-col max-h-[92dvh]">
         {/* Header */}
-        <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100 shrink-0">
-          <span className="text-base font-semibold text-gray-900">
+        <div className="flex items-center justify-between px-5 py-4 border-b border-border-subtle shrink-0">
+          <span className="text-base font-semibold text-text-primary">
             {t("filtersTitle")}
           </span>
           <button
             onClick={onClose}
-            className="w-8 h-8 flex items-center justify-center rounded-full border border-gray-200 text-gray-500 hover:bg-gray-50 transition-colors"
+            className="w-8 h-8 flex items-center justify-center rounded-full border border-border text-text-secondary hover:bg-surface transition-colors"
             aria-label={t("close")}
           >
             <X className="w-4 h-4" />
@@ -138,8 +138,8 @@ export default function MobileFiltersModal({
             const checkedItems = draft[key] ?? [];
 
             return (
-              <div key={key} className="py-3 border-b border-gray-100 last:border-b-0">
-                <h3 className="font-semibold text-sm mb-3 text-gray-900">{label}</h3>
+              <div key={key} className="py-3 border-b border-border-subtle last:border-b-0">
+                <h3 className="font-semibold text-sm mb-3 text-text-primary">{label}</h3>
 
                 {key === "brand" && (
                   <div className="relative mb-3">
@@ -201,10 +201,10 @@ export default function MobileFiltersModal({
         </div>
 
         {/* Footer actions */}
-        <div className="flex gap-3 px-5 py-4 border-t border-gray-100 bg-white shrink-0">
+        <div className="flex gap-3 px-5 py-4 border-t border-border-subtle bg-white shrink-0">
           <button
             onClick={handleClearAll}
-            className="flex-1 py-3 rounded-xl border border-gray-300 text-sm font-semibold text-gray-700 hover:bg-gray-50 transition-colors"
+            className="flex-1 py-3 rounded-xl border border-border text-sm font-semibold text-text-primary hover:bg-surface transition-colors"
           >
             {t("clearAll")}
           </button>

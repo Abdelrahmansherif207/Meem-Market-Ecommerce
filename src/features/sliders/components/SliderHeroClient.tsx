@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useLocale } from "next-intl";
 import { Autoplay, Keyboard } from "swiper/modules";
 import { Swiper, SwiperSlide } from "swiper/react";
 import type { Swiper as SwiperType } from "swiper/types";
@@ -12,6 +11,7 @@ import type { Slider } from "../types";
 
 interface SliderHeroClientProps {
   sliders: Slider[];
+  locale: string;
 }
 
 const AUTO_PLAY_MS = 5000;
@@ -30,8 +30,7 @@ function SliderSlideImage({ slider, isFirst }: { slider: Slider; isFirst: boolea
   );
 }
 
-export default function SliderHeroClient({ sliders }: SliderHeroClientProps) {
-  const locale = useLocale();
+export default function SliderHeroClient({ sliders, locale }: SliderHeroClientProps) {
   const isRtl = locale === "ar";
   const total = sliders.length;
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -55,7 +54,7 @@ export default function SliderHeroClient({ sliders }: SliderHeroClientProps) {
 
   return (
     <section className="w-full" dir={isRtl ? "rtl" : "ltr"} aria-label="Hero sliders">
-      <div className="group relative h-[170px] w-full overflow-hidden rounded-[20px] sm:h-[230px] lg:h-[300px]">
+      <div className="group relative h-[220px] w-full overflow-hidden rounded-lg sm:h-[300px] lg:h-[380px]">
         <Swiper
           modules={[Autoplay, Keyboard]}
           loop={total > 1}

@@ -134,6 +134,10 @@ export async function apiFetch<T>(
     }
   }
 
+  if (enableLogs) {
+    console.log("? " + method + " " + url + " request body:", requestOptions.body);
+  }
+
   let response: Response;
   try {
     response = await fetch(url, {

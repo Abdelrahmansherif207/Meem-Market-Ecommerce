@@ -4,7 +4,7 @@ import FlashSaleBanner from "./FlashSaleBanner";
 import ProductSlider from "../../productSlider/ProductSlider";
 import { homePageService } from "../../services/homePageService";
 import { flashSaleService } from "@/features/flash-sales/services/flashSaleService";
-import type { SectionFrontSetting, ApiFlashSale, ApiCoupon, Promotion, CardSlideItem, ProductItem } from "../../types";
+import type { SectionFrontSetting, ApiFlashSale, Promotion, CardSlideItem, ProductItem } from "../../types";
 import type { FlashSaleProduct } from "@/features/flash-sales/types";
 
 function flashProductToProductItem(p: FlashSaleProduct): ProductItem {
@@ -16,7 +16,6 @@ function flashProductToProductItem(p: FlashSaleProduct): ProductItem {
     originalPrice: p.price,
     slug: p.slug,
     hasVariants: p.has_variants,
-    isFastShippingAvailable: p.is_fast_shipping_available,
     isInStock: p.in_stock ?? p.quantity > 0,
     flashSaleActive: p.flash_sale_active ?? false,
     inWishlist: p.in_wishlist,
@@ -47,15 +46,7 @@ export default async function FlashSaleSection({
   let flashSaleItems: { name: string; slug: string; image: { desktop: string; mobile: string } }[] = [];
 
   try {
-    if (type === "coupons") {
-      const coupons = await homePageService.fetchSectionData<ApiCoupon[]>(endpoint, locale);
-      items = coupons.map((coupon) => ({
-        id: coupon.id,
-        title: coupon.name,
-        image: coupon.image,
-        borderColor: coupon.borderColor,
-      }));
-    } else if (type === "promotions") {
+    if (type === "promotions") {
       const promo = await homePageService.fetchSectionData<Promotion | Promotion[]>(endpoint, locale);
       const promoList = Array.isArray(promo) ? promo : [promo];
       items = promoList.map((p) => ({
@@ -128,7 +119,6 @@ export default async function FlashSaleSection({
       items={items}
       autoplay={setting?.autoplay}
       sliderSpeed={setting?.slider_speed}
-      slidesPerView={type === "coupons" ? 5 : undefined}
     />
   );
 

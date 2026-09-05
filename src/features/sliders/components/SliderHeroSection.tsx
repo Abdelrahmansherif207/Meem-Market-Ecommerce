@@ -20,5 +20,5 @@ export default async function SliderHeroSection({ locale }: SliderHeroSectionPro
   const validSliders = sliders.filter((s) => s.image?.desktop && s.image?.mobile);
   if (!validSliders.length) return null;
 
-  return <SliderHeroClient sliders={validSliders} />;
+  return <SliderHeroClient sliders={validSliders} locale={locale} />;
 }

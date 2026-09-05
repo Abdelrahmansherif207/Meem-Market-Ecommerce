@@ -13,7 +13,7 @@ export default function FilterCheckbox({
 }: FilterCheckboxProps) {
   return (
     <label
-      className={`group flex min-h-10 cursor-pointer items-center gap-3 rounded-xl px-2.5 py-2 text-sm transition-colors duration-200 ${
+      className={`group relative flex min-h-10 cursor-pointer items-center gap-3 rounded-xl px-2.5 py-2 text-sm transition-colors duration-200 ${
         checked
           ? "bg-primary/[0.07] font-medium text-text-primary"
           : "text-text-secondary hover:bg-surface hover:text-text-primary"

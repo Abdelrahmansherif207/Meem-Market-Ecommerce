@@ -53,20 +53,20 @@ interface CartCheckoutData {
   expired: boolean;
 }
 
-function validate(form: CheckoutFormData): FieldError[] {
+function validate(form: CheckoutFormData, vt: (key: string) => string): FieldError[] {
   const errors: FieldError[] = [];
-  if (!form.name.trim()) errors.push({ field: "name", message: "Name is required" });
-  if (!form.user_phone.trim()) errors.push({ field: "user_phone", message: "Phone is required" });
+  if (!form.name.trim()) errors.push({ field: "name", message: vt("nameRequired") });
+  if (!form.user_phone.trim()) errors.push({ field: "user_phone", message: vt("phoneRequired") });
   if (!form.user_email.trim()) {
-    errors.push({ field: "user_email", message: "Email is required" });
+    errors.push({ field: "user_email", message: vt("emailRequired") });
   } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.user_email)) {
-    errors.push({ field: "user_email", message: "Invalid email" });
+    errors.push({ field: "user_email", message: vt("emailInvalid") });
   }
   if (form.fulfillment_type === "delivery") {
-    if (form.governorate_id === null) errors.push({ field: "governorate_id", message: "Governorate is required" });
-    if (!form.city.trim()) errors.push({ field: "city", message: "City is required" });
-    if (!form.country.trim()) errors.push({ field: "country", message: "Country is required" });
-    if (!form.street_address.trim()) errors.push({ field: "street_address", message: "Street address is required" });
+    if (form.governorate_id === null) errors.push({ field: "governorate_id", message: vt("governorateRequired") });
+    if (!form.city.trim()) errors.push({ field: "city", message: vt("cityRequired") });
+    if (!form.country.trim()) errors.push({ field: "country", message: vt("countryRequired") });
+    if (!form.street_address.trim()) errors.push({ field: "street_address", message: vt("streetRequired") });
   }
   return errors;
 }
@@ -108,7 +108,7 @@ export function CheckoutForm() {
 
   useEffect(() => {
     const unsub = useAuthStore.persist.onFinishHydration(() => setHydrated(true));
-    if (useAuthStore.persist.hasHydrated()) setHydrated(true);
+    if (useAuthStore.persist.hasHydrated()) setHydrated(true); // eslint-disable-line react-hooks/set-state-in-effect
     return unsub;
   }, []);
 
@@ -163,7 +163,7 @@ export function CheckoutForm() {
 
   useEffect(() => {
     let cancelled = false;
-    setGovernoratesLoading(true);
+    setGovernoratesLoading(true); // eslint-disable-line react-hooks/set-state-in-effect
     setGovernoratesError(false);
     governorateService.getAll(locale)
       .then((data) => {
@@ -184,7 +184,7 @@ export function CheckoutForm() {
   useEffect(() => {
     if (!hydrated || !isAuthenticated) return;
     let cancelled = false;
-    setAddressesLoading(true);
+    setAddressesLoading(true); // eslint-disable-line react-hooks/set-state-in-effect
     setAddressesError(false);
     addressService.getAll(locale)
       .then((data) => {
@@ -367,7 +367,7 @@ export function CheckoutForm() {
     e.preventDefault();
     setApiError(null);
 
-    const validationErrors = validate(form);
+    const validationErrors = validate(form, (key) => t(`validation.${key}`));
     if (validationErrors.length > 0) {
       setErrors(validationErrors);
       setApiError(t("fixRequiredFields"));
@@ -529,30 +529,29 @@ export function CheckoutForm() {
               <div className="sm:col-span-2 space-y-1.5">
                 <label className={labelClass}>{t("name")}</label>
                 <input name="name" className={fieldError("name") ? errorClass : inputClass} value={form.name} onChange={set("name")} />
-                {fieldError("name") && <p className="text-xs text-red-500">{fieldError("name")}</p>}
+                {fieldError("name") && <p className="text-xs text-error">{fieldError("name")}</p>}
               </div>
               <div className="space-y-1.5">
                 <label className={labelClass}>{t("phone")}</label>
                 <input name="user_phone" className={fieldError("user_phone") ? errorClass : inputClass} value={form.user_phone} onChange={set("user_phone")} />
-                {fieldError("user_phone") && <p className="text-xs text-red-500">{fieldError("user_phone")}</p>}
+                {fieldError("user_phone") && <p className="text-xs text-error">{fieldError("user_phone")}</p>}
               </div>
               <div className="space-y-1.5">
                 <label className={labelClass}>{t("email")}</label>
                 <input name="user_email" className={fieldError("user_email") ? errorClass : inputClass} type="email" value={form.user_email} onChange={set("user_email")} />
-                {fieldError("user_email") && <p className="text-xs text-red-500">{fieldError("user_email")}</p>}
+                {fieldError("user_email") && <p className="text-xs text-error">{fieldError("user_email")}</p>}
               </div>
             </div>
           </div>
 
           <div className="rounded-2xl border-2 border-border bg-white p-6 space-y-4">
+            <div className="flex items-center gap-2">
+              <div className="h-1 w-6 rounded-full bg-primary" />
+              <h2 className="text-sm font-bold uppercase tracking-wider text-text-primary">
+                {isFast ? t("fastDelivery") : t("fulfillmentType")}
+              </h2>
+            </div>
             {!isFast && (
-              <>
-                <div className="flex items-center gap-2">
-                  <div className="h-1 w-6 rounded-full bg-primary" />
-                  <h2 className="text-sm font-bold uppercase tracking-wider text-text-primary">
-                    {t("fulfillmentType")}
-                  </h2>
-                </div>
                 <div className="flex gap-3">
                   <button
                     type="button"
@@ -579,7 +578,6 @@ export function CheckoutForm() {
                     {t("pickup")}
                   </button>
                 </div>
-              </>
             )}
 
             {(form.fulfillment_type === "delivery" || isFast) && (
@@ -590,10 +588,10 @@ export function CheckoutForm() {
                   </h3>
 
                   {addressesLoading ? (
-                    <div className="h-10 w-full animate-pulse rounded-xl bg-gray-200" />
+                    <div className="h-10 w-full animate-pulse rounded-xl bg-border" />
                   ) : addressesError ? (
                     <div className="space-y-2">
-                      <p className="text-xs text-red-500">{t("addressesError")}</p>
+                      <p className="text-xs text-error">{t("addressesError")}</p>
                       <button
                         type="button"
                         onClick={handleRetryAddresses}
@@ -628,7 +626,7 @@ export function CheckoutForm() {
                       </select>
                     ) : governoratesError ? (
                       <div className="space-y-2">
-                        <p className="text-xs text-red-500">{t("governorateError")}</p>
+                        <p className="text-xs text-error">{t("governorateError")}</p>
                         <button
                           type="button"
                           onClick={handleRetryGovernorates}
@@ -655,7 +653,7 @@ export function CheckoutForm() {
                           ))}
                         </select>
                         {fieldError("governorate_id") && (
-                          <p className="text-xs text-red-500">{fieldError("governorate_id")}</p>
+                          <p className="text-xs text-error">{fieldError("governorate_id")}</p>
                         )}
                       </>
                     )}
@@ -665,19 +663,19 @@ export function CheckoutForm() {
                     <div className="space-y-1.5">
                       <label className={labelClass}>{t("country")}</label>
                     <input name="country" className={fieldError("country") ? errorClass : inputClass} value={form.country} onChange={set("country")} />
-                    {fieldError("country") && <p className="text-xs text-red-500">{fieldError("country")}</p>}
+                    {fieldError("country") && <p className="text-xs text-error">{fieldError("country")}</p>}
                     </div>
                     <div className="space-y-1.5 sm:col-span-2">
                       <label className={labelClass}>{t("city")}</label>
                       <input name="city" className={fieldError("city") ? errorClass : inputClass} value={form.city} onChange={set("city")} />
-                      {fieldError("city") && <p className="text-xs text-red-500">{fieldError("city")}</p>}
+                      {fieldError("city") && <p className="text-xs text-error">{fieldError("city")}</p>}
                     </div>
                   </div>
 
                   <div className="space-y-1.5">
                     <label className={labelClass}>{t("streetAddress")}</label>
                     <input name="street_address" className={fieldError("street_address") ? errorClass : inputClass} value={form.street_address} onChange={set("street_address")} />
-                    {fieldError("street_address") && <p className="text-xs text-red-500">{fieldError("street_address")}</p>}
+                    {fieldError("street_address") && <p className="text-xs text-error">{fieldError("street_address")}</p>}
                   </div>
 
                   <button
@@ -698,7 +696,7 @@ export function CheckoutForm() {
           </div>
 
           {!isFast && (
-            <div className="rounded-2xl border-2 border-border bg-white p-6 space-y-4">
+          <div className="rounded-2xl border-2 border-border bg-white p-6 space-y-4">
               <div className="flex items-center gap-2">
                 <div className="h-1 w-6 rounded-full bg-primary" />
                 <h2 className="text-sm font-bold uppercase tracking-wider text-text-primary">
@@ -772,7 +770,7 @@ export function CheckoutForm() {
             >
               <CreditCard className="size-4" />
               {isFast
-                ? t("fastCheckout", { defaultValue: "Fast Checkout" })
+                ? t("fastCheckout")
                 : form.payment_method === "online"
                   ? t("payNow")
                   : form.payment_method === "cod"

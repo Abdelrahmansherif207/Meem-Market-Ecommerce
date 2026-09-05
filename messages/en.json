@@ -1,18 +1,5 @@
 {
   "header": {
-    "deliveryModes": {
-      "title": "Delivery Options",
-      "scheduled": "Scheduled",
-      "now": "NOW",
-      "nowEta": "120 mins",
-      "electronics": "Electronic…",
-      "fastDelivery": "Fast Delivery",
-      "fastDeliveryDesc": "Get it by tomorrow",
-      "standardDelivery": "Standard Delivery",
-      "standardDeliveryDesc": "Delivery in 3-5 business days",
-      "freeShipping": "Free Shipping",
-      "freeShippingDesc": "On orders over $50"
-    },
     "mainNav": {
       "shop": "Shop",
       "deals": "Deals",
@@ -88,6 +75,19 @@
     },
     "location": {
       "loading": "Detecting..."
+    },
+    "deliveryModes": {
+      "title": "Delivery Options",
+      "scheduled": "Scheduled",
+      "now": "NOW",
+      "nowEta": "120 mins",
+      "electronics": "Electronic…",
+      "fastDelivery": "Fast Delivery",
+      "fastDeliveryDesc": "Get it by tomorrow",
+      "standardDelivery": "Standard Delivery",
+      "standardDeliveryDesc": "Delivery in 3-5 business days",
+      "freeShipping": "Free Shipping",
+      "freeShippingDesc": "On orders over $50"
     }
   },
   "home": {
@@ -115,10 +115,24 @@
     "terms": "Terms & Conditions",
     "privacy": "Privacy Policy",
     "alreadyHaveAccount": "Already have an account?",
-    "creatingAccount": "Creating account..."
+    "creatingAccount": "Creating account...",
+    "welcomeHeading": "Hala! Let's get started",
+    "termsAgreement": "By continuing, you agree to our <terms>Terms of Use</terms> & <privacy>Privacy Policy</privacy>.",
+    "close": "Close",
+    "or": "or",
+    "continueWithGoogle": "Continue with Google",
+    "redirecting": "Redirecting...",
+    "googleError": "Unable to start Google login. Please try again.",
+    "verifyEmailHeading": "Verify your email",
+    "verifyEmailDesc": "Enter the verification code sent to your email.",
+    "createAccountHeading": "Create your account",
+    "loginSubtitle": "Please enter your login details below to continue.",
+    "registerSubtitle": "Use your details below to create a new account.",
+    "showPassword": "Show password",
+    "hidePassword": "Hide password"
   },
   "cartPage": {
-   "metaTitle": "Cart",
+    "metaTitle": "Cart",
     "metaDescription": "Review your cart and complete your checkout.",
     "title": "Cart",
     "breadcrumb": "Cart",
@@ -140,12 +154,21 @@
     "cartItems": "{count, plural, =0 {0 items} one {# item} other {# items}}",
     "scheduledTitle": "Scheduled Delivery",
     "scheduledEta": "3-5 business days",
-    "fastTitle": "Fast Delivery",
-    "fastEta": "120 mins",
-    "fastCheckout": "Fast Checkout",
     "minOrderProgress": "Add {amount} K.D more for minimum order",
     "freeShippingProgress": "Add {amount} K.D more for free shipping",
-    "freeShippingAchieved": "Free shipping unlocked!"
+    "freeShippingAchieved": "Free shipping unlocked!",
+    "milestoneStart": "Start",
+    "milestoneMinimum": "Minimum",
+    "milestoneFreeShipping": "Free Shipping",
+    "orderSummary": "Order Summary",
+    "discount": "Discount",
+    "inStock": "In Stock",
+    "removeItem": "Remove item",
+    "decreaseQuantity": "Decrease quantity",
+    "increaseQuantity": "Increase quantity",
+    "fastTitle": "Fast Delivery",
+    "fastEta": "120 mins",
+    "fastCheckout": "Fast Checkout"
   },
   "wishlist": {
     "metaTitle": "Wishlist",
@@ -210,7 +233,10 @@
     "reviewUpdated": "Your review has been updated!",
     "signInToReview": "Sign in to write a review",
     "editReview": "Edit",
-    "cancelEdit": "Cancel"
+    "cancelEdit": "Cancel",
+    "increaseQuantity": "Increase quantity",
+    "decreaseQuantity": "Decrease quantity",
+    "removeItem": "Remove item"
   },
   "categories": {
     "metaTitle": "Categories",
@@ -303,6 +329,7 @@
     "tabs": {
       "info": "Profile Info",
       "orders": "Orders",
+      "invoices": "Invoices",
       "addresses": "Addresses",
       "security": "Security"
     },
@@ -363,6 +390,29 @@
       "empty": "No orders yet.",
       "emptyDescription": "When you place an order, it will show up here.",
       "loadError": "Failed to load orders.",
+      "detailLoadError": "Failed to load order details.",
+      "viewDetails": "View Details",
+      "viewInvoice": "View Invoice",
+      "invoiceNotReady": "Invoice PDF is not available yet.",
+      "invoiceLoadError": "Failed to load invoice.",
+      "orderNumber": "Order #{number}",
+      "paymentMethod": "Payment Method",
+      "fulfillmentType": "Fulfillment",
+      "pickup": "Pickup",
+      "delivery": "Delivery",
+      "pickupLocation": "Pickup Location",
+      "all": "All",
+      "pending": "Pending",
+      "processing": "Processing",
+      "completed": "Completed",
+      "delivered": "Delivered",
+      "cancelled": "Cancelled",
+      "items": "Items",
+      "subtotal": "Subtotal",
+      "shipping": "Shipping",
+      "fastShipping": "Fast Shipping",
+      "promotionDiscount": "Promotion Discount",
+      "couponDiscount": "Coupon Discount",
       "total": "Total",
       "discount": "Discount",
       "status": {
@@ -370,8 +420,39 @@
         "pending": "Pending",
         "cancelled": "Cancelled",
         "processing": "Processing",
+        "delivered": "Delivered",
         "shipped": "Shipped"
       }
+    },
+    "invoices": {
+      "tab": "Invoices",
+      "empty": "No invoices yet.",
+      "emptyDescription": "Invoices will appear here after your first order.",
+      "loadError": "Failed to load invoices.",
+      "detailLoadError": "Failed to load invoice details.",
+      "invoiceNumber": "Invoice #{number}",
+      "orderNumber": "Order #{number}",
+      "date": "Date",
+      "total": "Total",
+      "subtotal": "Subtotal",
+      "shipping": "Shipping",
+      "discount": "Discount",
+      "status": {
+        "ready": "Ready",
+        "generated": "Generated"
+      },
+      "viewDetails": "View Details",
+      "downloadPdf": "Download PDF",
+      "verify": "Verify Invoice",
+      "items": "Items",
+      "pricing": "Pricing Breakdown",
+      "paymentMethod": "Payment Method",
+      "fulfillment": "Fulfillment",
+      "pickupLocation": "Pickup Location",
+      "pickupInfo": "Pickup Information",
+      "customerName": "Customer",
+      "deliveryAddress": "Delivery Address",
+      "learnMore": "Learn More"
     }
   },
   "contact": {
@@ -461,9 +542,6 @@
     "noPromotion": "No promotion",
     "noPromotions": "No promotions available for this cart",
     "saveAmount": "Save {amount} K.D",
-    "fastCheckout": "Fast Checkout",
-    "fastDelivery": "Fast Delivery",
-    "fastDeliveryDesc": "Pay and get your fast items shipped immediately",
     "payNow": "Pay Now",
     "placeOrderCod": "Place Order (COD)",
     "placeOrderCashier": "Place Order",
@@ -473,7 +551,20 @@
     "cartExpiredDesc": "The items in your cart are no longer available. Please start a new order.",
     "goToCart": "Go to Cart",
     "errorProcessing": "Something went wrong. Please try again.",
-    "fixRequiredFields": "Please fill in all required fields."
+    "fixRequiredFields": "Please fill in all required fields.",
+    "validation": {
+      "nameRequired": "Name is required",
+      "phoneRequired": "Phone number is required",
+      "emailRequired": "Email is required",
+      "emailInvalid": "Please enter a valid email address",
+      "governorateRequired": "Please select a governorate",
+      "cityRequired": "City is required",
+      "countryRequired": "Country is required",
+      "streetRequired": "Street address is required"
+    },
+    "fastCheckout": "Fast Checkout",
+    "fastDelivery": "Fast Delivery",
+    "fastDeliveryDesc": "Pay and get your fast items shipped immediately"
   },
   "siteReviews": {
     "metaTitle": "Customer Reviews",
@@ -601,7 +692,9 @@
     "cartErrorTitle": "Cart unavailable",
     "authErrorTitle": "Authentication service unavailable",
     "serverDownTitle": "We can't reach our servers",
-    "serverDownDesc": "Please try again in a few moments."
+    "serverDownDesc": "Please try again in a few moments.",
+    "genericErrorTitle": "Something went wrong",
+    "genericErrorDesc": "This page could not be loaded. Please try again."
   },
   "emptyState": {
     "browseProducts": "Browse all products",
@@ -629,5 +722,30 @@
     "noReviewDescription": "Be the first to share your thoughts on this product.",
     "noSuggestions": "No results found",
     "noMapResults": "No results found. Try a different search."
+  },
+  "notifications": {
+    "title": "Notifications",
+    "metaTitle": "Notifications",
+    "metaDescription": "Your notifications and activity updates",
+    "empty": "No notifications yet",
+    "emptyDescription": "When you have new notifications, they will appear here.",
+    "markAllRead": "Mark all as read",
+    "markRead": "Mark as read",
+    "delete": "Delete",
+    "viewAll": "View all",
+    "loginRequired": "Sign in to view your notifications.",
+    "login": "Sign in",
+    "allCaughtUp": "You are all caught up",
+    "unreadCount": "{count} unread notification(s)",
+    "loadMore": "Load more",
+    "loading": "Loading...",
+    "showing": "Showing {shown} of {total}",
+    "error": "Failed to load notifications.",
+    "justNow": "Just now",
+    "minAgo": "{count} min ago",
+    "hrAgo": "{count} hour(s) ago",
+    "dayAgo": "{count} day(s) ago",
+    "weekAgo": "{count} week(s) ago",
+    "retry": "Retry"
   }
 }

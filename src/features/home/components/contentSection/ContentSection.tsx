@@ -4,7 +4,6 @@ import type { ContentSectionProps, HomeCategory } from "../../types";
 
 export default async function ContentSection({
   title,
-  type,
   locale,
   setting,
   endpoint,

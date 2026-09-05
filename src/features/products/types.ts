@@ -93,7 +93,6 @@ export interface ProductDetail {
   weight: number;
   has_flash_sale: boolean;
   has_discount: boolean;
-  is_fast_shipping_available: boolean;
   images: ProductImages;
   variants: ProductVariant[];
   reviews: ProductReview[];
@@ -135,7 +134,6 @@ export interface ProductListItem {
   discount_valid: boolean;
   sku?: string;
   in_stock?: boolean;
-  is_fast_shipping_available: boolean;
   in_wishlist?: boolean;
   tags?: ProductTag[];
   image: {

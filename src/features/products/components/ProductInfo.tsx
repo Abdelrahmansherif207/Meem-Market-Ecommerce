@@ -63,7 +63,7 @@ export function ProductInfo({ product, selectedVariant }: ProductInfoProps) {
                   "size-4",
                   star <= avgRating
                     ? "fill-yellow-400 text-yellow-400"
-                    : "fill-gray-200 text-gray-200",
+                    : "fill-border text-border",
                 )}
               />
             ))}

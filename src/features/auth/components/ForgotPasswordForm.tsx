@@ -29,7 +29,7 @@ export function ForgotPasswordForm({
   useEffect(() => {
     if (state?.success) {
       if (step === "email" && state.payload?.otp_sent) {
-        setStep("otp");
+        setStep("otp"); // eslint-disable-line react-hooks/set-state-in-effect
       } else if (step === "otp" && state.payload?.token_verified) {
         setStep("reset");
       } else if (step === "reset") {
@@ -40,11 +40,11 @@ export function ForgotPasswordForm({
 
   useEffect(() => {
     if (state?.success === false && step === "done") {
-      setStep("reset");
+      setStep("reset"); // eslint-disable-line react-hooks/set-state-in-effect
     }
   }, [state, step]);
 
-  function handleOtpComplete(_value: string) {
+  function handleOtpComplete() {
     // submit button handles submission
   }
 
@@ -52,8 +52,8 @@ export function ForgotPasswordForm({
     return (
       <div className="mx-auto mt-4 max-w-md">
         <div className="rounded-3xl border border-border/80 bg-white/95 p-6 text-center shadow-[0_9px_30px_rgba(0,0,0,0.05)]">
-          <div className="mx-auto mb-4 grid h-16 w-16 place-items-center rounded-full bg-green-50">
-            <CheckCircle className="h-8 w-8 text-green-500" />
+          <div className="mx-auto mb-4 grid h-16 w-16 place-items-center rounded-full bg-success-surface">
+            <CheckCircle className="h-8 w-8 text-success" />
           </div>
           <h3 className="text-lg font-bold text-text-primary">Password Reset Successful</h3>
           <p className="mt-2 text-sm text-text-secondary">
@@ -95,10 +95,10 @@ export function ForgotPasswordForm({
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               className={`w-full rounded-xl border bg-background px-4 py-2.5 text-sm text-text-primary outline-none transition focus:border-primary ${
-                fieldErrors.email ? "border-red-500" : "border-border"
+                fieldErrors.email ? "border-error" : "border-border"
               }`}
             />
-            {fieldErrors.email && <p className="mt-1 text-xs text-red-500">{fieldErrors.email}</p>}
+            {fieldErrors.email && <p className="mt-1 text-xs text-error">{fieldErrors.email}</p>}
           </div>
 
           <div className="mt-6 grid gap-3 sm:grid-cols-[auto_1fr]">
@@ -176,10 +176,10 @@ export function ForgotPasswordForm({
                 name="password"
                 placeholder="New password"
                 className={`w-full rounded-xl border bg-background px-4 py-2.5 text-sm text-text-primary outline-none transition focus:border-primary ${
-                  fieldErrors.password ? "border-red-500" : "border-border"
+                  fieldErrors.password ? "border-error" : "border-border"
                 }`}
               />
-              {fieldErrors.password && <p className="mt-1 text-xs text-red-500">{fieldErrors.password}</p>}
+              {fieldErrors.password && <p className="mt-1 text-xs text-error">{fieldErrors.password}</p>}
             </div>
             <div>
               <input
@@ -187,10 +187,10 @@ export function ForgotPasswordForm({
                 name="password_confirmation"
                 placeholder="Confirm new password"
                 className={`w-full rounded-xl border bg-background px-4 py-2.5 text-sm text-text-primary outline-none transition focus:border-primary ${
-                  fieldErrors.password_confirmation ? "border-red-500" : "border-border"
+                  fieldErrors.password_confirmation ? "border-error" : "border-border"
                 }`}
               />
-              {fieldErrors.password_confirmation && <p className="mt-1 text-xs text-red-500">{fieldErrors.password_confirmation}</p>}
+              {fieldErrors.password_confirmation && <p className="mt-1 text-xs text-error">{fieldErrors.password_confirmation}</p>}
             </div>
           </div>
 

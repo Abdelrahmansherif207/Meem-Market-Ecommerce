@@ -56,7 +56,7 @@ export default function Pagination({ links }: PaginationProps) {
           <ChevronLeft className="h-4 w-4" />
         </Link>
       ) : (
-        <span className="inline-flex items-center justify-center h-9 w-9 rounded-md text-gray-300">
+        <span className="inline-flex items-center justify-center h-9 w-9 rounded-md text-text-muted">
           <ChevronLeft className="h-4 w-4" />
         </span>
       )}
@@ -92,7 +92,7 @@ export default function Pagination({ links }: PaginationProps) {
           <ChevronRight className="h-4 w-4" />
         </Link>
       ) : (
-        <span className="inline-flex items-center justify-center h-9 w-9 rounded-md text-gray-300">
+        <span className="inline-flex items-center justify-center h-9 w-9 rounded-md text-text-muted">
           <ChevronRight className="h-4 w-4" />
         </span>
       )}

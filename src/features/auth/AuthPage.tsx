@@ -1,10 +1,9 @@
 import AuthGateway from "./components/AuthGateway";
 
-export function AuthPage() {
+export function AuthPage({ logo }: { logo?: string | null }) {
   return (
     <main className="py-6 sm:py-10">
-      <AuthGateway />
+      <AuthGateway logo={logo} />
     </main>
   );
 }
-

@@ -12,7 +12,8 @@ export const DEFAULT_SITE_DESCRIPTION: Record<string, string> = {
 };
 
 export const DEFAULT_FAVICON = "/meem-icon.jpeg";
-export const DEFAULT_LOGO = "/meem-logo.png";
+export const DEFAULT_LOGO = "/meem-new.png";
+export const DEFAULT_FOOTER_LOGO = "/new-footer-logo.png";
 
 export interface SiteMeta {
   siteName: string;
@@ -30,7 +31,7 @@ export async function getSiteMeta(locale: string): Promise<SiteMeta> {
     siteName: fallbackName,
     description: fallbackDescription,
     favicon: DEFAULT_FAVICON,
-    logo: null,
+    logo: DEFAULT_LOGO,
   };
 
   try {

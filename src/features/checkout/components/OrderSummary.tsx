@@ -54,10 +54,10 @@ export function OrderSummary({
         {promotionDiscount > 0 && (
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <Tag className="h-3.5 w-3.5 text-green-600 shrink-0" />
-              <span className="text-sm text-green-600">{t("promotionDiscount")}</span>
+              <Tag className="h-3.5 w-3.5 text-success shrink-0" />
+              <span className="text-sm text-success">{t("promotionDiscount")}</span>
             </div>
-            <span className="text-sm font-semibold tabular-nums text-green-600">
+            <span className="text-sm font-semibold tabular-nums text-success">
               -{promotionDiscount.toFixed(2)} K.D
             </span>
           </div>
@@ -66,10 +66,10 @@ export function OrderSummary({
         {couponDiscount > 0 && (
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <Minus className="h-3.5 w-3.5 text-green-600 shrink-0" />
-              <span className="text-sm text-green-600">{t("couponDiscount")}</span>
+              <Minus className="h-3.5 w-3.5 text-success shrink-0" />
+              <span className="text-sm text-success">{t("couponDiscount")}</span>
             </div>
-            <span className="text-sm font-semibold tabular-nums text-green-600">
+            <span className="text-sm font-semibold tabular-nums text-success">
               -{couponDiscount.toFixed(2)} K.D
             </span>
           </div>

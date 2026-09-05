@@ -8,10 +8,16 @@ import Header from "@/features/navigation/components/header/Header";
 import MobileHeader from "@/features/navigation/components/mobile/MobileHeader";
 import MobileBottomNav from "@/features/navigation/components/mobile/MobileBottomNav";
 import Footer from "@/features/navigation/components/footer/Footer";
+import ScrollToTopButton from "@/components/ui/ScrollToTopButton";
 import { AuthModal } from "@/features/auth/components/AuthModal";
 import { AuthSyncHandler } from "@/features/auth/components/AuthSyncHandler";
 import { CartSyncProvider } from "@/features/cart/components/CartSyncProvider";
 import { WishlistSyncProvider } from "@/features/wishlist/components/WishlistSyncProvider";
+import {
+  NotificationSyncHandler,
+  NotificationRealtimeProvider,
+  NotificationToast,
+} from "@/features/notifications";
 import { ChannelThemeProvider } from "@/features/fast-shipping/components/ChannelThemeProvider";
 import { IBM_Plex_Sans_Arabic } from "next/font/google";
 import { cn } from "@/shared/utils/cn";
@@ -113,14 +119,20 @@ export default async function RootLayout({
           <MobileBottomNav />
           <ChannelThemeProvider />
           <AuthSyncHandler />
+          <NotificationSyncHandler />
+          <NotificationRealtimeProvider />
           <CartSyncProvider>
-            <div className="container mx-auto flex flex-1 flex-col px-4 pb-[56px] lg:pb-0">
-              {children}
+            <div className="flex flex-1 flex-col">
+              <div className="container mx-auto flex flex-1 flex-col px-4 pb-[56px] lg:pb-0">
+                {children}
+              </div>
+              <Footer params={params} />
             </div>
           </CartSyncProvider>
           <WishlistSyncProvider />
-          <Footer params={params} />
-          <AuthModal />
+          <ScrollToTopButton />
+          <AuthModal logo={settingsLogo} />
+          <NotificationToast />
         </NextIntlClientProvider>
       </body>
     </html>

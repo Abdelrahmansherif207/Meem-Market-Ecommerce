@@ -37,7 +37,7 @@ export function AddressCard({ address, onEdit, onDelete }: AddressCardProps) {
         <button
           type="button"
           onClick={() => onDelete(address.id)}
-          className="flex items-center gap-1 text-xs font-semibold text-red-500 hover:underline"
+          className="flex items-center gap-1 text-xs font-semibold text-error hover:underline"
         >
           <Trash2 className="h-3 w-3" />
           {t("delete")}

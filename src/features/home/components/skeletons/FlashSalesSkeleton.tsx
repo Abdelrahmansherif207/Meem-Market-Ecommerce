@@ -42,7 +42,7 @@ export default function FlashSalesSkeleton({ type, setting }: FlashSalesSkeleton
       <div className="-mt-3 relative">
         <div className="flex gap-4 overflow-hidden pt-3">
           {Array.from({ length: 6 }).map((_, i) => (
-            <div key={i} className="flex flex-col w-[248px] shrink-0 bg-white rounded-[18px] border border-gray-100 overflow-hidden">
+            <div key={i} className="flex flex-col w-[248px] shrink-0 bg-white rounded-[18px] border border-border-subtle overflow-hidden">
               <Skeleton className="h-[260px] w-full rounded-none" />
               <div className="flex flex-col gap-2.5 p-4">
                 <Skeleton className="h-5 w-full" />

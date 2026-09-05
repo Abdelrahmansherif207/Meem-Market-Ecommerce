@@ -14,7 +14,7 @@ export function VerificationBanner() {
 
   return (
     <>
-      <div className="bg-red-500 px-4 py-2 text-center text-sm text-white">
+      <div className="bg-error px-4 py-2 text-center text-sm text-white">
         <span>
           Your email is not yet verified.
           {email ? <span className="ml-1 font-medium">({email})</span> : null}

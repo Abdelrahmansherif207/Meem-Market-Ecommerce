@@ -5,7 +5,7 @@ import SectionTitle from "@/components/ui/SectionTitle";
 import { homePageService } from "../../services/homePageService";
 import type { BannerProps, Promotion } from "../../types";
 
-export default async function Banner({ type, title, locale, promotion: initialPromotion, setting, endpoint }: BannerProps) {
+export default async function Banner({ title, locale, promotion: initialPromotion, endpoint }: BannerProps) {
   if (!locale) return null;
   let promotion = initialPromotion;
 

@@ -25,6 +25,7 @@ type AuthState = {
   error: string | null;
   setAuthData: (authData: AuthLoginData) => boolean;
   setProfile: (id: number | null, name: string | null, image: string | null) => void;
+  setEmail: (email: string | null) => void;
   setEmailVerified: (verified: boolean) => void;
   clearAuth: () => void;
   login: (payload: LoginPayload) => Promise<void>;
@@ -93,6 +94,9 @@ export const useAuthStore = create<AuthState>()(
       },
       setProfile: (id, name, image) => {
         set({ userId: id, name, image });
+      },
+      setEmail: (email) => {
+        set({ email });
       },
       setEmailVerified: (verified) => {
         set({ emailVerified: verified });

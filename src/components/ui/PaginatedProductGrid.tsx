@@ -15,7 +15,6 @@ export interface PaginatedProductItem {
   has_variants: boolean;
   quantity: number;
   in_stock?: boolean;
-  is_fast_shipping_available: boolean;
   image: {
     thumbnail: string;
     original: Record<string, string>;
@@ -83,7 +82,6 @@ export default function PaginatedProductGrid({
               discountPercent={discountPercent}
               slug={product.slug}
               hasVariants={product.has_variants}
-              deliveryType={product.is_fast_shipping_available ? "fast" : "scheduled"}
               isInStock={product.in_stock ?? product.quantity > 0}
               inWishlist={product.in_wishlist}
               tags={product.tags}

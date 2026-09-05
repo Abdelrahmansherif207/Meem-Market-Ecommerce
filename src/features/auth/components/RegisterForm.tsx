@@ -22,13 +22,13 @@ interface RegisterFormProps {
 function inputClass(error?: string) {
   return (
     "w-full rounded-xl border bg-background pl-10 pr-4 py-2.5 text-sm text-text-primary outline-none transition focus:border-primary " +
-    (error ? "border-red-500" : "border-border")
+    (error ? "border-error" : "border-border")
   );
 }
 
 function ErrorMsg({ message }: { message?: string }) {
   if (!message) return null;
-  return <p className="mt-1 text-xs text-red-500">{message}</p>;
+  return <p className="mt-1 text-xs text-error">{message}</p>;
 }
 
 export function RegisterForm({
@@ -124,7 +124,7 @@ export function RegisterForm({
           type="checkbox"
           name="policy"
           defaultChecked={p.policy === "on"}
-          className={"mt-0.5 h-4 w-4 rounded border-border text-primary focus:ring-primary" + (fieldErrors.policy ? " border-red-500" : "")}
+          className={"mt-0.5 h-4 w-4 rounded border-border text-primary focus:ring-primary" + (fieldErrors.policy ? " border-error" : "")}
         />
         <span>
           {t("agreeTo")}{" "}

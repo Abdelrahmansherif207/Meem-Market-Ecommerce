@@ -38,7 +38,7 @@ export default async function SliderDetailPage({ slug, locale }: SliderDetailPag
 
   return (
     <div className="w-full flex flex-col gap-6">
-      <picture className="relative h-[170px] w-full overflow-hidden rounded-[20px] sm:h-[230px] lg:h-[300px]">
+      <picture className="relative h-[220px] w-full overflow-hidden rounded-lg sm:h-[300px] lg:h-[380px]">
         <source media="(min-width: 640px)" srcSet={image.desktop} />
         <img
           src={image.mobile}

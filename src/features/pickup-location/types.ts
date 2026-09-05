@@ -1,5 +1,5 @@
 export interface WorkingHour {
-  day: string;
+  day: { ar: string; en: string };
   open: string;
   close: string;
 }
@@ -15,4 +15,5 @@ export interface PickupLocation {
   working_hours: WorkingHour[];
   status: boolean;
   display_order: number;
+  is_default: boolean;
 }

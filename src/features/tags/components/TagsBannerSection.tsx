@@ -87,7 +87,7 @@ export async function TagsBannerSection({
         <div>
           <Link
             href="/tags"
-            className="inline-flex items-center justify-center rounded-full bg-white px-6 py-2.5 text-sm font-bold text-[#111] shadow-sm transition-all duration-200 hover:scale-105 hover:bg-gray-50"
+            className="inline-flex items-center justify-center rounded-full bg-white px-6 py-2.5 text-sm font-bold text-text-primary shadow-sm transition-all duration-200 hover:scale-105 hover:bg-surface"
           >
             {t("viewAll")}
           </Link>

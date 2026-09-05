@@ -1,8 +1,9 @@
 "use client";
 
 import { useState } from "react";
+import Image from "next/image";
 import { Link } from "@/i18n/navigation";
-import { cn } from "@/shared/utils/cn";
+
 import type { Brand } from "../types";
 
 interface BrandCardProps {
@@ -24,9 +25,11 @@ export default function BrandCard({ brand, priority }: BrandCardProps) {
             {brand.name.charAt(0)}
           </span>
         ) : (
-          <img
+          <Image
             src={brand.image.desktop || brand.image.mobile}
             alt={brand.name}
+            width={150}
+            height={150}
             className="h-auto w-full object-contain"
             loading={priority ? "eager" : "lazy"}
             onError={() => setImgError(true)}

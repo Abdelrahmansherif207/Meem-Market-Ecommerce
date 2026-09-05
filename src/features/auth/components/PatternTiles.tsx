@@ -17,15 +17,12 @@ type PatternTile = {
 };
 
 const PATTERN_IMAGES = [
-  "/images/auth/bags.png",
-  "/images/auth/burger.png",
-  "/images/auth/cheese.png",
-  "/images/auth/cheps.png",
-  "/images/auth/coursou.png",
-  "/images/auth/icecream.png",
-  "/images/auth/plant.png",
-  "/images/auth/tomatoo.png",
-  "/images/auth/vegtables.png",
+  "/images/auth/brush.svg",
+  "/images/auth/brush2.svg",
+  "/images/auth/lipstick.svg",
+  "/images/auth/makeup.svg",
+  "/images/auth/mirror.svg",
+  "/images/auth/sedmakeup.svg",
 ];
 
 function seededFloat(seed: number) {

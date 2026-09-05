@@ -12,10 +12,15 @@ import ContentSectionSkeleton from "@/features/home/components/skeletons/Content
 import ProductSliderSkeleton from "@/features/home/components/skeletons/ProductSliderSkeleton";
 import PromotionsSectionSkeleton from "@/features/promotions/components/PromotionsSectionSkeleton";
 import BrandsStripSkeleton from "@/features/brands/components/skeletons/BrandsStripSkeleton";
+import {
+  CouponsVouchersSection,
+  CouponsVouchersSkeleton,
+} from "@/features/coupons";
 import BannerHeroSection from "@/features/banners/components/BannerHeroSection";
 import BannerSection from "@/features/banners/components/BannerSection";
 import BannerStripSection from "@/features/banners/components/BannerStripSection";
 import BannerHeroSkeleton from "@/features/banners/components/BannerHeroSkeleton";
+import BannerSectionSkeleton from "@/features/banners/components/BannerSectionSkeleton";
 import BannerStripSkeleton from "@/features/banners/components/BannerStripSkeleton";
 import SliderHeroSection from "@/features/sliders/components/SliderHeroSection";
 import SliderHeroSkeleton from "@/features/sliders/components/SliderHeroSkeleton";
@@ -54,8 +59,9 @@ function SectionBlock({
     case "ending_this_week":
       return <EndingSoonSection locale={locale} period="week" />;
     case "flash-sales":
-    case "coupons":
       return <FlashSaleSection type={type} title={title} locale={locale} setting={setting} endpoint={endpoint} />;
+    case "coupons":
+      return <CouponsVouchersSection locale={locale} title={title} setting={setting} endpoint={endpoint} />;
     case "categories":
       return <ContentSection type={type} title={title} locale={locale} setting={setting} endpoint={endpoint} />;
     case "products":
@@ -90,14 +96,15 @@ function getSectionSkeleton(type: string, setting?: SectionFrontSetting): React.
     case "ending_this_week":
       return <EndingSoonSkeleton />;
     case "flash-sales":
-    case "coupons":
       return <FlashSalesSkeleton type={type} setting={setting} />;
+    case "coupons":
+      return <CouponsVouchersSkeleton />;
     case "categories":
       return <ContentSectionSkeleton setting={setting} />;
     case "products":
       return <ProductSliderSkeleton />;
     case "banners":
-      return <BannerHeroSkeleton />;
+      return <BannerSectionSkeleton />;
     case "tags":
       return <TagsBannerSkeleton />;
     default:

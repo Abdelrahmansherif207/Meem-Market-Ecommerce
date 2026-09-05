@@ -32,7 +32,7 @@ export default function Breadcrumb({ items, className }: BreadcrumbProps) {
               {index > 0 ? (
                 <CaretRightIcon
                   aria-hidden="true"
-                  className="h-3.5 w-2 shrink-0 stroke-1 text-gray-500 rtl:rotate-180"
+                  className="h-3.5 w-2 shrink-0 stroke-1 text-text-secondary rtl:rotate-180"
                   data-testid="caret-right-icon"
                 />
               ) : null}

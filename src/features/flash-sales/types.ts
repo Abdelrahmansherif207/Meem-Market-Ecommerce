@@ -24,7 +24,6 @@ export interface FlashSaleProduct {
   has_variants: boolean;
   quantity: number;
   in_stock?: boolean;
-  is_fast_shipping_available: boolean;
   ratings: number;
   in_wishlist?: boolean;
   image: {

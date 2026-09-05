@@ -20,7 +20,7 @@ export function WishlistIcon() {
         borderColor: "color-mix(in srgb, var(--color-primary) 20%, transparent)",
       }}
     >
-      <Heart className="h-5 w-5 fill-red-500 text-red-500" />
+      <Heart className="h-5 w-5 fill-discount text-error" />
     </Link>
   );
 }

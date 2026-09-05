@@ -60,18 +60,18 @@ export function WishlistItemCard({
 
         <div className="mt-auto flex items-baseline gap-2 pt-2">
           <span className="flex items-baseline gap-px" dir="ltr">
-            <span className="text-base font-bold leading-5 text-gray-900">
+            <span className="text-base font-bold leading-5 text-text-primary">
               {integerPart}
             </span>
-            <span className="text-xs font-bold leading-none text-gray-900">
+            <span className="text-xs font-bold leading-none text-text-primary">
               {decimalPart}
             </span>
-            <span className="ms-0.5 text-[10px] font-medium leading-none text-gray-500">
+            <span className="ms-0.5 text-[10px] font-medium leading-none text-text-secondary">
               {currency}
             </span>
           </span>
           {sale && (
-            <span className="text-xs leading-4 font-medium text-gray-400 line-through">
+            <span className="text-xs leading-4 font-medium text-text-muted line-through">
               {sale.originalPrice.toFixed(2)}
             </span>
           )}
@@ -80,7 +80,7 @@ export function WishlistItemCard({
 
       <div className="flex flex-col items-end justify-between">
         <Heart
-          className="size-4 fill-red-500 text-red-500"
+          className="size-4 fill-discount text-error"
           aria-hidden="true"
         />
         <button
@@ -89,7 +89,7 @@ export function WishlistItemCard({
           disabled={isPending}
           aria-label={t("remove")}
           className={cn(
-            "flex size-8 items-center justify-center rounded-full text-gray-400 transition-colors hover:bg-red-50 hover:text-red-500 disabled:cursor-not-allowed disabled:opacity-50",
+            "flex size-8 items-center justify-center rounded-full text-text-muted transition-colors hover:bg-red-50 hover:text-error disabled:cursor-not-allowed disabled:opacity-50",
           )}
         >
           {isPending ? (

@@ -76,7 +76,7 @@ export function ProfileImageUpload({
               type="button"
               onClick={handleRemove}
               aria-label="Remove image"
-              className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-white shadow transition hover:bg-red-600"
+              className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-error text-white shadow transition hover:bg-error"
             >
               <X className="h-3 w-3" />
             </button>

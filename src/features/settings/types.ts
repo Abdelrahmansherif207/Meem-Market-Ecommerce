@@ -13,6 +13,8 @@ export interface SiteSettings {
   linkedin: string;
   promotion_video_url: string;
   youtube: string;
+  tiktok: string;
+  snapchat: string;
   phone: string;
   fast_shipping_page_publish: number;
   minimumOrderAmount: number;

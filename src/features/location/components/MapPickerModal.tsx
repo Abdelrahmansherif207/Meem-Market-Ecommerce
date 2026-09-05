@@ -69,7 +69,7 @@ export function MapPickerModal({
           <button
             type="button"
             onClick={onClose}
-            className="rounded-lg p-1.5 hover:bg-gray-100 transition-colors"
+            className="rounded-lg p-1.5 hover:bg-surface transition-colors"
           >
             <X className="h-4 w-4" />
           </button>

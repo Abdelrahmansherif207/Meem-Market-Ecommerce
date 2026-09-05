@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
-import { MapPin } from "lucide-react";
+import { MapPin, ChevronDown, Loader2 } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useLocationStore } from "../store/useLocationStore";
 import { requestLocation } from "../services/geolocationService";
@@ -39,26 +39,31 @@ export function LocationDisplay() {
 
   if (loading) {
     return (
-      <span className="inline-flex items-center gap-1 text-xs text-text-muted whitespace-nowrap">
-        <MapPin className="h-3 w-3" />
-        {t("loading")}
-      </span>
+      <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-surface border border-primary/50">
+        <Loader2 className="h-3.5 w-3.5 text-primary animate-spin" />
+        <span className="text-xs text-text-secondary whitespace-nowrap">{t("loading")}</span>
+      </div>
     );
   }
 
   if (!city) return null;
 
-  const label = region ? `${city}-${region}` : city;
+  const label = region ? `${city}, ${region}` : city;
 
   return (
     <>
       <button
         type="button"
         onClick={() => setSidebarOpen(true)}
-        className="inline-flex items-center gap-1 text-xs text-text-muted whitespace-nowrap hover:text-primary transition-colors"
+        className="group inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-surface border border-primary/50 hover:border-primary hover:bg-primary/5 transition-all duration-200 whitespace-nowrap"
       >
-        <MapPin className={deliveryCoords ? "h-3 w-3 text-primary fill-primary" : "h-3 w-3"} />
-        {label}
+        <div className="flex items-center justify-center w-5 h-5 rounded-full bg-primary/10">
+          <MapPin className={`h-3 w-3 ${deliveryCoords ? "text-primary fill-primary" : "text-primary"}`} />
+        </div>
+        <span className="text-xs font-medium text-text-primary group-hover:text-primary transition-colors">
+          {label}
+        </span>
+        <ChevronDown className="h-3 w-3 text-text-secondary group-hover:text-primary transition-colors" />
       </button>
       <DeliveryLocationSidebar
         isOpen={sidebarOpen}

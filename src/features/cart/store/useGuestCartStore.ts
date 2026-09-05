@@ -72,7 +72,7 @@ export const useGuestCartStore = create<GuestCartState>()(
         items: get().items.map((i) => ({
           product_id: i.product_id,
           quantity: i.quantity,
-          shipping_method: i.deliveryType,
+          shipping_method: i.deliveryType ?? "scheduled",
         })),
       }),
 

@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
-import { MapPin, Loader2 } from "lucide-react";
+import { MapPin } from "lucide-react";
 import { pickupLocationService } from "@/features/pickup-location/services/pickupLocationService";
 import { usePickupLocationStore } from "@/features/pickup-location/store/usePickupLocationStore";
 import type { PickupLocation } from "@/features/pickup-location/types";
@@ -21,7 +21,7 @@ export function PickupSelector({ onSelect }: PickupSelectorProps) {
 
   useEffect(() => {
     let cancelled = false;
-    setLoading(true);
+    setLoading(true); // eslint-disable-line react-hooks/set-state-in-effect
     setError(false);
 
     pickupLocationService.getAll(locale)
@@ -29,6 +29,10 @@ export function PickupSelector({ onSelect }: PickupSelectorProps) {
         if (cancelled) return;
         setLocations(data);
         setLoading(false);
+        if (selectedId === null) {
+          const defaultLoc = data.find((l) => l.is_default);
+          if (defaultLoc) setSelectedId(defaultLoc.id);
+        }
       })
       .catch(() => {
         if (cancelled) return;
@@ -37,9 +41,7 @@ export function PickupSelector({ onSelect }: PickupSelectorProps) {
       });
 
     return () => { cancelled = true; };
-  }, [locale]);
-
-  const selectedLocation = locations.find((l) => l.id === selectedId);
+  }, [locale, selectedId, setSelectedId]);
 
   if (loading) {
     return (
@@ -52,8 +54,8 @@ export function PickupSelector({ onSelect }: PickupSelectorProps) {
         </div>
         {[1, 2].map((i) => (
           <div key={i} className="animate-pulse rounded-xl border border-border p-4 space-y-2">
-            <div className="h-4 w-3/4 rounded bg-gray-200" />
-            <div className="h-3 w-1/2 rounded bg-gray-200" />
+            <div className="h-4 w-3/4 rounded bg-border" />
+            <div className="h-3 w-1/2 rounded bg-border" />
           </div>
         ))}
       </div>

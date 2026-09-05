@@ -36,102 +36,92 @@ export default function CategorySlider({
 
   if (!subCategories || subCategories.length === 0) return null;
 
+  const circleClasses = (isActive: boolean) =>
+    cn(
+      "flex h-[96px] w-[96px] items-center justify-center rounded-full border transition-all duration-200 group-hover:scale-[1.04] group-hover:shadow-elev-2",
+      isActive
+        ? "border-primary bg-primary/10 shadow-elev-1 ring-2 ring-primary/25"
+        : "border-border bg-gradient-to-b from-white to-surface group-hover:border-primary/40",
+    );
+
+  const labelClasses = (isActive: boolean) =>
+    cn(
+      "relative px-1 text-sm font-medium leading-tight text-center transition-colors",
+      isActive
+        ? "text-primary after:absolute after:inset-x-2 after:-bottom-1 after:h-0.5 after:rounded-full after:bg-primary"
+        : "text-text-secondary group-hover:text-primary",
+    );
+
+  const imageSrc = (image: SubCategory["image"] | undefined) =>
+    image?.desktop || image?.mobile;
+
   return (
     <div className="relative w-full pb-6 mb-4">
       <div className="overflow-hidden">
-      <Swiper
-        key={locale}
-        dir={isRtl ? "rtl" : "ltr"}
-        modules={[Navigation]}
-        spaceBetween={16}
-        slidesPerView="auto"
-        watchOverflow={true}
-        onSwiper={(s) => {
-          setSwiper(s);
-          setIsLocked(s.isLocked);
-        }}
-        onLock={() => setIsLocked(true)}
-        onUnlock={() => setIsLocked(false)}
-        className="w-full"
-      >
-        <SwiperSlide className="w-auto!">
-          <Link
-            href={`/category/${parentSlug}`}
-            className="flex flex-col items-center gap-3 w-[120px]"
-          >
-            <div
-              className={cn(
-                "w-[120px] h-[120px] rounded-full flex justify-center border transition-colors",
-                currentSlug === parentSlug
-                  ? "bg-primary border-primary"
-                  : "bg-white border-border",
-              )}
+        <Swiper
+          key={locale}
+          dir={isRtl ? "rtl" : "ltr"}
+          modules={[Navigation]}
+          spaceBetween={16}
+          slidesPerView="auto"
+          watchOverflow={true}
+          onSwiper={(s) => {
+            setSwiper(s);
+            setIsLocked(s.isLocked);
+          }}
+          onLock={() => setIsLocked(true)}
+          onUnlock={() => setIsLocked(false)}
+          className="w-full"
+        >
+          <SwiperSlide className="w-auto!">
+            <Link
+              href={`/category/${parentSlug}`}
+              className="group flex w-[120px] flex-col items-center gap-3 py-1"
             >
-              <AllCategoryIcon
-                className={cn(
-                  "rounded-full stroke-2 transition-colors",
-                  currentSlug === parentSlug
-                    ? "text-white"
-                    : "text-primary"
-                )}
-              />
-            </div>
-            <span 
-              className={cn(
-                "text-sm font-medium text-center relative pb-1 transition-colors",
-                currentSlug === parentSlug
-                  ? "text-primary after:absolute after:bottom-0 after:left-1/2 after:-translate-x-1/2 after:w-1/2 after:h-[2px] after:bg-primary"
-                  : "text-foreground",
-              )}
-            >
-              {t("all")}
-            </span>
-          </Link>
-        </SwiperSlide>
+              <div className={circleClasses(currentSlug === parentSlug)}>
+                <AllCategoryIcon
+                  className={cn(
+                    "h-[44px] w-[44px] rounded-full stroke-2 transition-colors",
+                    currentSlug === parentSlug
+                      ? "text-primary"
+                      : "text-text-muted",
+                  )}
+                />
+              </div>
+              <span className={labelClasses(currentSlug === parentSlug)}>
+                {t("all")}
+              </span>
+            </Link>
+          </SwiperSlide>
 
-        {subCategories.map((subcat) => {
-          const isActive = currentSlug === subcat.slug;
-          return (
-            <SwiperSlide key={subcat.id} className="w-auto!">
-              <Link
-                href={`/category/${subcat.slug}`}
-                className="flex flex-col items-center gap-3 w-[120px]"
-              >
-                <div
-                  className={cn(
-                    "w-[120px] h-[120px] rounded-full overflow-hidden border flex items-end justify-center p-2 transition-colors",
-                    isActive
-                      ? "bg-primary border-primary"
-                      : "bg-white border-border",
-                  )}
+          {subCategories.map((subcat) => {
+            const isActive = currentSlug === subcat.slug;
+            const src = imageSrc(subcat.image);
+            return (
+              <SwiperSlide key={subcat.id} className="w-auto!">
+                <Link
+                  href={`/category/${subcat.slug}`}
+                  className="group flex w-[120px] flex-col items-center gap-3 py-1"
                 >
-                  <div className="relative rounded-full overflow-hidden">
-                    {subcat.image?.desktop || subcat.image?.mobile ? (
-                      <Image
-                        src={subcat.image.desktop || subcat.image.mobile}
-                        alt={subcat.name}
-                        width={60}
-                        height={60}
-                        className="object-contain"
-                      />
-                    ) : null}
+                  <div className={circleClasses(isActive)}>
+                    {src && (
+                      <div className="flex h-[64px] w-[64px] items-center justify-center overflow-hidden rounded-full bg-white shadow-elev-1">
+                        <Image
+                          src={src}
+                          alt={subcat.name}
+                          width={64}
+                          height={64}
+                          className="object-contain"
+                        />
+                      </div>
+                    )}
                   </div>
-                </div>
-                <span
-                  className={cn(
-                    "text-sm font-medium text-center line-clamp-2 px-1 relative pb-1 transition-colors",
-                    isActive
-                      ? "text-primary after:absolute after:bottom-0 after:left-1/2 after:-translate-x-1/2 after:w-1/2 after:h-[2px] after:bg-primary"
-                      : "text-foreground",
-                  )}
-                >
-                  {subcat.name}
-                </span>
-              </Link>
-            </SwiperSlide>
-          );
-        })}
-      </Swiper>
+                  <span className={labelClasses(isActive)}>{subcat.name}</span>
+                </Link>
+              </SwiperSlide>
+            );
+          })}
+        </Swiper>
       </div>
 
       {/* Navigation Arrows */}
@@ -139,21 +129,23 @@ export default function CategorySlider({
         <>
           <button
             onClick={onPrevious}
+            aria-label={isRtl ? "Next" : "Previous"}
             className={cn(
-              "absolute top-[60px] -translate-y-1/2 z-10 w-10 h-10 bg-white rounded-full shadow flex items-center justify-center border text-foreground hover:bg-gray-50",
-              isRtl ? "-right-5" : "-left-5",
+              "absolute top-12 z-10 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full border border-border bg-white shadow-elev-2 text-text-secondary transition-colors hover:bg-surface hover:text-primary",
+              isRtl ? "-right-4" : "-left-4",
             )}
           >
-            {isRtl ? <ChevronRight size={20} /> : <ChevronLeft size={20} />}
+            {isRtl ? <ChevronRight size={18} /> : <ChevronLeft size={18} />}
           </button>
           <button
             onClick={onNext}
+            aria-label={isRtl ? "Previous" : "Next"}
             className={cn(
-              "absolute top-[60px] -translate-y-1/2 z-10 w-10 h-10 bg-white rounded-full shadow flex items-center justify-center border text-foreground hover:bg-gray-50",
-              isRtl ? "-left-5" : "-right-5",
+              "absolute top-12 z-10 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full border border-border bg-white shadow-elev-2 text-text-secondary transition-colors hover:bg-surface hover:text-primary",
+              isRtl ? "-left-4" : "-right-4",
             )}
           >
-            {isRtl ? <ChevronLeft size={20} /> : <ChevronRight size={20} />}
+            {isRtl ? <ChevronLeft size={18} /> : <ChevronRight size={18} />}
           </button>
         </>
       )}

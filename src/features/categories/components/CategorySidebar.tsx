@@ -23,7 +23,7 @@ export default function CategorySidebar({
   onClose,
 }: CategorySidebarProps) {
   return (
-    <aside className="bg-surface border-e border-gray-200 overflow-y-auto">
+    <aside className="bg-surface border-e border-border overflow-y-auto">
       <ul className="py-2">
         {categories.map((category) => {
           const isActive = category.id === activeCategoryId;
@@ -35,8 +35,8 @@ export default function CategorySidebar({
                 onMouseEnter={() => onActiveCategoryChange(category.id)}
                 onFocus={() => onActiveCategoryChange(category.id)}
                 className={cn(
-                  "flex w-full items-center px-4 py-2 text-[13px] text-text-primary transition-colors hover:bg-gray-200",
-                  isActive && "bg-gray-200 font-semibold",
+                  "flex w-full items-center px-4 py-2 text-[13px] text-text-primary transition-colors hover:bg-border",
+                  isActive && "bg-border font-semibold",
                 )}
               >
                 <>

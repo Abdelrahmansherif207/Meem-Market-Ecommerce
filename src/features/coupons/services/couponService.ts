@@ -7,9 +7,9 @@ export type RemoveCouponResult =
   | { success: false; message: string; status?: number };
 
 export const couponService = {
-  getCoupons: async (locale: string): Promise<Coupon[]> => {
+  getCoupons: async (locale: string, endpoint: string = "/general/coupons"): Promise<Coupon[]> => {
     const response = await apiFetch<ApiResponse<Coupon[]>>(
-      "/general/coupons",
+      endpoint,
       { headers: { lang: locale }, next: { revalidate: 60 } },
     );
     return response.data;
@@ -22,11 +22,12 @@ export const couponService = {
         headers: { lang: locale },
       });
       return { success: true };
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const err = error as { message?: string; status?: number };
       return {
         success: false,
-        message: error?.message || "Failed to remove coupon",
-        status: error?.status,
+        message: err?.message || "Failed to remove coupon",
+        status: err?.status,
       };
     }
   },
@@ -42,11 +43,12 @@ export const couponService = {
         },
       );
       return { success: true, data: response.data, message: response.message };
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const err = error as { message?: string; status?: number };
       return {
         success: false,
-        message: error?.message || "Failed to apply coupon",
-        status: error?.status,
+        message: err?.message || "Failed to apply coupon",
+        status: err?.status,
       };
     }
   },

@@ -1,13 +1,13 @@
 "use client";
 
-import { ShoppingCart } from "lucide-react";
+import { ShoppingCart, User } from "lucide-react";
 import { useSyncExternalStore } from "react";
 import { useTranslations } from "next-intl";
 import Logo from "@/components/ui/Logo";
 import { SearchAutocomplete } from "./SearchAutocomplete";
 import { LocaleSwitcher } from "./LocaleSwitcher";
 import { WishlistIcon } from "./WishlistIcon";
-import Image from "next/image";
+import { NotificationBell } from "@/features/notifications";
 import { useAuthModalStore } from "@/features/auth/store/useAuthModalStore";
 import { useAuthStore } from "@/features/auth/store/useAuthStore";
 import { UserMenu } from "@/features/auth/components/UserMenu";
@@ -37,7 +37,7 @@ export default function MainNav({ settingsLogo }: { settingsLogo?: string | null
   return (
     <div className="grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-3 md:gap-6">
       <div className="flex items-center gap-2 md:gap-3 shrink-0">
-        <Logo src={settingsLogo || "/meem-logo.png"} alt="Logo" priority />
+        <Logo src={settingsLogo || "/meem-new.png"} alt="Logo" priority className="rounded-full" width={140} height={91} />
         <LocationDisplay />
       </div>
 
@@ -68,16 +68,21 @@ export default function MainNav({ settingsLogo }: { settingsLogo?: string | null
             <button
               type="button"
               onClick={() => openAuthModal()}
-              className="inline-flex items-center text-sm font-semibold text-text-primary gap-1 transition hover:text-primary whitespace-nowrap"
+              className="group inline-flex items-center gap-2 rounded-full border border-primary/50 bg-surface px-3 py-1.5 whitespace-nowrap transition-all duration-200 hover:border-primary hover:bg-primary/5"
             >
-              <Image src="/icons/user.svg" width={25} height={25} alt="user icon" />
-              <span className="hidden md:inline">{authLabel}</span>
+              <div className="flex h-5 w-5 items-center justify-center rounded-full bg-primary/10 transition-colors group-hover:bg-primary/15">
+                <User className="h-3 w-3 text-primary" />
+              </div>
+              <span className="hidden text-xs font-medium text-text-primary transition-colors group-hover:text-primary md:inline">
+                {authLabel}
+              </span>
               <span className="sr-only">{authLabel}</span>
             </button>
           )}
         </div>
 
         <WishlistIcon />
+        <NotificationBell />
 
        <Link
   href="/cart"

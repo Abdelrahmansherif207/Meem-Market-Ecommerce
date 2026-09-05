@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { Eye, EyeOff } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 interface PasswordInputProps {
   placeholder?: string;
@@ -18,6 +19,7 @@ export function PasswordInput({
   defaultValue,
   onChange,
 }: PasswordInputProps) {
+  const t = useTranslations("auth");
   const [showPassword, setShowPassword] = useState(false);
 
   return (
@@ -26,8 +28,9 @@ export function PasswordInput({
         <button
           type="button"
           onClick={() => setShowPassword(!showPassword)}
-          className="absolute left-3 top-1/2 -translate-y-1/2 text-text-secondary transition hover:text-text-primary"
+          className="absolute end-3 top-1/2 -translate-y-1/2 text-text-secondary transition hover:text-text-primary"
           tabIndex={-1}
+          aria-label={showPassword ? t("hidePassword") : t("showPassword")}
         >
           {showPassword ? (
             <EyeOff className="h-5 w-5" />
@@ -42,12 +45,12 @@ export function PasswordInput({
           defaultValue={defaultValue}
           onChange={onChange}
           className={
-            "w-full rounded-xl border bg-background pl-10 pr-4 py-2.5 text-sm text-text-primary outline-none transition focus:border-primary " +
-            (error ? "border-red-500" : "border-border")
+            "w-full rounded-xl border bg-background ps-4 pe-10 py-2.5 text-sm text-text-primary outline-none transition focus:border-primary " +
+            (error ? "border-error" : "border-border")
           }
         />
       </div>
-      {error && <p className="mt-1 text-xs text-red-500">{error}</p>}
+      {error && <p className="mt-1 text-xs text-error">{error}</p>}
     </div>
   );
 }

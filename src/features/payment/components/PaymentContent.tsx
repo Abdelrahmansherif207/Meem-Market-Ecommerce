@@ -155,7 +155,7 @@ export function PaymentContent() {
               onChange={set("name")}
             />
             {fieldError("name") && (
-              <p className="text-xs text-red-500">{fieldError("name")}</p>
+              <p className="text-xs text-error">{fieldError("name")}</p>
             )}
           </div>
 
@@ -168,7 +168,7 @@ export function PaymentContent() {
               onChange={set("user_phone")}
             />
             {fieldError("user_phone") && (
-              <p className="text-xs text-red-500">{fieldError("user_phone")}</p>
+              <p className="text-xs text-error">{fieldError("user_phone")}</p>
             )}
           </div>
 
@@ -182,7 +182,7 @@ export function PaymentContent() {
               onChange={set("user_email")}
             />
             {fieldError("user_email") && (
-              <p className="text-xs text-red-500">{fieldError("user_email")}</p>
+              <p className="text-xs text-error">{fieldError("user_email")}</p>
             )}
           </div>
         </div>
@@ -202,7 +202,7 @@ export function PaymentContent() {
                 onChange={set("country")}
               />
               {fieldError("country") && (
-                <p className="text-xs text-red-500">{fieldError("country")}</p>
+                <p className="text-xs text-error">{fieldError("country")}</p>
               )}
             </div>
 
@@ -215,7 +215,7 @@ export function PaymentContent() {
                 onChange={set("state")}
               />
               {fieldError("state") && (
-                <p className="text-xs text-red-500">{fieldError("state")}</p>
+                <p className="text-xs text-error">{fieldError("state")}</p>
               )}
             </div>
 
@@ -228,7 +228,7 @@ export function PaymentContent() {
                 onChange={set("city")}
               />
               {fieldError("city") && (
-                <p className="text-xs text-red-500">{fieldError("city")}</p>
+                <p className="text-xs text-error">{fieldError("city")}</p>
               )}
             </div>
           </div>
@@ -242,7 +242,7 @@ export function PaymentContent() {
               onChange={set("street_address")}
             />
             {fieldError("street_address") && (
-              <p className="text-xs text-red-500">{fieldError("street_address")}</p>
+              <p className="text-xs text-error">{fieldError("street_address")}</p>
             )}
           </div>
         </div>

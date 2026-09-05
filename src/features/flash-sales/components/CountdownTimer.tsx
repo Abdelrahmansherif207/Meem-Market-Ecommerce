@@ -12,7 +12,7 @@ export default function CountdownTimer({ targetDate, className = "" }: Countdown
   const { days, hours, minutes, seconds, isExpired } = useCountdown(targetDate);
 
   if (isExpired) {
-    return <span className={`text-red-500 font-bold ${className}`}>Sale Ended</span>;
+    return <span className={`text-error font-bold ${className}`}>Sale Ended</span>;
   }
 
   return (

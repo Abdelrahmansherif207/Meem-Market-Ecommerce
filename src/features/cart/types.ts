@@ -42,7 +42,7 @@ export interface GuestCartItem {
   slug: string;
   sku: string;
   in_stock: boolean;
-  stock_quantity: number;
+  stock_quantity?: number;
 }
 
 export interface HydratedCartItem extends GuestCartItem {

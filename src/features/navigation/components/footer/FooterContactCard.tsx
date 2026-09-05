@@ -10,14 +10,14 @@ interface Props {
 
 export default function FooterContactCard({ contactInfo, vertical = false }: Props) {
   return (
-    <div className="flex flex-col items-start gap-4 rounded-lg p-2">
+    <div className="flex flex-col items-start gap-4 rounded-lg">
       <a
         href={contactInfo.whatsappUrl || "#"}
         target="_blank"
         rel="noopener noreferrer"
-        className="flex items-center gap-2 text-sm leading-normal font-normal text-white transition-colors hover:text-white/80 hover:underline no-underline"
+        className="flex items-center gap-2 text-md leading-normal font-normal text-white transition-colors hover:text-white/80 hover:underline no-underline"
       >
-        <span>{contactInfo.assistanceText}</span>
+        {/* <span>{contactInfo.assistanceText}</span> */}
       </a>
       <div className="flex items-center gap-2">
         <div
@@ -33,7 +33,7 @@ export default function FooterContactCard({ contactInfo, vertical = false }: Pro
 
           <span className="text-sm leading-normal font-normal text-white">{contactInfo.callUsText}</span>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center ">
            <PhoneIcon className="size-7 shrink-0" />
 
           <span className="text-xl leading-none text-white">{contactInfo.phoneNumber}</span>
