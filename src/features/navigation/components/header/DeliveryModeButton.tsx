@@ -44,7 +44,7 @@ export function DeliveryModeButton({
         onClick={onClick}
         disabled={disabled}
         className={cn(
-          "relative flex min-w-0 flex-1 items-center justify-center gap-1.5 overflow-hidden rounded-lg px-2 py-1 text-center transition-all duration-200 ease-out",
+          "relative flex min-w-0 flex-1 items-center justify-center gap-1 overflow-hidden rounded-lg px-1 py-0.5 text-center transition-all duration-200 ease-out",
           "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60",
           "disabled:cursor-not-allowed",
           disabled && "border border-dashed border-text-muted/40 opacity-70 saturate-[0.6] hover:opacity-70",
@@ -55,7 +55,7 @@ export function DeliveryModeButton({
       >
         <div
           className={cn(
-            "relative size-6 shrink-0 overflow-hidden drop-shadow-sm",
+            "relative size-5 shrink-0 overflow-hidden drop-shadow-sm",
             hideIcon && "hidden",
           )}
         >
@@ -72,13 +72,13 @@ export function DeliveryModeButton({
         </span>
 
         {disabled && note ? (
-          <span className="shrink-0 rounded-full border border-text-muted/50 px-1.5 py-0.5 text-[10px] leading-3 font-bold text-text-muted">
+          <span className="shrink-0 rounded-full border border-text-muted/50 px-1 py-px text-[9px] leading-3 font-bold text-text-muted">
             {note}
           </span>
         ) : etaText && !hideIcon ? (
           <span
             className={cn(
-              "shrink-0 rounded-full px-1.5 py-0.5 text-[10px] leading-3 font-bold",
+              "shrink-0 rounded-full px-1 py-px text-[9px] leading-3 font-bold",
               textClass?.includes("text-white") ? "bg-white/25 text-white" : "bg-primary/10 text-primary",
             )}
           >
