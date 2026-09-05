@@ -159,18 +159,42 @@ export function MapPicker({
     setSelectedCoords({ lat, lng });
     try {
       const response = await fetch(
-        `https://maps.googleapis.com/maps/api/geocode/json?latlng=${lat},${lng}&language=${locale === "ar" ? "ar" : "en"}&key=${process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY}`,
+        "https://places.googleapis.com/v1/places:searchNearby",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "X-Goog-Api-Key": process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY!,
+            "X-Goog-FieldMask": "places.id,places.formattedAddress,places.addressComponents,places.location,places.displayName",
+          },
+          body: JSON.stringify({
+            locationRestriction: {
+              circle: {
+                center: { latitude: lat, longitude: lng },
+                radius: 200,
+              },
+            },
+            rankPreference: "DISTANCE",
+            maxResultCount: 1,
+          }),
+        },
       );
+      if (!response.ok) return;
       const data = await response.json();
-      if (data.status === "OK" && data.results?.[0]) {
-        const place = data.results[0];
-        const addr = extractAddressComponents(place.address_components);
+      const place = data.places?.[0];
+      if (place?.location) {
+        const legacyComponents = (place.addressComponents ?? []).map((c: PlaceAddressComponent) => ({
+          long_name: c.longText,
+          short_name: c.shortText,
+          types: c.types,
+        }));
+        const addr = extractAddressComponents(legacyComponents);
         setCity(addr.city);
         setState(addr.state);
         setZip(addr.zip);
-        setStreetAddress(addr.street || place.formatted_address?.split(",")[0]?.trim() || "");
+        setStreetAddress(addr.street || place.formattedAddress?.split(",")[0]?.trim() || "");
         setCountry(addr.country);
-        setSearchValue(place.formatted_address || "");
+        setSearchValue(place.formattedAddress || "");
       }
     } catch {
       // silently fail
