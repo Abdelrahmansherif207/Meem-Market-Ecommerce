@@ -37,6 +37,7 @@ interface PlaceAddressComponent {
 
 interface MapPickerProps {
   initialValue?: PickedAddress | null;
+  initialTitle?: string;
   defaultCenter?: { lat: number; lng: number } | null;
   currentLocation?: { coords: { lat: number; lng: number }; streetAddress: string } | null;
   saving?: boolean;
@@ -94,6 +95,7 @@ async function fetchPredictions(input: string, languageCode: string): Promise<Au
 
 export function MapPicker({
   initialValue,
+  initialTitle,
   defaultCenter,
   currentLocation,
   saving,
@@ -106,7 +108,7 @@ export function MapPicker({
   const locale = useLocale();
 
   const [searchValue, setSearchValue] = useState(() => initialValue?.formattedAddress ?? "");
-  const [title, setTitle] = useState(() => initialValue?.title ?? "");
+  const [title, setTitle] = useState(() => initialValue?.title ?? initialTitle ?? "");
   const [predictions, setPredictions] = useState<AutocompletePrediction[]>([]);
   const [predictionsLoading, setPredictionsLoading] = useState(false);
   const [selectedCoords, setSelectedCoords] = useState<{ lat: number; lng: number }>(
@@ -194,6 +196,7 @@ export function MapPicker({
         setZip(addr.zip);
         setStreetAddress(addr.street || place.formattedAddress?.split(",")[0]?.trim() || "");
         setCountry(addr.country);
+        setTitle((prev) => prev.trim() || place.displayName?.text || place.formattedAddress?.split(",")[0]?.trim() || "");
         setSearchValue(place.formattedAddress || "");
       }
     } catch {
@@ -210,7 +213,7 @@ export function MapPicker({
         {
           headers: {
             "X-Goog-Api-Key": process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY!,
-            "X-Goog-FieldMask": "formattedAddress,addressComponents,location",
+            "X-Goog-FieldMask": "formattedAddress,addressComponents,location,displayName",
           },
         },
       );
@@ -231,6 +234,7 @@ export function MapPicker({
         setZip(addr.zip);
         setStreetAddress(addr.street || place.formattedAddress?.split(",")[0]?.trim() || "");
         setCountry(addr.country);
+        setTitle((prev) => prev.trim() || place.displayName?.text || prediction.structured_formatting?.main_text || "");
         setSearchValue(place.formattedAddress || prediction.description);
       }
     } catch {
@@ -368,34 +372,34 @@ export function MapPicker({
         <div className="space-y-1">
           <label className="text-xs font-medium text-text-secondary">{t("city")}</label>
           <input
-            className="w-full rounded-xl border border-border bg-surface px-3 py-2 text-sm outline-none focus:border-primary transition-colors"
+            readOnly
+            className="w-full rounded-xl border border-border bg-surface/60 px-3 py-2 text-sm text-text-primary outline-none cursor-default"
             value={city}
-            onChange={(e) => setCity(e.target.value)}
           />
         </div>
         <div className="space-y-1">
           <label className="text-xs font-medium text-text-secondary">{t("streetAddress")}</label>
           <input
-            className="w-full rounded-xl border border-border bg-surface px-3 py-2 text-sm outline-none focus:border-primary transition-colors"
+            readOnly
+            className="w-full rounded-xl border border-border bg-surface/60 px-3 py-2 text-sm text-text-primary outline-none cursor-default"
             value={streetAddress}
-            onChange={(e) => setStreetAddress(e.target.value)}
           />
         </div>
         <div className="grid grid-cols-2 gap-3">
           <div className="space-y-1">
             <label className="text-xs font-medium text-text-secondary">{t("state")}</label>
             <input
-              className="w-full rounded-xl border border-border bg-surface px-3 py-2 text-sm outline-none focus:border-primary transition-colors"
+              readOnly
+              className="w-full rounded-xl border border-border bg-surface/60 px-3 py-2 text-sm text-text-primary outline-none cursor-default"
               value={state}
-              onChange={(e) => setState(e.target.value)}
             />
           </div>
           <div className="space-y-1">
             <label className="text-xs font-medium text-text-secondary">{t("zip")}</label>
             <input
-              className="w-full rounded-xl border border-border bg-surface px-3 py-2 text-sm outline-none focus:border-primary transition-colors"
+              readOnly
+              className="w-full rounded-xl border border-border bg-surface/60 px-3 py-2 text-sm text-text-primary outline-none cursor-default"
               value={zip}
-              onChange={(e) => setZip(e.target.value)}
             />
           </div>
         </div>

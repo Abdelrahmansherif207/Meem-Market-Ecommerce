@@ -67,8 +67,8 @@ export function CartSection({
   ];
 
   return (
-    <div className="rounded-2xl border-2 border-border p-10 space-y-6">
-      <div className="flex items-center gap-3">
+    <div className="rounded-2xl border-2 border-border p-4 sm:p-6 lg:p-10 space-y-6">
+      <div className="flex flex-wrap items-center gap-2 sm:gap-3">
         <span className={cn("inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-sm font-bold", badgeColor)}>
           <DeliveryIcon className="h-4 w-4" />
           {title}
@@ -99,11 +99,21 @@ export function CartSection({
 
             {milestones.map((m) => {
               const reached = freeShipPercent >= m.pos;
+              const edge = m.pos === 0 ? "start" : m.pos === 100 ? "end" : "center";
               return (
                 <div
                   key={m.pos}
                   className="absolute"
-                  style={{ left: m.pos + "%", top: "50%", transform: "translate(-50%,-50%)" }}
+                  style={{
+                    left: m.pos + "%",
+                    top: "50%",
+                    transform:
+                      edge === "start"
+                        ? "translate(0,-50%)"
+                        : edge === "end"
+                          ? "translate(-100%,-50%)"
+                          : "translate(-50%,-50%)",
+                  }}
                 >
                   <div
                     className={cn(
@@ -115,7 +125,15 @@ export function CartSection({
                   >
                     <m.Icon className={cn("h-4 w-4", reached ? "text-white" : "text-text-secondary")} />
                   </div>
-                  <div className="absolute left-1/2 -translate-x-1/2 mt-1 text-center" style={{ top: "100%" }}>
+                  <div
+                    className={cn(
+                      "absolute mt-1 text-center",
+                      edge === "start" && "left-0 text-start",
+                      edge === "end" && "right-0 text-end",
+                      edge === "center" && "left-1/2 -translate-x-1/2",
+                    )}
+                    style={{ top: "100%" }}
+                  >
                     <div className={cn("text-xs font-bold whitespace-nowrap", reached ? activeText : "text-text-secondary")}>
                       {m.label}
                     </div>

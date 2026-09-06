@@ -150,7 +150,23 @@ export function CartPageContent({ minimumOrderAmount }: CartPageContentProps) {
   const abortRef = useRef<AbortController | null>(null);
 
   const [appliedCoupon, setAppliedCoupon] = useState<AppliedCoupon | null>(null);
+  const [stickyTop, setStickyTop] = useState<number | null>(null);
   const couponDiscount = appliedCoupon?.discount_amount ?? 0;
+
+  useEffect(() => {
+    const header = document.querySelector("header");
+    if (!header) return;
+    const update = () =>
+      setStickyTop(window.innerWidth >= 1024 ? header.offsetHeight + 24 : null);
+    update(); // eslint-disable-line react-hooks/set-state-in-effect
+    const observer = new ResizeObserver(update);
+    observer.observe(header);
+    window.addEventListener("resize", update);
+    return () => {
+      observer.disconnect();
+      window.removeEventListener("resize", update);
+    };
+  }, []);
 
 
   // -------------------------------------------------------------------------
@@ -441,7 +457,7 @@ export function CartPageContent({ minimumOrderAmount }: CartPageContentProps) {
   }
 
   return (
-    <div className="space-y-10">
+    <div className="space-y-6 sm:space-y-10">
       {/* Sync error banner */}
       {syncError && (
         <div className="flex items-center justify-between gap-4 rounded-xl border border-red-200 bg-red-50 px-4 py-3">
@@ -463,7 +479,7 @@ export function CartPageContent({ minimumOrderAmount }: CartPageContentProps) {
       )}
 
       <div className="flex items-center justify-between">
-        <h2 className="text-xl font-bold">{t("title")}</h2>
+        <h2 className="text-lg sm:text-xl font-bold">{t("title")}</h2>
       </div>
 
       {displayItems.length === 0 ? (
@@ -502,7 +518,10 @@ export function CartPageContent({ minimumOrderAmount }: CartPageContentProps) {
           </div>
 
           <div className="lg:col-span-1">
-            <div className="sticky top-24 space-y-6">
+            <div
+              className="space-y-6 lg:sticky lg:top-24"
+              style={stickyTop !== null ? { top: stickyTop } : undefined}
+            >
               <CartSummary
                 scheduledSubtotal={scheduledSubtotal}
                 scheduledQty={scheduledQty}
