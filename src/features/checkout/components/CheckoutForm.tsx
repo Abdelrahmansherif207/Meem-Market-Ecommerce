@@ -100,11 +100,28 @@ export function CheckoutForm() {
   const [addressesLoading, setAddressesLoading] = useState(false);
   const [addressesError, setAddressesError] = useState(false);
   const [selectedAddressId, setSelectedAddressId] = useState<number | null>(null);
+  const [addressTitle, setAddressTitle] = useState("");
   const [mapModalOpen, setMapModalOpen] = useState(false);
   const [savingLocation, setSavingLocation] = useState(false);
   const [mapSaveError, setMapSaveError] = useState<string | null>(null);
   const [hydrated, setHydrated] = useState(false);
+  const [stickyTop, setStickyTop] = useState<number | null>(null);
   const browserCoords = useLocationStore((s) => s.coords);
+
+  useEffect(() => {
+    const header = document.querySelector("header");
+    if (!header) return;
+    const update = () =>
+      setStickyTop(window.innerWidth >= 1024 ? header.offsetHeight + 12 : null);
+    update(); // eslint-disable-line react-hooks/set-state-in-effect
+    const observer = new ResizeObserver(update);
+    observer.observe(header);
+    window.addEventListener("resize", update);
+    return () => {
+      observer.disconnect();
+      window.removeEventListener("resize", update);
+    };
+  }, []);
 
   useEffect(() => {
     const unsub = useAuthStore.persist.onFinishHydration(() => setHydrated(true));
@@ -190,6 +207,10 @@ export function CheckoutForm() {
       .then((data) => {
         if (cancelled) return;
         setSavedAddresses(data);
+        if (data.length > 0) {
+          setSelectedAddressId(data[0].id);
+          applyAddressToForm(data[0]);
+        }
         setAddressesLoading(false);
       })
       .catch(() => {
@@ -201,12 +222,27 @@ export function CheckoutForm() {
     return () => { cancelled = true; };
   }, [locale, hydrated, isAuthenticated]);
 
+  useEffect(() => {
+    if (governoratesLoading || governorates.length === 0) return;
+    if (form.governorate_id !== null || !selectedAddressId) return;
+    const addr = savedAddresses.find((a) => a.id === selectedAddressId);
+    if (!addr) return;
+    const matched = matchGovernorate(addr.address.city, addr.address.state);
+    if (matched) {
+      setForm((prev) => (prev.governorate_id === null ? { ...prev, governorate_id: matched.id } : prev));
+    }
+  }, [governorates, governoratesLoading, selectedAddressId, savedAddresses]); // eslint-disable-line react-hooks/exhaustive-deps
+
   const handleRetryAddresses = () => {
     setAddressesError(false);
     setAddressesLoading(true);
     addressService.getAll(locale)
       .then((data) => {
         setSavedAddresses(data);
+        if (data.length > 0) {
+          setSelectedAddressId(data[0].id);
+          applyAddressToForm(data[0]);
+        }
         setAddressesLoading(false);
       })
       .catch(() => {
@@ -229,6 +265,36 @@ export function CheckoutForm() {
       });
   };
 
+  const matchGovernorate = (city: string, state: string) => {
+    const stripGov = (s: string) =>
+      s.replace(/governorate|محافظة/gi, "").trim().toLowerCase();
+    const pickedCity = stripGov(city);
+    const pickedState = stripGov(state);
+    return governorates.find((g) => {
+      const name = stripGov(g.name);
+      return name === pickedCity || name === pickedState ||
+        (pickedCity.length > 0 && (name.includes(pickedCity) || pickedCity.includes(name))) ||
+        (pickedState.length > 0 && (name.includes(pickedState) || pickedState.includes(name)));
+    });
+  };
+
+  const applyAddressToForm = (addr: Address) => {
+    setForm((prev) => {
+      const matched = matchGovernorate(addr.address.city, addr.address.state);
+      return {
+        ...prev,
+        city: addr.address.city,
+        state: addr.address.state,
+        country: addr.address.country,
+        street_address: addr.address.street_address,
+        ...(matched ? { governorate_id: matched.id } : {}),
+      };
+    });
+    setErrors((prev) => prev.filter(
+      (e) => !["city", "state", "country", "street_address", "governorate_id"].includes(e.field),
+    ));
+  };
+
   const handleAddressSelect = (id: number | null) => {
     setSelectedAddressId(id);
     if (id === null) {
@@ -241,15 +307,7 @@ export function CheckoutForm() {
       }));
     } else {
       const addr = savedAddresses.find((a) => a.id === id);
-      if (addr) {
-        setForm((prev) => ({
-          ...prev,
-          city: addr.address.city,
-          state: addr.address.state,
-          country: addr.address.country,
-          street_address: addr.address.street_address,
-        }));
-      }
+      if (addr) applyAddressToForm(addr);
     }
   };
 
@@ -264,15 +322,7 @@ export function CheckoutForm() {
     }));
     setErrors((prev) => prev.filter((e) => !["city", "state", "country", "street_address"].includes(e.field)));
 
-    const normalize = (s: string) => s.trim().toLowerCase();
-    const pickedCity = normalize(picked.city);
-    const pickedState = normalize(picked.state);
-    const matched = governorates.find((g) => {
-      const name = normalize(g.name);
-      return name === pickedCity || name === pickedState ||
-        (pickedCity.length > 0 && name.includes(pickedCity)) ||
-        (pickedState.length > 0 && name.includes(pickedState));
-    });
+    const matched = matchGovernorate(picked.city, picked.state);
     if (matched) {
       setForm((prev) => ({ ...prev, governorate_id: matched.id }));
       setErrors((prev) => prev.filter((e) => e.field !== "governorate_id"));
@@ -281,7 +331,7 @@ export function CheckoutForm() {
     setSavingLocation(true);
     try {
       const created = await addressService.create({
-        title: picked.title.trim() || locationT("defaultTitle"),
+        title: picked.title.trim() || picked.formattedAddress.trim() || locationT("defaultTitle"),
         address: {
           zip: picked.zip.trim() || " ",
           city: picked.city.trim() || " ",
@@ -300,6 +350,30 @@ export function CheckoutForm() {
       setSavingLocation(false);
     }
   };
+
+  const selectedAddress = savedAddresses.find((a) => a.id === selectedAddressId) ?? null;
+  const mapDefaultCenter = selectedAddress?.location
+    ? { lat: selectedAddress.location.latitude, lng: selectedAddress.location.longitude }
+    : browserCoords;
+  const mapInitialValue: PickedAddress | null = selectedAddress
+    ? {
+        title: selectedAddress.title,
+        coords: selectedAddress.location
+          ? { lat: selectedAddress.location.latitude, lng: selectedAddress.location.longitude }
+          : browserCoords ?? { lat: 30.0444, lng: 31.2357 },
+        formattedAddress: [
+          selectedAddress.address.street_address,
+          selectedAddress.address.city,
+          selectedAddress.address.state,
+          selectedAddress.address.country,
+        ].filter((part) => part.trim()).join(", "),
+        city: selectedAddress.address.city,
+        state: selectedAddress.address.state,
+        country: selectedAddress.address.country,
+        zip: selectedAddress.address.zip,
+        streetAddress: selectedAddress.address.street_address,
+      }
+    : null;
 
   const fieldError = (name: string) => errors.find((e) => e.field === name)?.message;
 
@@ -618,6 +692,18 @@ export function CheckoutForm() {
                     </div>
                   )}
 
+                  {selectedAddressId === null && (
+                    <div className="space-y-1.5">
+                      <label className={labelClass}>{locationT("addressTitle")}</label>
+                      <input
+                        className={inputClass}
+                        value={addressTitle}
+                        onChange={(e) => setAddressTitle(e.target.value)}
+                        placeholder={locationT("addressTitlePlaceholder")}
+                      />
+                    </div>
+                  )}
+
                   <div className="space-y-1.5">
                     <label className={labelClass}>{t("governorate")}</label>
                     {governoratesLoading ? (
@@ -752,7 +838,10 @@ export function CheckoutForm() {
         </div>
 
         <div className="lg:col-span-1">
-          <div className="space-y-4">
+          <div
+            className="space-y-4 lg:sticky lg:top-24"
+            style={stickyTop !== null ? { top: stickyTop } : undefined}
+          >
             <OrderSummary
               subtotal={cartData?.subtotal ?? 0}
               totalQuantity={cartData?.totalQuantity ?? 0}
@@ -785,7 +874,9 @@ export function CheckoutForm() {
         open={mapModalOpen}
         onClose={() => setMapModalOpen(false)}
         onConfirm={handleMapPicked}
-        defaultCenter={browserCoords}
+        initialValue={mapInitialValue}
+        initialTitle={selectedAddressId === null ? addressTitle : undefined}
+        defaultCenter={mapDefaultCenter}
         title={t("pickOnMapTitle")}
         saving={savingLocation}
         error={mapSaveError}

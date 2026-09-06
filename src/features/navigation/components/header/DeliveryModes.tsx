@@ -42,7 +42,7 @@ export default function DeliveryModes({ compact = false }: { compact?: boolean }
 
   if (compact) {
     return (
-      <div className="flex w-full items-stretch gap-0.5 rounded-lg border border-text-muted/20 bg-white/60 p-px shadow-elev-1">
+      <div className="flex w-full items-center gap-0.5 rounded-lg border border-black/[0.06] bg-white/80 p-0.5 shadow-elev-1 backdrop-blur">
         <DeliveryModeButton
           label={t("scheduled")}
           icon={{ src: "/scheduled.avif", alt: "Scheduled" }}
@@ -71,7 +71,7 @@ export default function DeliveryModes({ compact = false }: { compact?: boolean }
   return (
     <div className={cn(
       "no-scrollbar flex w-full items-center overflow-x-auto",
-      "gap-3 py-2",
+      "gap-2.5 py-1.5",
     )}>
       <DeliveryModeButton
         label={t("scheduled")}
