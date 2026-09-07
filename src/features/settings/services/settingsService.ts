@@ -8,7 +8,13 @@ async function fetchSettings(locale: string): Promise<SiteSettings> {
     "/general/settings",
     { headers: { lang: locale }, next: { revalidate: 300 } },
   );
-  return response.data;
+  const data = response.data;
+  return {
+    ...data,
+    // Backend serializes this as a string (e.g. "50.00") — coerce to number
+    // so numeric comparisons (minimum-order gates, progress bars) behave.
+    minimumOrderAmount: Number(data.minimumOrderAmount) || 0,
+  };
 }
 
 export const getCachedSettings = cache(fetchSettings);
