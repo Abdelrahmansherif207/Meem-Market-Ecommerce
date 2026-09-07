@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import type { ReactNode } from "react";
 import { cn } from "@/shared/utils/cn";
 
 export type DeliveryModeButtonProps = {
@@ -12,9 +13,10 @@ export type DeliveryModeButtonProps = {
   bgClass: string;
   borderClass: string;
   textClass?: string;
-  etaText?: string;
+  etaText?: ReactNode;
   note?: string;
-  hideIcon?: boolean;
+  /** Compact scrolled state: smaller height + icon, sub-text hidden. */
+  small?: boolean;
   compact?: boolean;
   onClick?: () => void;
   disabled?: boolean;
@@ -28,7 +30,7 @@ export function DeliveryModeButton({
   textClass,
   etaText,
   note,
-  hideIcon = false,
+  small = false,
   compact = false,
   onClick,
   disabled = false,
@@ -51,17 +53,15 @@ export function DeliveryModeButton({
           textClass,
         )}
       >
-        {!hideIcon && (
-          <span className="relative block size-8 shrink-0 drop-shadow-sm">
-            <Image
-              src={icon.src}
-              alt={icon.alt}
-              fill
-              sizes="32px"
-              className="object-contain"
-            />
-          </span>
-        )}
+        <span className="relative block size-8 shrink-0 drop-shadow-sm">
+          <Image
+            src={icon.src}
+            alt={icon.alt}
+            fill
+            sizes="32px"
+            className="object-contain"
+          />
+        </span>
 
         <span className="min-w-0 truncate text-[13px] leading-4 font-medium tracking-tight">
           {label}
@@ -95,7 +95,7 @@ export function DeliveryModeButton({
       aria-pressed={selected}
       className={cn(
         "group relative inline-flex shrink-0 select-none items-center gap-1.5 rounded-lg border border-black/[0.08] font-medium whitespace-nowrap transition-all duration-200 ease-out active:scale-[0.98]",
-        hideIcon ? "h-8 px-3" : "h-10 pr-2.5 pl-1 md:h-11 md:pr-3 md:pl-1.5",
+        small ? "h-8 pr-3 pl-1" : "h-10 pr-2.5 pl-1 md:h-11 md:pr-3 md:pl-1.5",
         "shadow-elev-1 disabled:cursor-not-allowed disabled:opacity-60 disabled:saturate-50 disabled:active:scale-100",
         !disabled && "hover:-translate-y-px hover:shadow-elev-2",
         bgClass,
@@ -103,28 +103,26 @@ export function DeliveryModeButton({
         textClass,
       )}
     >
-      {!hideIcon && (
-        <span className="relative block size-9 shrink-0 drop-shadow-sm md:size-10">
-          <Image
-            src={icon.src}
-            alt={icon.alt}
-            fill
-            sizes="40px"
-            className="object-contain"
-          />
-        </span>
-      )}
+      <span className={cn("relative block shrink-0 drop-shadow-sm", small ? "size-6" : "size-9 md:size-10")}>
+        <Image
+          src={icon.src}
+          alt={icon.alt}
+          fill
+          sizes={small ? "24px" : "40px"}
+          className="object-contain"
+        />
+      </span>
 
       <span className="flex min-w-0 flex-col items-start text-start leading-none">
         <span
           className={cn(
             "max-w-[220px] truncate tracking-tight",
-            hideIcon ? "text-[13px] leading-5 font-medium" : "text-sm leading-5 font-medium md:text-[15px]",
+            small ? "text-[13px] leading-5 font-medium" : "text-sm leading-5 font-medium md:text-[15px]",
           )}
         >
           {label}
         </span>
-        {subText && !hideIcon ? (
+        {subText && !small ? (
           <span
             className={cn(
               "max-w-[220px] truncate text-[11px] leading-4 font-normal tabular-nums",
