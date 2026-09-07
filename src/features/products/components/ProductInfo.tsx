@@ -3,6 +3,7 @@
 import { useTranslations } from "next-intl";
 import { Star } from "lucide-react";
 import { cn } from "@/shared/utils/cn";
+import { Price } from "@/components/ui/Price";
 import { ProductTags } from "@/features/tags/components/ProductTags";
 import type { ProductDetail, ProductVariant } from "../types";
 import {
@@ -78,17 +79,13 @@ export function ProductInfo({ product, selectedVariant }: ProductInfoProps) {
         <ProductTags tags={product.tags} />
       )}
 
-      <div className="flex items-baseline gap-3">
+      <div className="flex items-baseline gap-3 flex-wrap">
         {selectedVariant || !hasVariants ? (
           <>
-            <span className="text-3xl font-bold text-text-primary">
-              {displayPrice.toFixed(2)} {t("currency")}
-            </span>
+            <Price amount={displayPrice} className="text-3xl font-bold text-text-primary" />
             {hasDiscount && (
               <>
-                <span className="text-lg text-text-secondary line-through">
-                  {originalPrice.toFixed(2)} {t("currency")}
-                </span>
+                <Price amount={originalPrice} className="text-lg text-text-secondary line-through" />
                 {discountPercent && (
                   <span className="rounded-md bg-discount px-2 py-0.5 text-xs font-bold text-white">
                     -{discountPercent}%
@@ -98,15 +95,12 @@ export function ProductInfo({ product, selectedVariant }: ProductInfoProps) {
             )}
           </>
         ) : range!.min === range!.max ? (
-          <span className="text-3xl font-bold text-text-primary">
-            {range!.min.toFixed(2)} {t("currency")}
-          </span>
+          <Price amount={range!.min} className="text-3xl font-bold text-text-primary" />
         ) : (
-          <span className="text-3xl font-bold text-text-primary">
-            {t("fromPrice", {
-              min: `${range!.min.toFixed(2)} ${t("currency")}`,
-              max: `${range!.max.toFixed(2)} ${t("currency")}`,
-            })}
+          <span className="flex items-baseline gap-2 text-3xl font-bold text-text-primary">
+            <Price amount={range!.min} />
+            <span aria-hidden>–</span>
+            <Price amount={range!.max} />
           </span>
         )}
       </div>

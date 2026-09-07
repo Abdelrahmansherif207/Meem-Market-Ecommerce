@@ -3,6 +3,7 @@
 import { useTranslations } from "next-intl";
 import { cn } from "@/shared/utils/cn";
 import { Check } from "lucide-react";
+import { Price } from "@/components/ui/Price";
 import type { ProductVariant } from "../types";
 
 interface ProductVariantsProps {
@@ -64,9 +65,7 @@ export function ProductVariants({
             </div>
 
             <div className="flex flex-col items-end gap-0.5">
-              <span className="text-sm font-bold text-text-primary">
-                {variant.current_price.toFixed(2)} {t("currency")}
-              </span>
+              <Price amount={variant.current_price} className="text-sm font-bold text-text-primary" />
               <span
                 className={cn(
                   "text-xs",
