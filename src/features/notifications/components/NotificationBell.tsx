@@ -58,7 +58,7 @@ export function NotificationBell() {
   };
 
   return (
-    <div ref={containerRef} className="relative">
+    <div ref={containerRef} className="static lg:relative">
       <button
         type="button"
         aria-label={t("title")}
@@ -84,7 +84,7 @@ export function NotificationBell() {
       </button>
 
       {open && (
-        <div className="absolute end-0 top-12 z-50 w-[min(92vw,360px)] overflow-hidden rounded-2xl border border-border bg-white shadow-2xl shadow-black/10">
+        <div className="absolute inset-x-4 top-full z-50 overflow-hidden rounded-2xl border border-border bg-white shadow-2xl shadow-black/10 lg:inset-x-auto lg:end-0 lg:top-12 lg:w-[360px]">
           <div className="flex items-center justify-between gap-3 border-b border-border px-4 py-3">
             <h3 className="text-sm font-semibold text-text-primary">{t("title")}</h3>
             {hasUnread && (

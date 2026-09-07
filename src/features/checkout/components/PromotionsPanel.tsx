@@ -129,7 +129,12 @@ export function PromotionsPanel({ selectedId, onSelect }: PromotionsPanelProps) 
                 <span className="text-sm font-medium text-text-primary">{p.title}</span>
               </div>
               <p className="mt-1 text-xs text-text-secondary">
-                {t("saveAmount", { amount: p.discount.toFixed(2) })}
+                {t("saveAmount", {
+                  amount: p.discount.toLocaleString(locale === "ar" ? "ar-KW" : "en-KW", {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2,
+                  }),
+                })}
                 {p.gift_items.length > 0 && ` + ${p.gift_items.length} gift item(s)`}
               </p>
             </div>

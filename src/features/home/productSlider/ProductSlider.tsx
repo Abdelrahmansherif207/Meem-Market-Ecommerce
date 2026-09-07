@@ -72,7 +72,6 @@ export default function ProductSlider({
               title={product.title}
               price={product.price}
               originalPrice={product.originalPrice}
-              currency="K.D"
               productId={product.id}
               slug={product.slug}
               sku={product.sku}

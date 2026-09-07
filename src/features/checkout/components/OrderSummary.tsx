@@ -3,6 +3,7 @@ import { useTranslations } from "next-intl";
 import { Truck, Minus, Tag, ShoppingBag } from "lucide-react";
 import CouponInput from "@/features/coupons/components/CouponInput";
 import CouponBadge from "@/features/coupons/components/CouponBadge";
+import { Price } from "@/components/ui/Price";
 import type { AppliedCoupon } from "@/features/coupons/types";
 
 interface OrderSummaryProps {
@@ -46,9 +47,7 @@ export function OrderSummary({
               {t("subtotal")} ({totalQuantity} {t("items")})
             </span>
           </div>
-          <span className="text-sm font-semibold tabular-nums text-text-primary">
-            {subtotal.toFixed(2)} K.D
-          </span>
+          <Price amount={subtotal} className="text-sm font-semibold text-text-primary" />
         </div>
 
         {promotionDiscount > 0 && (
@@ -57,9 +56,7 @@ export function OrderSummary({
               <Tag className="h-3.5 w-3.5 text-success shrink-0" />
               <span className="text-sm text-success">{t("promotionDiscount")}</span>
             </div>
-            <span className="text-sm font-semibold tabular-nums text-success">
-              -{promotionDiscount.toFixed(2)} K.D
-            </span>
+            <Price amount={promotionDiscount} prefix="-" className="text-sm font-semibold text-success" />
           </div>
         )}
 
@@ -69,9 +66,7 @@ export function OrderSummary({
               <Minus className="h-3.5 w-3.5 text-success shrink-0" />
               <span className="text-sm text-success">{t("couponDiscount")}</span>
             </div>
-            <span className="text-sm font-semibold tabular-nums text-success">
-              -{couponDiscount.toFixed(2)} K.D
-            </span>
+            <Price amount={couponDiscount} prefix="-" className="text-sm font-semibold text-success" />
           </div>
         )}
 
@@ -88,9 +83,7 @@ export function OrderSummary({
               <Truck className="h-3.5 w-3.5 text-text-secondary shrink-0" />
               <span className="text-sm text-text-secondary">{t("shipping")}</span>
             </div>
-            <span className="text-sm font-semibold tabular-nums text-text-primary">
-              {shippingFee.toFixed(2)} K.D
-            </span>
+            <Price amount={shippingFee} className="text-sm font-semibold text-text-primary" />
           </div>
         ) : null}
       </div>
@@ -106,9 +99,7 @@ export function OrderSummary({
           <span className="text-xs font-medium uppercase tracking-wider text-text-secondary">
             {t("total")}
           </span>
-          <span className="text-lg font-bold tabular-nums text-text-primary">
-            {Math.max(0, total).toFixed(2)} K.D
-          </span>
+          <Price amount={Math.max(0, total)} className="text-lg font-bold text-text-primary" />
         </div>
         <p className="text-[11px] text-text-secondary text-right mt-1">
           ({totalQuantity} {t("items")})

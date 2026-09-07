@@ -5,6 +5,7 @@ import { useTranslations } from "next-intl";
 import { Heart, Loader2, Trash2 } from "lucide-react";
 import { Link } from "@/i18n/navigation";
 import { cn } from "@/shared/utils/cn";
+import { Price } from "@/components/ui/Price";
 import type { WishlistItem } from "../types";
 import { getWishlistSalePrice, getWishlistVariantLabel } from "../utils";
 
@@ -23,11 +24,7 @@ export function WishlistItemCard({
   const product = item.product;
   const variantLabel = getWishlistVariantLabel(item);
   const sale = getWishlistSalePrice(item);
-  const currency = "K.D";
-
-  const priceStr = (sale?.price ?? product.current_price ?? product.price ?? 0).toString();
-  const integerPart = priceStr.split(".")[0];
-  const decimalPart = priceStr.includes(".") ? "." + priceStr.split(".")[1] : ".00";
+  const price = sale?.price ?? product.current_price ?? product.price ?? 0;
 
   return (
     <div className="flex gap-3 rounded-xl border border-border bg-white p-3 transition-shadow hover:shadow-sm sm:gap-4">
@@ -58,22 +55,13 @@ export function WishlistItemCard({
           </p>
         )}
 
-        <div className="mt-auto flex items-baseline gap-2 pt-2">
-          <span className="flex items-baseline gap-px" dir="ltr">
-            <span className="text-base font-bold leading-5 text-text-primary">
-              {integerPart}
-            </span>
-            <span className="text-xs font-bold leading-none text-text-primary">
-              {decimalPart}
-            </span>
-            <span className="ms-0.5 text-[10px] font-medium leading-none text-text-secondary">
-              {currency}
-            </span>
-          </span>
+        <div className="mt-auto flex items-center gap-2 pt-2 flex-wrap">
+          <Price amount={price} className="text-base font-bold text-text-primary" />
           {sale && (
-            <span className="text-xs leading-4 font-medium text-text-muted line-through">
-              {sale.originalPrice.toFixed(2)}
-            </span>
+            <Price
+              amount={sale.originalPrice}
+              className="text-xs font-medium text-text-muted line-through"
+            />
           )}
         </div>
       </div>

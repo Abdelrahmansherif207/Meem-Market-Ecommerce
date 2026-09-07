@@ -30,11 +30,43 @@ export interface CartItem {
 
 export type DeliveryType = "scheduled" | "fast";
 
+/**
+ * Identity of a single cart line. The same product may live in the scheduled
+ * AND the fast cart as two independent lines, so every lookup / mutation must
+ * match the full key — never `product_id` alone.
+ */
+export interface CartLineIdentity {
+  productVariantId?: number | null;
+  deliveryType?: DeliveryType;
+}
+
+/** Stable string key for a cart line (pending flags, React keys). */
+export function getCartLineKey(
+  productId: number,
+  line?: CartLineIdentity | null,
+): string {
+  return `${productId}:${line?.productVariantId ?? 0}:${line?.deliveryType ?? "scheduled"}`;
+}
+
+/** True when a stored line matches the given identity (undefined = wildcard). */
+export function matchesCartLine(
+  item: { product_id: number; product_variant_id?: number | null; deliveryType?: DeliveryType },
+  productId: number,
+  line?: CartLineIdentity | null,
+): boolean {
+  if (item.product_id !== productId) return false;
+  if (line?.deliveryType !== undefined && item.deliveryType !== line.deliveryType) return false;
+  if (line?.productVariantId !== undefined && (item.product_variant_id ?? null) !== (line.productVariantId ?? null)) return false;
+  return true;
+}
+
 export interface GuestCartItem {
   product_id: number;
   product_variant_id?: number | null;
   quantity: number;
   deliveryType: DeliveryType;
+  /** Human-readable variant label, e.g. "Color: White / Size: Medium". */
+  variant_label?: string | null;
   name: string;
   image: string;
   price: number;
@@ -72,6 +104,11 @@ export interface CartApiProduct {
   thumbnail: string;
 }
 
+export interface CartApiItemAttribute {
+  attribute: string;
+  value: string;
+}
+
 export interface CartApiItem {
   id: number;
   product_id: number;
@@ -79,11 +116,12 @@ export interface CartApiItem {
   quantity: number;
   price: number;
   total_price: number;
-  attributes: string | null;
+  attributes: CartApiItemAttribute[] | null;
   shipping_method: string;
   promotion_id: number | null;
   discount_amount: number;
   is_gift: boolean;
+  item_type?: string;
   product: CartApiProduct;
 }
 

@@ -7,6 +7,7 @@ import { useCartActions } from "@/features/cart/hooks/useCartActions";
 import { WishlistButton } from "@/features/wishlist/components/WishlistButton";
 import { QuantityStepper } from "@/components/ui/QuantityStepper";
 import { Button } from "@/components/ui/Button";
+import { Price } from "@/components/ui/Price";
 import type { ProductDetail, ProductVariant } from "../types";
 import { getStockStatus, getDisplayPrice } from "../utils";
 
@@ -66,9 +67,7 @@ export function ProductActions({ product, selectedVariant }: ProductActionsProps
       </div>
 
       <div className="flex items-center justify-between gap-4">
-        <span className="text-lg font-bold text-text-primary">
-          {(price * selectedQuantity).toFixed(2)} {t("currency")}
-        </span>
+        <Price amount={price * selectedQuantity} className="text-lg font-bold text-text-primary" />
       </div>
 
       {cartQuantity > 0 ? (

@@ -9,6 +9,7 @@ import { cn } from "@/shared/utils/cn";
 import { useCartActions } from "@/features/cart/hooks/useCartActions";
 import { WishlistButton } from "@/features/wishlist/components/WishlistButton";
 import { Badge } from "./Badge";
+import { Price } from "./Price";
 import { QuantityStepper } from "./QuantityStepper";
 import type { ProductTag } from "@/shared/types";
 import { Autoplay } from "swiper/modules";
@@ -20,7 +21,6 @@ interface ProductCardProps {
   title: string;
   price: number;
   originalPrice: number;
-  currency?: string;
   discountPercent?: number;
   productId: number;
   slug?: string;
@@ -43,7 +43,6 @@ export default function ProductCard({
   title,
   price,
   originalPrice,
-  currency = "K.D",
   discountPercent,
   productId,
   slug = "",
@@ -81,12 +80,6 @@ export default function ProductCard({
   const handleDecrement = useCallback(async () => {
     await decrement();
   }, [decrement]);
-
-  const priceStr = safePrice.toString();
-  const integerPart = priceStr.split(".")[0];
-  const decimalPart = priceStr.includes(".")
-    ? "." + priceStr.split(".")[1]
-    : ".00";
 
   return (
     <div className="flex flex-col w-full">
@@ -169,7 +162,7 @@ export default function ProductCard({
 
       <Link href={`/products/${slug}`} className="mt-2.5 px-0.5">
         <p className={cn(
-          "text-sm leading-4 font-medium line-clamp-2 text-balance transition-colors cursor-pointer",
+          "text-sm leading-4 font-medium line-clamp-2 min-h-8 text-balance transition-colors cursor-pointer",
           isDark ? "text-white hover:text-white/80" : "text-text-primary hover:text-primary",
           isRtl ? "text-right" : "text-left",
         )}>
@@ -214,19 +207,15 @@ export default function ProductCard({
       )}
 
       <div className="flex items-center gap-2 mt-1.5 px-0.5 flex-wrap">
-        <div className="flex items-baseline gap-px" dir="ltr">
-          <span className={cn("text-lg leading-5 font-bold md:text-xl", isDark ? "text-white" : "text-text-primary")}>
-            {integerPart}
-          </span>
-          <div className="flex flex-col items-start">
-            <span className={cn("text-sm font-bold leading-none", isDark ? "text-white" : "text-text-primary")}>{decimalPart}</span>
-            <span className={cn("text-2xs font-medium leading-none", isDark ? "text-white/60" : "text-text-muted")}>{currency}</span>
-          </div>
-        </div>
+        <Price
+          amount={safePrice}
+          className={cn("text-base font-semibold md:text-lg", isDark ? "text-white" : "text-text-primary")}
+        />
         {safeOriginalPrice > safePrice && (
-          <span className={cn("text-sm leading-4 font-normal line-through", isDark ? "text-white/50" : "text-text-muted")}>
-            {currency} {safeOriginalPrice.toFixed(2)}
-          </span>
+          <Price
+            amount={safeOriginalPrice}
+            className={cn("text-sm leading-4 font-normal line-through", isDark ? "text-white/50" : "text-text-muted")}
+          />
         )}
       </div>
     </div>

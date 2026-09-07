@@ -7,16 +7,17 @@ import { cn } from "@/shared/utils/cn";
 import { formatMoney } from "@/shared/utils/formatMoney";
 import { Button } from "@/components/ui/Button";
 import { useAuthStore } from "@/features/auth/store/useAuthStore";
-import type { DeliveryType, HydratedCartItem } from "../types";
+import type { CartLineIdentity, DeliveryType, HydratedCartItem } from "../types";
+import { getCartLineKey } from "../types";
 import { ProductCartItem } from "./ProductCartItem";
 import { calcSubtotal, isFreeShipping, canCheckout } from "../utils";
 
 interface CartSectionProps {
   deliveryType: DeliveryType;
   items: HydratedCartItem[];
-  pendingItemIds?: Set<number>;
-  onUpdateQuantity: (productId: number, quantity: number) => void;
-  onRemove: (productId: number) => void;
+  pendingItemIds?: Set<string>;
+  onUpdateQuantity: (productId: number, quantity: number, line: CartLineIdentity) => void;
+  onRemove: (productId: number, line: CartLineIdentity) => void;
   minimumOrderAmount: number;
 }
 
@@ -51,19 +52,19 @@ export function CartSection({
     ? (isFast ? "/payment?type=fast" : "/payment")
     : `/auth?redirect=${isFast ? "/payment?type=fast" : "/payment"}`;
 
-  // Free shipping progress (scheduled-only)
+  // Free shipping progress (per cart type — yellow accents in fast mode)
   const freeShippingThreshold = 300;
   const freeShippingEligible = isFreeShipping(subtotal, freeShippingThreshold);
   const freeShipPercent = Math.min(100, (subtotal / freeShippingThreshold) * 100);
   const freeShipRemaining = Math.max(0, freeShippingThreshold - subtotal);
-  const fillGradient = "from-primary to-primary-dark";
-  const activeColor = "border-primary bg-primary";
-  const activeText = "text-primary";
+  const fillGradient = isFast ? "from-accent to-accent" : "from-primary to-primary-dark";
+  const activeColor = isFast ? "border-accent bg-accent" : "border-primary bg-primary";
+  const activeText = isFast ? "text-accent" : "text-primary";
   const milestonePos = (minimumOrderAmount / freeShippingThreshold) * 100;
   const milestones = [
     { label: t("milestoneStart"), sub: null, pos: 0, Icon: Star },
     { label: formatMoney(minimumOrderAmount, locale), sub: t("milestoneMinimum"), pos: milestonePos, Icon: ShoppingCart },
-    { label: formatMoney(freeShippingThreshold, locale), sub: t("milestoneFreeShipping"), pos: 100, Icon: Car },
+    { label: formatMoney(freeShippingThreshold, locale), sub: t("milestoneFreeShipping"), pos: 100, Icon: isFast ? Zap : Car },
   ];
 
   return (
@@ -76,10 +77,9 @@ export function CartSection({
         <span className="text-sm text-text-secondary">{eta}</span>
       </div>
 
-      {!isFast && (
-        <div className="space-y-2">
-          <div className="flex items-center gap-2 text-xs text-text-secondary">
-            <Gift className="h-4 w-4 shrink-0 text-primary" />
+      <div className="space-y-2">
+        <div className="flex items-center gap-2 text-xs text-text-secondary">
+          <Gift className={cn("h-4 w-4 shrink-0", isFast ? "text-accent" : "text-primary")} />
             <span>
               {freeShippingEligible
                 ? t("freeShippingAchieved")
@@ -155,14 +155,21 @@ export function CartSection({
             </div>
           )}
         </div>
-      )}
 
       <div className="space-y-4">
         {items.map((item) => (
           <ProductCartItem
-            key={item.product_id + deliveryType}
+            key={getCartLineKey(item.product_id, {
+              productVariantId: item.product_variant_id ?? null,
+              deliveryType: item.deliveryType ?? deliveryType,
+            })}
             item={item}
-            isPending={pendingItemIds?.has(item.product_id) ?? false}
+            isPending={pendingItemIds?.has(
+              getCartLineKey(item.product_id, {
+                productVariantId: item.product_variant_id ?? null,
+                deliveryType: item.deliveryType ?? deliveryType,
+              }),
+            ) ?? false}
             onUpdateQuantity={onUpdateQuantity}
             onRemove={onRemove}
           />
@@ -172,8 +179,8 @@ export function CartSection({
       <Button
         size="lg"
         full
+        variant={isFast ? "accent" : "primary"}
         disabled={!checkoutEnabled}
-        className={isFast ? "bg-accent" : undefined}
         onClick={() => router.push(checkoutHref)}
       >
         <ShoppingBag className="h-4 w-4" aria-hidden />

@@ -1,8 +1,8 @@
 "use client";
 
 import { Truck, Zap, Minus } from "lucide-react";
-import { useTranslations, useLocale } from "next-intl";
-import { formatMoney } from "@/shared/utils/formatMoney";
+import { useTranslations } from "next-intl";
+import { Price } from "@/components/ui/Price";
 import { useAuthStore } from "@/features/auth/store/useAuthStore";
 import CouponInput from "@/features/coupons/components/CouponInput";
 import CouponBadge from "@/features/coupons/components/CouponBadge";
@@ -28,7 +28,6 @@ export function CartSummary({
   onCouponApplied,
 }: CartSummaryProps) {
   const t = useTranslations("cartPage");
-  const locale = useLocale();
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
 
   const totalQty = scheduledQty + fastQty;
@@ -56,7 +55,7 @@ export function CartSummary({
                   {l.label} <span className="text-xs text-text-secondary">({l.qty} {t("cartItems", { count: l.qty })})</span>
                 </span>
               </div>
-              <span className="text-sm font-semibold tabular-nums text-text-primary">{formatMoney(l.sub, locale)}</span>
+              <Price amount={l.sub} className="text-sm font-semibold text-text-primary" />
             </div>
           ) : null,
         )}
@@ -74,16 +73,14 @@ export function CartSummary({
             <Minus className="h-3.5 w-3.5 text-success shrink-0" />
             <span className="text-sm text-success">{t("discount")}</span>
           </div>
-          <span className="text-sm font-semibold tabular-nums text-success">
-            -{formatMoney(couponDiscount, locale)}
-          </span>
+          <Price amount={couponDiscount} prefix="-" className="text-sm font-semibold text-success" />
         </div>
       )}
 
       <div className="border-t border-border pt-3 space-y-1">
         <div className="flex items-center justify-between">
           <span className="text-xs font-medium uppercase tracking-wider text-text-secondary">{t("total")}</span>
-          <span className="text-lg font-bold tabular-nums text-text-primary">{formatMoney(Math.max(0, total), locale)}</span>
+          <Price amount={Math.max(0, total)} className="text-lg font-bold text-text-primary" />
         </div>
         <p className="text-[11px] text-text-secondary text-end">
           ({totalQty} {t("cartItems", { count: totalQty })})
