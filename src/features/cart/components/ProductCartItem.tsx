@@ -4,8 +4,8 @@ import Link from "next/link";
 import { Minus, Plus, Trash2, Loader2 } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { cn } from "@/shared/utils/cn";
-import { currencyLabel } from "@/shared/utils/formatMoney";
-import type { HydratedCartItem } from "../types";
+import { Price } from "@/components/ui/Price";
+import type { CartLineIdentity, HydratedCartItem } from "../types";
 import { getDisplayPrice, getOriginalPrice } from "@/features/products";
 import type { PriceInfo } from "@/features/products/types";
 
@@ -13,8 +13,8 @@ interface ProductCartItemProps {
   item: HydratedCartItem;
   /** Disables all controls and shows a loading spinner while an API call is in-flight. */
   isPending?: boolean;
-  onUpdateQuantity: (productId: number, quantity: number) => void;
-  onRemove: (productId: number) => void;
+  onUpdateQuantity: (productId: number, quantity: number, line: CartLineIdentity) => void;
+  onRemove: (productId: number, line: CartLineIdentity) => void;
 }
 
 function toPriceInfo(item: HydratedCartItem): PriceInfo {
@@ -39,36 +39,17 @@ function PriceBlock({
   hasDiscount: boolean;
   discountPercent: number;
 }) {
-  const priceStr = value.toFixed(2);
-  const intPart = priceStr.split(".")[0];
-  const decPart = "." + priceStr.split(".")[1];
-
-  const origPriceStr = originalValue.toFixed(2);
-  const origInt = origPriceStr.split(".")[0];
-  const origDec = "." + origPriceStr.split(".")[1];
-
   return (
-    <div className="flex flex-wrap items-center gap-2" dir="ltr">
+    <div className="flex min-w-0 max-w-full flex-wrap items-center gap-x-2 gap-y-1">
+      <Price amount={value} className="shrink-0 text-base font-bold sm:text-lg" />
       {hasDiscount && (
-        <div className="flex items-center gap-1">
-          <span className="text-xs leading-4 font-medium text-text-muted line-through">
-            {origInt}
-          </span>
-          <div className="flex flex-col">
-            <span className="text-[10px] leading-3 font-medium text-text-muted line-through">{origDec}</span>
-            <span className="text-[8px] leading-3 font-medium text-text-muted line-through">{currencyLabel()}</span>
-          </div>
-        </div>
+        <Price
+          amount={originalValue}
+          className="shrink-0 text-xs tabular-nums text-text-muted line-through sm:text-sm"
+        />
       )}
-      <div className="flex items-center gap-1">
-        <span className="text-base leading-5 font-bold">{intPart}</span>
-        <div className="flex flex-col">
-          <span className="text-sm font-bold leading-3">{decPart}</span>
-          <span className="text-[10px] font-medium leading-3">{currencyLabel()}</span>
-        </div>
-      </div>
       {hasDiscount && (
-        <span className="text-[10px] font-bold text-discount bg-error-surface px-1 py-0.5 rounded">
+        <span className="shrink-0 rounded bg-error-surface px-1 py-0.5 text-[10px] font-bold whitespace-nowrap text-discount">
           -{discountPercent}%
         </span>
       )}
@@ -93,8 +74,13 @@ export function ProductCartItem({
     ? Math.round((1 - displayPrice / originalPrice) * 100)
     : 0;
 
+  const line: CartLineIdentity = {
+    productVariantId: item.product_variant_id ?? null,
+    deliveryType: item.deliveryType ?? "scheduled",
+  };
+
   const btnClass =
-    "flex h-9 w-9 sm:h-11 sm:w-11 items-center justify-center text-text-secondary transition-colors disabled:opacity-30";
+    "flex h-8 w-8 sm:h-10 sm:w-10 items-center justify-center text-text-secondary transition-colors disabled:opacity-30";
 
   return (
     <div className="rounded-lg border border-border p-3 sm:p-4">
@@ -117,6 +103,9 @@ export function ProductCartItem({
               {item.name}
             </h4>
           </Link>
+          {item.variant_label && (
+            <p className="line-clamp-1 text-[11px] text-text-secondary">{item.variant_label}</p>
+          )}
           {item.sku && (
             <p className="text-[11px] text-text-secondary">SKU: {item.sku}</p>
           )}
@@ -124,7 +113,7 @@ export function ProductCartItem({
             {item.in_stock ? t("inStock") : t("outOfStock")}
             {item.in_stock && item.stock_quantity != null && ` (${item.stock_quantity})`}
           </p>
-          <div className="mt-auto pt-1">
+          <div className="mt-auto min-w-0 pt-1">
             <PriceBlock
               value={displayPrice}
               originalValue={originalPrice}
@@ -135,15 +124,15 @@ export function ProductCartItem({
         </div>
       </div>
 
-      <div className="mt-3 flex items-center justify-between gap-3 border-t border-border-subtle pt-3">
+      <div className="mt-3 flex min-w-0 items-center justify-between gap-2 border-t border-border-subtle pt-3">
         {isPending ? (
-          <div className="flex h-9 sm:h-11 items-center px-1">
+          <div className="flex h-8 sm:h-10 items-center px-1">
             <Loader2 className="h-4 w-4 animate-spin text-primary" />
           </div>
         ) : (
-          <div className="flex items-center gap-0.5 rounded-lg border border-border">
+          <div className="flex shrink-0 items-center gap-0.5 rounded-lg border border-border">
             <button
-              onClick={() => onRemove(item.product_id)}
+              onClick={() => onRemove(item.product_id, line)}
               disabled={isPending}
               className={cn(btnClass, "hover:text-error")}
               aria-label={t("removeItem")}
@@ -152,18 +141,18 @@ export function ProductCartItem({
             </button>
             <div className="h-5 w-px bg-border" />
             <button
-              onClick={() => onUpdateQuantity(item.product_id, item.quantity - 1)}
+              onClick={() => onUpdateQuantity(item.product_id, item.quantity - 1, line)}
               disabled={isPending || item.quantity <= 1}
               className={cn(btnClass, "hover:text-primary")}
               aria-label={t("decreaseQuantity")}
             >
               <Minus className="h-4 w-4" />
             </button>
-            <span className="flex h-9 w-8 sm:h-11 sm:w-9 items-center justify-center text-sm font-medium tabular-nums">
+            <span className="flex h-8 w-7 sm:h-10 sm:w-8 items-center justify-center text-sm font-medium tabular-nums">
               {item.quantity}
             </span>
             <button
-              onClick={() => onUpdateQuantity(item.product_id, item.quantity + 1)}
+              onClick={() => onUpdateQuantity(item.product_id, item.quantity + 1, line)}
               disabled={isPending || (item.stock_quantity != null && item.quantity >= item.stock_quantity)}
               className={cn(btnClass, "hover:text-primary")}
               aria-label={t("increaseQuantity")}
@@ -172,9 +161,10 @@ export function ProductCartItem({
             </button>
           </div>
         )}
-        <span className="text-sm font-bold tabular-nums text-text-primary" dir="ltr">
-          {lineTotal.toFixed(2)} {currencyLabel()}
-        </span>
+        <Price
+          amount={lineTotal}
+          className="shrink-0 text-end text-sm font-bold text-text-primary"
+        />
       </div>
     </div>
   );

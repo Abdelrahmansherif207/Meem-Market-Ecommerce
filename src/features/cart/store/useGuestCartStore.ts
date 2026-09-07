@@ -2,15 +2,16 @@
 import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
 import { CART_STORAGE_KEY } from "@/shared/constants/storageKeys";
-import type { GuestCartItem, AddBulkPayload } from "../types";
+import type { GuestCartItem, AddBulkPayload, CartLineIdentity } from "../types";
+import { matchesCartLine } from "../types";
 
 type GuestCartState = {
   items: GuestCartItem[];
   isSyncing: boolean;
   syncError: string | null;
   addItem: (item: GuestCartItem) => void;
-  removeItem: (productId: number) => void;
-  updateQuantity: (productId: number, quantity: number) => void;
+  removeItem: (productId: number, line?: CartLineIdentity) => void;
+  updateQuantity: (productId: number, quantity: number, line?: CartLineIdentity) => void;
   clearCart: () => void;
   setSyncing: (syncing: boolean) => void;
   setSyncError: (error: string | null) => void;
@@ -26,37 +27,42 @@ export const useGuestCartStore = create<GuestCartState>()(
       syncError: null,
 
       addItem: (item) => {
+        const deliveryType = item.deliveryType ?? "scheduled";
+        const variantId = item.product_variant_id ?? null;
         set((state) => {
           const existing = state.items.find(
-            (i) => i.product_id === item.product_id,
+            (i) =>
+              i.product_id === item.product_id &&
+              (i.product_variant_id ?? null) === variantId &&
+              (i.deliveryType ?? "scheduled") === deliveryType,
           );
           if (existing) {
             return {
               items: state.items.map((i) =>
-                i.product_id === item.product_id
+                i === existing
                   ? { ...i, quantity: i.quantity + item.quantity }
                   : i,
               ),
             };
           }
-          return { items: [...state.items, item] };
+          return { items: [...state.items, { ...item, deliveryType, product_variant_id: variantId }] };
         });
       },
 
-      removeItem: (productId) => {
+      removeItem: (productId, line) => {
         set((state) => ({
-          items: state.items.filter((i) => i.product_id !== productId),
+          items: state.items.filter((i) => !matchesCartLine(i, productId, line)),
         }));
       },
 
-      updateQuantity: (productId, quantity) => {
+      updateQuantity: (productId, quantity, line) => {
         if (quantity <= 0) {
-          get().removeItem(productId);
+          get().removeItem(productId, line);
           return;
         }
         set((state) => ({
           items: state.items.map((i) =>
-            i.product_id === productId ? { ...i, quantity } : i,
+            matchesCartLine(i, productId, line) ? { ...i, quantity } : i,
           ),
         }));
       },
@@ -72,6 +78,7 @@ export const useGuestCartStore = create<GuestCartState>()(
         items: get().items.map((i) => ({
           product_id: i.product_id,
           quantity: i.quantity,
+          product_variant_id: i.product_variant_id ?? null,
           shipping_method: i.deliveryType ?? "scheduled",
         })),
       }),
