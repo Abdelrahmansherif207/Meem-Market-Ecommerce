@@ -56,10 +56,15 @@ export function WishlistItemCard({
         )}
 
         <div className="mt-auto flex items-center gap-2 pt-2 flex-wrap">
-          <Price amount={price} className="text-base font-bold text-text-primary" />
+          <Price
+            amount={price}
+            currency={product.currency}
+            className="text-base font-bold text-text-primary"
+          />
           {sale && (
             <Price
               amount={sale.originalPrice}
+              currency={product.currency}
               className="text-xs font-medium text-text-muted line-through"
             />
           )}

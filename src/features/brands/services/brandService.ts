@@ -13,10 +13,14 @@ export const brandService = {
     return response.data;
   },
 
-  getBrand: async (slug: string, locale: string): Promise<BrandDetail> => {
+  getBrand: async (slug: string, locale: string, currency?: string): Promise<BrandDetail> => {
     const response = await apiFetch<ApiResponse<BrandDetail>>(
       `/general/brands/${encodeURIComponent(slug)}`,
-      { headers: { lang: locale }, next: { revalidate: 60 } },
+      {
+        headers: { lang: locale },
+        // Per-guest converted prices must bypass the shared Data Cache.
+        ...(currency ? { cache: "no-store" as RequestCache, currency } : { next: { revalidate: 60 } }),
+      },
     );
     return response.data;
   },

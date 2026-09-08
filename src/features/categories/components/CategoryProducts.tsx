@@ -6,11 +6,14 @@ import type { CategoryProduct, CategoryProductsResponse } from "../types";
 interface CategoryProductsProps {
   products: CategoryProduct[];
   links?: CategoryProductsResponse["links"];
+  /** When true, card price numbers render as skeleton bars. */
+  pricesLoading?: boolean;
 }
 
 export default function CategoryProducts({
   products,
   links,
+  pricesLoading = false,
 }: CategoryProductsProps) {
   if (products.length === 0) {
     return <EmptyCategory />;
@@ -41,12 +44,14 @@ export default function CategoryProducts({
               title={product.name}
               price={product.current_price}
               originalPrice={product.price}
+              currency={product.currency}
               discountPercent={discountPercent}
               slug={product.slug}
               hasVariants={product.has_variants}
               isInStock={product.in_stock ?? product.quantity > 0}
               inWishlist={product.in_wishlist}
               tags={product.tags}
+              pricesLoading={pricesLoading}
             />
           );
         })}

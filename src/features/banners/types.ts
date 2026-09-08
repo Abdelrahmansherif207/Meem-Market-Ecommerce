@@ -1,4 +1,5 @@
 import type { ProductTag } from "@/shared/types";
+import type { ProductCurrency } from "@/features/currencies";
 
 export interface BannerImage {
   desktop: string;
@@ -32,6 +33,8 @@ export interface BannerProduct {
   discount_active?: boolean;
   flash_sale_active?: boolean;
   tags?: ProductTag[];
+  /** Converted-prices metadata returned by the API alongside prices. */
+  currency?: ProductCurrency;
 }
 
 export interface BannerDetail extends Banner {

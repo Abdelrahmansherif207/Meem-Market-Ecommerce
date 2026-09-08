@@ -1,4 +1,5 @@
 import type { ProductAttribute } from "@/features/products/types";
+import type { ProductCurrency } from "@/features/currencies";
 
 /** A variation entry inside a saved product. */
 export interface WishlistVariation {
@@ -29,6 +30,8 @@ export interface WishlistProduct {
     original?: Record<string, string>;
   };
   variations?: WishlistVariation[];
+  /** Converted-prices metadata returned by the API alongside prices. */
+  currency?: ProductCurrency;
 }
 
 /** A single saved wishlist entry. */

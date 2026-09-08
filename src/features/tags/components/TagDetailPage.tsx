@@ -2,11 +2,11 @@ import { notFound } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import { ShoppingBag } from "lucide-react";
 import { Link } from "@/i18n/navigation";
-import ProductCard from "@/components/ui/ProductCard";
 import EmptyState from "@/components/ui/EmptyState";
 import { getCachedCategoryPageData } from "@/features/categories/services/categoryProductsService";
 import type { CategoryProduct } from "@/features/categories/types";
 import { tagService } from "../services/tagService";
+import { TagProductsIsland } from "./TagProductsIsland";
 
 interface TagDetailPageProps {
   slug: string;
@@ -57,30 +57,13 @@ export async function TagDetailPage({ slug, locale }: TagDetailPageProps) {
           }
         />
       ) : (
-        <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6">
-          {products.map((product) => {
-            const discountPercent =
-              product.has_discount && product.discount_valid
-                ? Math.round((1 - product.current_price / product.price) * 100)
-                : 0;
-            return (
-              <ProductCard
-                key={product.id}
-                productId={product.id}
-                image={product.image.thumbnail}
-                title={product.name}
-                price={product.current_price}
-                originalPrice={product.price}
-                discountPercent={discountPercent}
-                slug={product.slug}
-                hasVariants={product.has_variants}
-                isInStock={product.in_stock ?? product.quantity > 0}
-                inWishlist={product.in_wishlist}
-                tags={product.tags}
-              />
-            );
-          })}
-        </div>
+        <TagProductsIsland
+          key={slug}
+          slug={slug}
+          locale={locale}
+          initialProducts={products}
+          initialCurrency={products[0]?.currency?.code}
+        />
       )}
     </div>
   );

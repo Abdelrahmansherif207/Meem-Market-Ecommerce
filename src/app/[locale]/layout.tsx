@@ -22,6 +22,7 @@ import { ChannelThemeProvider } from "@/features/fast-shipping/components/Channe
 import { IBM_Plex_Sans_Arabic } from "next/font/google";
 import { cn } from "@/shared/utils/cn";
 import { getSiteMeta } from "@/features/settings/lib/metadata";
+import { getCachedSettings } from "@/features/settings/services/settingsService";
 
 export function generateStaticParams() {
   return routing.locales.map((locale) => ({ locale }));
@@ -98,11 +99,20 @@ export default async function RootLayout({
   const messages = await getMessages();
 
   let settingsLogo: string | null = null;
+  let currencyEnabled = false;
   try {
     const meta = await getSiteMeta(locale);
     settingsLogo = meta.logo;
   } catch {
     // Use default
+  }
+  try {
+    const settings = await getCachedSettings(locale);
+    currencyEnabled =
+      settings.currency_selection_enabled === true ||
+      settings.options?.currency_selection_enabled === true;
+  } catch {
+    // Currency selector stays hidden when settings are unavailable
   }
   
   return (
@@ -111,10 +121,10 @@ export default async function RootLayout({
         <link rel="preconnect" href={process.env.NEXT_PUBLIC_API_URL} />
         <NextIntlClientProvider locale={locale} messages={messages}>
           <div className="hidden lg:block sticky top-0 z-50">
-            <Header params={params} settingsLogo={settingsLogo} />
+            <Header params={params} settingsLogo={settingsLogo} currencyEnabled={currencyEnabled} />
           </div>
           <div className="block lg:hidden sticky top-0 z-50">
-            <MobileHeader />
+            <MobileHeader currencyEnabled={currencyEnabled} />
           </div>
           <MobileBottomNav />
           <ChannelThemeProvider />

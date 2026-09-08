@@ -1,4 +1,5 @@
 import type { ProductTag } from "@/shared/types";
+import type { ProductCurrency } from "@/features/currencies";
 
 export interface PromotionImage {
   desktop: string;
@@ -35,4 +36,5 @@ export interface PromotionProduct {
   discount_active?: boolean;
   flash_sale_active?: boolean;
   tags?: ProductTag[];
+  currency?: ProductCurrency;
 }

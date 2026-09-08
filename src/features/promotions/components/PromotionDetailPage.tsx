@@ -1,9 +1,9 @@
-import ProductCard from "@/components/ui/ProductCard";
 import { Link } from "@/i18n/navigation";
 import { getTranslations } from "next-intl/server";
 import { ShoppingBag } from "lucide-react";
 import EmptyState from "@/components/ui/EmptyState";
 import { promotionService } from "../services/promotionService";
+import { PromotionProductsIsland } from "./PromotionProductsIsland";
 import type { PromotionDetail } from "../types";
 
 interface PromotionDetailPageProps {
@@ -67,30 +67,13 @@ export default async function PromotionDetailPage({ slug, locale }: PromotionDet
           }
         />
       ) : (
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
-          {products.map((product) => {
-            const discountPercent =
-              product.discount_active && product.current_price < product.price
-                ? Math.round((1 - product.current_price / product.price) * 100)
-                : 0;
-            return (
-              <ProductCard
-                key={product.id}
-                productId={product.id}
-                image={product.image.thumbnail}
-                title={product.name}
-                price={product.current_price}
-                originalPrice={product.price}
-                discountPercent={discountPercent}
-                slug={product.slug}
-                hasVariants={product.has_variants}
-                isInStock={product.in_stock ?? product.quantity > 0}
-                inWishlist={product.in_wishlist}
-                tags={product.tags}
-              />
-            );
-          })}
-        </div>
+        <PromotionProductsIsland
+          key={slug}
+          slug={slug}
+          locale={locale}
+          initialProducts={products}
+          initialCurrency={products[0]?.currency?.code}
+        />
       )}
     </div>
   );

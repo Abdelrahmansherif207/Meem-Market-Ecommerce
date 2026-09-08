@@ -1,6 +1,6 @@
 import { homePageService } from "@/features/home/services/homePageService";
 import SectionTitle from "@/components/ui/SectionTitle";
-import ProductSlider from "@/features/home/productSlider/ProductSlider";
+import ProductSliderIsland from "@/features/home/components/ProductSliderIsland";
 import type { BannerDetail } from "../types";
 import type { ProductItem, SectionFrontSetting } from "@/features/home/types";
 
@@ -42,6 +42,7 @@ export default async function BannerSection({ endpoint, locale, title, setting }
     inStock: p.quantity,
     stockQuantity: p.quantity,
     tags: p.tags,
+    currency: p.currency,
   }));
 
   return (
@@ -73,8 +74,12 @@ export default async function BannerSection({ endpoint, locale, title, setting }
       </a>
 
       {productItems.length > 0 && (
-        <ProductSlider
-          items={productItems}
+        <ProductSliderIsland
+          key={endpoint}
+          fetchKind="banner"
+          endpoint={endpoint}
+          locale={locale}
+          initialItems={productItems}
           columnsCount={setting?.columns_count}
         />
       )}

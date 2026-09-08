@@ -1,4 +1,5 @@
 import { AUTH_TOKEN_STORAGE_KEY, CHANNEL_STORAGE_KEY } from "@/shared/constants/storageKeys";
+import { CURRENCY_HEADER, getStoredClientCurrency, normalizeCurrencyCode } from "@/shared/lib/currency";
 import { notifyUnauthorized } from "@/shared/lib/unauthorizedEvent";
 
 export class ApiError extends Error {
@@ -14,6 +15,15 @@ export class ApiError extends Error {
 }
 
 const BASE_URL = process.env.NEXT_PUBLIC_API_URL;
+
+/**
+ * Credential mode for API requests. Defaults to `"same-origin"`.
+ *
+ * Currency needs no credentials: it travels via the `X-Currency` header.
+ * Auth travels via `Authorization: Bearer` from localStorage. Keep
+ * `"same-origin"` unless a cross-origin deployment requires otherwise.
+ */
+export const API_REQUEST_CREDENTIALS: RequestCredentials = "same-origin";
 
 function getAuthToken() {
   if (typeof window === "undefined") return null;
@@ -72,6 +82,14 @@ type ApiFetchOptions = RequestInit & {
   timeout?: number;
   /** Set to false to skip the X-Channel header (e.g. status endpoint). */
   channel?: boolean;
+  /**
+   * Guest currency code (e.g. `"SAR"`). Normalized to uppercase 3-letter;
+   * invalid/missing values omit the `X-Currency` header so the Backend
+   * falls back to the catalog currency. Server-side callers must pass this
+   * explicitly (e.g. via a Server Action argument). On the client it
+   * defaults to the picker's stored UI preference.
+   */
+  currency?: string;
 };
 
 export async function apiFetch<T>(
@@ -88,6 +106,7 @@ export async function apiFetch<T>(
     lang,
     timeout: timeoutMs = 15_000,
     channel: includeChannel = true,
+    currency: currencyOption,
     ...requestOptions
   } = options;
   const authToken = getAuthToken();
@@ -111,6 +130,15 @@ export async function apiFetch<T>(
   const channel = includeChannel ? await getChannel() : null;
   if (channel && !headers.has("X-Channel")) {
     headers.set("X-Channel", channel);
+  }
+
+  // Guest currency travels via `X-Currency` (no currency cookie exists).
+  // Explicit option wins (server actions); on the client fall back to the
+  // picker's stored UI preference; otherwise omit the header for catalog.
+  const effectiveCurrency =
+    normalizeCurrencyCode(currencyOption) ?? getStoredClientCurrency();
+  if (effectiveCurrency && !headers.has(CURRENCY_HEADER)) {
+    headers.set(CURRENCY_HEADER, effectiveCurrency);
   }
 
   const enableLogs = process.env.NEXT_PUBLIC_XHR_LOGS === "true";
@@ -142,6 +170,7 @@ export async function apiFetch<T>(
   try {
     response = await fetch(url, {
       ...requestOptions,
+      credentials: requestOptions.credentials ?? API_REQUEST_CREDENTIALS,
       signal: controller.signal,
       headers,
     });

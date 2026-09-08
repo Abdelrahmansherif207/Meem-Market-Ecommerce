@@ -1,9 +1,8 @@
-import SectionTitle from "@/components/ui/SectionTitle";
 import Banner from "../banner/Banner";
-import ProductSlider from "../../productSlider/ProductSlider";
+import BrandProductsIsland from "./BrandProductsIsland";
 import { homePageService } from "../../services/homePageService";
 import { toProductItem } from "../../utils";
-import type { SectionFrontSetting, ApiBrandWithProducts, ApiProduct } from "../../types";
+import type { SectionFrontSetting, ApiBrandWithProducts, ApiProduct, ProductItem } from "../../types";
 
 interface BrandProductsSectionProps {
   type: string;
@@ -52,18 +51,31 @@ export default async function BrandProductsSection({
   if (!brands || brands.length === 0) return null;
 
   return (
-    <div className="flex flex-col pb-4 overflow-hidden">
-      {title && <SectionTitle title={title} />}
-      <div className="flex flex-col gap-y-12">
-        {brands.map((brand) => (
-          <div key={brand.id} className="flex flex-col gap-y-4">
-            <Banner promotion={brand} locale={locale} setting={setting} />
-            {brand.products && brand.products.length > 0 && (
-              <ProductSlider title={brand.name} items={brand.products.map(toProductItem)} columnsCount={setting?.columns_count} />
-            )}
-          </div>
-        ))}
-      </div>
-    </div>
+    <BrandProductsIsland
+      key={`${type}:${endpoint}`}
+      fetchKind={type === "banners" ? "banners" : "brands"}
+      endpoint={endpoint}
+      locale={locale}
+      title={title}
+      columnsCount={setting?.columns_count}
+      initialBlocks={brands.map((brand) => ({
+        id: brand.id,
+        name: brand.name,
+        banner: (
+          <Banner
+            key={brand.id}
+            promotion={brand}
+            locale={locale}
+            setting={setting}
+          />
+        ),
+      }))}
+      initialItemsByBrand={Object.fromEntries(
+        brands.map((brand) => [
+          brand.id,
+          (brand.products ?? []).map(toProductItem),
+        ]),
+      ) as Record<number, ProductItem[]>}
+    />
   );
 }
