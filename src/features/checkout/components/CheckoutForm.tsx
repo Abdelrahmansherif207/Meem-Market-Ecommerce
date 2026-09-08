@@ -5,6 +5,7 @@ import { useLocale, useTranslations } from "next-intl";
 import { Loader2, CreditCard, MapPin, Store, Truck } from "lucide-react";
 import { useShallow } from "zustand/react/shallow";
 import { useAuthStore } from "@/features/auth/store/useAuthStore";
+import { useCurrencyStore } from "@/features/currencies";
 import { usePickupLocationStore } from "@/features/pickup-location";
 import { MapPickerModal, useLocationStore } from "@/features/location";
 import type { PickedAddress } from "@/features/location";
@@ -77,6 +78,9 @@ export function CheckoutForm() {
   const router = useRouter();
   const locale = useLocale();
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
+  // Re-fetch cart totals when the currency changes (client `apiFetch`
+  // already attaches `X-Currency`).
+  const selectedCurrency = useCurrencyStore((s) => s.selectedCode);
   const user = useAuthStore(
     useShallow((s) => ({ name: s.name, email: s.email, phone: s.phoneNumber })),
   );
@@ -129,7 +133,7 @@ export function CheckoutForm() {
     return unsub;
   }, []);
 
-  const fetchedRef = useRef(false);
+  const fetchedKey = useRef<string | null>(null);
 
   useEffect(() => {
     if (!hydrated) return;
@@ -137,8 +141,10 @@ export function CheckoutForm() {
       router.replace("/auth?redirect=/payment");
       return;
     }
-    if (fetchedRef.current) return;
-    fetchedRef.current = true;
+    // Fetch once per locale+currency (re-fetch when either changes).
+    const key = `${locale}:${selectedCurrency}`;
+    if (fetchedKey.current === key) return;
+    fetchedKey.current = key;
 
     setCartLoading(true);
     cartService.getCart(locale)
@@ -162,7 +168,7 @@ export function CheckoutForm() {
         setCartData({ subtotal: 0, totalQuantity: 0, couponDiscount: 0, appliedCoupon: null, expired: true });
       })
       .finally(() => setCartLoading(false));
-  }, [hydrated, isAuthenticated, locale, router]);
+  }, [hydrated, isAuthenticated, locale, selectedCurrency, router]);
 
   useEffect(() => {
     if (!isAuthenticated) return;

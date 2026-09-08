@@ -11,10 +11,14 @@ export const promotionService = {
     return response.data;
   },
 
-  getPromotion: async (slug: string, locale: string): Promise<PromotionDetail> => {
+  getPromotion: async (slug: string, locale: string, currency?: string): Promise<PromotionDetail> => {
     const response = await apiFetch<ApiResponse<PromotionDetail>>(
       `/general/promotions/${encodeURIComponent(slug)}`,
-      { headers: { lang: locale }, next: { revalidate: 60 } },
+      {
+        headers: { lang: locale },
+        // Per-guest converted prices must bypass the shared Data Cache.
+        ...(currency ? { cache: "no-store" as RequestCache, currency } : { next: { revalidate: 60 } }),
+      },
     );
     return response.data;
   },

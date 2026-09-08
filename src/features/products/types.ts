@@ -1,4 +1,5 @@
 ﻿import type { ProductTag } from "@/shared/types";
+import type { ProductCurrency } from "@/features/currencies";
 
 export interface ProductAttribute {
   attribute_name: string;
@@ -62,6 +63,7 @@ export interface RelatedProduct {
   discount_valid?: boolean;
   tags?: ProductTag[];
   in_wishlist?: boolean;
+  currency?: ProductCurrency;
   image: {
     thumbnail: string;
     original: Record<string, string>;
@@ -99,6 +101,7 @@ export interface ProductDetail {
   related_products: RelatedProduct[];
   categories: ProductCategory[];
   tags?: ProductTag[];
+  currency?: ProductCurrency;
 }
 
 export interface ProductSearchResult {
@@ -112,6 +115,7 @@ export interface ProductSearchResult {
   has_discount: boolean;
   discount_valid: boolean;
   ratings: number;
+  currency?: ProductCurrency;
   image: {
     thumbnail: string;
   };
@@ -136,6 +140,7 @@ export interface ProductListItem {
   in_stock?: boolean;
   in_wishlist?: boolean;
   tags?: ProductTag[];
+  currency?: ProductCurrency;
   image: {
     thumbnail: string;
     original: Record<string, string>;

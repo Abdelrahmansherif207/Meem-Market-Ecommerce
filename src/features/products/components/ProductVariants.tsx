@@ -3,21 +3,29 @@
 import { useTranslations } from "next-intl";
 import { cn } from "@/shared/utils/cn";
 import { Check } from "lucide-react";
-import { Price } from "@/components/ui/Price";
+import { useDisplayCurrency } from "@/features/currencies";
+import Skeleton from "@/components/ui/Skeleton";
 import type { ProductVariant } from "../types";
 
 interface ProductVariantsProps {
   variants: ProductVariant[];
   selectedVariantId: number | null;
   onSelectVariant: (variantId: number) => void;
+  currency?: import("@/features/currencies").ProductCurrency;
+  /** When true, variant price numbers render as skeleton bars. */
+  pricesLoading?: boolean;
 }
 
 export function ProductVariants({
   variants,
   selectedVariantId,
   onSelectVariant,
+  currency,
+  pricesLoading = false,
 }: ProductVariantsProps) {
   const t = useTranslations("product");
+  const { code: currencyCode, decimalPlaces } =
+    useDisplayCurrency(currency);
 
   if (variants.length === 0) return null;
 
@@ -65,7 +73,13 @@ export function ProductVariants({
             </div>
 
             <div className="flex flex-col items-end gap-0.5">
-              <Price amount={variant.current_price} className="text-sm font-bold text-text-primary" />
+              {pricesLoading ? (
+                <Skeleton className="h-4 w-16" />
+              ) : (
+                <span className="text-sm font-bold text-text-primary">
+                  {variant.current_price.toFixed(decimalPlaces)} {currencyCode}
+                </span>
+              )}
               <span
                 className={cn(
                   "text-xs",

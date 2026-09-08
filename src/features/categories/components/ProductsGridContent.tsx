@@ -1,9 +1,8 @@
 import { getTranslations } from "next-intl/server";
 import { guardLoad } from "@/shared/lib/guardedFetch";
 import { getCachedCategoryPageData } from "../services/categoryProductsService";
-import CategoryProducts from "./CategoryProducts";
 import ProductsToolbar from "./ProductsToolbar";
-import ActiveFilterChips from "./ActiveFilterChips";
+import ProductsGridIsland from "./ProductsGridIsland";
 import ErrorState from "@/components/ui/ErrorState";
 
 interface ProductsGridContentProps {
@@ -46,9 +45,15 @@ export default async function ProductsGridContent({
   }
 
   return (
-    <>
-      <ActiveFilterChips />
-      <CategoryProducts products={products} links={links} />
-    </>
+    <ProductsGridIsland
+      key={`${filterKey}:${slug}:${JSON.stringify(searchParams ?? {})}`}
+      slug={slug}
+      locale={locale}
+      searchParams={searchParams ?? {}}
+      filterKey={filterKey}
+      initialProducts={products}
+      initialLinks={links}
+      initialCurrency={products[0]?.currency?.code}
+    />
   );
 }

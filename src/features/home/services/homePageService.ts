@@ -12,8 +12,13 @@ export const homePageService = {
     return response.data;
   },
 
-  fetchSectionData: async <T>(endpoint: string, lang?: string): Promise<T> => {
-    const response = await apiFetch<ApiResponse<T>>(endpoint, { next: { revalidate: 60 }, lang });
+  fetchSectionData: async <T>(endpoint: string, lang?: string, currency?: string): Promise<T> => {
+    const response = await apiFetch<ApiResponse<T>>(endpoint, {
+      // Currency-converted prices are per-guest: never share them through
+      // the Data Cache (fetch cache key does not vary by header).
+      ...(currency ? { cache: "no-store" as RequestCache, currency } : { next: { revalidate: 60 } }),
+      lang,
+    });
     return response.data;
   },
 };

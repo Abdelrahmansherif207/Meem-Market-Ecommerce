@@ -11,10 +11,14 @@ export const bannerService = {
     return response.data;
   },
 
-  getBanner: async (slug: string, locale: string): Promise<BannerDetail> => {
+  getBanner: async (slug: string, locale: string, currency?: string): Promise<BannerDetail> => {
     const response = await apiFetch<ApiResponse<BannerDetail>>(
       `/general/banners/${encodeURIComponent(slug)}?with_products=true`,
-      { headers: { lang: locale }, next: { revalidate: 60 } },
+      {
+        headers: { lang: locale },
+        // Per-guest converted prices must bypass the shared Data Cache.
+        ...(currency ? { cache: "no-store" as RequestCache, currency } : { next: { revalidate: 60 } }),
+      },
     );
     return response.data;
   },

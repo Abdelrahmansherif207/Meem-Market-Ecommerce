@@ -1,6 +1,7 @@
 import { getLocale, getTranslations } from "next-intl/server";
 import { SearchAutocomplete } from "../header/SearchAutocomplete";
 import { LocaleSwitcher } from "../header/LocaleSwitcher";
+import { CurrencySwitcher } from "@/features/currencies";
 import { WishlistIcon } from "../header/WishlistIcon";
 import DeliveryModes from "../header/DeliveryModes";
 import { NotificationBell } from "@/features/notifications";
@@ -9,7 +10,7 @@ import { MobileAuthButton } from "@/features/auth/components/MobileAuthButton";
 import MobileFooterDrawer from "./MobileFooterDrawer";
 import { assembleFooterContent } from "../../services/footerService";
 
-export default async function MobileHeader() {
+export default async function MobileHeader({ currencyEnabled = false }: { currencyEnabled?: boolean }) {
   const t = await getTranslations("header.search");
   const locale = await getLocale();
   const footerContent = await assembleFooterContent(locale);
@@ -25,6 +26,7 @@ export default async function MobileHeader() {
             <NotificationBell />
             <WishlistIcon />
             <LocaleSwitcher />
+            {currencyEnabled && <CurrencySwitcher />}
           </div>
         </div>
         <SearchAutocomplete

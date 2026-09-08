@@ -1,4 +1,5 @@
 import type { ProductTag } from "@/shared/types";
+import type { ProductCurrency } from "@/features/currencies";
 
 export interface BrandImage {
   desktop: string;
@@ -25,6 +26,8 @@ export interface BrandProduct {
     thumbnail: string;
   };
   tags?: ProductTag[];
+  /** Converted-prices metadata returned by the API alongside prices. */
+  currency?: ProductCurrency;
 }
 
 export interface BrandDetail extends Brand {

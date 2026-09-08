@@ -23,6 +23,7 @@ export async function getCategoryPageData(
   locale: string,
   searchParams?: Record<string, string | string[] | undefined>,
   filterKey?: "category" | "banner" | "promotion" | "tag",
+  currency?: string,
 ): Promise<{
   products: CategoryProduct[];
   filters: CategoryFilters;
@@ -50,7 +51,9 @@ export async function getCategoryPageData(
       headers: {
         "lang": locale,
       },
-      next: { revalidate: 60 },
+      // Currency-converted prices are per-guest: never share them through
+      // the Data Cache (fetch cache key does not vary by header).
+      ...(currency ? { cache: "no-store" as RequestCache, currency } : { next: { revalidate: 60 } }),
     },
   );
 
@@ -81,6 +84,7 @@ export async function getCategoryPageData(
 export async function getSearchPageData(
   locale: string,
   searchParams?: Record<string, string | string[] | undefined>,
+  currency?: string,
 ): Promise<{
   products: CategoryProduct[];
   filters: CategoryFilters;
@@ -110,7 +114,8 @@ export async function getSearchPageData(
     `/general/products?${params.toString()}`,
     {
       headers: { "lang": locale },
-      next: { revalidate: 60 },
+      // Per-guest converted prices must bypass the shared Data Cache.
+      ...(currency ? { cache: "no-store" as RequestCache, currency } : { next: { revalidate: 60 } }),
     },
   );
 

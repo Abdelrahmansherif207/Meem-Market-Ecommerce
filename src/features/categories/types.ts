@@ -1,4 +1,5 @@
 import type { ProductTag } from "@/shared/types";
+import type { ProductCurrency } from "@/features/currencies";
 
 export interface CategoryImage {
   desktop: string;
@@ -45,6 +46,7 @@ export interface CategoryProduct {
   in_wishlist?: boolean;
   image: CategoryProductImage;
   tags?: ProductTag[];
+  currency?: ProductCurrency;
 }
 
 export interface CategoryFilters {

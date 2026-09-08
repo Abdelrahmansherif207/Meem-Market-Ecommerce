@@ -18,6 +18,7 @@ export default function ProductSlider({
   theme,
   autoplay = true,
   sliderSpeed = 4500,
+  pricesLoading = false,
 }: ProductSliderProps) {
   const locale = useLocale();
   const isRtl = locale === "ar";
@@ -72,6 +73,7 @@ export default function ProductSlider({
               title={product.title}
               price={product.price}
               originalPrice={product.originalPrice}
+              currency={product.currency}
               productId={product.id}
               slug={product.slug}
               sku={product.sku}
@@ -83,6 +85,7 @@ export default function ProductSlider({
               isInStock={product.isInStock}
               inWishlist={product.inWishlist}
               tags={product.tags}
+              pricesLoading={pricesLoading}
             />
           </SwiperSlide>
         ))}

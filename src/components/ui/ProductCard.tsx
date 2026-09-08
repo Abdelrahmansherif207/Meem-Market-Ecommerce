@@ -7,10 +7,12 @@ import { Plus } from "lucide-react";
 import { useLocale } from "next-intl";
 import { cn } from "@/shared/utils/cn";
 import { useCartActions } from "@/features/cart/hooks/useCartActions";
+import { useDisplayCurrency } from "@/features/currencies";
+import type { ProductCurrency } from "@/features/currencies";
 import { WishlistButton } from "@/features/wishlist/components/WishlistButton";
 import { Badge } from "./Badge";
-import { Price } from "./Price";
 import { QuantityStepper } from "./QuantityStepper";
+import Skeleton from "./Skeleton";
 import type { ProductTag } from "@/shared/types";
 import { Autoplay } from "swiper/modules";
 import { Swiper, SwiperSlide } from "swiper/react";
@@ -21,6 +23,9 @@ interface ProductCardProps {
   title: string;
   price: number;
   originalPrice: number;
+  /** Legacy symbol string or backend per-product currency object. When omitted, the selected currency is used. */
+  currency?: string | ProductCurrency;
+  currencyDecimals?: number;
   discountPercent?: number;
   productId: number;
   slug?: string;
@@ -36,6 +41,13 @@ interface ProductCardProps {
   tags?: ProductTag[];
   inWishlist?: boolean;
   showWishlist?: boolean;
+  /**
+   * When true, price numbers are replaced with skeleton bars (same
+   * footprint, no layout shift) while converted prices load. Images,
+   * titles, buttons and badges stay untouched. The discount badge stays
+   * visible — a ratio is currency-invariant.
+   */
+  pricesLoading?: boolean;
 }
 
 export default function ProductCard({
@@ -43,6 +55,8 @@ export default function ProductCard({
   title,
   price,
   originalPrice,
+  currency,
+  currencyDecimals,
   discountPercent,
   productId,
   slug = "",
@@ -57,12 +71,20 @@ export default function ProductCard({
   tags,
   inWishlist,
   showWishlist = true,
+  pricesLoading = false,
 }: ProductCardProps) {
   const isDark = theme === "dark";
   const locale = useLocale();
   const isRtl = locale === "ar";
   const { quantity, isPending, addItem, increment, decrement } = useCartActions(productId);
   const [animating, setAnimating] = useState(false);
+
+  const displayCurrency = useDisplayCurrency(
+    typeof currency === "object" ? currency : undefined,
+  );
+  const currencyCode =
+    typeof currency === "string" && currency ? currency : displayCurrency.code;
+  const decimals = currencyDecimals ?? displayCurrency.decimalPlaces;
 
   const safePrice = price ?? 0;
   const safeOriginalPrice = originalPrice ?? 0;
@@ -80,6 +102,12 @@ export default function ProductCard({
   const handleDecrement = useCallback(async () => {
     await decrement();
   }, [decrement]);
+
+  const priceStr = safePrice.toFixed(decimals);
+  const integerPart = priceStr.split(".")[0];
+  const decimalPart = priceStr.includes(".")
+    ? "." + priceStr.split(".")[1]
+    : ""; 
 
   return (
     <div className="flex flex-col w-full">
@@ -207,15 +235,27 @@ export default function ProductCard({
       )}
 
       <div className="flex items-center gap-2 mt-1.5 px-0.5 flex-wrap">
-        <Price
-          amount={safePrice}
-          className={cn("text-base font-semibold md:text-lg", isDark ? "text-white" : "text-text-primary")}
-        />
-        {safeOriginalPrice > safePrice && (
-          <Price
-            amount={safeOriginalPrice}
-            className={cn("text-sm leading-4 font-normal line-through", isDark ? "text-white/50" : "text-text-muted")}
-          />
+        {pricesLoading ? (
+          <div className="flex items-baseline gap-2" dir="ltr" aria-hidden>
+            <Skeleton className="h-5 w-20 md:h-6 md:w-24" />
+          </div>
+        ) : (
+          <>
+            <div className="flex items-baseline gap-px" dir="ltr">
+              <span className={cn("text-lg leading-5 font-bold md:text-xl", isDark ? "text-white" : "text-text-primary")}>
+                {integerPart}
+              </span>
+              <div className="flex flex-col items-start">
+                <span className={cn("text-sm font-bold leading-none", isDark ? "text-white" : "text-text-primary")}>{decimalPart}</span>
+                <span className={cn("text-2xs font-medium leading-none", isDark ? "text-white/60" : "text-text-muted")}>{currencyCode}</span>
+              </div>
+            </div>
+            {safeOriginalPrice > safePrice && (
+              <span className={cn("text-sm leading-4 font-normal line-through", isDark ? "text-white/50" : "text-text-muted")}>
+                {currencyCode} {safeOriginalPrice.toFixed(decimals)}
+              </span>
+            )}
+          </>
         )}
       </div>
     </div>

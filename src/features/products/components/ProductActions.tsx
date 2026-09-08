@@ -7,17 +7,23 @@ import { useCartActions } from "@/features/cart/hooks/useCartActions";
 import { WishlistButton } from "@/features/wishlist/components/WishlistButton";
 import { QuantityStepper } from "@/components/ui/QuantityStepper";
 import { Button } from "@/components/ui/Button";
-import { Price } from "@/components/ui/Price";
+import { useDisplayCurrency } from "@/features/currencies";
+import Skeleton from "@/components/ui/Skeleton";
 import type { ProductDetail, ProductVariant } from "../types";
 import { getStockStatus, getDisplayPrice } from "../utils";
 
 interface ProductActionsProps {
   product: ProductDetail;
   selectedVariant: ProductVariant | null;
+  /** When true, the total price renders as a skeleton bar. */
+  pricesLoading?: boolean;
 }
 
-export function ProductActions({ product, selectedVariant }: ProductActionsProps) {
+export function ProductActions({ product, selectedVariant, pricesLoading = false }: ProductActionsProps) {
   const t = useTranslations("product");
+  const { code: currencyCode, decimalPlaces } = useDisplayCurrency(
+    product.currency,
+  );
   const variant = selectedVariant;
   const stock = variant
     ? { inStock: product.in_stock && variant.quantity > 0, remaining: variant.quantity }
@@ -67,7 +73,13 @@ export function ProductActions({ product, selectedVariant }: ProductActionsProps
       </div>
 
       <div className="flex items-center justify-between gap-4">
-        <Price amount={price * selectedQuantity} className="text-lg font-bold text-text-primary" />
+        {pricesLoading ? (
+          <Skeleton className="h-7 w-32" />
+        ) : (
+          <span className="text-lg font-bold text-text-primary">
+            {(price * selectedQuantity).toFixed(decimalPlaces)} {currencyCode}
+          </span>
+        )}
       </div>
 
       {cartQuantity > 0 ? (

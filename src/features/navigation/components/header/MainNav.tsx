@@ -6,6 +6,7 @@ import { useTranslations } from "next-intl";
 import Logo from "@/components/ui/Logo";
 import { SearchAutocomplete } from "./SearchAutocomplete";
 import { LocaleSwitcher } from "./LocaleSwitcher";
+import { CurrencySwitcher } from "@/features/currencies";
 import { WishlistIcon } from "./WishlistIcon";
 import { NotificationBell } from "@/features/notifications";
 import { useAuthModalStore } from "@/features/auth/store/useAuthModalStore";
@@ -18,7 +19,7 @@ import { cn } from "@/shared/utils/cn";
 import { Link } from "@/i18n/navigation";
 import { LocationDisplay } from "@/features/location";
 
-export default function MainNav({ settingsLogo }: { settingsLogo?: string | null }) {
+export default function MainNav({ settingsLogo, currencyEnabled = false }: { settingsLogo?: string | null; currencyEnabled?: boolean }) {
   const mounted = useSyncExternalStore(
     () => () => {},
     () => true,
@@ -57,6 +58,11 @@ export default function MainNav({ settingsLogo }: { settingsLogo?: string | null
         <LocaleSwitcher
           className={isScrolled ? "opacity-0 invisible w-0 overflow-hidden" : undefined}
         />
+        {currencyEnabled && (
+          <CurrencySwitcher
+            className={isScrolled ? "opacity-0 invisible w-0 overflow-hidden" : undefined}
+          />
+        )}
 
         <div className={cn(
           "transition-all duration-300",

@@ -1,7 +1,6 @@
 import CardSlider from "./CardSlider";
 import CardGrid from "../cardGrid/CardGrid";
-import FlashSaleBanner from "./FlashSaleBanner";
-import ProductSlider from "../../productSlider/ProductSlider";
+import ProductSliderIsland from "../ProductSliderIsland";
 import { homePageService } from "../../services/homePageService";
 import { flashSaleService } from "@/features/flash-sales/services/flashSaleService";
 import type { SectionFrontSetting, ApiFlashSale, Promotion, CardSlideItem, ProductItem } from "../../types";
@@ -22,6 +21,7 @@ function flashProductToProductItem(p: FlashSaleProduct): ProductItem {
     inStock: p.quantity,
     stockQuantity: p.quantity,
     tags: p.tags,
+    currency: p.currency,
   };
 }
 
@@ -95,17 +95,16 @@ export default async function FlashSaleSection({
     if (!products.length) return null;
 
     return (
-      <section className="w-full bg-gradient-to-b from-black via-[#1a1a1a] to-[#2a2a2a] text-white">
-        <FlashSaleBanner locale={locale} title={title} />
-        <div className="relative">
-          <ProductSlider
-            items={products}
-            columnsCount={setting?.columns_count}
-            badgeText={setting?.badge_text}
-            theme="dark"
-          />
-        </div>
-      </section>
+      <ProductSliderIsland
+        key={endpoint}
+        fetchKind="flash-sales"
+        endpoint={endpoint}
+        locale={locale}
+        title={title}
+        initialItems={products}
+        columnsCount={setting?.columns_count}
+        badgeText={setting?.badge_text}
+      />
     );
   }
 

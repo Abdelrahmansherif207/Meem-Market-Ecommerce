@@ -3,8 +3,9 @@
 import { useTranslations } from "next-intl";
 import { Star } from "lucide-react";
 import { cn } from "@/shared/utils/cn";
-import { Price } from "@/components/ui/Price";
 import { ProductTags } from "@/features/tags/components/ProductTags";
+import { useDisplayCurrency } from "@/features/currencies";
+import Skeleton from "@/components/ui/Skeleton";
 import type { ProductDetail, ProductVariant } from "../types";
 import {
   getDisplayPrice,
@@ -17,10 +18,15 @@ import {
 interface ProductInfoProps {
   product: ProductDetail;
   selectedVariant?: ProductVariant | null;
+  /** When true, price numbers render as skeleton bars. */
+  pricesLoading?: boolean;
 }
 
-export function ProductInfo({ product, selectedVariant }: ProductInfoProps) {
+export function ProductInfo({ product, selectedVariant, pricesLoading = false }: ProductInfoProps) {
   const t = useTranslations("product");
+  const { code: currencyCode, decimalPlaces } = useDisplayCurrency(
+    product.currency,
+  );
   const avgRating = getAverageRating(product.reviews);
   const hasVariants = product.variants.length > 0;
   const range = hasVariants ? getVariantPriceRange(product.variants) : null;
@@ -80,12 +86,20 @@ export function ProductInfo({ product, selectedVariant }: ProductInfoProps) {
       )}
 
       <div className="flex items-baseline gap-3 flex-wrap">
-        {selectedVariant || !hasVariants ? (
+        {pricesLoading ? (
+          <div className="flex items-baseline gap-3" dir="ltr" aria-hidden>
+            <Skeleton className="h-9 w-44" />
+          </div>
+        ) : selectedVariant || !hasVariants ? (
           <>
-            <Price amount={displayPrice} className="text-3xl font-bold text-text-primary" />
+            <span className="text-3xl font-bold text-text-primary">
+              {displayPrice.toFixed(decimalPlaces)} {currencyCode}
+            </span>
             {hasDiscount && (
               <>
-                <Price amount={originalPrice} className="text-lg text-text-secondary line-through" />
+                <span className="text-lg text-text-secondary line-through">
+                  {originalPrice.toFixed(decimalPlaces)} {currencyCode}
+                </span>
                 {discountPercent && (
                   <span className="rounded-md bg-discount px-2 py-0.5 text-xs font-bold text-white">
                     -{discountPercent}%
@@ -95,12 +109,15 @@ export function ProductInfo({ product, selectedVariant }: ProductInfoProps) {
             )}
           </>
         ) : range!.min === range!.max ? (
-          <Price amount={range!.min} className="text-3xl font-bold text-text-primary" />
+          <span className="text-3xl font-bold text-text-primary">
+            {range!.min.toFixed(decimalPlaces)} {currencyCode}
+          </span>
         ) : (
-          <span className="flex items-baseline gap-2 text-3xl font-bold text-text-primary">
-            <Price amount={range!.min} />
-            <span aria-hidden>–</span>
-            <Price amount={range!.max} />
+          <span className="text-3xl font-bold text-text-primary">
+            {t("fromPrice", {
+              min: `${range!.min.toFixed(decimalPlaces)} ${currencyCode}`,
+              max: `${range!.max.toFixed(decimalPlaces)} ${currencyCode}`,
+            })}
           </span>
         )}
       </div>
