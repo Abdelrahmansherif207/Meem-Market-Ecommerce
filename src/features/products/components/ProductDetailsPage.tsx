@@ -18,7 +18,7 @@ function buildCategoryBreadcrumbs(categories: ProductCategory[]): { label: strin
   const sorted = [...categories].sort((a, b) => a.level - b.level);
   return sorted.map((cat) => ({
     label: cat.name,
-    href: "/categories/" + cat.slug,
+    href: "/category/" + cat.slug,
   }));
 }
 

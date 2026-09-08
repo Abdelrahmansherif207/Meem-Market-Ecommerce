@@ -12,6 +12,7 @@ interface MapPickerModalProps {
   onClose: () => void;
   onConfirm: (picked: PickedAddress) => void;
   initialValue?: PickedAddress | null;
+  initialTitle?: string;
   defaultCenter?: { lat: number; lng: number } | null;
   currentLocation?: { coords: { lat: number; lng: number }; streetAddress: string } | null;
   saving?: boolean;
@@ -26,6 +27,7 @@ export function MapPickerModal({
   onClose,
   onConfirm,
   initialValue,
+  initialTitle,
   defaultCenter,
   currentLocation,
   saving,
@@ -78,6 +80,7 @@ export function MapPickerModal({
         <div className="flex-1 overflow-y-auto">
           <MapPicker
             initialValue={initialValue}
+            initialTitle={initialTitle}
             defaultCenter={defaultCenter}
             currentLocation={currentLocation}
             saving={saving}

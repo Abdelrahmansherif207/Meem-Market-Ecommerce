@@ -85,7 +85,7 @@ export function ProductInfo({ product, selectedVariant, pricesLoading = false }:
         <ProductTags tags={product.tags} />
       )}
 
-      <div className="flex items-baseline gap-3">
+      <div className="flex items-baseline gap-3 flex-wrap">
         {pricesLoading ? (
           <div className="flex items-baseline gap-3" dir="ltr" aria-hidden>
             <Skeleton className="h-9 w-44" />

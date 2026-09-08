@@ -66,7 +66,7 @@ export function AddressFormModal({ open, onClose, onSubmit, editingAddress, cust
     setLocation({ latitude: picked.coords.lat, longitude: picked.coords.lng });
     setForm((prev) => ({
       ...prev,
-      title: picked.title.trim() || prev.title,
+      title: picked.title.trim() || picked.formattedAddress.trim() || prev.title,
       city: picked.city.trim() || prev.city,
       state: picked.state.trim() || prev.state,
       country: picked.country.trim() || prev.country,

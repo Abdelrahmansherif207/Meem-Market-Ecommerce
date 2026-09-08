@@ -15,7 +15,8 @@ import { calcSubtotal, calcTotalQuantity } from "../utils";
 import type { AppliedCoupon } from "@/features/coupons/types";
 import { couponService } from "@/features/coupons/services/couponService";
 import { ApiError } from "@/shared/lib/api";
-import type { HydratedCartItem, CartApiItem, CartApiCart } from "../types";
+import type { HydratedCartItem, CartApiItem, CartApiCart, CartLineIdentity, DeliveryType } from "../types";
+import { getCartLineKey, matchesCartLine } from "../types";
 import EmptyState from "@/components/ui/EmptyState";
 
 
@@ -28,8 +29,8 @@ type CartState = {
   source: CartSource;
   serverItems: HydratedCartItem[];
   error: string | null;
-  /** Product IDs whose cart item currently has an in-flight API request. */
-  pendingItemIds: Set<number>;
+  /** Cart line keys (product + variant + delivery type) with an in-flight API request. */
+  pendingItemIds: Set<string>;
 };
 
 type CartAction =
@@ -38,11 +39,11 @@ type CartAction =
   | { type: "SET_LOADING" }
   | { type: "SET_SERVER"; items: HydratedCartItem[] }
   | { type: "SET_ERROR"; error: string }
-  | { type: "UPDATE_ITEM"; productId: number; quantity: number }
-  | { type: "REMOVE_ITEM"; productId: number }
+  | { type: "UPDATE_ITEM"; productId: number; quantity: number; line: CartLineIdentity }
+  | { type: "REMOVE_ITEM"; productId: number; line: CartLineIdentity }
   | { type: "SET_ITEM_ROLLBACK"; items: HydratedCartItem[] }
-  | { type: "ITEM_PENDING"; productId: number }
-  | { type: "ITEM_DONE"; productId: number };
+  | { type: "ITEM_PENDING"; key: string }
+  | { type: "ITEM_DONE"; key: string };
 
 function cartReducer(state: CartState, action: CartAction): CartState {
   switch (action.type) {
@@ -71,7 +72,7 @@ function cartReducer(state: CartState, action: CartAction): CartState {
       return {
         ...state,
         serverItems: state.serverItems.map((i) =>
-          i.product_id === action.productId
+          matchesCartLine(i, action.productId, action.line)
             ? { ...i, quantity: action.quantity }
             : i,
         ),
@@ -80,19 +81,19 @@ function cartReducer(state: CartState, action: CartAction): CartState {
       return {
         ...state,
         serverItems: state.serverItems.filter(
-          (i) => i.product_id !== action.productId,
+          (i) => !matchesCartLine(i, action.productId, action.line),
         ),
       };
     case "SET_ITEM_ROLLBACK":
       return { ...state, serverItems: action.items };
     case "ITEM_PENDING": {
       const next = new Set(state.pendingItemIds);
-      next.add(action.productId);
+      next.add(action.key);
       return { ...state, pendingItemIds: next };
     }
     case "ITEM_DONE": {
       const next = new Set(state.pendingItemIds);
-      next.delete(action.productId);
+      next.delete(action.key);
       return { ...state, pendingItemIds: next };
     }
     default:
@@ -138,7 +139,7 @@ export function CartPageContent({ minimumOrderAmount }: CartPageContentProps) {
       source: deriveInitialSource(isAuthenticated, isSyncing),
       serverItems: [],
       error: null,
-      pendingItemIds: new Set<number>(),
+      pendingItemIds: new Set<string>(),
     }),
   );
 
@@ -152,33 +153,59 @@ export function CartPageContent({ minimumOrderAmount }: CartPageContentProps) {
   const abortRef = useRef<AbortController | null>(null);
 
   const [appliedCoupon, setAppliedCoupon] = useState<AppliedCoupon | null>(null);
+  const [stickyTop, setStickyTop] = useState<number | null>(null);
   const couponDiscount = appliedCoupon?.discount_amount ?? 0;
+
+  useEffect(() => {
+    const header = document.querySelector("header");
+    if (!header) return;
+    const update = () =>
+      setStickyTop(window.innerWidth >= 1024 ? header.offsetHeight + 24 : null);
+    update(); // eslint-disable-line react-hooks/set-state-in-effect
+    const observer = new ResizeObserver(update);
+    observer.observe(header);
+    window.addEventListener("resize", update);
+    return () => {
+      observer.disconnect();
+      window.removeEventListener("resize", update);
+    };
+  }, []);
 
 
   // -------------------------------------------------------------------------
   // processCart — map server cart data into all local state
   // -------------------------------------------------------------------------
   const processCart = useCallback((cart: CartApiCart) => {
-    const mapItem = (item: CartApiItem, deliveryType: "scheduled" | "fast"): HydratedCartItem => ({
-      product_id: item.product_id,
-      product_variant_id: item.product_variant_id ?? null,
-      cartItemId: item.id,
-      quantity: item.quantity,
-      name: item.product.name,
-      image: item.product.thumbnail,
-      price: item.price,
-      current_price: item.total_price / item.quantity,
-      total_price: item.total_price,
-      discount_amount: item.discount_amount,
-      promotion_id: item.promotion_id,
-      slug: item.product.slug,
-      sku: "",
-      // Server cart items are reserved, but the cart API exposes no stock
-      // count — leave stock_quantity unset rather than fabricating one.
-      in_stock: true,
-      stock_quantity: undefined,
-      deliveryType,
-    });
+    const mapItem = (item: CartApiItem, fallbackType: DeliveryType): HydratedCartItem => {
+      // Trust the item's own shipping_method flag first ("SCHEDULED" / "FAST"),
+      // fall back to the array it arrived in.
+      const method = item.shipping_method?.toUpperCase();
+      const deliveryType: DeliveryType =
+        method === "FAST" ? "fast" : method === "SCHEDULED" ? "scheduled" : fallbackType;
+      return {
+        product_id: item.product_id,
+        product_variant_id: item.product_variant_id ?? null,
+        cartItemId: item.id,
+        quantity: item.quantity,
+        variant_label: item.attributes?.length
+          ? item.attributes.map((a) => `${a.attribute}: ${a.value}`).join(" / ")
+          : null,
+        name: item.product.name,
+        image: item.product.thumbnail,
+        price: item.price,
+        current_price: item.quantity > 0 ? item.total_price / item.quantity : item.price,
+        total_price: item.total_price,
+        discount_amount: item.discount_amount,
+        promotion_id: item.promotion_id,
+        slug: item.product.slug,
+        sku: "",
+        // Server cart items are reserved, but the cart API exposes no stock
+        // count — leave stock_quantity unset rather than fabricating one.
+        in_stock: true,
+        stock_quantity: undefined,
+        deliveryType,
+      };
+    };
 
     const items: HydratedCartItem[] = [];
 
@@ -308,38 +335,42 @@ export function CartPageContent({ minimumOrderAmount }: CartPageContentProps) {
   // Handlers — optimistic update with snapshot rollback on error
   // -------------------------------------------------------------------------
   const handleUpdateQuantity = useCallback(
-    async (productId: number, quantity: number) => {
+    async (productId: number, quantity: number, line: CartLineIdentity) => {
       // Guest path — mutate store
       if (state.source !== "server") {
         if (quantity <= 0) {
-          guestRemoveItem(productId);
+          guestRemoveItem(productId, line);
         } else {
-          guestUpdateQuantity(productId, quantity);
+          guestUpdateQuantity(productId, quantity, line);
         }
         return;
       }
 
-      const item = state.serverItems.find((i) => i.product_id === productId);
+      const item = state.serverItems.find((i) => matchesCartLine(i, productId, line));
       if (!item || !item.cartItemId) return;
-      if (state.pendingItemIds.has(productId)) return;
+      const pendingKey = getCartLineKey(productId, {
+        productVariantId: item.product_variant_id ?? null,
+        deliveryType: item.deliveryType ?? line.deliveryType ?? "scheduled",
+      });
+      if (state.pendingItemIds.has(pendingKey)) return;
 
       const snapshot = state.serverItems;
-      dispatch({ type: "ITEM_PENDING", productId });
+      dispatch({ type: "ITEM_PENDING", key: pendingKey });
 
       try {
         if (quantity <= 0) {
-          dispatch({ type: "REMOVE_ITEM", productId });
+          dispatch({ type: "REMOVE_ITEM", productId, line });
           await cartService.removeItem(item.cartItemId, locale);
         } else {
-          dispatch({ type: "UPDATE_ITEM", productId, quantity });
+          dispatch({ type: "UPDATE_ITEM", productId, quantity, line });
           const operation = quantity > item.quantity ? "increment" : "decrement";
-          const updatedCart = await cartService.updateItem({ item: { product_id: productId, quantity: item.quantity, operation, product_variant_id: item.product_variant_id ?? null } }, locale);
+          const updatedCart = await cartService.updateItem({ item: { product_id: productId, quantity: item.quantity, operation, product_variant_id: item.product_variant_id ?? null, shipping_method: item.deliveryType ?? "scheduled" } }, locale);
           processCart(updatedCart);
         }
       } catch {
         dispatch({ type: "SET_ITEM_ROLLBACK", items: snapshot });
       } finally {
-        dispatch({ type: "ITEM_DONE", productId });
+        dispatch({ type: "ITEM_DONE", key: pendingKey });
       }
     },
     [
@@ -354,7 +385,7 @@ export function CartPageContent({ minimumOrderAmount }: CartPageContentProps) {
   );
 
   const handleRemove = useCallback(
-    (productId: number) => handleUpdateQuantity(productId, 0),
+    (productId: number, line: CartLineIdentity) => handleUpdateQuantity(productId, 0, line),
     [handleUpdateQuantity],
   );
 
@@ -458,7 +489,7 @@ export function CartPageContent({ minimumOrderAmount }: CartPageContentProps) {
   }
 
   return (
-    <div className="space-y-10">
+    <div className="space-y-6 sm:space-y-10">
       {/* Sync error banner */}
       {syncError && (
         <div className="flex items-center justify-between gap-4 rounded-xl border border-red-200 bg-red-50 px-4 py-3">
@@ -480,7 +511,7 @@ export function CartPageContent({ minimumOrderAmount }: CartPageContentProps) {
       )}
 
       <div className="flex items-center justify-between">
-        <h2 className="text-xl font-bold">{t("title")}</h2>
+        <h2 className="text-lg sm:text-xl font-bold">{t("title")}</h2>
       </div>
 
       {displayItems.length === 0 ? (
@@ -519,7 +550,10 @@ export function CartPageContent({ minimumOrderAmount }: CartPageContentProps) {
           </div>
 
           <div className="lg:col-span-1">
-            <div className="sticky top-24 space-y-6">
+            <div
+              className="space-y-6 lg:sticky lg:top-24"
+              style={stickyTop !== null ? { top: stickyTop } : undefined}
+            >
               <CartSummary
                 scheduledSubtotal={scheduledSubtotal}
                 scheduledQty={scheduledQty}

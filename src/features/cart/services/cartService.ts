@@ -36,6 +36,7 @@ export const cartService = {
         quantity: number;
         operation: "increment" | "decrement";
         product_variant_id?: number | null;
+        shipping_method?: "scheduled" | "fast";
       };
     },
     lang?: string,

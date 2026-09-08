@@ -5,19 +5,19 @@ import { useRouter } from "next/navigation";
 import { Truck, Zap, Gift, Star, ShoppingCart, Car, ShoppingBag, ChevronRight } from "lucide-react";
 import { cn } from "@/shared/utils/cn";
 import { formatMoney } from "@/shared/utils/formatMoney";
-import { useDisplayCurrency } from "@/features/currencies";
 import { Button } from "@/components/ui/Button";
 import { useAuthStore } from "@/features/auth/store/useAuthStore";
-import type { DeliveryType, HydratedCartItem } from "../types";
+import type { CartLineIdentity, DeliveryType, HydratedCartItem } from "../types";
+import { getCartLineKey } from "../types";
 import { ProductCartItem } from "./ProductCartItem";
 import { calcSubtotal, isFreeShipping, canCheckout } from "../utils";
 
 interface CartSectionProps {
   deliveryType: DeliveryType;
   items: HydratedCartItem[];
-  pendingItemIds?: Set<number>;
-  onUpdateQuantity: (productId: number, quantity: number) => void;
-  onRemove: (productId: number) => void;
+  pendingItemIds?: Set<string>;
+  onUpdateQuantity: (productId: number, quantity: number, line: CartLineIdentity) => void;
+  onRemove: (productId: number, line: CartLineIdentity) => void;
   minimumOrderAmount: number;
 }
 
@@ -33,8 +33,6 @@ export function CartSection({
   const locale = useLocale();
   const router = useRouter();
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
-  const { code: currencyCode, decimalPlaces } = useDisplayCurrency();
-  const moneyOpts = { symbol: currencyCode, decimalPlaces };
 
   const subtotal = calcSubtotal(
     items.map((i) => ({ price: i.current_price, quantity: i.quantity })),
@@ -54,24 +52,24 @@ export function CartSection({
     ? (isFast ? "/payment?type=fast" : "/payment")
     : `/auth?redirect=${isFast ? "/payment?type=fast" : "/payment"}`;
 
-  // Free shipping progress (scheduled-only)
+  // Free shipping progress (per cart type — yellow accents in fast mode)
   const freeShippingThreshold = 300;
   const freeShippingEligible = isFreeShipping(subtotal, freeShippingThreshold);
   const freeShipPercent = Math.min(100, (subtotal / freeShippingThreshold) * 100);
   const freeShipRemaining = Math.max(0, freeShippingThreshold - subtotal);
-  const fillGradient = "from-primary to-primary-dark";
-  const activeColor = "border-primary bg-primary";
-  const activeText = "text-primary";
+  const fillGradient = isFast ? "from-accent to-accent" : "from-primary to-primary-dark";
+  const activeColor = isFast ? "border-accent bg-accent" : "border-primary bg-primary";
+  const activeText = isFast ? "text-accent" : "text-primary";
   const milestonePos = (minimumOrderAmount / freeShippingThreshold) * 100;
   const milestones = [
     { label: t("milestoneStart"), sub: null, pos: 0, Icon: Star },
-    { label: formatMoney(minimumOrderAmount, locale, moneyOpts), sub: t("milestoneMinimum"), pos: milestonePos, Icon: ShoppingCart },
-    { label: formatMoney(freeShippingThreshold, locale, moneyOpts), sub: t("milestoneFreeShipping"), pos: 100, Icon: Car },
+    { label: formatMoney(minimumOrderAmount, locale), sub: t("milestoneMinimum"), pos: milestonePos, Icon: ShoppingCart },
+    { label: formatMoney(freeShippingThreshold, locale), sub: t("milestoneFreeShipping"), pos: 100, Icon: isFast ? Zap : Car },
   ];
 
   return (
-    <div className="rounded-2xl border-2 border-border p-10 space-y-6">
-      <div className="flex items-center gap-3">
+    <div className="rounded-2xl border-2 border-border p-4 sm:p-6 lg:p-10 space-y-6">
+      <div className="flex flex-wrap items-center gap-2 sm:gap-3">
         <span className={cn("inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-sm font-bold", badgeColor)}>
           <DeliveryIcon className="h-4 w-4" />
           {title}
@@ -79,10 +77,9 @@ export function CartSection({
         <span className="text-sm text-text-secondary">{eta}</span>
       </div>
 
-      {!isFast && (
-        <div className="space-y-2">
-          <div className="flex items-center gap-2 text-xs text-text-secondary">
-            <Gift className="h-4 w-4 shrink-0 text-primary" />
+      <div className="space-y-2">
+        <div className="flex items-center gap-2 text-xs text-text-secondary">
+          <Gift className={cn("h-4 w-4 shrink-0", isFast ? "text-accent" : "text-primary")} />
             <span>
               {freeShippingEligible
                 ? t("freeShippingAchieved")
@@ -102,11 +99,21 @@ export function CartSection({
 
             {milestones.map((m) => {
               const reached = freeShipPercent >= m.pos;
+              const edge = m.pos === 0 ? "start" : m.pos === 100 ? "end" : "center";
               return (
                 <div
                   key={m.pos}
                   className="absolute"
-                  style={{ left: m.pos + "%", top: "50%", transform: "translate(-50%,-50%)" }}
+                  style={{
+                    left: m.pos + "%",
+                    top: "50%",
+                    transform:
+                      edge === "start"
+                        ? "translate(0,-50%)"
+                        : edge === "end"
+                          ? "translate(-100%,-50%)"
+                          : "translate(-50%,-50%)",
+                  }}
                 >
                   <div
                     className={cn(
@@ -118,7 +125,15 @@ export function CartSection({
                   >
                     <m.Icon className={cn("h-4 w-4", reached ? "text-white" : "text-text-secondary")} />
                   </div>
-                  <div className="absolute left-1/2 -translate-x-1/2 mt-1 text-center" style={{ top: "100%" }}>
+                  <div
+                    className={cn(
+                      "absolute mt-1 text-center",
+                      edge === "start" && "left-0 text-start",
+                      edge === "end" && "right-0 text-end",
+                      edge === "center" && "left-1/2 -translate-x-1/2",
+                    )}
+                    style={{ top: "100%" }}
+                  >
                     <div className={cn("text-xs font-bold whitespace-nowrap", reached ? activeText : "text-text-secondary")}>
                       {m.label}
                     </div>
@@ -140,14 +155,21 @@ export function CartSection({
             </div>
           )}
         </div>
-      )}
 
       <div className="space-y-4">
         {items.map((item) => (
           <ProductCartItem
-            key={item.product_id + deliveryType}
+            key={getCartLineKey(item.product_id, {
+              productVariantId: item.product_variant_id ?? null,
+              deliveryType: item.deliveryType ?? deliveryType,
+            })}
             item={item}
-            isPending={pendingItemIds?.has(item.product_id) ?? false}
+            isPending={pendingItemIds?.has(
+              getCartLineKey(item.product_id, {
+                productVariantId: item.product_variant_id ?? null,
+                deliveryType: item.deliveryType ?? deliveryType,
+              }),
+            ) ?? false}
             onUpdateQuantity={onUpdateQuantity}
             onRemove={onRemove}
           />
@@ -157,8 +179,8 @@ export function CartSection({
       <Button
         size="lg"
         full
+        variant={isFast ? "accent" : "primary"}
         disabled={!checkoutEnabled}
-        className={isFast ? "bg-accent" : undefined}
         onClick={() => router.push(checkoutHref)}
       >
         <ShoppingBag className="h-4 w-4" aria-hidden />

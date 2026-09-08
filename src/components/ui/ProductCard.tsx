@@ -190,7 +190,7 @@ export default function ProductCard({
 
       <Link href={`/products/${slug}`} className="mt-2.5 px-0.5">
         <p className={cn(
-          "text-sm leading-4 font-medium line-clamp-2 text-balance transition-colors cursor-pointer",
+          "text-sm leading-4 font-medium line-clamp-2 min-h-8 text-balance transition-colors cursor-pointer",
           isDark ? "text-white hover:text-white/80" : "text-text-primary hover:text-primary",
           isRtl ? "text-right" : "text-left",
         )}>

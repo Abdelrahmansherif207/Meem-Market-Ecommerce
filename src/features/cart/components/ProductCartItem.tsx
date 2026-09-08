@@ -4,8 +4,8 @@ import Link from "next/link";
 import { Minus, Plus, Trash2, Loader2 } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { cn } from "@/shared/utils/cn";
-import { useDisplayCurrency } from "@/features/currencies";
-import type { HydratedCartItem } from "../types";
+import { Price } from "@/components/ui/Price";
+import type { CartLineIdentity, HydratedCartItem } from "../types";
 import { getDisplayPrice, getOriginalPrice } from "@/features/products";
 import type { PriceInfo } from "@/features/products/types";
 
@@ -13,8 +13,8 @@ interface ProductCartItemProps {
   item: HydratedCartItem;
   /** Disables all controls and shows a loading spinner while an API call is in-flight. */
   isPending?: boolean;
-  onUpdateQuantity: (productId: number, quantity: number) => void;
-  onRemove: (productId: number) => void;
+  onUpdateQuantity: (productId: number, quantity: number, line: CartLineIdentity) => void;
+  onRemove: (productId: number, line: CartLineIdentity) => void;
 }
 
 function toPriceInfo(item: HydratedCartItem): PriceInfo {
@@ -28,6 +28,35 @@ function toPriceInfo(item: HydratedCartItem): PriceInfo {
   };
 }
 
+function PriceBlock({
+  value,
+  originalValue,
+  hasDiscount,
+  discountPercent,
+}: {
+  value: number;
+  originalValue: number;
+  hasDiscount: boolean;
+  discountPercent: number;
+}) {
+  return (
+    <div className="flex min-w-0 max-w-full flex-wrap items-center gap-x-2 gap-y-1">
+      <Price amount={value} className="shrink-0 text-base font-bold sm:text-lg" />
+      {hasDiscount && (
+        <Price
+          amount={originalValue}
+          className="shrink-0 text-xs tabular-nums text-text-muted line-through sm:text-sm"
+        />
+      )}
+      {hasDiscount && (
+        <span className="shrink-0 rounded bg-error-surface px-1 py-0.5 text-[10px] font-bold whitespace-nowrap text-discount">
+          -{discountPercent}%
+        </span>
+      )}
+    </div>
+  );
+}
+
 export function ProductCartItem({
   item,
   isPending = false,
@@ -35,116 +64,107 @@ export function ProductCartItem({
   onRemove,
 }: ProductCartItemProps) {
   const t = useTranslations("cartPage");
-  const { code: currencyCode, decimalPlaces } = useDisplayCurrency();
   const priceInfo = toPriceInfo(item);
   const displayPrice = getDisplayPrice(priceInfo);
   const originalPrice = getOriginalPrice(priceInfo);
   const hasDiscount = displayPrice < originalPrice;
   const lineTotal = displayPrice * item.quantity;
 
-  const priceStr = displayPrice.toFixed(decimalPlaces);
-  const intPart = priceStr.split(".")[0];
-  const decPart = "." + priceStr.split(".")[1];
-
-  const origPriceStr = originalPrice.toFixed(decimalPlaces);
-  const origInt = origPriceStr.split(".")[0];
-  const origDec = "." + origPriceStr.split(".")[1];
-
   const discountPercent = hasDiscount
     ? Math.round((1 - displayPrice / originalPrice) * 100)
     : 0;
 
+  const line: CartLineIdentity = {
+    productVariantId: item.product_variant_id ?? null,
+    deliveryType: item.deliveryType ?? "scheduled",
+  };
+
+  const btnClass =
+    "flex h-8 w-8 sm:h-10 sm:w-10 items-center justify-center text-text-secondary transition-colors disabled:opacity-30";
+
   return (
-    <div className="flex gap-3 border border-border p-3 rounded-lg">
-      <Link href={item.slug ? `/products/${item.slug}` : "#"} className="block shrink-0">
-        <div className="relative h-24 w-24 overflow-hidden rounded-lg bg-white">
-          <Image src={item.image} alt={item.name} width={96} height={96} className="object-cover" />
-        </div>
-      </Link>
-
-      <div className="flex flex-1 min-w-0 gap-2">
-        <div className="flex flex-col justify-between flex-1 min-w-0">
-          <div>
-            <Link href={item.slug ? `/products/${item.slug}` : "#"}>
-              <h4 className="truncate text-sm font-semibold hover:text-primary transition-colors">{item.name}</h4>
-            </Link>
-            {item.sku && (
-              <p className="mt-0.5 text-[11px] text-text-secondary">SKU: {item.sku}</p>
-            )}
-            <p className={cn("text-[11px]", item.in_stock ? "text-success" : "text-error")}>
-              {item.in_stock ? t("inStock") : t("outOfStock")}
-              {item.in_stock && item.stock_quantity != null && ` (${item.stock_quantity})`}
-            </p>
+    <div className="rounded-lg border border-border p-3 sm:p-4">
+      <div className="flex gap-3">
+        <Link href={item.slug ? `/products/${item.slug}` : "#"} className="block shrink-0">
+          <div className="relative h-20 w-20 overflow-hidden rounded-lg bg-white sm:h-24 sm:w-24">
+            <Image
+              src={item.image}
+              alt={item.name}
+              width={96}
+              height={96}
+              className="h-full w-full object-cover"
+            />
           </div>
+        </Link>
 
-          <div className="flex items-center gap-2 mt-2">
-            {hasDiscount && (
-              <div className="flex items-center gap-1" dir="ltr">
-                <span className="text-xs leading-4 font-medium text-text-muted line-through">
-                  {origInt}
-                </span>
-                <div className="flex flex-col">
-                  <span className="text-[10px] leading-3 font-medium text-text-muted line-through">{origDec}</span>
-                  <span className="text-[8px] leading-3 font-medium text-text-muted line-through">{currencyCode}</span>
-                </div>
-              </div>
-            )}
-            <div className="flex items-center gap-1" dir="ltr">
-              <span className="text-base leading-5 font-bold">{intPart}</span>
-              <div className="flex flex-col">
-                <span className="text-sm font-bold leading-3">{decPart}</span>
-                <span className="text-[10px] font-medium leading-3">{currencyCode}</span>
-              </div>
-            </div>
-            {hasDiscount && (
-              <span className="text-[10px] font-bold text-discount bg-error-surface px-1 py-0.5 rounded">
-                -{discountPercent}%
-              </span>
-            )}
-          </div>
-        </div>
-
-        <div className="flex flex-col items-end justify-center gap-2 shrink-0">
-          {isPending ? (
-            <div className="flex h-11 w-[calc(4*28px+2px)] items-center justify-center">
-              <Loader2 className="h-4 w-4 animate-spin text-primary" />
-            </div>
-          ) : (
-            <div className="flex items-center gap-0.5 rounded-lg border border-border">
-              <button
-                onClick={() => onRemove(item.product_id)}
-                disabled={isPending}
-                className="flex h-11 w-11 items-center justify-center text-text-secondary hover:text-error transition-colors disabled:opacity-30"
-                aria-label={t("removeItem")}
-              >
-                <Trash2 className="h-4 w-4" />
-              </button>
-              <div className="h-5 w-px bg-border" />
-              <button
-                onClick={() => onUpdateQuantity(item.product_id, item.quantity - 1)}
-                disabled={isPending || item.quantity <= 1}
-                className="flex h-11 w-11 items-center justify-center text-text-secondary hover:text-primary disabled:opacity-30 transition-colors"
-                aria-label={t("decreaseQuantity")}
-              >
-                <Minus className="h-4 w-4" />
-              </button>
-              <span className="flex h-11 w-9 items-center justify-center text-sm font-medium tabular-nums">
-                {item.quantity}
-              </span>
-              <button
-                onClick={() => onUpdateQuantity(item.product_id, item.quantity + 1)}
-                disabled={isPending || (item.stock_quantity != null && item.quantity >= item.stock_quantity)}
-                className="flex h-11 w-11 items-center justify-center text-text-secondary hover:text-primary disabled:opacity-30 transition-colors"
-                aria-label={t("increaseQuantity")}
-              >
-                <Plus className="h-4 w-4" />
-              </button>
-            </div>
+        <div className="flex min-w-0 flex-1 flex-col gap-1.5">
+          <Link href={item.slug ? `/products/${item.slug}` : "#"}>
+            <h4 className="line-clamp-2 text-sm font-semibold leading-snug hover:text-primary transition-colors">
+              {item.name}
+            </h4>
+          </Link>
+          {item.variant_label && (
+            <p className="line-clamp-1 text-[11px] text-text-secondary">{item.variant_label}</p>
           )}
-          <span className="text-xs font-semibold tabular-nums text-text-secondary" dir="ltr">
-            {lineTotal.toFixed(decimalPlaces)} {currencyCode}
-          </span>
+          {item.sku && (
+            <p className="text-[11px] text-text-secondary">SKU: {item.sku}</p>
+          )}
+          <p className={cn("text-[11px]", item.in_stock ? "text-success" : "text-error")}>
+            {item.in_stock ? t("inStock") : t("outOfStock")}
+            {item.in_stock && item.stock_quantity != null && ` (${item.stock_quantity})`}
+          </p>
+          <div className="mt-auto min-w-0 pt-1">
+            <PriceBlock
+              value={displayPrice}
+              originalValue={originalPrice}
+              hasDiscount={hasDiscount}
+              discountPercent={discountPercent}
+            />
+          </div>
         </div>
+      </div>
+
+      <div className="mt-3 flex min-w-0 items-center justify-between gap-2 border-t border-border-subtle pt-3">
+        {isPending ? (
+          <div className="flex h-8 sm:h-10 items-center px-1">
+            <Loader2 className="h-4 w-4 animate-spin text-primary" />
+          </div>
+        ) : (
+          <div className="flex shrink-0 items-center gap-0.5 rounded-lg border border-border">
+            <button
+              onClick={() => onRemove(item.product_id, line)}
+              disabled={isPending}
+              className={cn(btnClass, "hover:text-error")}
+              aria-label={t("removeItem")}
+            >
+              <Trash2 className="h-4 w-4" />
+            </button>
+            <div className="h-5 w-px bg-border" />
+            <button
+              onClick={() => onUpdateQuantity(item.product_id, item.quantity - 1, line)}
+              disabled={isPending || item.quantity <= 1}
+              className={cn(btnClass, "hover:text-primary")}
+              aria-label={t("decreaseQuantity")}
+            >
+              <Minus className="h-4 w-4" />
+            </button>
+            <span className="flex h-8 w-7 sm:h-10 sm:w-8 items-center justify-center text-sm font-medium tabular-nums">
+              {item.quantity}
+            </span>
+            <button
+              onClick={() => onUpdateQuantity(item.product_id, item.quantity + 1, line)}
+              disabled={isPending || (item.stock_quantity != null && item.quantity >= item.stock_quantity)}
+              className={cn(btnClass, "hover:text-primary")}
+              aria-label={t("increaseQuantity")}
+            >
+              <Plus className="h-4 w-4" />
+            </button>
+          </div>
+        )}
+        <Price
+          amount={lineTotal}
+          className="shrink-0 text-end text-sm font-bold text-text-primary"
+        />
       </div>
     </div>
   );

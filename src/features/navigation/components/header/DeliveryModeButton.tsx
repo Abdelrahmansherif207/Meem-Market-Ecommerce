@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useLocale } from "next-intl";
+import type { ReactNode } from "react";
 import { cn } from "@/shared/utils/cn";
 
 export type DeliveryModeButtonProps = {
@@ -13,9 +13,10 @@ export type DeliveryModeButtonProps = {
   bgClass: string;
   borderClass: string;
   textClass?: string;
-  etaText?: string;
+  etaText?: ReactNode;
   note?: string;
-  hideIcon?: boolean;
+  /** Compact scrolled state: smaller height + icon, sub-text hidden. */
+  small?: boolean;
   compact?: boolean;
   onClick?: () => void;
   disabled?: boolean;
@@ -29,13 +30,12 @@ export function DeliveryModeButton({
   textClass,
   etaText,
   note,
-  hideIcon = false,
+  small = false,
   compact = false,
   onClick,
   disabled = false,
 }: DeliveryModeButtonProps) {
-  const locale = useLocale();
-  const isRtl = locale === "ar";
+  const selected = textClass?.includes("text-white") ?? false;
 
   if (compact) {
     return (
@@ -43,43 +43,39 @@ export function DeliveryModeButton({
         type="button"
         onClick={onClick}
         disabled={disabled}
+        aria-pressed={selected}
         className={cn(
-          "relative flex min-w-0 flex-1 items-center justify-center gap-1 overflow-hidden rounded-lg px-1 py-0.5 text-center transition-all duration-200 ease-out",
-          "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60",
-          "disabled:cursor-not-allowed",
-          disabled && "border border-dashed border-text-muted/40 opacity-70 saturate-[0.6] hover:opacity-70",
+          "relative flex min-w-0 flex-1 select-none items-center justify-center gap-1 rounded-lg border border-transparent px-2 py-1 text-center transition-all duration-200 ease-out active:scale-[0.97]",
+          "min-h-[34px] disabled:cursor-not-allowed disabled:opacity-60 disabled:saturate-50 disabled:active:scale-100",
+          !disabled && "hover:brightness-[1.04]",
           bgClass,
           borderClass,
           textClass,
         )}
       >
-        <div
-          className={cn(
-            "relative size-6 shrink-0 overflow-hidden drop-shadow-sm",
-            hideIcon && "hidden",
-          )}
-        >
+        <span className="relative block size-8 shrink-0 drop-shadow-sm">
           <Image
             src={icon.src}
             alt={icon.alt}
             fill
+            sizes="32px"
             className="object-contain"
           />
-        </div>
+        </span>
 
-        <span className="min-w-0 flex-1 overflow-hidden text-ellipsis text-center text-[12px] leading-4 font-bold">
+        <span className="min-w-0 truncate text-[13px] leading-4 font-medium tracking-tight">
           {label}
         </span>
 
         {disabled && note ? (
-          <span className="shrink-0 rounded-full border border-text-muted/50 px-1 py-px text-[9px] leading-3 font-bold text-text-muted">
+          <span className="shrink-0 rounded-md bg-text-muted/15 px-1 py-px text-[10px] leading-3 font-medium text-text-secondary">
             {note}
           </span>
-        ) : etaText && !hideIcon ? (
+        ) : etaText ? (
           <span
             className={cn(
-              "shrink-0 rounded-full px-1 py-px text-[9px] leading-3 font-bold",
-              textClass?.includes("text-white") ? "bg-white/25 text-white" : "bg-primary/10 text-primary",
+              "shrink-0 rounded-md px-1 py-px text-[10px] leading-3 font-medium tabular-nums",
+              selected ? "bg-white/25 text-white" : "bg-black/[0.06] text-text-secondary",
             )}
           >
             {etaText}
@@ -89,50 +85,54 @@ export function DeliveryModeButton({
     );
   }
 
+  const subText = disabled && note ? note : etaText;
+
   return (
     <button
       type="button"
       onClick={onClick}
       disabled={disabled}
+      aria-pressed={selected}
       className={cn(
-        "relative flex shrink-0 items-center whitespace-nowrap font-bold duration-300 ease-in-out transition-all focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-primary/60 disabled:pointer-events-none disabled:opacity-[0.12]",
-        "flex-col rounded-lg py-2.5 text-xs leading-4 lg:flex-row md:border-2 md:text-lg md:leading-5",
-        hideIcon
-          ? "w-auto px-10 justify-center md:min-w-[168px] md:px-2.5 md:justify-center"
-          : "min-w-[90px] w-auto px-2 justify-between md:min-w-[168px] md:px-3 lg:justify-start lg:pl-1",
+        "group relative inline-flex shrink-0 select-none items-center gap-1.5 rounded-lg border border-black/[0.08] font-medium whitespace-nowrap transition-all duration-200 ease-out active:scale-[0.98]",
+        small ? "h-8 pr-3 pl-1" : "h-10 pr-2.5 pl-1 md:h-11 md:pr-3 md:pl-1.5",
+        "shadow-elev-1 disabled:cursor-not-allowed disabled:opacity-60 disabled:saturate-50 disabled:active:scale-100",
+        !disabled && "hover:-translate-y-px hover:shadow-elev-2",
         bgClass,
         borderClass,
         textClass,
       )}
     >
-      <div className={cn(
-        "relative shrink-0 overflow-hidden",
-        !compact && "size-12 md:size-10",
-        hideIcon && "hidden",
-      )}>
+      <span className={cn("relative block shrink-0 drop-shadow-sm", small ? "size-6" : "size-9 md:size-10")}>
         <Image
           src={icon.src}
           alt={icon.alt}
           fill
+          sizes={small ? "24px" : "40px"}
           className="object-contain"
         />
-      </div>
-
-      <span className={cn(
-        "overflow-hidden text-ellipsis text-center lg:text-start",
-        hideIcon ? "pl-0" : isRtl ? "lg:pr-3" : "lg:pl-2",
-      )}>
-        {label}
       </span>
 
-      {etaText ? (
-        <span className={cn(
-          "absolute inset-x-0 mx-auto -top-1 w-max max-w-[calc(100%-12px)] truncate rounded-br-lg rounded-tl-lg bg-white px-1 text-xs italic font-bold text-[#14569D] shadow-sm",
-          hideIcon && "hidden",
-        )}>
-          {etaText}
+      <span className="flex min-w-0 flex-col items-start text-start leading-none">
+        <span
+          className={cn(
+            "max-w-[220px] truncate tracking-tight",
+            small ? "text-[13px] leading-5 font-medium" : "text-sm leading-5 font-medium md:text-[15px]",
+          )}
+        >
+          {label}
         </span>
-      ) : null}
+        {subText && !small ? (
+          <span
+            className={cn(
+              "max-w-[220px] truncate text-[11px] leading-4 font-normal tabular-nums",
+              selected ? "text-white/85" : "text-text-secondary",
+            )}
+          >
+            {subText}
+          </span>
+        ) : null}
+      </span>
     </button>
   );
 }

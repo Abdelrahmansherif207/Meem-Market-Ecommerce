@@ -1,9 +1,9 @@
 "use client";
 import { useTranslations } from "next-intl";
 import { Truck, Minus, Tag, ShoppingBag } from "lucide-react";
-import { useDisplayCurrency } from "@/features/currencies";
 import CouponInput from "@/features/coupons/components/CouponInput";
 import CouponBadge from "@/features/coupons/components/CouponBadge";
+import { Price } from "@/components/ui/Price";
 import type { AppliedCoupon } from "@/features/coupons/types";
 
 interface OrderSummaryProps {
@@ -28,11 +28,10 @@ export function OrderSummary({
   onCouponApplied,
 }: OrderSummaryProps) {
   const t = useTranslations("checkout");
-  const { code: currencyCode, decimalPlaces } = useDisplayCurrency();
   const total = subtotal - promotionDiscount - couponDiscount + (pickupLocationName ? 0 : shippingFee);
 
   return (
-    <div className="rounded-2xl border-2 border-border bg-white p-5 space-y-4 sticky top-24">
+    <div className="rounded-2xl border-2 border-border bg-white p-5 space-y-4">
       <div className="flex items-center gap-2">
         <div className="h-1 w-6 rounded-full bg-primary" />
         <h3 className="text-sm font-bold uppercase tracking-wider text-text-primary">
@@ -48,9 +47,7 @@ export function OrderSummary({
               {t("subtotal")} ({totalQuantity} {t("items")})
             </span>
           </div>
-          <span className="text-sm font-semibold tabular-nums text-text-primary">
-            {subtotal.toFixed(decimalPlaces)} {currencyCode}
-          </span>
+          <Price amount={subtotal} className="text-sm font-semibold text-text-primary" />
         </div>
 
         {promotionDiscount > 0 && (
@@ -59,9 +56,7 @@ export function OrderSummary({
               <Tag className="h-3.5 w-3.5 text-success shrink-0" />
               <span className="text-sm text-success">{t("promotionDiscount")}</span>
             </div>
-            <span className="text-sm font-semibold tabular-nums text-success">
-              -{promotionDiscount.toFixed(decimalPlaces)} {currencyCode}
-            </span>
+            <Price amount={promotionDiscount} prefix="-" className="text-sm font-semibold text-success" />
           </div>
         )}
 
@@ -71,9 +66,7 @@ export function OrderSummary({
               <Minus className="h-3.5 w-3.5 text-success shrink-0" />
               <span className="text-sm text-success">{t("couponDiscount")}</span>
             </div>
-            <span className="text-sm font-semibold tabular-nums text-success">
-              -{couponDiscount.toFixed(decimalPlaces)} {currencyCode}
-            </span>
+            <Price amount={couponDiscount} prefix="-" className="text-sm font-semibold text-success" />
           </div>
         )}
 
@@ -90,9 +83,7 @@ export function OrderSummary({
               <Truck className="h-3.5 w-3.5 text-text-secondary shrink-0" />
               <span className="text-sm text-text-secondary">{t("shipping")}</span>
             </div>
-            <span className="text-sm font-semibold tabular-nums text-text-primary">
-              {shippingFee.toFixed(decimalPlaces)} {currencyCode}
-            </span>
+            <Price amount={shippingFee} className="text-sm font-semibold text-text-primary" />
           </div>
         ) : null}
       </div>
@@ -108,9 +99,7 @@ export function OrderSummary({
           <span className="text-xs font-medium uppercase tracking-wider text-text-secondary">
             {t("total")}
           </span>
-          <span className="text-lg font-bold tabular-nums text-text-primary">
-            {Math.max(0, total).toFixed(decimalPlaces)} {currencyCode}
-          </span>
+          <Price amount={Math.max(0, total)} className="text-lg font-bold text-text-primary" />
         </div>
         <p className="text-[11px] text-text-secondary text-right mt-1">
           ({totalQuantity} {t("items")})
