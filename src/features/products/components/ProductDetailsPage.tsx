@@ -6,9 +6,7 @@ import RetryButton from "@/components/ui/RetryButton";
 import type { ProductCategory } from "../types";
 import { productService } from "@/features/products/services/productService";
 import { guardLoad } from "@/shared/lib/guardedFetch";
-import { getDisplayPrice, getOriginalPrice } from "../utils";
-import { ProductPageContent } from "./ProductPageContent";
-import ProductSlider from "@/features/home/productSlider/ProductSlider";
+import { ProductDetailIsland } from "./ProductDetailIsland";
 
 interface ProductDetailsPageProps {
   slug: string;
@@ -48,17 +46,6 @@ export async function ProductDetailsPage({ slug, locale }: ProductDetailsPagePro
 
   const product = result.data;
 
-  const mappedRelated = product.related_products.map((rp) => ({
-    id: rp.id,
-    image: rp.image?.thumbnail || "",
-    title: rp.name,
-    price: getDisplayPrice(rp),
-    originalPrice: getOriginalPrice(rp),
-    slug: rp.slug ?? `${rp.name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "")}-${rp.id}`,
-    inWishlist: rp.in_wishlist,
-    tags: rp.tags,
-  }));
-
   return (
     <div className="py-6">
       <Breadcrumb
@@ -69,13 +56,12 @@ export async function ProductDetailsPage({ slug, locale }: ProductDetailsPagePro
         ]}
       />
 
-      <ProductPageContent product={product} />
-
-      {mappedRelated.length > 0 && (
-        <div className="mt-12">
-          <ProductSlider title={t("relatedProducts")} items={mappedRelated} />
-        </div>
-      )}
+      <ProductDetailIsland
+        key={slug}
+        slug={slug}
+        locale={locale}
+        initialProduct={product}
+      />
     </div>
   );
 }

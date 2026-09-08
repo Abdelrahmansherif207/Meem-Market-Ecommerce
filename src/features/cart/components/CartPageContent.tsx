@@ -4,6 +4,7 @@ import { useLocale, useTranslations } from "next-intl";
 import Link from "next/link";
 import { Loader2, AlertTriangle, RefreshCw } from "lucide-react";
 import { useAuthStore } from "@/features/auth/store/useAuthStore";
+import { useCurrencyStore } from "@/features/currencies";
 import { useGuestCartStore } from "../store/useGuestCartStore";
 import { useServerCartStore } from "../store/useServerCartStore";
 import { cartService } from "../services/cartService";
@@ -120,6 +121,7 @@ export function CartPageContent({ minimumOrderAmount }: CartPageContentProps) {
   const locale = useLocale();
 
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
+  const selectedCurrency = useCurrencyStore((s) => s.selectedCode);
   const guestItems = useGuestCartStore((s) => s.items);
   const guestRemoveItem = useGuestCartStore((s) => s.removeItem);
   const guestUpdateQuantity = useGuestCartStore((s) => s.updateQuantity);
@@ -279,6 +281,21 @@ export function CartPageContent({ minimumOrderAmount }: CartPageContentProps) {
       abortRef.current?.abort();
     };
   }, []);
+
+  // Silently re-fetch server cart prices when the currency changes. The
+  // client already attaches `X-Currency` to `getCart`; the mount load
+  // covers first paint, so skip the initial run. Guest carts are priced
+  // locally at add-to-cart time and are unaffected.
+  const currencyMounted = useRef(false);
+  useEffect(() => {
+    if (!currencyMounted.current) {
+      currencyMounted.current = true;
+      return;
+    }
+    if (state.source === "server") {
+      refreshCart(); // eslint-disable-line react-hooks/set-state-in-effect
+    }
+  }, [selectedCurrency, state.source, refreshCart]);
 
   // Keep the header badge in sync with whatever items the cart page is showing.
   useEffect(() => {

@@ -1,7 +1,10 @@
 "use client";
 
+import { useCallback } from "react";
 import ProductCard from "@/components/ui/ProductCard";
 import SectionTitle from "@/components/ui/SectionTitle";
+import { getEndingSoonAction } from "../actions/flashSaleCurrencyActions";
+import { useCurrencyRefetch } from "@/features/currencies";
 import type { FlashSaleProduct } from "../types";
 
 interface EndingSoonClientProps {
@@ -10,8 +13,17 @@ interface EndingSoonClientProps {
   locale: string;
 }
 
-export default function EndingSoonClient({ products, period }: EndingSoonClientProps) {
+export default function EndingSoonClient({ products: initialProducts, period, locale }: EndingSoonClientProps) {
   const title = period === "today" ? "Ending Today" : "Ending This Week";
+  const fetchAction = useCallback(
+    (currency: string) => getEndingSoonAction(period, locale, currency),
+    [period, locale],
+  );
+  const { data: products, isRefreshing } = useCurrencyRefetch(
+    fetchAction,
+    initialProducts,
+    initialProducts[0]?.currency?.code,
+  );
 
   return (
     <section className="w-full" aria-label={title}>
@@ -30,16 +42,18 @@ export default function EndingSoonClient({ products, period }: EndingSoonClientP
               title={product.name}
               price={product.current_price}
               originalPrice={product.price}
+              currency={product.currency}
               discountPercent={discountPercent}
               slug={product.slug}
               hasVariants={product.has_variants}
               isInStock={product.in_stock ?? product.quantity > 0}
               flashSaleActive={product.flash_sale_active}
-              inWishlist={product.in_wishlist}
-              tags={product.tags}
-            />
-          );
-        })}
+                inWishlist={product.in_wishlist}
+                tags={product.tags}
+                pricesLoading={isRefreshing}
+          />
+        );
+      })}
       </div>
     </section>
   );

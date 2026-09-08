@@ -4,7 +4,7 @@ import Link from "next/link";
 import { Minus, Plus, Trash2, Loader2 } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { cn } from "@/shared/utils/cn";
-import { currencyLabel } from "@/shared/utils/formatMoney";
+import { useDisplayCurrency } from "@/features/currencies";
 import type { HydratedCartItem } from "../types";
 import { getDisplayPrice, getOriginalPrice } from "@/features/products";
 import type { PriceInfo } from "@/features/products/types";
@@ -35,17 +35,18 @@ export function ProductCartItem({
   onRemove,
 }: ProductCartItemProps) {
   const t = useTranslations("cartPage");
+  const { code: currencyCode, decimalPlaces } = useDisplayCurrency();
   const priceInfo = toPriceInfo(item);
   const displayPrice = getDisplayPrice(priceInfo);
   const originalPrice = getOriginalPrice(priceInfo);
   const hasDiscount = displayPrice < originalPrice;
   const lineTotal = displayPrice * item.quantity;
 
-  const priceStr = displayPrice.toFixed(2);
+  const priceStr = displayPrice.toFixed(decimalPlaces);
   const intPart = priceStr.split(".")[0];
   const decPart = "." + priceStr.split(".")[1];
 
-  const origPriceStr = originalPrice.toFixed(2);
+  const origPriceStr = originalPrice.toFixed(decimalPlaces);
   const origInt = origPriceStr.split(".")[0];
   const origDec = "." + origPriceStr.split(".")[1];
 
@@ -84,7 +85,7 @@ export function ProductCartItem({
                 </span>
                 <div className="flex flex-col">
                   <span className="text-[10px] leading-3 font-medium text-text-muted line-through">{origDec}</span>
-                  <span className="text-[8px] leading-3 font-medium text-text-muted line-through">{currencyLabel()}</span>
+                  <span className="text-[8px] leading-3 font-medium text-text-muted line-through">{currencyCode}</span>
                 </div>
               </div>
             )}
@@ -92,7 +93,7 @@ export function ProductCartItem({
               <span className="text-base leading-5 font-bold">{intPart}</span>
               <div className="flex flex-col">
                 <span className="text-sm font-bold leading-3">{decPart}</span>
-                <span className="text-[10px] font-medium leading-3">{currencyLabel()}</span>
+                <span className="text-[10px] font-medium leading-3">{currencyCode}</span>
               </div>
             </div>
             {hasDiscount && (
@@ -141,7 +142,7 @@ export function ProductCartItem({
             </div>
           )}
           <span className="text-xs font-semibold tabular-nums text-text-secondary" dir="ltr">
-            {lineTotal.toFixed(2)} {currencyLabel()}
+            {lineTotal.toFixed(decimalPlaces)} {currencyCode}
           </span>
         </div>
       </div>

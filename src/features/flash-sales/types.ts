@@ -1,4 +1,5 @@
 import type { ProductTag } from "@/shared/types";
+import type { ProductCurrency } from "@/features/currencies";
 
 export interface FlashSaleImage {
   desktop: string;
@@ -32,6 +33,7 @@ export interface FlashSaleProduct {
   };
   flash_sale_active?: boolean;
   tags?: ProductTag[];
+  currency?: ProductCurrency;
 }
 
 export interface FlashSaleDetail extends FlashSale {

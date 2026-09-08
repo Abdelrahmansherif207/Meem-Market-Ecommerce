@@ -1,9 +1,9 @@
 import { Link } from "@/i18n/navigation";
 import { getTranslations } from "next-intl/server";
 import { ShoppingBag } from "lucide-react";
-import ProductCard from "@/components/ui/ProductCard";
 import EmptyState from "@/components/ui/EmptyState";
 import { brandService } from "../services/brandService";
+import { BrandProductsIsland } from "./BrandProductsIsland";
 import Image from "next/image";
 
 interface BrandDetailPageProps {
@@ -61,29 +61,13 @@ export default async function BrandDetailPage({ slug, locale }: BrandDetailPageP
           }
         />
       ) : (
-        <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6">
-          {products.map((product) => {
-            const discountPercent =
-              product.price_after_discount > 0 && product.price_after_discount < product.price
-                ? Math.round((1 - product.price_after_discount / product.price) * 100)
-                : 0;
-            return (
-              <ProductCard
-                key={product.id}
-                productId={product.id}
-                image={product.image.thumbnail}
-                title={product.name}
-                price={product.price_after_discount > 0 ? product.price_after_discount : product.price}
-                originalPrice={product.price}
-                discountPercent={discountPercent}
-                slug={product.slug}
-                isInStock
-                inWishlist={product.in_wishlist}
-                tags={product.tags}
-              />
-            );
-          })}
-        </div>
+        <BrandProductsIsland
+          key={slug}
+          slug={slug}
+          locale={locale}
+          initialProducts={products}
+          initialCurrency={products[0]?.currency?.code}
+        />
       )}
     </div>
   );

@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
 import { cn } from "@/shared/utils/cn";
 import { useChannelStore } from "@/features/fast-shipping/store/useChannelStore";
+import { useDisplayCurrency } from "@/features/currencies";
 import { useFastShippingStatusStore } from "@/features/fast-shipping/store/useFastShippingStatusStore";
 import { DeliveryModeButton } from "./DeliveryModeButton";
 import type { Channel } from "@/features/fast-shipping/store/useChannelStore";
@@ -13,6 +14,7 @@ export default function DeliveryModes({ compact = false }: { compact?: boolean }
   const channel = useChannelStore((s) => s.channel);
   const setChannel = useChannelStore((s) => s.setChannel);
   const { status, fetchStatus } = useFastShippingStatusStore();
+  const { code: currencyCode, decimalPlaces } = useDisplayCurrency();
   const [scrolled, setScrolled] = useState(false);
   const hideIcons = compact ? false : scrolled;
 
@@ -30,8 +32,8 @@ export default function DeliveryModes({ compact = false }: { compact?: boolean }
   const fee = status?.fee ?? 0;
   const duration = status?.duration_minutes ?? 120;
   const etaText = duration >= 60
-    ? `~${Math.floor(duration / 60)}h ${duration % 60}m (+K.D ${fee.toFixed(2)})`
-    : `~${duration} min (+K.D ${fee.toFixed(2)})`;
+    ? `~${Math.floor(duration / 60)}h ${duration % 60}m (+${currencyCode} ${fee.toFixed(decimalPlaces)})`
+    : `~${duration} min (+${currencyCode} ${fee.toFixed(decimalPlaces)})`;
 
   const handleChannelChange = (newChannel: Channel) => {
     if (newChannel === "fast-shipping" && !isFastAvailable) return;

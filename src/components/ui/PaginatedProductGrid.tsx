@@ -5,6 +5,7 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 import { cn } from "@/shared/utils/cn";
 import ProductCard from "./ProductCard";
 import type { ProductTag } from "@/shared/types";
+import type { ProductCurrency } from "@/features/currencies";
 
 export interface PaginatedProductItem {
   id: number;
@@ -23,11 +24,14 @@ export interface PaginatedProductItem {
   flash_sale_active?: boolean;
   tags?: ProductTag[];
   in_wishlist?: boolean;
+  currency?: ProductCurrency;
 }
 
 interface PaginatedProductGridProps {
   products: PaginatedProductItem[];
   itemsPerPage?: number;
+  /** When true, card price numbers render as skeleton bars. */
+  pricesLoading?: boolean;
 }
 
 function getPageNumbers(current: number, total: number): (number | "...")[] {
@@ -49,6 +53,7 @@ function getPageNumbers(current: number, total: number): (number | "...")[] {
 export default function PaginatedProductGrid({
   products,
   itemsPerPage = 12,
+  pricesLoading = false,
 }: PaginatedProductGridProps) {
   const [currentPage, setCurrentPage] = useState(1);
   const totalPages = Math.ceil(products.length / itemsPerPage);
@@ -79,12 +84,14 @@ export default function PaginatedProductGrid({
               title={product.name}
               price={product.current_price}
               originalPrice={product.price}
+              currency={product.currency}
               discountPercent={discountPercent}
               slug={product.slug}
               hasVariants={product.has_variants}
               isInStock={product.in_stock ?? product.quantity > 0}
               inWishlist={product.in_wishlist}
               tags={product.tags}
+              pricesLoading={pricesLoading}
             />
           );
         })}

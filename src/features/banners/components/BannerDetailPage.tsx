@@ -2,7 +2,7 @@ import { bannerService } from "../services/bannerService";
 import { Link } from "@/i18n/navigation";
 import { getTranslations } from "next-intl/server";
 import { ShoppingBag } from "lucide-react";
-import PaginatedProductGrid from "@/components/ui/PaginatedProductGrid";
+import { BannerProductsIsland } from "./BannerProductsIsland";
 import EmptyState from "@/components/ui/EmptyState";
 import type { BannerDetail } from "../types";
 
@@ -70,7 +70,14 @@ export default async function BannerDetailPage({ slug, locale }: BannerDetailPag
           }
         />
       ) : (
-        <PaginatedProductGrid products={products} itemsPerPage={12} />
+        <BannerProductsIsland
+          key={slug}
+          slug={slug}
+          locale={locale}
+          initialProducts={products}
+          itemsPerPage={12}
+          initialCurrency={products[0]?.currency?.code}
+        />
       )}
     </div>
   );

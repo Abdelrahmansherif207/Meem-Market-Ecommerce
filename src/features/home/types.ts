@@ -1,4 +1,5 @@
 ﻿import type { ProductTag } from "@/shared/types";
+import type { ProductCurrency } from "@/features/currencies";
 
 export interface BannerItem {
   id: string;
@@ -62,6 +63,7 @@ export interface ApiProduct {
   in_stock?: boolean;
   in_wishlist?: boolean;
   tags?: ProductTag[];
+  currency?: ProductCurrency;
   image: {
     thumbnail: string;
     original: Record<string, string>;
@@ -83,6 +85,7 @@ export interface ProductItem {
   flashSaleActive?: boolean;
   inWishlist?: boolean;
   tags?: ProductTag[];
+  currency?: ProductCurrency;
 }
 
 export interface BannerProps {
@@ -160,6 +163,8 @@ export interface ProductSliderProps {
   theme?: "light" | "dark";
   autoplay?: boolean;
   sliderSpeed?: number;
+  /** When true, card price numbers render as skeleton bars. */
+  pricesLoading?: boolean;
 }
 
 export interface SectionFrontSetting {

@@ -1,10 +1,10 @@
 import { Suspense } from "react";
 import type { Metadata } from "next";
 import Breadcrumb from "@/components/ui/Breadcrumb";
-import CategoryProducts from "@/features/categories/components/CategoryProducts";
 import SidebarContent from "@/features/categories/components/SidebarContent";
 import MobileSidebarContent from "@/features/categories/components/MobileSidebarContent";
 import SearchEmptyState from "@/features/search/components/SearchEmptyState";
+import SearchGridIsland from "@/features/search/components/SearchGridIsland";
 import { getCachedSearchPageData } from "@/features/categories/services/categoryProductsService";
 import { getTranslations } from "next-intl/server";
 import { notFound } from "next/navigation";
@@ -42,7 +42,15 @@ async function SearchProductsGrid({
     return <SearchEmptyState />;
   }
 
-  return <CategoryProducts products={products} />;
+  return (
+    <SearchGridIsland
+      key={JSON.stringify(searchParams)}
+      locale={locale}
+      searchParams={searchParams}
+      initialProducts={products}
+      initialCurrency={products[0]?.currency?.code}
+    />
+  );
 }
 
 

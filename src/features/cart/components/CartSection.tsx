@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { Truck, Zap, Gift, Star, ShoppingCart, Car, ShoppingBag, ChevronRight } from "lucide-react";
 import { cn } from "@/shared/utils/cn";
 import { formatMoney } from "@/shared/utils/formatMoney";
+import { useDisplayCurrency } from "@/features/currencies";
 import { Button } from "@/components/ui/Button";
 import { useAuthStore } from "@/features/auth/store/useAuthStore";
 import type { DeliveryType, HydratedCartItem } from "../types";
@@ -32,6 +33,8 @@ export function CartSection({
   const locale = useLocale();
   const router = useRouter();
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
+  const { code: currencyCode, decimalPlaces } = useDisplayCurrency();
+  const moneyOpts = { symbol: currencyCode, decimalPlaces };
 
   const subtotal = calcSubtotal(
     items.map((i) => ({ price: i.current_price, quantity: i.quantity })),
@@ -62,8 +65,8 @@ export function CartSection({
   const milestonePos = (minimumOrderAmount / freeShippingThreshold) * 100;
   const milestones = [
     { label: t("milestoneStart"), sub: null, pos: 0, Icon: Star },
-    { label: formatMoney(minimumOrderAmount, locale), sub: t("milestoneMinimum"), pos: milestonePos, Icon: ShoppingCart },
-    { label: formatMoney(freeShippingThreshold, locale), sub: t("milestoneFreeShipping"), pos: 100, Icon: Car },
+    { label: formatMoney(minimumOrderAmount, locale, moneyOpts), sub: t("milestoneMinimum"), pos: milestonePos, Icon: ShoppingCart },
+    { label: formatMoney(freeShippingThreshold, locale, moneyOpts), sub: t("milestoneFreeShipping"), pos: 100, Icon: Car },
   ];
 
   return (

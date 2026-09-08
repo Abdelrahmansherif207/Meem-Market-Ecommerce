@@ -5,6 +5,7 @@ import { useTranslations } from "next-intl";
 import { Heart, Loader2, Trash2 } from "lucide-react";
 import { Link } from "@/i18n/navigation";
 import { cn } from "@/shared/utils/cn";
+import { useDisplayCurrency } from "@/features/currencies";
 import type { WishlistItem } from "../types";
 import { getWishlistSalePrice, getWishlistVariantLabel } from "../utils";
 
@@ -23,11 +24,12 @@ export function WishlistItemCard({
   const product = item.product;
   const variantLabel = getWishlistVariantLabel(item);
   const sale = getWishlistSalePrice(item);
-  const currency = "K.D";
+  const { code: currencyCode, decimalPlaces } = useDisplayCurrency();
 
-  const priceStr = (sale?.price ?? product.current_price ?? product.price ?? 0).toString();
+  const rawPrice = sale?.price ?? product.current_price ?? product.price ?? 0;
+  const priceStr = rawPrice.toFixed(decimalPlaces);
   const integerPart = priceStr.split(".")[0];
-  const decimalPart = priceStr.includes(".") ? "." + priceStr.split(".")[1] : ".00";
+  const decimalPart = priceStr.includes(".") ? "." + priceStr.split(".")[1] : "";
 
   return (
     <div className="flex gap-3 rounded-xl border border-border bg-white p-3 transition-shadow hover:shadow-sm sm:gap-4">
@@ -67,12 +69,12 @@ export function WishlistItemCard({
               {decimalPart}
             </span>
             <span className="ms-0.5 text-[10px] font-medium leading-none text-text-secondary">
-              {currency}
+              {currencyCode}
             </span>
           </span>
           {sale && (
             <span className="text-xs leading-4 font-medium text-text-muted line-through">
-              {sale.originalPrice.toFixed(2)}
+              {sale.originalPrice.toFixed(decimalPlaces)}
             </span>
           )}
         </div>

@@ -1,6 +1,7 @@
 "use client";
 import { useTranslations } from "next-intl";
 import { Truck, Minus, Tag, ShoppingBag } from "lucide-react";
+import { useDisplayCurrency } from "@/features/currencies";
 import CouponInput from "@/features/coupons/components/CouponInput";
 import CouponBadge from "@/features/coupons/components/CouponBadge";
 import type { AppliedCoupon } from "@/features/coupons/types";
@@ -27,6 +28,7 @@ export function OrderSummary({
   onCouponApplied,
 }: OrderSummaryProps) {
   const t = useTranslations("checkout");
+  const { code: currencyCode, decimalPlaces } = useDisplayCurrency();
   const total = subtotal - promotionDiscount - couponDiscount + (pickupLocationName ? 0 : shippingFee);
 
   return (
@@ -47,7 +49,7 @@ export function OrderSummary({
             </span>
           </div>
           <span className="text-sm font-semibold tabular-nums text-text-primary">
-            {subtotal.toFixed(2)} K.D
+            {subtotal.toFixed(decimalPlaces)} {currencyCode}
           </span>
         </div>
 
@@ -58,7 +60,7 @@ export function OrderSummary({
               <span className="text-sm text-success">{t("promotionDiscount")}</span>
             </div>
             <span className="text-sm font-semibold tabular-nums text-success">
-              -{promotionDiscount.toFixed(2)} K.D
+              -{promotionDiscount.toFixed(decimalPlaces)} {currencyCode}
             </span>
           </div>
         )}
@@ -70,7 +72,7 @@ export function OrderSummary({
               <span className="text-sm text-success">{t("couponDiscount")}</span>
             </div>
             <span className="text-sm font-semibold tabular-nums text-success">
-              -{couponDiscount.toFixed(2)} K.D
+              -{couponDiscount.toFixed(decimalPlaces)} {currencyCode}
             </span>
           </div>
         )}
@@ -89,7 +91,7 @@ export function OrderSummary({
               <span className="text-sm text-text-secondary">{t("shipping")}</span>
             </div>
             <span className="text-sm font-semibold tabular-nums text-text-primary">
-              {shippingFee.toFixed(2)} K.D
+              {shippingFee.toFixed(decimalPlaces)} {currencyCode}
             </span>
           </div>
         ) : null}
@@ -107,7 +109,7 @@ export function OrderSummary({
             {t("total")}
           </span>
           <span className="text-lg font-bold tabular-nums text-text-primary">
-            {Math.max(0, total).toFixed(2)} K.D
+            {Math.max(0, total).toFixed(decimalPlaces)} {currencyCode}
           </span>
         </div>
         <p className="text-[11px] text-text-secondary text-right mt-1">

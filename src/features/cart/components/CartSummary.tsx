@@ -3,6 +3,7 @@
 import { Truck, Zap, Minus } from "lucide-react";
 import { useTranslations, useLocale } from "next-intl";
 import { formatMoney } from "@/shared/utils/formatMoney";
+import { useDisplayCurrency } from "@/features/currencies";
 import { useAuthStore } from "@/features/auth/store/useAuthStore";
 import CouponInput from "@/features/coupons/components/CouponInput";
 import CouponBadge from "@/features/coupons/components/CouponBadge";
@@ -30,6 +31,8 @@ export function CartSummary({
   const t = useTranslations("cartPage");
   const locale = useLocale();
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
+  const { code: currencyCode, decimalPlaces } = useDisplayCurrency();
+  const moneyOpts = { symbol: currencyCode, decimalPlaces };
 
   const totalQty = scheduledQty + fastQty;
   const total = scheduledSubtotal + fastSubtotal - couponDiscount;
@@ -56,7 +59,7 @@ export function CartSummary({
                   {l.label} <span className="text-xs text-text-secondary">({l.qty} {t("cartItems", { count: l.qty })})</span>
                 </span>
               </div>
-              <span className="text-sm font-semibold tabular-nums text-text-primary">{formatMoney(l.sub, locale)}</span>
+              <span className="text-sm font-semibold tabular-nums text-text-primary">{formatMoney(l.sub, locale, moneyOpts)}</span>
             </div>
           ) : null,
         )}
@@ -75,7 +78,7 @@ export function CartSummary({
             <span className="text-sm text-success">{t("discount")}</span>
           </div>
           <span className="text-sm font-semibold tabular-nums text-success">
-            -{formatMoney(couponDiscount, locale)}
+            -{formatMoney(couponDiscount, locale, moneyOpts)}
           </span>
         </div>
       )}
@@ -83,7 +86,7 @@ export function CartSummary({
       <div className="border-t border-border pt-3 space-y-1">
         <div className="flex items-center justify-between">
           <span className="text-xs font-medium uppercase tracking-wider text-text-secondary">{t("total")}</span>
-          <span className="text-lg font-bold tabular-nums text-text-primary">{formatMoney(Math.max(0, total), locale)}</span>
+          <span className="text-lg font-bold tabular-nums text-text-primary">{formatMoney(Math.max(0, total), locale, moneyOpts)}</span>
         </div>
         <p className="text-[11px] text-text-secondary text-end">
           ({totalQty} {t("cartItems", { count: totalQty })})

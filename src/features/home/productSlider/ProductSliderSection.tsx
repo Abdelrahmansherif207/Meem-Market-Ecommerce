@@ -1,4 +1,4 @@
-import ProductSlider from "./ProductSlider";
+import ProductSliderIsland from "../components/ProductSliderIsland";
 import { homePageService } from "../services/homePageService";
 import { toProductItem } from "../utils";
 import type { SectionFrontSetting, ApiProduct } from "../types";
@@ -39,9 +39,13 @@ export default async function ProductSliderSection({
   const items = products.map(toProductItem);
 
   return (
-    <ProductSlider
+    <ProductSliderIsland
+      key={endpoint}
+      fetchKind="products"
+      endpoint={endpoint}
+      locale={locale}
       title={title}
-      items={items}
+      initialItems={items}
       columnsCount={setting?.columns_count}
       badgeText={setting?.badge_text}
       showTimer={setting?.show_timer}

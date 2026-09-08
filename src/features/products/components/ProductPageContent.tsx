@@ -14,9 +14,11 @@ import { getSortedImages } from "../utils";
 
 interface ProductPageContentProps {
   product: ProductDetail;
+  /** When true, price numbers render as skeleton bars. */
+  pricesLoading?: boolean;
 }
 
-export function ProductPageContent({ product }: ProductPageContentProps) {
+export function ProductPageContent({ product, pricesLoading = false }: ProductPageContentProps) {
   const t = useTranslations("product");
   const router = useRouter();
   const [selectedVariantId, setSelectedVariantId] = useState<number | null>(
@@ -37,15 +39,25 @@ export function ProductPageContent({ product }: ProductPageContentProps) {
     <div className="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-[280px_minmax(0,1fr)_minmax(300px,1fr)] lg:gap-8">
       <aside className="hidden space-y-6 lg:order-1 lg:block">
         <ProductDeliveryInfo />
-        <ProductActions product={product} selectedVariant={selectedVariant} />
+        <ProductActions
+          product={product}
+          selectedVariant={selectedVariant}
+          pricesLoading={pricesLoading}
+        />
       </aside>
 
       <main className="space-y-8 border-x border-border/40 px-0 lg:order-2 lg:px-6">
-        <ProductInfo product={product} selectedVariant={selectedVariant} />
+        <ProductInfo
+          product={product}
+          selectedVariant={selectedVariant}
+          pricesLoading={pricesLoading}
+        />
         <ProductVariants
           variants={product.variants}
           selectedVariantId={selectedVariantId}
           onSelectVariant={setSelectedVariantId}
+          currency={product.currency}
+          pricesLoading={pricesLoading}
         />
 
         <section className="lg:hidden">
@@ -84,7 +96,11 @@ export function ProductPageContent({ product }: ProductPageContentProps) {
         )}
 
         <section className="lg:hidden">
-          <ProductActions product={product} selectedVariant={selectedVariant} />
+          <ProductActions
+            product={product}
+            selectedVariant={selectedVariant}
+            pricesLoading={pricesLoading}
+          />
         </section>
 
         <section>

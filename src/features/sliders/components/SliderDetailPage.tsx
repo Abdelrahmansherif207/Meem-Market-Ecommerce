@@ -2,7 +2,7 @@ import { sliderService } from "../services/sliderService";
 import { Link } from "@/i18n/navigation";
 import { getTranslations } from "next-intl/server";
 import { ShoppingBag } from "lucide-react";
-import PaginatedProductGrid from "@/components/ui/PaginatedProductGrid";
+import { SliderProductsIsland } from "./SliderProductsIsland";
 import EmptyState from "@/components/ui/EmptyState";
 import type { SliderDetail } from "../types";
 
@@ -64,7 +64,14 @@ export default async function SliderDetailPage({ slug, locale }: SliderDetailPag
           }
         />
       ) : (
-        <PaginatedProductGrid products={products} itemsPerPage={12} />
+        <SliderProductsIsland
+          key={slug}
+          slug={slug}
+          locale={locale}
+          initialProducts={products}
+          itemsPerPage={12}
+          initialCurrency={products[0]?.currency?.code}
+        />
       )}
     </div>
   );

@@ -26,5 +26,6 @@ export function toProductItem(p: ApiProduct): ProductItem {
     flashSaleActive: hasFlashSale,
     inWishlist: p.in_wishlist,
     tags: p.tags,
+    currency: p.currency,
   };
 }

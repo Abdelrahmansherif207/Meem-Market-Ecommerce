@@ -1,3 +1,5 @@
+import type { ProductCurrency } from "@/features/currencies";
+
 export interface SliderImage {
   desktop: string;
   mobile: string;
@@ -26,6 +28,7 @@ export interface SliderProduct {
   };
   discount_active?: boolean;
   flash_sale_active?: boolean;
+  currency?: ProductCurrency;
 }
 
 export interface SliderDetail extends Slider {

@@ -1,5 +1,6 @@
 "use client";
 
+import { useDisplayCurrency } from "@/features/currencies";
 import type { AppliedCoupon } from "../types";
 
 interface CouponBadgeProps {
@@ -7,6 +8,7 @@ interface CouponBadgeProps {
 }
 
 export default function CouponBadge({ coupon }: CouponBadgeProps) {
+  const { code: currencyCode, decimalPlaces } = useDisplayCurrency();
   return (
     <div className="inline-flex items-center gap-2 rounded-full border border-green-300 bg-success-surface px-4 py-1.5 text-sm">
       <div className="flex flex-col">
@@ -19,7 +21,7 @@ export default function CouponBadge({ coupon }: CouponBadgeProps) {
         <span className="text-success">
           -{coupon.discount_type === "percentage"
             ? `${coupon.discount_amount}%`
-            : `${coupon.discount_amount.toFixed(2)} K.D`}
+            : `${coupon.discount_amount.toFixed(decimalPlaces)} ${currencyCode}`}
         </span>
       )}
     </div>

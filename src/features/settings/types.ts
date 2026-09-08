@@ -1,3 +1,10 @@
+export interface SiteSettingsCurrencyOptions {
+  currency?: string;
+  base_currency_code?: string;
+  catalog_currency_code?: string;
+  currency_selection_enabled?: boolean;
+}
+
 export interface SiteSettings {
   site_name: string;
   site_desc: string;
@@ -18,5 +25,6 @@ export interface SiteSettings {
   phone: string;
   fast_shipping_page_publish: number;
   minimumOrderAmount: number;
-  options: unknown | null;
+  currency_selection_enabled: boolean;
+  options: SiteSettingsCurrencyOptions | null;
 }

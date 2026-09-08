@@ -4,6 +4,7 @@ import { ShoppingBag, Zap, ChevronRight } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
 import { useAuthStore } from "@/features/auth/store/useAuthStore";
+import { useDisplayCurrency } from "@/features/currencies";
 
 interface FastShippingSummaryProps {
   subtotal: number;
@@ -19,6 +20,7 @@ export function FastShippingSummary({
   const t = useTranslations("cartPage");
   const router = useRouter();
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
+  const { code: currencyCode, decimalPlaces } = useDisplayCurrency();
 
   return (
     <div className="rounded-2xl border-2 border-border bg-white p-5 space-y-5">
@@ -41,7 +43,7 @@ export function FastShippingSummary({
             </span>
           </div>
           <span className="text-sm font-semibold tabular-nums text-text-primary">
-            {subtotal.toFixed(2)} K.D
+            {subtotal.toFixed(decimalPlaces)} {currencyCode}
           </span>
         </div>
       )}
@@ -52,7 +54,7 @@ export function FastShippingSummary({
             Total
           </span>
           <span className="text-lg font-bold tabular-nums text-text-primary">
-            {subtotal.toFixed(2)} K.D
+            {subtotal.toFixed(decimalPlaces)} {currencyCode}
           </span>
         </div>
         <p className="text-[11px] text-text-secondary text-right">
