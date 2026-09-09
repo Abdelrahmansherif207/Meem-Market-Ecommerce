@@ -2,14 +2,12 @@
 import { useCallback, useMemo, useState } from "react";
 import { useLocale } from "next-intl";
 import { useAuthStore } from "@/features/auth/store/useAuthStore";
-import { useChannelStore } from "@/features/fast-shipping/store/useChannelStore";
 import { useGuestCartStore } from "../store/useGuestCartStore";
 import { useServerCartStore } from "../store/useServerCartStore";
 import { cartService } from "../services/cartService";
-import type { CartLineIdentity, DeliveryType } from "../types";
 
 /**
- * Unified cart-mutation hook.
+ * Unified cart-mutation hook (single cart).
  *
  * - **Guest:** reads/writes localStorage via `useGuestCartStore`.
  * - **Authenticated:** maintains optimistic per-card quantity state so the UI
@@ -22,24 +20,14 @@ import type { CartLineIdentity, DeliveryType } from "../types";
 export function useCartActions(productId: number) {
   const locale = useLocale();
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
-  const channel = useChannelStore((s) => s.channel);
-  // In fast-shipping mode, adds default to the fast cart — an explicit
-  // per-call deliveryType always wins.
-  const channelDeliveryType: DeliveryType =
-    channel === "fast-shipping" ? "fast" : "scheduled";
 
   // ── Guest store (only used when not authenticated) ──────────────────────
   const guestAddItem = useGuestCartStore((s) => s.addItem);
   const guestRemoveItem = useGuestCartStore((s) => s.removeItem);
   const guestUpdateQuantity = useGuestCartStore((s) => s.updateQuantity);
   const guestQuantity = useGuestCartStore((s) => {
-    const line: CartLineIdentity = { deliveryType: channel === "fast-shipping" ? "fast" : "scheduled" };
     return s.items
-      .filter(
-        (i) =>
-          i.product_id === productId &&
-          (i.deliveryType ?? "scheduled") === line.deliveryType,
-      )
+      .filter((i) => i.product_id === productId)
       .reduce((sum, i) => sum + i.quantity, 0);
   });
 
@@ -64,7 +52,6 @@ export function useCartActions(productId: number) {
     async (item: {
       quantity: number;
       product_variant_id?: number | null;
-      deliveryType?: DeliveryType;
       name: string;
       image: string;
       price: number;
@@ -74,13 +61,11 @@ export function useCartActions(productId: number) {
       in_stock: boolean;
       stock_quantity: number;
     }) => {
-      const deliveryType = item.deliveryType ?? channelDeliveryType;
       if (!isAuthenticated) {
         guestAddItem({
           product_id: productId,
           quantity: item.quantity,
           product_variant_id: item.product_variant_id ?? null,
-          deliveryType,
           name: item.name,
           image: item.image,
           price: item.price,
@@ -103,7 +88,7 @@ export function useCartActions(productId: number) {
           product_id: productId,
           quantity: item.quantity,
           product_variant_id: item.product_variant_id ?? null,
-          shipping_method: deliveryType,
+          shipping_method: "scheduled",
         }, locale);
       } catch {
         // Rollback on failure.
@@ -113,24 +98,18 @@ export function useCartActions(productId: number) {
         setIsPending(false);
       }
     },
-    [isAuthenticated, productId, guestAddItem, adjustQuantity, locale, channelDeliveryType],
+    [isAuthenticated, productId, guestAddItem, adjustQuantity, locale],
   );
 
   // ── increment ────────────────────────────────────────────────────────────
-  // Operates on the channel-default line (explicit deliveryType override via addItem).
   const increment = useCallback(async () => {
     if (!isAuthenticated) {
       const target = useGuestCartStore
         .getState()
-        .items.find(
-          (i) =>
-            i.product_id === productId &&
-            (i.deliveryType ?? "scheduled") === channelDeliveryType,
-        );
+        .items.find((i) => i.product_id === productId);
       // Stepper only renders when quantity > 0, so a line exists in practice.
       if (!target) return;
       guestUpdateQuantity(productId, target.quantity + 1, {
-        deliveryType: channelDeliveryType,
         productVariantId: target.product_variant_id ?? null,
       });
       return;
@@ -142,7 +121,7 @@ export function useCartActions(productId: number) {
 
     try {
       await cartService.addItem(
-        { product_id: productId, quantity: 1, shipping_method: channelDeliveryType },
+        { product_id: productId, quantity: 1, shipping_method: "scheduled" },
         locale,
       );
     } catch {
@@ -151,7 +130,7 @@ export function useCartActions(productId: number) {
     } finally {
       setIsPending(false);
     }
-  }, [isAuthenticated, productId, guestUpdateQuantity, adjustQuantity, locale, channelDeliveryType]);
+  }, [isAuthenticated, productId, guestUpdateQuantity, adjustQuantity, locale]);
 
   // ── decrement ────────────────────────────────────────────────────────────
   const decrement = useCallback(
@@ -159,14 +138,9 @@ export function useCartActions(productId: number) {
       if (!isAuthenticated) {
         const target = useGuestCartStore
           .getState()
-          .items.find(
-            (i) =>
-              i.product_id === productId &&
-              (i.deliveryType ?? "scheduled") === channelDeliveryType,
-          );
+          .items.find((i) => i.product_id === productId);
         if (!target) return;
-        const line: CartLineIdentity = {
-          deliveryType: channelDeliveryType,
+        const line = {
           productVariantId: target.product_variant_id ?? null,
         };
         if (target.quantity <= 1) guestRemoveItem(productId, line);
@@ -187,7 +161,7 @@ export function useCartActions(productId: number) {
         if (newQty === 0) {
           await cartService.removeItem(cartItemId, locale);
         } else {
-          await cartService.updateItem({ item: { product_id: productId, quantity: currentQty, operation: "decrement", product_variant_id: undefined, shipping_method: channelDeliveryType } }, locale);
+          await cartService.updateItem({ item: { product_id: productId, quantity: currentQty, operation: "decrement", product_variant_id: undefined, shipping_method: "scheduled" } }, locale);
         }
       } catch {
         setAuthQuantity((q) => q + 1);
@@ -204,7 +178,6 @@ export function useCartActions(productId: number) {
       guestRemoveItem,
       guestUpdateQuantity,
       adjustQuantity,
-      channelDeliveryType,
     ],
   );
 

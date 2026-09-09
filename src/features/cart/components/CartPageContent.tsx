@@ -15,7 +15,7 @@ import { calcSubtotal, calcTotalQuantity } from "../utils";
 import type { AppliedCoupon } from "@/features/coupons/types";
 import { couponService } from "@/features/coupons/services/couponService";
 import { ApiError } from "@/shared/lib/api";
-import type { HydratedCartItem, CartApiItem, CartApiCart, CartLineIdentity, DeliveryType } from "../types";
+import type { HydratedCartItem, CartApiItem, CartApiCart, CartLineIdentity } from "../types";
 import { getCartLineKey, matchesCartLine } from "../types";
 import EmptyState from "@/components/ui/EmptyState";
 
@@ -29,7 +29,7 @@ type CartState = {
   source: CartSource;
   serverItems: HydratedCartItem[];
   error: string | null;
-  /** Cart line keys (product + variant + delivery type) with an in-flight API request. */
+  /** Cart line keys (product + variant) with an in-flight API request. */
   pendingItemIds: Set<string>;
 };
 
@@ -176,12 +176,7 @@ export function CartPageContent({ minimumOrderAmount }: CartPageContentProps) {
   // processCart — map server cart data into all local state
   // -------------------------------------------------------------------------
   const processCart = useCallback((cart: CartApiCart) => {
-    const mapItem = (item: CartApiItem, fallbackType: DeliveryType): HydratedCartItem => {
-      // Trust the item's own shipping_method flag first ("SCHEDULED" / "FAST"),
-      // fall back to the array it arrived in.
-      const method = item.shipping_method?.toUpperCase();
-      const deliveryType: DeliveryType =
-        method === "FAST" ? "fast" : method === "SCHEDULED" ? "scheduled" : fallbackType;
+    const mapItem = (item: CartApiItem): HydratedCartItem => {
       return {
         product_id: item.product_id,
         product_variant_id: item.product_variant_id ?? null,
@@ -203,17 +198,19 @@ export function CartPageContent({ minimumOrderAmount }: CartPageContentProps) {
         // count — leave stock_quantity unset rather than fabricating one.
         in_stock: true,
         stock_quantity: undefined,
-        deliveryType,
       };
     };
 
     const items: HydratedCartItem[] = [];
 
     if (cart.normal_items) {
-      items.push(...cart.normal_items.map((i) => mapItem(i, "scheduled")));
+      items.push(...cart.normal_items.map((i) => mapItem(i)));
     }
-    if (cart.fast_items) {
-      items.push(...cart.fast_items.map((i) => mapItem(i, "fast")));
+    // Defensive: backend may still return legacy fast_items — merge into the
+    // single cart instead of dropping them.
+    const legacyFast = (cart as unknown as { fast_items?: CartApiItem[] }).fast_items;
+    if (legacyFast) {
+      items.push(...legacyFast.map((i) => mapItem(i)));
     }
 
     dispatch({ type: "SET_SERVER", items });
@@ -350,7 +347,6 @@ export function CartPageContent({ minimumOrderAmount }: CartPageContentProps) {
       if (!item || !item.cartItemId) return;
       const pendingKey = getCartLineKey(productId, {
         productVariantId: item.product_variant_id ?? null,
-        deliveryType: item.deliveryType ?? line.deliveryType ?? "scheduled",
       });
       if (state.pendingItemIds.has(pendingKey)) return;
 
@@ -364,7 +360,7 @@ export function CartPageContent({ minimumOrderAmount }: CartPageContentProps) {
         } else {
           dispatch({ type: "UPDATE_ITEM", productId, quantity, line });
           const operation = quantity > item.quantity ? "increment" : "decrement";
-          const updatedCart = await cartService.updateItem({ item: { product_id: productId, quantity: item.quantity, operation, product_variant_id: item.product_variant_id ?? null, shipping_method: item.deliveryType ?? "scheduled" } }, locale);
+          const updatedCart = await cartService.updateItem({ item: { product_id: productId, quantity: item.quantity, operation, product_variant_id: item.product_variant_id ?? null, shipping_method: "scheduled" } }, locale);
           processCart(updatedCart);
         }
       } catch {
@@ -427,7 +423,6 @@ export function CartPageContent({ minimumOrderAmount }: CartPageContentProps) {
   const displayItems: HydratedCartItem[] =
     state.source === "server" ? state.serverItems : guestItems.map((g) => ({
       ...g,
-      deliveryType: g.deliveryType ?? "scheduled",
       name: g.name ?? `Product #${g.product_id}`,
       image: g.image ?? "",
       price: g.price ?? 0,
@@ -438,17 +433,10 @@ export function CartPageContent({ minimumOrderAmount }: CartPageContentProps) {
       stock_quantity: g.stock_quantity ?? 0,
     }));
 
-  const scheduledItems = displayItems.filter((i) => i.deliveryType === "scheduled");
-  const fastItems = displayItems.filter((i) => i.deliveryType === "fast");
-
-  const scheduledSubtotal = calcSubtotal(
-    scheduledItems.map((i) => ({ price: i.current_price, quantity: i.quantity })),
+  const subtotal = calcSubtotal(
+    displayItems.map((i) => ({ price: i.current_price, quantity: i.quantity })),
   );
-  const fastSubtotal = calcSubtotal(
-    fastItems.map((i) => ({ price: i.current_price, quantity: i.quantity })),
-  );
-  const scheduledQty = calcTotalQuantity(scheduledItems);
-  const fastQty = calcTotalQuantity(fastItems);
+  const totalQuantity = calcTotalQuantity(displayItems);
 
   // -------------------------------------------------------------------------
   // Render states
@@ -532,16 +520,7 @@ export function CartPageContent({ minimumOrderAmount }: CartPageContentProps) {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           <div className="lg:col-span-2 space-y-8">
             <CartSection
-              deliveryType="scheduled"
-              items={scheduledItems}
-              pendingItemIds={state.pendingItemIds}
-              onUpdateQuantity={handleUpdateQuantity}
-              onRemove={handleRemove}
-              minimumOrderAmount={minimumOrderAmount}
-            />
-            <CartSection
-              deliveryType="fast"
-              items={fastItems}
+              items={displayItems}
               pendingItemIds={state.pendingItemIds}
               onUpdateQuantity={handleUpdateQuantity}
               onRemove={handleRemove}
@@ -555,10 +534,8 @@ export function CartPageContent({ minimumOrderAmount }: CartPageContentProps) {
               style={stickyTop !== null ? { top: stickyTop } : undefined}
             >
               <CartSummary
-                scheduledSubtotal={scheduledSubtotal}
-                scheduledQty={scheduledQty}
-                fastSubtotal={fastSubtotal}
-                fastQty={fastQty}
+                subtotal={subtotal}
+                quantity={totalQuantity}
                 appliedCoupon={appliedCoupon}
                 couponDiscount={couponDiscount}
                 onCouponApplied={async () => { await refreshCart(); }}

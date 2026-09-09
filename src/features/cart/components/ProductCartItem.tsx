@@ -76,7 +76,6 @@ export function ProductCartItem({
 
   const line: CartLineIdentity = {
     productVariantId: item.product_variant_id ?? null,
-    deliveryType: item.deliveryType ?? "scheduled",
   };
 
   const btnClass =

@@ -3,7 +3,6 @@ import { SearchAutocomplete } from "../header/SearchAutocomplete";
 import { LocaleSwitcher } from "../header/LocaleSwitcher";
 import { CurrencySwitcher } from "@/features/currencies";
 import { WishlistIcon } from "../header/WishlistIcon";
-import DeliveryModes from "../header/DeliveryModes";
 import { NotificationBell } from "@/features/notifications";
 import { LocationDisplay } from "@/features/location";
 import { MobileAuthButton } from "@/features/auth/components/MobileAuthButton";
@@ -34,7 +33,6 @@ export default async function MobileHeader({ currencyEnabled = false }: { curren
           highlightText={t("mainPlaceholderHighlight")}
           wrapperClassName="w-full"
         />
-        <DeliveryModes compact />
       </div>
     </header>
   );

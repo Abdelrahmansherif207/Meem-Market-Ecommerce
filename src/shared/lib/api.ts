@@ -1,4 +1,4 @@
-import { AUTH_TOKEN_STORAGE_KEY, CHANNEL_STORAGE_KEY } from "@/shared/constants/storageKeys";
+import { AUTH_TOKEN_STORAGE_KEY } from "@/shared/constants/storageKeys";
 import { CURRENCY_HEADER, getStoredClientCurrency, normalizeCurrencyCode } from "@/shared/lib/currency";
 import { notifyUnauthorized } from "@/shared/lib/unauthorizedEvent";
 
@@ -28,19 +28,6 @@ export const API_REQUEST_CREDENTIALS: RequestCredentials = "same-origin";
 function getAuthToken() {
   if (typeof window === "undefined") return null;
   return window.localStorage.getItem(AUTH_TOKEN_STORAGE_KEY);
-}
-
-async function getChannel() {
-  if (typeof window === "undefined") {
-    try {
-      const { cookies } = await import("next/headers");
-      const cookieStore = await cookies();
-      return cookieStore.get(CHANNEL_STORAGE_KEY)?.value ?? "home";
-    } catch {
-      return "home";
-    }
-  }
-  return window.localStorage.getItem(CHANNEL_STORAGE_KEY) ?? "home";
 }
 
 function extractApiMessage(body: Record<string, unknown>): string | undefined {
@@ -80,8 +67,6 @@ type ApiFetchOptions = RequestInit & {
   lang?: string;
   /** Request timeout in ms. Defaults to 15000. Set to 0 to disable. */
   timeout?: number;
-  /** Set to false to skip the X-Channel header (e.g. status endpoint). */
-  channel?: boolean;
   /**
    * Guest currency code (e.g. `"SAR"`). Normalized to uppercase 3-letter;
    * invalid/missing values omit the `X-Currency` header so the Backend
@@ -105,7 +90,6 @@ export async function apiFetch<T>(
   const {
     lang,
     timeout: timeoutMs = 15_000,
-    channel: includeChannel = true,
     currency: currencyOption,
     ...requestOptions
   } = options;
@@ -125,11 +109,6 @@ export async function apiFetch<T>(
 
   if (lang && !headers.has("lang")) {
     headers.set("lang", lang);
-  }
-
-  const channel = includeChannel ? await getChannel() : null;
-  if (channel && !headers.has("X-Channel")) {
-    headers.set("X-Channel", channel);
   }
 
   // Guest currency travels via `X-Currency` (no currency cookie exists).

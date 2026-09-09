@@ -75,20 +75,6 @@
     },
     "location": {
       "loading": "جاري التحديد..."
-    },
-    "deliveryModes": {
-      "title": "خيارات التسليم",
-      "scheduled": "توصيل ب موعد",
-      "now": "توصيل سريع",
-      "nowEta": "120 دقيقة",
-      "unavailable": "غير متاح حاليا",
-      "electronics": "إلكترونيات…",
-      "fastDelivery": "التسليم السريع",
-      "fastDeliveryDesc": "احصل عليه غدًا",
-      "standardDelivery": "التسليم العادي",
-      "standardDeliveryDesc": "التسليم في 3-5 أيام عمل",
-      "freeShipping": "شحن مجاني",
-      "freeShippingDesc": "على الطلبات فوق 50 ريال"
     }
   },
   "home": {
@@ -166,10 +152,7 @@
     "inStock": "متوفر",
     "removeItem": "إزالة العنصر",
     "decreaseQuantity": "تقليل الكمية",
-    "increaseQuantity": "زيادة الكمية",
-    "fastTitle": "توصيل سريع",
-    "fastEta": "120 دقيقة",
-    "fastCheckout": "الشراء السريع"
+    "increaseQuantity": "زيادة الكمية"
   },
   "wishlist": {
     "metaTitle": "قائمة الرغبات",
@@ -562,10 +545,7 @@
       "cityRequired": "المدينة مطلوبة",
       "countryRequired": "الدولة مطلوبة",
       "streetRequired": "عنوان الشارع مطلوب"
-    },
-    "fastCheckout": "الشراء السريع",
-    "fastDelivery": "توصيل سريع",
-    "fastDeliveryDesc": "ادفع واحصل على منتجاتك السريعة فورًا"
+    }
   },
   "siteReviews": {
     "metaTitle": "آراء العملاء",

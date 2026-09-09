@@ -96,11 +96,6 @@ button {
   --header-gradient-end: rgb(255, 255, 255);
 }
 
-[data-channel="fast-shipping"] {
-  --header-gradient-start: rgb(252, 238, 190);
-  --header-gradient-end: rgb(255, 253, 248);
-}
-
 @layer utilities {
   .font-heading {
     font-family: var(--font-family-heading);

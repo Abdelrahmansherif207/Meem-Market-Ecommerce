@@ -18,7 +18,6 @@ import {
   NotificationRealtimeProvider,
   NotificationToast,
 } from "@/features/notifications";
-import { ChannelThemeProvider } from "@/features/fast-shipping/components/ChannelThemeProvider";
 import { IBM_Plex_Sans_Arabic } from "next/font/google";
 import { cn } from "@/shared/utils/cn";
 import { getSiteMeta } from "@/features/settings/lib/metadata";
@@ -127,7 +126,6 @@ export default async function RootLayout({
             <MobileHeader currencyEnabled={currencyEnabled} />
           </div>
           <MobileBottomNav />
-          <ChannelThemeProvider />
           <AuthSyncHandler />
           <NotificationSyncHandler />
           <NotificationRealtimeProvider />

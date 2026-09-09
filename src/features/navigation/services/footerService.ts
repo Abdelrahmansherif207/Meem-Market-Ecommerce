@@ -18,7 +18,6 @@ export async function assembleFooterContent(locale: string): Promise<AssembledFo
   let siteName = "";
   let copyright = "";
   const settingsSocial: { platform: string; url: string }[] = [];
-  let fastShippingPublished = false;
 
   try {
     const settings = await getCachedSettings(locale);
@@ -26,7 +25,6 @@ export async function assembleFooterContent(locale: string): Promise<AssembledFo
     logoSrc = settings.footer_logo || settings.logo || logoSrc;
     siteName = settings.site_name || siteName;
     copyright = settings.site_copy_right || "";
-    if (settings.fast_shipping_page_publish) fastShippingPublished = true;
 
     const platformMap: Record<string, string> = {
       facebook: settings.facebook,
@@ -41,19 +39,6 @@ export async function assembleFooterContent(locale: string): Promise<AssembledFo
     }
   } catch {
     // use defaults
-  }
-
-  if (fastShippingPublished) {
-    const csColumn = data.columns.find(
-      (c) => c.title === "Customer Service" || c.title === "خدمة العملاء",
-    );
-    if (csColumn) {
-      csColumn.links.push({
-        id: 99,
-        label: locale === "ar" ? "الشحن السريع" : "Fast Shipping",
-        slug: "/fast-shipping",
-      });
-    }
   }
 
   const baseLinks: SocialLink[] = data.socialLinks;

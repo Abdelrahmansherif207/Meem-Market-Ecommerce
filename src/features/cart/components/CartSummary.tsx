@@ -1,6 +1,6 @@
 "use client";
 
-import { Truck, Zap, Minus } from "lucide-react";
+import { Truck, Minus } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { Price } from "@/components/ui/Price";
 import { useAuthStore } from "@/features/auth/store/useAuthStore";
@@ -9,20 +9,16 @@ import CouponBadge from "@/features/coupons/components/CouponBadge";
 import type { AppliedCoupon } from "@/features/coupons/types";
 
 interface CartSummaryProps {
-  scheduledSubtotal: number;
-  scheduledQty: number;
-  fastSubtotal: number;
-  fastQty: number;
+  subtotal: number;
+  quantity: number;
   appliedCoupon?: AppliedCoupon | null;
   couponDiscount?: number;
   onCouponApplied?: () => void;
 }
 
 export function CartSummary({
-  scheduledSubtotal,
-  scheduledQty,
-  fastSubtotal,
-  fastQty,
+  subtotal,
+  quantity,
   appliedCoupon,
   couponDiscount = 0,
   onCouponApplied,
@@ -30,13 +26,8 @@ export function CartSummary({
   const t = useTranslations("cartPage");
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
 
-  const totalQty = scheduledQty + fastQty;
-  const total = scheduledSubtotal + fastSubtotal - couponDiscount;
-
-  const lines = [
-    { Icon: Truck, label: t("scheduledTitle"), qty: scheduledQty, sub: scheduledSubtotal },
-    { Icon: Zap, label: t("fastTitle"), qty: fastQty, sub: fastSubtotal },
-  ];
+  const totalQty = quantity;
+  const total = subtotal - couponDiscount;
 
   return (
     <div className="rounded-2xl border-2 border-border bg-white p-5 space-y-5">
@@ -46,18 +37,16 @@ export function CartSummary({
       </div>
 
       <div className="space-y-3">
-        {lines.map((l) =>
-          l.qty > 0 ? (
-            <div key={l.label} className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <l.Icon className="h-3.5 w-3.5 text-text-secondary shrink-0" />
-                <span className="text-sm text-text-secondary">
-                  {l.label} <span className="text-xs text-text-secondary">({l.qty} {t("cartItems", { count: l.qty })})</span>
-                </span>
-              </div>
-              <Price amount={l.sub} className="text-sm font-semibold text-text-primary" />
+        {totalQty > 0 && (
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Truck className="h-3.5 w-3.5 text-text-secondary shrink-0" />
+              <span className="text-sm text-text-secondary">
+                {t("scheduledTitle")} <span className="text-xs text-text-secondary">({totalQty} {t("cartItems", { count: totalQty })})</span>
+              </span>
             </div>
-          ) : null,
+            <Price amount={subtotal} className="text-sm font-semibold text-text-primary" />
+          </div>
         )}
       </div>
 

@@ -27,14 +27,12 @@ export const useGuestCartStore = create<GuestCartState>()(
       syncError: null,
 
       addItem: (item) => {
-        const deliveryType = item.deliveryType ?? "scheduled";
         const variantId = item.product_variant_id ?? null;
         set((state) => {
           const existing = state.items.find(
             (i) =>
               i.product_id === item.product_id &&
-              (i.product_variant_id ?? null) === variantId &&
-              (i.deliveryType ?? "scheduled") === deliveryType,
+              (i.product_variant_id ?? null) === variantId,
           );
           if (existing) {
             return {
@@ -45,7 +43,7 @@ export const useGuestCartStore = create<GuestCartState>()(
               ),
             };
           }
-          return { items: [...state.items, { ...item, deliveryType, product_variant_id: variantId }] };
+          return { items: [...state.items, { ...item, product_variant_id: variantId }] };
         });
       },
 
@@ -79,7 +77,7 @@ export const useGuestCartStore = create<GuestCartState>()(
           product_id: i.product_id,
           quantity: i.quantity,
           product_variant_id: i.product_variant_id ?? null,
-          shipping_method: i.deliveryType ?? "scheduled",
+          shipping_method: "scheduled" as const,
         })),
       }),
 
