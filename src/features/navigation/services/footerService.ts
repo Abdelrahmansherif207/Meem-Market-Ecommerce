@@ -13,8 +13,8 @@ export interface AssembledFooterContent {
 export async function assembleFooterContent(locale: string): Promise<AssembledFooterContent> {
   const data = await footerService.getFooter(locale);
 
-  let logoSrc = "/new-footer-logo.png";
-  let mainLogoSrc = "/meem-new.png";
+  let logoSrc = "/catch-footer-logo.jpeg";
+  let mainLogoSrc = "/catch-logo.png";
   let siteName = "";
   let copyright = "";
   const settingsSocial: { platform: string; url: string }[] = [];

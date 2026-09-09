@@ -11,9 +11,9 @@ export const DEFAULT_SITE_DESCRIPTION: Record<string, string> = {
   en: "Shop the best products at Meem Market — electronics, fashion, home goods, and more.",
 };
 
-export const DEFAULT_FAVICON = "/meem-icon.jpeg";
-export const DEFAULT_LOGO = "/meem-new.png";
-export const DEFAULT_FOOTER_LOGO = "/new-footer-logo.png";
+export const DEFAULT_FAVICON = "/catch-footer-logo.jpeg";
+export const DEFAULT_LOGO = "/catch-logo.png";
+export const DEFAULT_FOOTER_LOGO = "/catch-footer-logo.jpeg";
 
 export interface SiteMeta {
   siteName: string;
@@ -42,7 +42,7 @@ export async function getSiteMeta(locale: string): Promise<SiteMeta> {
     if (settings.favicon) meta.favicon = settings.favicon;
     if (settings.logo) meta.logo = settings.logo;
   } catch {
-    // settings unavailable — keep locale-aware Meem Market defaults
+    // settings unavailable — keep locale-aware Catch Beauty defaults
   }
 
   return meta;

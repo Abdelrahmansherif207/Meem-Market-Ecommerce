@@ -38,7 +38,7 @@ export default function MainNav({ settingsLogo, currencyEnabled = false }: { set
   return (
     <div className="grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-3 md:gap-6">
       <div className="flex items-center gap-2 md:gap-3 shrink-0">
-        <Logo src={settingsLogo || "/meem-new.png"} alt="Logo" priority width={140} height={91} />
+        <Logo src={settingsLogo || "/catch-logo.png"} alt="Logo" priority className="rounded-full" width={60} height={60} />
         <LocationDisplay />
       </div>
 

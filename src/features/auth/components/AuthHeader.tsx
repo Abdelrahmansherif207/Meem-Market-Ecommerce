@@ -30,7 +30,7 @@ export function AuthHeader({ isLogin, isOtp, logo }: AuthHeaderProps) {
   return (
     <>
       <div className="mb-4 flex justify-center">
-        <Logo src={logo || DEFAULT_LOGO} alt="Meem Market" width={100} height={40} className="rounded-lg" />
+        <Logo src={logo || DEFAULT_LOGO} alt="Catch Beauty" width={100} height={40} className="rounded-lg" />
       </div>
       {!isLogin && (
         <h2 className="text-center text-2xl font-semibold text-text-primary sm:text-3xl">
