@@ -104,7 +104,7 @@ function getMockFooterData(lang: string): FooterData {
         id: 3,
         title: isAr ? "معلومات عنا" : "About Us",
         links: [
-          { id: 6, label: isAr ? "عن ميم ماركت" : "About Meem Market", slug: "/info/about" },
+          { id: 6, label: isAr ? "عن كاتش بيوتي" : "About Catch Beauty", slug: "/info/about" },
           { id: 7, label: isAr ? "شركتنا" : "Our Company", slug: "/info/company" },
           { id: 8, label: isAr ? "المسؤولية المجتمعية" : "Community & Society", slug: "/info/community" },
           { id: 9, label: isAr ? "النشرة البريدية" : "Newsletter", slug: "/info/newsletter" },
@@ -142,10 +142,10 @@ function getMockFooterData(lang: string): FooterData {
     ],
     contactInfo: {
       stayInTouchText: isAr ? "ابق على تواصل معنا" : "Stay in touch with us",
-      whatsappUrl: "https://api.whatsapp.com/send?phone=%2B201111185469",
+      whatsappUrl: "https://wa.me/97496367199",
       assistanceText: isAr ? "تحدث معنا للمساعدة" : "Have a question? We are here to help.",
       callUsText: isAr ? "اتصل بنا للمساعدة" : "Call us for assistance",
-      phoneNumber: "16061",
+      phoneNumber: "+974 9636 7199",
     },
     bottomRow: {
       title: isAr ? "حمل تطبيقنا" : "Download Our App",

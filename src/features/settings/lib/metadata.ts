@@ -2,13 +2,13 @@ import type { Metadata } from "next";
 import { getCachedSettings } from "../services/settingsService";
 
 export const DEFAULT_SITE_NAME: Record<string, string> = {
-  ar: "ميم ماركت",
-  en: "Meem Market",
+  ar: "كاتش بيوتي",
+  en: "Catch Beauty",
 };
 
 export const DEFAULT_SITE_DESCRIPTION: Record<string, string> = {
-  ar: "تسوق أفضل المنتجات في ميم ماركت - إلكترونيات، أزياء، منتجات المنزل والمزيد",
-  en: "Shop the best products at Meem Market — electronics, fashion, home goods, and more.",
+  ar: "تسوقي أفضل المنتجات في كاتش بيوتي — الجمال والعناية الشخصية والمزيد في قطر",
+  en: "Shop the best products at Catch Beauty — beauty, personal care, and more in Qatar.",
 };
 
 export const DEFAULT_FAVICON = "/catch-footer-logo.jpeg";
