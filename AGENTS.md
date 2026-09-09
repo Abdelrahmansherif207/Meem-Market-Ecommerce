@@ -7,33 +7,33 @@ This file is the architectural single source of truth for all AI agents, assista
 
 ```text
 .
-â”œâ”€â”€ AGENTS.md
-â”œâ”€â”€ CLAUDE.md
-â”œâ”€â”€ messages/                 # next-intl JSON messages (repo root)
-â”œâ”€â”€ public/                   # static assets
-â”œâ”€â”€ next.config.ts            # Next + next-intl plugin config
-â”œâ”€â”€ tsconfig.json             # `@/*` points to `src/*`
-â””â”€â”€ src/
-    â”œâ”€â”€ app/                  # Next.js App Router (routing + layouts only)
-    â”œâ”€â”€ components/
-    â”‚   â””â”€â”€ ui/               # reusable, presentational primitives ONLY
-    â”œâ”€â”€ features/             # business/domain ownership (feature-first)
-    â”‚   â”œâ”€â”€ auth/
-    â”‚   â”œâ”€â”€ cart/
-    â”‚   â”œâ”€â”€ checkout/
-    â”‚   â”œâ”€â”€ home/
-    â”‚   â”œâ”€â”€ navigation/
-    â”‚   â”œâ”€â”€ products/
-    â”‚   â”œâ”€â”€ categories/
-    â”‚   â””â”€â”€ ...               # new ecommerce features go here
-    â”œâ”€â”€ shared/               # reusable infrastructure (no domain logic)
-    â”‚   â”œâ”€â”€ lib/              # shared clients (fetch wrappers, SDK instances)
-    â”‚   â”œâ”€â”€ hooks/            # generic reusable hooks (non-domain)
-    â”‚   â”œâ”€â”€ utils/            # helpers like `cn`, formatters, etc.
-    â”‚   â”œâ”€â”€ constants/        # cross-feature constants (keys, enums)
-    â”‚   â””â”€â”€ types/            # cross-feature types (API response, core models)
-    â”œâ”€â”€ stores/               # global cross-feature state only
-    â””â”€â”€ i18n/                 # next-intl routing/navigation helpers
+|-- AGENTS.md
+|-- CLAUDE.md
+|-- messages/                 # next-intl JSON messages (repo root)
+|-- public/                   # static assets
+|-- next.config.ts            # Next + next-intl plugin config
+|-- tsconfig.json             # `@/*` points to `src/*`
++-- src/
+    |-- app/                  # Next.js App Router (routing + layouts only)
+    |-- components/
+    |   +-- ui/               # reusable, presentational primitives ONLY
+    |-- features/             # business/domain ownership (feature-first)
+    |   |-- auth/
+    |   |-- cart/
+    |   |-- checkout/
+    |   |-- home/
+    |   |-- navigation/
+    |   |-- products/
+    |   |-- categories/
+    |   +-- ...               # new ecommerce features go here
+    |-- shared/               # reusable infrastructure (no domain logic)
+    |   |-- lib/              # shared clients (fetch wrappers, SDK instances)
+    |   |-- hooks/            # generic reusable hooks (non-domain)
+    |   |-- utils/            # helpers like `cn`, formatters, etc.
+    |   |-- constants/        # cross-feature constants (keys, enums)
+    |   +-- types/            # cross-feature types (API response, core models)
+    |-- stores/               # global cross-feature state only
+    +-- i18n/                 # next-intl routing/navigation helpers
 ```
 
 ## Folder Responsibilities
@@ -52,7 +52,7 @@ This file is the architectural single source of truth for all AI agents, assista
 - Rules:
   - Prefer colocation: put feature UI + state + services together.
   - Feature code can import from `shared/*` and `components/ui/*`.
-  - Cross-feature imports are allowed, but prefer the owning featureâ€™s public surface:
+  - Cross-feature imports are allowed, but prefer the owning feature's public surface:
     - Prefer `src/features/<feature>/index.ts` over deep internal paths.
 
 ### `src/components/ui/` (presentational primitives only)
@@ -67,7 +67,7 @@ This file is the architectural single source of truth for all AI agents, assista
   - API/fetch clients, generic hooks, formatting helpers, shared constants, shared base types.
 - Rules:
   - `shared/*` must not import from `features/*`.
-  - If the code â€œspeaks ecommerceâ€‌ (cart totals, product pricing rules), it belongs in that feature.
+  - If the code \"speaks ecommerce\" (cart totals, product pricing rules), it belongs in that feature.
 
 ### `src/stores/` (global cross-feature state)
 - Only for state shared across multiple features (rare).
@@ -82,7 +82,7 @@ This file is the architectural single source of truth for all AI agents, assista
 
 ## Page Composition Philosophy
 
-Pages in `src/app/` should mostly compose feature-level â€œpage componentsâ€‌.
+Pages in `src/app/` should mostly compose feature-level \"page components\".
 
 Example:
 ```ts
@@ -97,21 +97,21 @@ export default function Page() {
 ## Shared vs Feature: How to Decide
 
 Put it in a **feature** when:
-- Itâ€™s tied to a domain (cart, checkout, auth, products, categories).
+- It's tied to a domain (cart, checkout, auth, products, categories).
 - It changes when that domain evolves.
 - It uses feature state, feature services, or feature-specific types.
 
 Put it in **shared** when:
-- Itâ€™s infrastructure (API client), a generic helper (`cn`, `formatMoney`), or cross-feature types (`ApiResponse`).
+- It's infrastructure (API client), a generic helper (`cn`, `formatMoney`), or cross-feature types (`ApiResponse`).
 - It has no knowledge of ecommerce concepts.
 
 Put it in **components/ui** when:
-- Itâ€™s a pure presentational primitive with no domain ownership.
+- It's a pure presentational primitive with no domain ownership.
 - It can be used anywhere without importing business logic.
 
 ## Ecommerce Examples (Where New Code Goes)
 
-- Add â€œWishlistâ€‌:
+- Add \"Wishlist\":
   - `src/features/wishlist/components/WishlistButton.tsx`
   - `src/features/wishlist/store/useWishlistStore.ts`
   - `src/features/wishlist/services/wishlistService.ts`
@@ -131,10 +131,47 @@ Put it in **components/ui** when:
 
 ## Anti-Patterns (Do Not Do)
 
-- Putting domain logic in `src/app/` (pages/layouts become â€œgod componentsâ€‌).
+- Putting domain logic in `src/app/` (pages/layouts become \"god components\").
 - Creating global folders by file type (e.g. `src/services/*`, `src/hooks/*`) instead of feature ownership.
 - A giant `shared/components` dumping ground.
 - Feature stores placed in `src/stores/`.
-- Deep cross-feature imports into another featureâ€™s internals (prefer feature public exports).
+- Deep cross-feature imports into another feature's internals (prefer feature public exports).
 - Deep route-only component folders that duplicate features (keep folders shallow).
+
+## Git Workflow (Base -> Client Branches)
+
+### Branch model
+- `main` = shared/base project. Generic, reusable, stable. Never contains client-specific changes.
+- Each client gets its own branch created from `main`: `git checkout -b project/<name> main`
+  (e.g. `project/catch-beauty`). It starts identical to Base (all features).
+- Daily work: commit directly on `project/<name>`, or use sub-branches
+  `project/<name>/feature-x` merged back into it. Both allowed.
+
+### Reference folder
+- `Catch-Beauty-Ecommerce/` is a gitignored reference implementation for comparison only.
+  Never copy it as a starting point, never `git add` it. Verify ignore with
+  `git check-ignore -v Catch-Beauty-Ecommerce/`.
+
+### What a client branch may do
+- Add, remove, modify, or simplify Base features; change CSS tokens, branding,
+  logos, metadata, content, translations. Goal is NOT to stay identical to Base.
+- Before implementing, check whether Base already covers the need; keep changes
+  minimal and follow the folder-boundary rules above.
+
+### Merge direction (one-way)
+- `main` -> project branches (via `git fetch origin; git merge origin/main`). Never rebase shared history.
+- Project -> `main` is forbidden, except intentional promotion of shared functionality:
+  make the fix on `main` via small PR, then merge `main` into the project branch.
+
+### Commit convention
+- `chore: ...` for repo hygiene, `feat(<project>): ...` / `fix(<project>): ...` for client work
+  (e.g. `feat(catch-beauty): remove fast-shipping, single cart`). `main` history stays generic.
+
+### Verification before commit/push
+- `git status --short --branch`, `git diff --stat`, `npx tsc --noEmit`,
+  confirm reference folder absent from diff and `main` untouched.
+
+### Assistant permission rule
+- AI agents must never commit or push without the user's explicit permission
+  (e.g. `go`, `commit`, `push`). Plan and show diffs first, wait for approval.
 
