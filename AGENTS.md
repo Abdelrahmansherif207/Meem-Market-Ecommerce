@@ -163,6 +163,39 @@ Put it in **components/ui** when:
 - Project -> `main` is forbidden, except intentional promotion of shared functionality:
   make the fix on `main` via small PR, then merge `main` into the project branch.
 
+### Syncing a project branch with main (multi-project playbook)
+Context: `main` is the source of truth for mutual features shared by all projects
+(e.g. `project/catch-beauty`, future `project/meem-market-kuwait`). Each project
+branch keeps its own tokens, branding, defaults, and feature set on top.
+Syncing pulls mutual updates in WITHOUT rewriting brand files or history.
+- Strategy is always **merge, never rebase**: rebase recreates (new hashes) and
+  abandons the published brand commits, needs force-push, and replays the same
+  conflicts once per commit. Merge preserves history, pushes normally, and
+  resolves each conflict once. File outcome is identical either way — preservation
+  is decided by conflict resolution, not by strategy.
+- Mutual PRs on `main` must stay brand-neutral: CSS vars (e.g.
+  `var(--color-primary)`) instead of hex, i18n keys instead of hardcoded strings.
+  This is what keeps future syncs near-automatic.
+- Procedure (run on the project branch, clean tree required):
+  1. `git fetch origin` (local `origin/main` goes stale — never trust it).
+  2. Recon: `git log --oneline <old>..origin/main` to enumerate incoming work;
+     intersect `git diff --name-only <old>...origin/main` with brand-touched files
+     for the conflict surface.
+  3. Safety ref: `git branch backup/<project>-pre-sync <project>` (rollback point).
+  4. `git checkout <project> && git merge origin/main`.
+- Standing conflict-resolution rule: **brand side wins** on tokens, branding,
+  logos, metadata, content, and feature removals (e.g. a file the brand deleted
+  stays deleted — "deleted here, unmodified there" auto-resolves; only
+  modify/delete needs a human, keep the deletion); **main wins** on shared
+  functionality and its additive changes (new components, new i18n keys).
+- Verify after resolving: `git status --short --branch`, `git diff --stat`,
+  `npx tsc --noEmit`, JSON validity of `messages/*.json`, brand tokens intact
+  (`rg "color-primary" src/app/globals.css`), brand-only files untouched
+  (merge delta must equal main's delta file-for-file:
+  `diff <(git diff --name-only <base>..HEAD) <(git diff --name-only <base>..origin/main)`).
+- Rollback: messy merge -> `git merge --abort`; bad merge commit ->
+  `git reset --hard backup/<project>-pre-sync`. Push only with explicit permission.
+
 ### Commit convention
 - `chore: ...` for repo hygiene, `feat(<project>): ...` / `fix(<project>): ...` for client work
   (e.g. `feat(catch-beauty): remove fast-shipping, single cart`). `main` history stays generic.
