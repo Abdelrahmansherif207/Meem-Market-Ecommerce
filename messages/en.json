@@ -71,7 +71,20 @@
       "clearBrandSearch": "Clear brand search",
       "noBrandsFound": "No brands match your search",
       "activeFilters": "{count} active",
-      "refineResults": "Refine your results"
+      "refineResults": "Refine your results",
+      "collapseFilters": "Collapse filters",
+      "showFilters": "Show filters",
+      "noFiltersTitle": "No filters available",
+      "noFiltersDesc": "There is nothing to refine here yet.",
+      "searchPlaceholder": "Search in this category…",
+      "clearSearch": "Clear search",
+      "sortLabel": "Sort products",
+      "sortDefault": "Default",
+      "sortPriceAsc": "Price: Low to High",
+      "sortPriceDesc": "Price: High to Low",
+      "sortNewest": "Newest",
+      "sortRating": "Top rated",
+      "resultsCount": "{from}–{to} of {total} results"
     },
     "location": {
       "loading": "Detecting..."

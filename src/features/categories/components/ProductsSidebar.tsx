@@ -2,6 +2,8 @@
 
 import {
   ChevronDown,
+  PanelLeftClose,
+  PanelLeftOpen,
   RotateCcw,
   Search,
   SlidersHorizontal,
@@ -33,6 +35,7 @@ export default function ProductsSidebar({
   const searchParams = useSearchParams();
   const [brandSearchQuery, setBrandSearchQuery] = useState("");
   const [collapsedSections, setCollapsedSections] = useState<string[]>([]);
+  const [isCollapsed, setIsCollapsed] = useState(false);
 
   const entries = Object.entries(filters).filter(
     (entry): entry is [string, string[]] =>
@@ -84,7 +87,40 @@ export default function ProductsSidebar({
     return count + (searchParams.get(key)?.split(",").filter(Boolean).length || 0);
   }, 0);
 
-  if (entries.length === 0) return null;
+  if (isCollapsed) {
+    return (
+      <button
+        type="button"
+        onClick={() => setIsCollapsed(false)}
+        aria-expanded={false}
+        aria-label={t("showFilters")}
+        className="card-shadow flex w-80 max-w-full shrink-0 items-center gap-3 self-start rounded-2xl border border-border-subtle bg-background px-4 py-3.5 text-start transition-all hover:border-primary/40 hover:shadow-elev-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/25"
+      >
+        <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-primary text-white shadow-sm">
+          <SlidersHorizontal className="size-5" aria-hidden="true" />
+        </span>
+        <span className="min-w-0 flex-1">
+          <span className="block text-sm font-bold text-text-primary">
+            {t("showFilters")}
+          </span>
+          <span className="mt-0.5 block truncate text-xs text-text-secondary">
+            {activeFilterCount > 0
+              ? t("activeFilters", { count: activeFilterCount })
+              : t("refineResults")}
+          </span>
+        </span>
+        {activeFilterCount > 0 && (
+          <span className="flex min-w-5 shrink-0 items-center justify-center rounded-full bg-primary px-1.5 py-0.5 text-[11px] font-bold leading-4 text-white">
+            {activeFilterCount}
+          </span>
+        )}
+        <PanelLeftOpen
+          className="size-4 shrink-0 text-text-secondary rtl:-scale-x-100"
+          aria-hidden="true"
+        />
+      </button>
+    );
+  }
 
   return (
     <aside
@@ -108,20 +144,48 @@ export default function ProductsSidebar({
           </div>
         </div>
 
-        {activeFilterCount > 0 && (
+        <div className="flex shrink-0 items-center gap-1">
+          {activeFilterCount > 0 && (
+            <button
+              type="button"
+              onClick={handleClearAll}
+              className="flex shrink-0 items-center gap-1 rounded-lg px-2 py-1.5 text-xs font-semibold text-primary transition-colors hover:bg-primary/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/25"
+            >
+              <RotateCcw className="size-3.5" aria-hidden="true" />
+              {t("clearAll")}
+            </button>
+          )}
           <button
             type="button"
-            onClick={handleClearAll}
-            className="flex shrink-0 items-center gap-1 rounded-lg px-2 py-1.5 text-xs font-semibold text-primary transition-colors hover:bg-primary/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/25"
+            onClick={() => setIsCollapsed(true)}
+            aria-expanded={true}
+            aria-label={t("collapseFilters")}
+            title={t("collapseFilters")}
+            className="flex shrink-0 items-center justify-center rounded-lg p-1.5 text-text-secondary transition-colors hover:bg-surface hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/25"
           >
-            <RotateCcw className="size-3.5" aria-hidden="true" />
-            {t("clearAll")}
+            <PanelLeftClose
+              className="size-4 rtl:-scale-x-100"
+              aria-hidden="true"
+            />
           </button>
-        )}
+        </div>
       </div>
 
       <div className="no-scrollbar min-h-0 flex-1 overflow-y-auto overscroll-contain">
-        {entries.map(([key, values]) => {
+        {entries.length === 0 ? (
+          <div className="flex flex-col items-center gap-2 px-5 py-10 text-center">
+            <span className="flex size-11 items-center justify-center rounded-xl bg-surface text-text-muted">
+              <SlidersHorizontal className="size-5" aria-hidden="true" />
+            </span>
+            <p className="text-sm font-bold text-text-primary">
+              {t("noFiltersTitle")}
+            </p>
+            <p className="text-xs leading-5 text-text-secondary">
+              {t("noFiltersDesc")}
+            </p>
+          </div>
+        ) : (
+        entries.map(([key, values]) => {
           const label = filterLabels[key] || key;
           const items = values!;
           const checkedItems =
@@ -229,7 +293,8 @@ export default function ProductsSidebar({
               )}
             </section>
           );
-        })}
+        })
+        )}
       </div>
     </aside>
   );

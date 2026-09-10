@@ -1,8 +1,9 @@
 "use client";
 
 import { usePathname, useSearchParams, useRouter } from "next/navigation";
-import { useCallback, useState } from "react";
-import { Search, X } from "lucide-react";
+import { useCallback, useEffect, useState } from "react";
+import { ArrowUpDown, ChevronDown, Search, X } from "lucide-react";
+import { useTranslations } from "next-intl";
 import type { CategoryProductsResponse } from "../types";
 
 interface ProductsToolbarProps {
@@ -10,24 +11,31 @@ interface ProductsToolbarProps {
   sortOptions?: { value: string; label: string }[];
 }
 
-const defaultSortOptions = [
-  { value: "", label: "Default" },
-  { value: "price_asc", label: "Price: Low to High" },
-  { value: "price_desc", label: "Price: High to Low" },
-  { value: "newest", label: "Newest" },
-  { value: "rating", label: "Best Rating" },
-];
-
 export default function ProductsToolbar({
   links,
-  sortOptions = defaultSortOptions,
+  sortOptions,
 }: ProductsToolbarProps) {
+  const t = useTranslations("header.filters");
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const router = useRouter();
   const currentSort = searchParams.get("sort") || "";
   const searchQuery = searchParams.get("search") || "";
   const [searchValue, setSearchValue] = useState(searchQuery);
+
+  // Keep the input in sync when the URL changes externally
+  // (e.g. browser back/forward, filter chips).
+  useEffect(() => {
+    setSearchValue(searchQuery);
+  }, [searchQuery]);
+
+  const resolvedSortOptions = sortOptions ?? [
+    { value: "", label: t("sortDefault") },
+    { value: "price_asc", label: t("sortPriceAsc") },
+    { value: "price_desc", label: t("sortPriceDesc") },
+    { value: "newest", label: t("sortNewest") },
+    { value: "rating", label: t("sortRating") },
+  ];
 
   const updateParam = useCallback(
     (key: string, value: string) => {
@@ -46,7 +54,7 @@ export default function ProductsToolbar({
 
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    updateParam("search", searchValue);
+    updateParam("search", searchValue.trim());
   };
 
   const clearSearch = () => {
@@ -55,44 +63,67 @@ export default function ProductsToolbar({
   };
 
   return (
-    <div className="flex flex-wrap items-center gap-3 mb-4">
-      <form onSubmit={handleSearchSubmit} className="relative flex-1 min-w-[180px] max-w-xs">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-text-muted" />
+    <div className="mb-4 flex flex-wrap items-center gap-2.5 sm:gap-3">
+      <form
+        role="search"
+        onSubmit={handleSearchSubmit}
+        className="relative min-w-[200px] flex-1"
+      >
+        <Search
+          className="pointer-events-none absolute inset-s-3.5 top-1/2 size-4 -translate-y-1/2 text-text-secondary"
+          aria-hidden="true"
+        />
         <input
-          type="text"
+          type="search"
+          autoComplete="off"
           value={searchValue}
           onChange={(e) => setSearchValue(e.target.value)}
-          placeholder="Search in category..."
-          className="w-full h-9 pl-9 pr-8 rounded-md border border-border text-sm bg-background focus:outline-none focus:border-primary transition-colors"
+          placeholder={t("searchPlaceholder")}
+          aria-label={t("searchPlaceholder")}
+          className="h-11 w-full rounded-xl border border-border-subtle bg-surface/60 pe-10 ps-10 text-sm text-text-primary outline-none transition-all placeholder:text-text-secondary/70 hover:border-primary/40 focus:border-primary focus:bg-background focus:ring-3 focus:ring-primary/10"
         />
         {searchValue && (
           <button
             type="button"
             onClick={clearSearch}
-            className="absolute right-2 top-1/2 -translate-y-1/2"
-            aria-label="Clear search"
+            aria-label={t("clearSearch")}
+            className="absolute inset-e-2 top-1/2 flex size-7 -translate-y-1/2 items-center justify-center rounded-lg text-text-secondary transition-colors hover:bg-border-subtle hover:text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/25"
           >
-            <X className="h-4 w-4 text-text-muted" />
+            <X className="size-3.5" aria-hidden="true" />
           </button>
         )}
       </form>
 
-      <select
-        value={currentSort}
-        onChange={(e) => updateParam("sort", e.target.value)}
-        className="h-9 rounded-md border border-border text-sm bg-background px-3 focus:outline-none focus:border-primary transition-colors"
-        aria-label="Sort products"
-      >
-        {sortOptions.map((opt) => (
-          <option key={opt.value} value={opt.value}>
-            {opt.label}
-          </option>
-        ))}
-      </select>
+      <label className="relative inline-flex shrink-0 items-center">
+        <ArrowUpDown
+          className="pointer-events-none absolute inset-s-3.5 size-4 text-text-secondary"
+          aria-hidden="true"
+        />
+        <select
+          value={currentSort}
+          onChange={(e) => updateParam("sort", e.target.value)}
+          aria-label={t("sortLabel")}
+          className="h-11 cursor-pointer appearance-none rounded-xl border border-border-subtle bg-surface/60 pe-9 ps-10 text-sm font-semibold text-text-primary outline-none transition-all hover:border-primary/40 focus:border-primary focus:bg-background focus:ring-3 focus:ring-primary/10"
+        >
+          {resolvedSortOptions.map((opt) => (
+            <option key={opt.value} value={opt.value}>
+              {opt.label}
+            </option>
+          ))}
+        </select>
+        <ChevronDown
+          className="pointer-events-none absolute inset-e-3 size-4 text-text-secondary"
+          aria-hidden="true"
+        />
+      </label>
 
       {links && (
-        <span className="text-sm text-text-secondary whitespace-nowrap">
-          {links.from}–{links.to} of {links.total}
+        <span className="ms-auto inline-flex items-center whitespace-nowrap rounded-full bg-surface px-3 py-2 text-xs font-medium text-text-secondary tabular-nums">
+          {t("resultsCount", {
+            from: links.from,
+            to: links.to,
+            total: links.total,
+          })}
         </span>
       )}
     </div>
