@@ -125,6 +125,30 @@ button {
     display: none;
   }
 
+  /* Thin scrollbar tinted with the brand color (theme-driven, no static hex) */
+  .scrollbar-brand {
+    scrollbar-width: thin;
+    scrollbar-color: color-mix(in srgb, var(--color-primary) 50%, transparent) transparent;
+  }
+
+  .scrollbar-brand::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+
+  .scrollbar-brand::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .scrollbar-brand::-webkit-scrollbar-thumb {
+    background: color-mix(in srgb, var(--color-primary) 50%, transparent);
+    border-radius: 999px;
+  }
+
+  .scrollbar-brand::-webkit-scrollbar-thumb:hover {
+    background: color-mix(in srgb, var(--color-primary) 70%, transparent);
+  }
+
   .auth-fall-item {
     top: -14%;
     transform: translate3d(-50%, -130%, 0);

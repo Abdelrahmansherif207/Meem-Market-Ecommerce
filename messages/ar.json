@@ -71,7 +71,20 @@
       "clearBrandSearch": "مسح بحث العلامة التجارية",
       "noBrandsFound": "لا توجد علامات تجارية مطابقة",
       "activeFilters": "{count} محدد",
-      "refineResults": "خصص نتائج البحث"
+      "refineResults": "خصص نتائج البحث",
+      "collapseFilters": "طي الفلاتر",
+      "showFilters": "عرض الفلاتر",
+      "noFiltersTitle": "لا توجد فلاتر متاحة",
+      "noFiltersDesc": "لا يوجد ما يمكن تخصيصه هنا بعد.",
+      "searchPlaceholder": "ابحث في هذه الفئة…",
+      "clearSearch": "مسح البحث",
+      "sortLabel": "ترتيب المنتجات",
+      "sortDefault": "الافتراضي",
+      "sortPriceAsc": "السعر: من الأقل للأعلى",
+      "sortPriceDesc": "السعر: من الأعلى للأقل",
+      "sortNewest": "الأحدث",
+      "sortRating": "الأعلى تقييماً",
+      "resultsCount": "عرض {from}–{to} من {total}"
     },
     "location": {
       "loading": "جاري التحديد..."

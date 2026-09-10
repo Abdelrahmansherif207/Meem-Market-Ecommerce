@@ -56,7 +56,7 @@ export default function CategorySlider({
     image?.desktop || image?.mobile;
 
   return (
-    <div className="relative w-full pb-6 mb-4">
+    <div className="group/slider relative w-full max-w-full min-w-0 pb-6 mb-4">
       <div className="overflow-hidden">
         <Swiper
           key={locale}
@@ -131,7 +131,8 @@ export default function CategorySlider({
             onClick={onPrevious}
             aria-label={isRtl ? "Next" : "Previous"}
             className={cn(
-              "absolute top-12 z-10 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full border border-border bg-white shadow-elev-2 text-text-secondary transition-colors hover:bg-surface hover:text-primary",
+              "absolute top-12 z-10 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full border border-border bg-white shadow-elev-2 text-text-secondary transition-all hover:bg-surface hover:text-primary",
+              "opacity-0 group-hover/slider:opacity-100 group-focus-within/slider:opacity-100",
               isRtl ? "-right-4" : "-left-4",
             )}
           >
@@ -141,7 +142,8 @@ export default function CategorySlider({
             onClick={onNext}
             aria-label={isRtl ? "Previous" : "Next"}
             className={cn(
-              "absolute top-12 z-10 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full border border-border bg-white shadow-elev-2 text-text-secondary transition-colors hover:bg-surface hover:text-primary",
+              "absolute top-12 z-10 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full border border-border bg-white shadow-elev-2 text-text-secondary transition-all hover:bg-surface hover:text-primary",
+              "opacity-0 group-hover/slider:opacity-100 group-focus-within/slider:opacity-100",
               isRtl ? "-left-4" : "-right-4",
             )}
           >
