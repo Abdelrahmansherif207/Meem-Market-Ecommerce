@@ -27,7 +27,7 @@ export default function CategoryProducts({
         </div>
       )}
 
-      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-4">
+      <div className="grid min-w-0 grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">
         {products.map((product) => {
           const discountPercent =
             product.has_discount && product.discount_valid

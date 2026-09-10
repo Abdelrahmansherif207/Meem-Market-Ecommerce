@@ -27,7 +27,7 @@ export default function CategoryMenuClient({
       className="absolute inset-s-0 top-full z-50 pt-2"
     >
       <div className="w-[calc(100vw-2rem)] max-w-6xl overflow-hidden rounded-xl bg-background shadow-lg">
-        <div className="grid grid-cols-[240px_1fr] min-h-95 max-h-[70dvh]">
+        <div className="grid grid-cols-[240px_1fr] grid-rows-[minmax(0,1fr)] min-h-95 max-h-[70dvh]">
           <CategorySidebar
             categories={categories}
             activeCategoryId={activeCategory.id}
