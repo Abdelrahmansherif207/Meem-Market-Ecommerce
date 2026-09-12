@@ -7,10 +7,10 @@ import { Plus } from "lucide-react";
 import { useLocale } from "next-intl";
 import { cn } from "@/shared/utils/cn";
 import { useCartActions } from "@/features/cart/hooks/useCartActions";
-import { useDisplayCurrency } from "@/features/currencies";
 import type { ProductCurrency } from "@/features/currencies";
 import { WishlistButton } from "@/features/wishlist/components/WishlistButton";
 import { Badge } from "./Badge";
+import { Price } from "./Price";
 import { QuantityStepper } from "./QuantityStepper";
 import Skeleton from "./Skeleton";
 import type { ProductTag } from "@/shared/types";
@@ -79,15 +79,10 @@ export default function ProductCard({
   const { quantity, isPending, addItem, increment, decrement } = useCartActions(productId);
   const [animating, setAnimating] = useState(false);
 
-  const displayCurrency = useDisplayCurrency(
-    typeof currency === "object" ? currency : undefined,
-  );
-  const currencyCode =
-    typeof currency === "string" && currency ? currency : displayCurrency.code;
-  const decimals = currencyDecimals ?? displayCurrency.decimalPlaces;
-
   const safePrice = price ?? 0;
   const safeOriginalPrice = originalPrice ?? 0;
+  /** Fixed 2 fraction digits for a clean, consistent horizontal price. */
+  const priceDecimals = currencyDecimals ?? 2;
 
   const handleAdd = useCallback(async () => {
     await addItem({ quantity: 1, name: title, image, price: safePrice, current_price: safePrice, slug, sku, in_stock: isInStock, stock_quantity: stockQuantity });
@@ -102,12 +97,6 @@ export default function ProductCard({
   const handleDecrement = useCallback(async () => {
     await decrement();
   }, [decrement]);
-
-  const priceStr = safePrice.toFixed(decimals);
-  const integerPart = priceStr.split(".")[0];
-  const decimalPart = priceStr.includes(".")
-    ? "." + priceStr.split(".")[1]
-    : ""; 
 
   return (
     <div className="flex flex-col w-full">
@@ -234,26 +223,30 @@ export default function ProductCard({
         </div>
       )}
 
-      <div className="flex items-center gap-2 mt-1.5 px-0.5 flex-wrap">
+      <div className="mt-1.5 flex flex-wrap items-baseline gap-x-2 gap-y-0.5 px-0.5">
         {pricesLoading ? (
-          <div className="flex items-baseline gap-2" dir="ltr" aria-hidden>
-            <Skeleton className="h-5 w-20 md:h-6 md:w-24" />
-          </div>
+          <Skeleton className="h-6 w-28 md:h-7" aria-hidden />
         ) : (
           <>
-            <div className="flex items-baseline gap-px" dir="ltr">
-              <span className={cn("text-lg leading-5 font-bold md:text-xl", isDark ? "text-white" : "text-text-primary")}>
-                {integerPart}
-              </span>
-              <div className="flex flex-col items-start">
-                <span className={cn("text-sm font-bold leading-none", isDark ? "text-white" : "text-text-primary")}>{decimalPart}</span>
-                <span className={cn("text-2xs font-medium leading-none", isDark ? "text-white/60" : "text-text-muted")}>{currencyCode}</span>
-              </div>
-            </div>
+            <Price
+              amount={safePrice}
+              currency={currency}
+              decimals={priceDecimals}
+              className={cn(
+                "text-lg font-bold leading-6 md:text-xl",
+                isDark ? "text-white" : "text-text-primary",
+              )}
+            />
             {safeOriginalPrice > safePrice && (
-              <span className={cn("text-sm leading-4 font-normal line-through", isDark ? "text-white/50" : "text-text-muted")}>
-                {currencyCode} {safeOriginalPrice.toFixed(decimals)}
-              </span>
+              <Price
+                amount={safeOriginalPrice}
+                currency={currency}
+                decimals={priceDecimals}
+                className={cn(
+                  "text-sm font-normal leading-5 line-through",
+                  isDark ? "text-white/50" : "text-text-muted",
+                )}
+              />
             )}
           </>
         )}

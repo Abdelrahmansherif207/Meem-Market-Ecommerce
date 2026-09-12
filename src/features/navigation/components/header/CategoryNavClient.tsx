@@ -91,7 +91,7 @@ export default function CategoryNavClient({
           {hoveredCategory && (
             <div className="absolute left-0 top-full z-50 pt-2 w-full max-w-6xl">
               <div className="rounded-xl bg-background shadow-lg overflow-hidden">
-                <div className={cn("min-h-95 max-h-[70dvh]")}>
+                <div className={cn("min-h-95 max-h-[70dvh] overflow-y-auto overscroll-contain scrollbar-brand")}>
                   <SubCategoryPane activeCategory={hoveredCategory} />
                 </div>
               </div>

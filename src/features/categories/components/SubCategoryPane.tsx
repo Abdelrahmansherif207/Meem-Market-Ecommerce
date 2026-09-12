@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import type { CategoryMenuItem } from "../types";
 
@@ -14,17 +15,28 @@ function toCategoryHref(slug: string) {
 
 export default function SubCategoryPane({ activeCategory, onClose }: SubCategoryPaneProps) {
   return (
-    <section className="overflow-y-auto">
+    <section className="overflow-y-auto overscroll-contain scrollbar-brand min-h-0">
       <div className="p-6">
         <div className="grid grid-cols-[repeat(auto-fit,minmax(180px,1fr))] gap-x-12 gap-y-8">
-          {activeCategory.children.map((level2) => (
+          {activeCategory.children.map((level2) => {
+            const imageSrc = level2.image?.desktop || level2.image?.mobile;
+            return (
             <div key={level2.id} className="min-w-0">
               <Link
                 href={toCategoryHref(level2.slug)}
                 onClick={onClose}
-                className="block text-[13px] font-semibold text-text-primary hover:text-primary-dark transition-colors"
+                className="flex items-center gap-2.5 text-[13px] font-semibold text-text-primary hover:text-primary-dark transition-colors"
               >
-                {level2.name}
+                {imageSrc && (
+                  <Image
+                    src={imageSrc}
+                    alt=""
+                    width={40}
+                    height={40}
+                    className="h-10 w-10 shrink-0 rounded-lg bg-white object-contain ring-1 ring-border"
+                  />
+                )}
+                <span className="min-w-0">{level2.name}</span>
               </Link>
 
               {level2?.children?.length > 0 && (
@@ -43,7 +55,8 @@ export default function SubCategoryPane({ activeCategory, onClose }: SubCategory
                 </ul>
               )}
             </div>
-          ))}
+            );
+          })}
         </div>
       </div>
     </section>

@@ -96,7 +96,7 @@ async function BannerPromotionContent({
           seeLessText={seeLessText}
         />
       </div>
-      <div className="flex-1 max-[991px]:p-0">
+      <div className="flex-1 max-[991px]:p-0 min-w-0">
         {/* Mobile filter bar — sits above the grid */}
         <div className="hidden max-[991px]:block">
           <MobileSidebarContent
@@ -269,7 +269,7 @@ export default async function Page({
           </Suspense>
         </div>
 
-        <div className="flex-1">
+        <div className="flex-1 min-w-0">
           {/* Desktop Category Slider */}
           <CategorySlider
             subCategories={sliderCategories}
