@@ -27,6 +27,8 @@ export function generateStaticParams() {
   return routing.locales.map((locale) => ({ locale }));
 }
 
+export const revalidate = 60;
+
 const ibmPlexSansArabic = IBM_Plex_Sans_Arabic({
   weight: ["300", "400", "500", "600", "700"],
   subsets: ["arabic"],

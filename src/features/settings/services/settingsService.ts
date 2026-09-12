@@ -6,7 +6,7 @@ import type { SiteSettings } from "../types";
 async function fetchSettings(locale: string): Promise<SiteSettings> {
   const response = await apiFetch<ApiResponse<SiteSettings>>(
     "/general/settings",
-    { headers: { lang: locale }, next: { revalidate: 300 } },
+    { headers: { lang: locale }, next: { revalidate: 60 } },
   );
   const data = response.data;
   return {
