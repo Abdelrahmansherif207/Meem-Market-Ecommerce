@@ -65,6 +65,7 @@ export default function ProductsSidebar({
     }
 
     params.delete("page");
+    params.delete("cursor");
     navigateWithParams(params);
   };
 
@@ -72,6 +73,7 @@ export default function ProductsSidebar({
     const params = new URLSearchParams(searchParams.toString());
     entries.forEach(([key]) => params.delete(key));
     params.delete("page");
+    params.delete("cursor");
     navigateWithParams(params);
   };
 

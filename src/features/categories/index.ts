@@ -9,10 +9,12 @@ export { categoryMenuService } from "./services/categoryMenuService";
 export { getCategoryPageData, getCachedCategoryPageData } from "./services/categoryProductsService";
 export { findCategoryPath } from "./utils/categoryBreadcrumbs";
 export type {
+  CategoryCursorPage,
   CategoryFilters,
   CategoryImage,
   CategoryMenuItem,
   CategoryProduct,
   CategoryProductImage,
   CategoryProductsResponse,
+  CursorProductsResponse,
 } from "./types";

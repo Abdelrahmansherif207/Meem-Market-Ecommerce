@@ -1,18 +1,19 @@
 import ProductCard from "@/components/ui/ProductCard";
-import Pagination from "./Pagination";
 import EmptyCategory from "./EmptyCategory";
-import type { CategoryProduct, CategoryProductsResponse } from "../types";
+import { ProductsGridSkeletonRow } from "./skeletons/ProductsGridSkeletonRow";
+import type { CategoryProduct } from "../types";
 
 interface CategoryProductsProps {
   products: CategoryProduct[];
-  links?: CategoryProductsResponse["links"];
+  /** True while the next cursor page is loading (skeleton row shows). */
+  isLoadingMore?: boolean;
   /** When true, card price numbers render as skeleton bars. */
   pricesLoading?: boolean;
 }
 
 export default function CategoryProducts({
   products,
-  links,
+  isLoadingMore = false,
   pricesLoading = false,
 }: CategoryProductsProps) {
   if (products.length === 0) {
@@ -21,12 +22,6 @@ export default function CategoryProducts({
 
   return (
     <div className="flex flex-col gap-6">
-      {links && (
-        <div className="text-sm text-text-secondary">
-          Showing {links.from}–{links.to} of {links.total} products
-        </div>
-      )}
-
       <div className="grid min-w-0 grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">
         {products.map((product) => {
           const discountPercent =
@@ -57,7 +52,7 @@ export default function CategoryProducts({
         })}
       </div>
 
-      {links && links.last_page > 1 && <Pagination links={links} />}
+      {isLoadingMore && <ProductsGridSkeletonRow />}
     </div>
   );
 }

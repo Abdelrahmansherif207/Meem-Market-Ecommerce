@@ -19,6 +19,7 @@ export async function getCategoryPageDataAction(
   searchParams: Record<string, string | string[] | undefined> | undefined,
   filterKey: "category" | "banner" | "promotion" | "tag" | undefined,
   currency: string | null | undefined,
+  cursor?: string | null,
 ) {
   return getCategoryPageData(
     slug,
@@ -26,6 +27,7 @@ export async function getCategoryPageDataAction(
     searchParams,
     filterKey,
     currency ?? undefined,
+    cursor,
   );
 }
 

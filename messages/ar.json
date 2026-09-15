@@ -708,7 +708,8 @@
     "serverDownTitle": "تعذر الوصول إلى الخوادم",
     "serverDownDesc": "حدث خطأ من جهة الخادم. يرجى المحاولة مرة أخرى بعد قليل.",
     "genericErrorTitle": "حدث خطأ ما",
-    "genericErrorDesc": "تعذر تحميل هذه الصفحة. يرجى المحاولة مرة أخرى."
+    "genericErrorDesc": "تعذر تحميل هذه الصفحة. يرجى المحاولة مرة أخرى.",
+    "couldNotLoadMore": "تعذّر تحميل المزيد من المنتجات."
   },
   "emptyState": {
     "browseProducts": "تصفح جميع المنتجات",
