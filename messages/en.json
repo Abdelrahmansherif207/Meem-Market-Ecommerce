@@ -688,7 +688,8 @@
     "serverDownTitle": "We can't reach our servers",
     "serverDownDesc": "Please try again in a few moments.",
     "genericErrorTitle": "Something went wrong",
-    "genericErrorDesc": "This page could not be loaded. Please try again."
+    "genericErrorDesc": "This page could not be loaded. Please try again.",
+    "couldNotLoadMore": "Couldn't load more products."
   },
   "emptyState": {
     "browseProducts": "Browse all products",

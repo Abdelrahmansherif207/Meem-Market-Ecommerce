@@ -1,15 +1,14 @@
 import { Suspense } from "react";
 import type { Metadata } from "next";
 import Breadcrumb from "@/components/ui/Breadcrumb";
-import CategoryProducts from "@/features/categories/components/CategoryProducts";
 import CategorySlider from "@/features/categories/components/CategorySlider";
 import ProductsSidebar from "@/features/categories/components/ProductsSidebar";
 import MobileCategorySidebar from "@/features/categories/components/MobileCategorySidebar";
 import SidebarContent from "@/features/categories/components/SidebarContent";
 import MobileSidebarContent from "@/features/categories/components/MobileSidebarContent";
 import ProductsGridContent from "@/features/categories/components/ProductsGridContent";
+import ProductsGridIsland from "@/features/categories/components/ProductsGridIsland";
 import ProductsToolbar from "@/features/categories/components/ProductsToolbar";
-import ActiveFilterChips from "@/features/categories/components/ActiveFilterChips";
 import { CategoryMobileLayout } from "@/features/categories/components/CategoryMobileLayout";
 import { categoryMenuService } from "@/features/categories/services/categoryMenuService";
 import { getCategoryPageData, getCachedCategoryPageData, getBannerBySlug } from "@/features/categories/services/categoryProductsService";
@@ -60,8 +59,12 @@ async function BannerPromotionContent({
   seeLessText: string;
 }) {
   let result = await guardLoad(() => getCategoryPageData(slug, locale, searchParams, "banner"));
+  let filterKeyUsed: "banner" | "promotion" = "banner";
   if (result.ok && result.data.products.length === 0) {
     result = await guardLoad(() => getCategoryPageData(slug, locale, searchParams, "promotion"));
+    if (result.ok) {
+      filterKeyUsed = "promotion";
+    }
   }
   if (!result.ok) {
     const te = await getTranslations({ locale, namespace: "error" });
@@ -83,7 +86,7 @@ async function BannerPromotionContent({
       notFound();
     }
   }
-  const { products, filters, filterLabels, links } = pageData;
+  const { products, filters, filterLabels, nextCursor } = pageData;
 
   return (
     <div className="flex gap-5 max-[991px]:gap-0 items-stretch">
@@ -106,9 +109,17 @@ async function BannerPromotionContent({
           />
         </div>
         <div className="max-[991px]:p-3">
-          <ProductsToolbar links={links} />
-          <ActiveFilterChips />
-          <CategoryProducts products={products} links={links} />
+          <ProductsToolbar />
+          <ProductsGridIsland
+            key={`${filterKeyUsed}:${slug}`}
+            slug={slug}
+            locale={locale}
+            searchParams={searchParams}
+            filterKey={filterKeyUsed}
+            initialProducts={products}
+            initialNextCursor={nextCursor}
+            initialCurrency={products[0]?.currency?.code}
+          />
         </div>
       </div>
     </div>
@@ -201,7 +212,7 @@ export default async function Page({
       products: [],
       filters: {},
       filterLabels: {},
-      links: {},
+      nextCursor: null,
     }));
 
   return (

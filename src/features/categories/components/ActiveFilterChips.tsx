@@ -19,9 +19,7 @@ export default function ActiveFilterChips() {
     }
   }
 
-  const page = searchParams.get("page");
   const sort = searchParams.get("sort");
-  const search = searchParams.get("search");
 
   const removeChip = (key: string, value: string) => {
     const params = new URLSearchParams(searchParams.toString());
@@ -32,14 +30,15 @@ export default function ActiveFilterChips() {
     } else {
       params.delete(key);
     }
+    // Filter changes restart the cursor list.
+    params.delete("page");
+    params.delete("cursor");
     router.push(`${pathname}?${params.toString()}`, { scroll: false });
   };
 
   const clearAll = () => {
     const params = new URLSearchParams();
     if (sort) params.set("sort", sort);
-    if (search) params.set("search", search);
-    if (page) params.set("page", page);
     const qs = params.toString();
     router.push(qs ? `${pathname}?${qs}` : pathname, { scroll: false });
   };
