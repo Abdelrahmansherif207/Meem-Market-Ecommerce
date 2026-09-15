@@ -38,10 +38,10 @@ export default async function ProductsGridContent({
     );
   }
 
-  const { products, links } = result.data;
+  const { products, nextCursor } = result.data;
 
   if (renderToolbar) {
-    return <ProductsToolbar links={links} />;
+    return <ProductsToolbar />;
   }
 
   return (
@@ -52,7 +52,7 @@ export default async function ProductsGridContent({
       searchParams={searchParams ?? {}}
       filterKey={filterKey}
       initialProducts={products}
-      initialLinks={links}
+      initialNextCursor={nextCursor}
       initialCurrency={products[0]?.currency?.code}
     />
   );

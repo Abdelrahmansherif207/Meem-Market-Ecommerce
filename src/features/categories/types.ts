@@ -75,3 +75,37 @@ export interface CategoryProductsResponse {
     first_page_url: string;
   };
 }
+
+/** Laravel cursor paginator `links` — no totals, only navigation URLs. */
+export interface CursorLinks {
+  path?: string;
+  per_page?: number;
+  /** Absolute backend URL for the next page; `null` = end of list. */
+  next_page_url: string | null;
+  /** Absolute backend URL for the previous page; `null` = first page. */
+  prev_page_url: string | null;
+}
+
+export interface CursorProductsResponse {
+  data: CategoryProduct[];
+  filters: CategoryFilters;
+  links: CursorLinks;
+  /**
+   * Plain opaque token (newer backend contract). Preferred over parsing
+   * `links.next_page_url`; `null` = end of list.
+   */
+  next_cursor?: string | null;
+  prev_cursor?: string | null;
+}
+
+/**
+ * Normalized cursor-paginated category page returned by the service.
+ * `nextCursor` is the opaque token extracted from the backend's absolute
+ * `next_page_url` (`null` = no more pages).
+ */
+export interface CategoryCursorPage {
+  products: CategoryProduct[];
+  filters: CategoryFilters;
+  filterLabels: Record<string, string>;
+  nextCursor: string | null;
+}
