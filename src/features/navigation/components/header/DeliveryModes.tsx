@@ -7,7 +7,7 @@ import { useLocale, useTranslations } from "next-intl";
 import { cn } from "@/shared/utils/cn";
 import { useChannelStore } from "@/features/fast-shipping/store/useChannelStore";
 import { useFastShippingStatusStore } from "@/features/fast-shipping/store/useFastShippingStatusStore";
-import { currencyLabel } from "@/shared/utils/formatMoney";
+import { currencyLabel, formatNumber } from "@/shared/utils/formatMoney";
 import { DeliveryModeButton } from "./DeliveryModeButton";
 import type { Channel } from "@/features/fast-shipping/store/useChannelStore";
 
@@ -40,14 +40,15 @@ export default function DeliveryModes({ compact = false }: { compact?: boolean }
   const duration = status?.duration_minutes ?? 0;
   const currency = currencyLabel(locale);
   // While settings are loading, show a spinner instead of a fake default ETA.
+  const feeText = formatNumber(fee, locale, 2);
   const eta: ReactNode = !isDetermined ? (
     <span className="inline-flex items-center" aria-label="loading">
       <Loader2 className="h-3 w-3 animate-spin" aria-hidden />
     </span>
   ) : duration >= 60 ? (
-    `~${Math.floor(duration / 60)}h ${duration % 60}m (+${currency} ${fee.toFixed(2)})`
+    `~${Math.floor(duration / 60)}h ${duration % 60}m (+${currency} ${feeText})`
   ) : (
-    `~${duration} min (+${currency} ${fee.toFixed(2)})`
+    `~${duration} min (+${currency} ${feeText})`
   );
 
   const handleChannelChange = (newChannel: Channel) => {

@@ -1,6 +1,10 @@
 /**
  * Canonical money formatting. Use everywhere prices are displayed instead of
  * manual toFixed + currency string concatenation (RTL/decimal correctness).
+ *
+ * Arabic locale always uses Eastern Arabic digits (٠١٢٣٤٥٦٧٨٩) via an
+ * explicit `numberingSystem: "arab"` so Chrome/Firefox match Safari
+ * (which renders `ar-*` with Arabic-Indic digits by default).
  */
 const CURRENCY = "KWD";
 const CURRENCY_DISPLAY: Record<string, string> = {
@@ -15,17 +19,26 @@ export interface FormatMoneyOptions {
   decimalPlaces?: number;
 }
 
+export function formatNumber(
+  amount: number | null | undefined,
+  locale = "en",
+  decimals = 2,
+): string {
+  const safe = Number.isFinite(amount) ? (amount as number) : 0;
+  return safe.toLocaleString(locale === "ar" ? "ar-KW" : "en-KW", {
+    minimumFractionDigits: decimals,
+    maximumFractionDigits: decimals,
+    numberingSystem: locale === "ar" ? "arab" : "latn",
+  });
+}
+
 export function formatMoney(
   amount: number | null | undefined,
   locale = "en",
   opts?: FormatMoneyOptions,
 ): string {
-  const safe = Number.isFinite(amount) ? (amount as number) : 0;
   const decimals = opts?.decimalPlaces ?? 2;
-  const formatted = safe.toLocaleString(locale === "ar" ? "ar-KW" : "en-KW", {
-    minimumFractionDigits: decimals,
-    maximumFractionDigits: decimals,
-  });
+  const formatted = formatNumber(amount, locale, decimals);
   return `${formatted} ${opts?.symbol ?? (CURRENCY_DISPLAY[locale] ?? "K.D")}`;
 }
 
