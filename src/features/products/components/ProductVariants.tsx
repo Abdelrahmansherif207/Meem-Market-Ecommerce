@@ -1,8 +1,9 @@
 "use client";
 
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { cn } from "@/shared/utils/cn";
 import { Check } from "lucide-react";
+import { formatNumber } from "@/shared/utils/formatMoney";
 import { useDisplayCurrency } from "@/features/currencies";
 import Skeleton from "@/components/ui/Skeleton";
 import type { ProductVariant } from "../types";
@@ -24,6 +25,7 @@ export function ProductVariants({
   pricesLoading = false,
 }: ProductVariantsProps) {
   const t = useTranslations("product");
+  const locale = useLocale();
   const { code: currencyCode, decimalPlaces } =
     useDisplayCurrency(currency);
 
@@ -77,7 +79,7 @@ export function ProductVariants({
                 <Skeleton className="h-4 w-16" />
               ) : (
                 <span className="text-sm font-bold text-text-primary">
-                  {variant.current_price.toFixed(decimalPlaces)} {currencyCode}
+                  {formatNumber(variant.current_price, locale, decimalPlaces)} {currencyCode}
                 </span>
               )}
               <span

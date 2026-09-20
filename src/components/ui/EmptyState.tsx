@@ -38,7 +38,7 @@ export default function EmptyState({
   return (
     <div
       className={cn(
-        "flex flex-col items-center",
+        "flex flex-col items-center text-center",
         className,
       )}
     >

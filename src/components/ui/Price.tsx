@@ -53,6 +53,9 @@ export function Price({
   const formatted = safe.toLocaleString(locale === "ar" ? "ar-KW" : "en-KW", {
     minimumFractionDigits: fractionDigits,
     maximumFractionDigits: fractionDigits,
+    // Explicit Eastern Arabic digits (٠١٢٣) in Arabic locale so all
+    // browsers match Safari's default `ar-*` rendering.
+    numberingSystem: locale === "ar" ? "arab" : "latn",
   });
   const text = `${formatted} ${display.symbol}`;
 

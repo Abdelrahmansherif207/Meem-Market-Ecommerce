@@ -25,9 +25,16 @@ export default async function ProductsGridContent({
   );
 
   if (!result.ok) {
+    // The toolbar instance is a secondary fetch of the same cached data as
+    // the grid instance. Rendering an ErrorState here would duplicate the
+    // grid's fallback (two server-error illustrations stacked). Suppress the
+    // toolbar error so only the single grid fallback is visible.
+    if (renderToolbar) {
+      return null;
+    }
     const te = await getTranslations({ locale, namespace: "error" });
     return (
-      <div className="py-8">
+      <div className="flex min-h-[50dvh] flex-col items-center justify-center px-4 py-10 text-center">
         <ErrorState
           compact
           variant="serverError"

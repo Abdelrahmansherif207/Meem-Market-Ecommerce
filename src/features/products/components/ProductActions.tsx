@@ -1,13 +1,14 @@
 ﻿"use client";
 
 import { useState } from "react";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { ShoppingCart } from "lucide-react";
 import { useCartActions } from "@/features/cart/hooks/useCartActions";
 import { WishlistButton } from "@/features/wishlist/components/WishlistButton";
 import { QuantityStepper } from "@/components/ui/QuantityStepper";
 import { Button } from "@/components/ui/Button";
 import { useDisplayCurrency } from "@/features/currencies";
+import { formatNumber } from "@/shared/utils/formatMoney";
 import Skeleton from "@/components/ui/Skeleton";
 import type { ProductDetail, ProductVariant } from "../types";
 import { getStockStatus, getDisplayPrice } from "../utils";
@@ -21,6 +22,7 @@ interface ProductActionsProps {
 
 export function ProductActions({ product, selectedVariant, pricesLoading = false }: ProductActionsProps) {
   const t = useTranslations("product");
+  const locale = useLocale();
   const { code: currencyCode, decimalPlaces } = useDisplayCurrency(
     product.currency,
   );
@@ -77,7 +79,7 @@ export function ProductActions({ product, selectedVariant, pricesLoading = false
           <Skeleton className="h-7 w-32" />
         ) : (
           <span className="text-lg font-bold text-text-primary">
-            {(price * selectedQuantity).toFixed(decimalPlaces)} {currencyCode}
+            {formatNumber(price * selectedQuantity, locale, decimalPlaces)} {currencyCode}
           </span>
         )}
       </div>

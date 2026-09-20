@@ -133,6 +133,7 @@ export function PromotionsPanel({ selectedId, onSelect }: PromotionsPanelProps) 
                   amount: p.discount.toLocaleString(locale === "ar" ? "ar-KW" : "en-KW", {
                     minimumFractionDigits: 2,
                     maximumFractionDigits: 2,
+                    numberingSystem: locale === "ar" ? "arab" : "latn",
                   }),
                 })}
                 {p.gift_items.length > 0 && ` + ${p.gift_items.length} gift item(s)`}
