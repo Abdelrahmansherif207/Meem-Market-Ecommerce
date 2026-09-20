@@ -1,9 +1,10 @@
 "use client";
 
 import { useState, useMemo, useCallback } from "react";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { useRouter } from "@/i18n/navigation";
 import { ProductDeliveryInfo } from "./ProductDeliveryInfo";
+import { ProductDescription } from "./ProductDescription";
 import { ProductGallery } from "./ProductGallery";
 import { ProductInfo } from "./ProductInfo";
 import { ProductVariants } from "./ProductVariants";
@@ -20,6 +21,7 @@ interface ProductPageContentProps {
 
 export function ProductPageContent({ product, pricesLoading = false }: ProductPageContentProps) {
   const t = useTranslations("product");
+  const locale = useLocale();
   const router = useRouter();
   const [selectedVariantId, setSelectedVariantId] = useState<number | null>(
     () => product.variants.find((v) => v.quantity > 0)?.id ?? product.variants[0]?.id ?? null,
@@ -68,9 +70,7 @@ export function ProductPageContent({ product, pricesLoading = false }: ProductPa
           <h2 className="mb-3 text-lg font-bold text-text-primary">
             {t("description")}
           </h2>
-          <p className="text-sm leading-relaxed text-text-secondary">
-            {product.description}
-          </p>
+          <ProductDescription description={product.description} locale={locale} />
         </section>
 
         {(product.height > 0 || product.width > 0 || product.length > 0 || product.weight > 0) && (

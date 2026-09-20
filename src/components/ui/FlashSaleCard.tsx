@@ -4,6 +4,7 @@ import { useState } from "react";
 import Image from "next/image";
 import { Link } from "@/i18n/navigation";
 import { Heart, Star } from "lucide-react";
+import { useLocale } from "next-intl";
 import { cn } from "@/shared/utils/cn";
 
 export interface FlashSaleCardItem {
@@ -26,13 +27,18 @@ interface FlashSaleCardProps {
 
 export default function FlashSaleCard({ item, priority }: FlashSaleCardProps) {
   const [wishlisted, setWishlisted] = useState(false);
+  const locale = useLocale();
   const discountPercent =
     item.price && item.originalPrice && item.originalPrice > item.price
       ? Math.round((1 - item.price / item.originalPrice) * 100)
       : 0;
 
   const formatPrice = (val: number) =>
-    val.toLocaleString("en-US", { minimumFractionDigits: 0, maximumFractionDigits: 3 });
+    val.toLocaleString(locale === "ar" ? "ar-KW" : "en-US", {
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 3,
+      numberingSystem: locale === "ar" ? "arab" : "latn",
+    });
 
   return (
     <div className="group/card flex flex-col w-full bg-white rounded-lg border border-border-subtle shadow-elev-1 transition-all duration-300 hover:-translate-y-1 hover:shadow-elev-2 overflow-hidden">

@@ -1,8 +1,9 @@
 ﻿"use client";
 
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { Star } from "lucide-react";
 import { cn } from "@/shared/utils/cn";
+import { formatNumber } from "@/shared/utils/formatMoney";
 import { ProductTags } from "@/features/tags/components/ProductTags";
 import { useDisplayCurrency } from "@/features/currencies";
 import Skeleton from "@/components/ui/Skeleton";
@@ -24,6 +25,7 @@ interface ProductInfoProps {
 
 export function ProductInfo({ product, selectedVariant, pricesLoading = false }: ProductInfoProps) {
   const t = useTranslations("product");
+  const locale = useLocale();
   const { code: currencyCode, decimalPlaces } = useDisplayCurrency(
     product.currency,
   );
@@ -93,12 +95,12 @@ export function ProductInfo({ product, selectedVariant, pricesLoading = false }:
         ) : selectedVariant || !hasVariants ? (
           <>
             <span className="text-3xl font-bold text-text-primary">
-              {displayPrice.toFixed(decimalPlaces)} {currencyCode}
+              {formatNumber(displayPrice, locale, decimalPlaces)} {currencyCode}
             </span>
             {hasDiscount && (
               <>
                 <span className="text-lg text-text-secondary line-through">
-                  {originalPrice.toFixed(decimalPlaces)} {currencyCode}
+                  {formatNumber(originalPrice, locale, decimalPlaces)} {currencyCode}
                 </span>
                 {discountPercent && (
                   <span className="rounded-md bg-discount px-2 py-0.5 text-xs font-bold text-white">
@@ -110,21 +112,17 @@ export function ProductInfo({ product, selectedVariant, pricesLoading = false }:
           </>
         ) : range!.min === range!.max ? (
           <span className="text-3xl font-bold text-text-primary">
-            {range!.min.toFixed(decimalPlaces)} {currencyCode}
+            {formatNumber(range!.min, locale, decimalPlaces)} {currencyCode}
           </span>
         ) : (
           <span className="text-3xl font-bold text-text-primary">
             {t("fromPrice", {
-              min: `${range!.min.toFixed(decimalPlaces)} ${currencyCode}`,
-              max: `${range!.max.toFixed(decimalPlaces)} ${currencyCode}`,
+              min: `${formatNumber(range!.min, locale, decimalPlaces)} ${currencyCode}`,
+              max: `${formatNumber(range!.max, locale, decimalPlaces)} ${currencyCode}`,
             })}
           </span>
         )}
       </div>
-
-      <p className="text-sm leading-relaxed text-text-secondary line-clamp-3">
-        {product.description}
-      </p>
     </div>
   );
 }

@@ -55,3 +55,77 @@ export function getStockStatus(product: { in_stock: boolean; quantity: number; s
     remaining: Math.max(0, remaining),
   };
 }
+
+/**
+ * Resolve a product `description` payload to final HTML for the given locale.
+ *
+ * The API normally returns already-localized HTML (via the `lang` header),
+ * but some rows come back as a JSON-encoded locale map, e.g.
+ * `"{\"en\":\"<p>..</p>\",\"ar\":\"<p>..</p>\"}"`. This handles both shapes
+ * (plus a plain object, for defensiveness) and always returns an HTML string.
+ */
+export function resolveProductDescriptionHtml(
+  raw: string | Record<string, string> | null | undefined,
+  locale?: string,
+): string {
+  if (raw == null) return "";
+  if (typeof raw === "object") {
+    const lang = (locale ?? "en").toLowerCase();
+    return raw[lang] ?? raw.en ?? raw.ar ?? Object.values(raw)[0] ?? "";
+  }
+  const trimmed = raw.trim();
+  if (!trimmed) return "";
+  // Heuristic: JSON locale map starts with { and contains en/ar keys.
+  if (trimmed.startsWith("{") && trimmed.endsWith("}")) {
+    try {
+      const parsed = JSON.parse(trimmed) as unknown;
+      if (parsed && typeof parsed === "object" && !Array.isArray(parsed)) {
+        const map = parsed as Record<string, unknown>;
+        const lang = (locale ?? "en").toLowerCase();
+        const pick =
+          map[lang] ?? map[lang.split("-")[0]] ?? map.en ?? map.ar ?? Object.values(map)[0];
+        return typeof pick === "string" ? pick : "";
+      }
+    } catch {
+      // Not actually JSON — fall through and treat as HTML.
+    }
+  }
+  return raw;
+}
+
+/**
+ * Minimal SSR-safe sanitizer for backend-provided product HTML.
+ * Blocklist approach: strip actively dangerous tags/attributes while
+ * preserving formatting tags (`p`, `ul`, `ol`, `li`, `strong`, ...).
+ */
+export function sanitizeProductHtml(html: string): string {
+  if (!html) return "";
+  let out = html;
+  // Remove dangerous element bodies entirely.
+  out = out.replace(/<(script|style|iframe|object|embed|form|input|button|link|meta|noscript)[^>]*>[\s\S]*?<\/\1\s*>/gi, "");
+  out = out.replace(/<(script|style|iframe|object|embed|form|input|button|link|meta)[^>]*\/?>/gi, "");
+  // Remove event-handler attributes (onclick, onerror, ...) and xmlns.
+  out = out.replace(/\s+on\w+\s*=\s*("[^"]*"|'[^']*'|[^\s>]+)/gi, "");
+  out = out.replace(/\s+xmlns(:\w+)?\s*=\s*("[^"]*"|'[^']*'|[^\s>]+)/gi, "");
+  // Neutralize javascript:/data:/vbscript: URLs in href/src/action.
+  out = out.replace(/\s+(href|src|action)\s*=\s*("javascript:[^"]*"|'javascript:[^']*'|"data:text\/html[^"]*"|'data:text\/html[^']*'|"vbscript:[^"]*"|'vbscript:[^']*')/gi, ' $1="#"');
+  return out.trim();
+}
+
+/** Strip all HTML tags + decode common entities for plain-text previews / SEO. */
+export function stripProductHtml(html: string): string {
+  if (!html) return "";
+  return html
+    .replace(/<(script|style)[^>]*>[\s\S]*?<\/\1\s*>/gi, " ")
+    .replace(/<br\s*\/?>/gi, " ")
+    .replace(/<\/(p|div|li|ul|ol|h1|h2|h3|h4|h5|h6|tr|table)>/gi, " ")
+    .replace(/<[^>]*>/g, "")
+    .replace(/&nbsp;/gi, " ")
+    .replace(/&amp;/gi, "&")
+    .replace(/&lt;/gi, "<")
+    .replace(/&gt;/gi, ">")
+    .replace(/&quot;/gi, '"')
+    .replace(/&#39;|&apos;/gi, "'")
+    .replace(/\s+/g, " ")
+    .trim();
+}

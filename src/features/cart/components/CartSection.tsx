@@ -4,7 +4,7 @@ import { useTranslations, useLocale } from "next-intl";
 import { useRouter } from "next/navigation";
 import { Truck, Gift, Star, ShoppingCart, Car, ShoppingBag, ChevronRight } from "lucide-react";
 import { cn } from "@/shared/utils/cn";
-import { formatMoney } from "@/shared/utils/formatMoney";
+import { formatMoney, formatNumber } from "@/shared/utils/formatMoney";
 import { Button } from "@/components/ui/Button";
 import { useAuthStore } from "@/features/auth/store/useAuthStore";
 import type { CartLineIdentity, HydratedCartItem } from "../types";
@@ -80,7 +80,7 @@ export function CartSection({
             <span>
               {freeShippingEligible
                 ? t("freeShippingAchieved")
-                : t("freeShippingProgress", { amount: freeShipRemaining.toFixed(0) })}
+                : t("freeShippingProgress", { amount: formatNumber(freeShipRemaining, locale, 0) })}
             </span>
           </div>
 
