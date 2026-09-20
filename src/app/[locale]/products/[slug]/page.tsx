@@ -1,5 +1,6 @@
 ﻿import { ProductDetailsPage } from "@/features/products";
 import { productService } from "@/features/products/services/productService";
+import { resolveProductDescriptionHtml, stripProductHtml } from "@/features/products/utils";
 import { ApiError } from "@/shared/lib/api";
 import type { Metadata } from "next";
 
@@ -13,7 +14,9 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
   try {
     const product = await productService.getProductBySlug(slug, locale);
     const images = Object.values(product.images?.original ?? {});
-    const description = product.description?.replace(/<[^>]*>/g, "").slice(0, 160);
+    const description = stripProductHtml(
+      resolveProductDescriptionHtml(product.description, locale),
+    ).slice(0, 160);
 
     return {
       title: product.name,

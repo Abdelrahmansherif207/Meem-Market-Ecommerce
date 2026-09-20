@@ -123,10 +123,6 @@ export function ProductInfo({ product, selectedVariant, pricesLoading = false }:
           </span>
         )}
       </div>
-
-      <p className="text-sm leading-relaxed text-text-secondary line-clamp-3">
-        {product.description}
-      </p>
     </div>
   );
 }
