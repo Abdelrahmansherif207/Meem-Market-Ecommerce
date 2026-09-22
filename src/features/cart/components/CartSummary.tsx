@@ -5,7 +5,6 @@ import { useTranslations } from "next-intl";
 import { Price } from "@/components/ui/Price";
 import { useAuthStore } from "@/features/auth/store/useAuthStore";
 import CouponInput from "@/features/coupons/components/CouponInput";
-import CouponBadge from "@/features/coupons/components/CouponBadge";
 import type { AppliedCoupon } from "@/features/coupons/types";
 
 interface CartSummaryProps {
@@ -63,17 +62,21 @@ export function CartSummary({
 
       <CouponInput onApplied={onCouponApplied} isAuthenticated={isAuthenticated} />
 
-      {appliedCoupon && (
-        <CouponBadge coupon={appliedCoupon} />
-      )}
-
       {couponDiscount > 0 && (
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <Minus className="h-3.5 w-3.5 text-success shrink-0" />
+        <div className="flex items-center justify-between gap-2">
+          <div className="flex min-w-0 items-center gap-2">
+            <Minus className="h-3.5 w-3.5 shrink-0 text-success" />
             <span className="text-sm text-success">{t("discount")}</span>
+            {appliedCoupon?.code && (
+              <span
+                dir="ltr"
+                className="truncate rounded-full bg-success/10 px-2 py-0.5 text-[11px] font-semibold text-success"
+              >
+                {appliedCoupon.code}
+              </span>
+            )}
           </div>
-          <Price amount={couponDiscount} prefix="-" className="text-sm font-semibold text-success" />
+          <Price amount={couponDiscount} prefix="-" className="shrink-0 text-sm font-semibold text-success" />
         </div>
       )}
 

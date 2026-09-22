@@ -2,6 +2,7 @@
 
 import { useTranslations, useLocale } from "next-intl";
 import { useRouter } from "next/navigation";
+import type { ReactNode } from "react";
 import { Truck, Zap, Gift, Star, ShoppingCart, Car, ShoppingBag, ChevronRight } from "lucide-react";
 import { cn } from "@/shared/utils/cn";
 import { formatMoney, formatNumber } from "@/shared/utils/formatMoney";
@@ -19,6 +20,8 @@ interface CartSectionProps {
   onUpdateQuantity: (productId: number, quantity: number, line: CartLineIdentity) => void;
   onRemove: (productId: number, line: CartLineIdentity) => void;
   minimumOrderAmount: number;
+  /** Optional slot rendered at the bottom of the section (e.g. My Coupons). */
+  couponSlot?: ReactNode;
 }
 
 export function CartSection({
@@ -28,6 +31,7 @@ export function CartSection({
   onUpdateQuantity,
   onRemove,
   minimumOrderAmount,
+  couponSlot,
 }: CartSectionProps) {
   const t = useTranslations("cartPage");
   const locale = useLocale();
@@ -175,6 +179,8 @@ export function CartSection({
           />
         ))}
       </div>
+
+      {couponSlot && <div className="border-t border-border pt-4">{couponSlot}</div>}
 
       <Button
         size="lg"

@@ -184,6 +184,17 @@
     "fastEta": "120 mins",
     "fastCheckout": "Fast Checkout"
   },
+  "coupons": {
+    "myCouponsTitle": "Your Coupons",
+    "apply": "Apply",
+    "applied": "Applied",
+    "remainingUses": "{count, plural, =1 {# use left} other {# uses left}}",
+    "expiresOn": "Expires {date}",
+    "loadError": "Couldn't load your coupons",
+    "applyFailed": "Couldn't apply this coupon",
+    "retry": "Retry",
+    "expired": "Expired"
+  },
   "wishlist": {
     "metaTitle": "Wishlist",
     "metaDescription": "Your saved products, all in one place.",
