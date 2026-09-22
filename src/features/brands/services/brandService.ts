@@ -1,5 +1,6 @@
 import { cache } from "react";
 import { apiFetch } from "@/shared/lib/api";
+import { CACHE_TTL } from "@/shared/constants/cache";
 import type { ApiResponse } from "@/shared/types";
 import type { Brand, BrandDetail } from "../types";
 
@@ -8,7 +9,7 @@ export const brandService = {
     const params = limit ? `?limit=${limit}` : "";
     const response = await apiFetch<ApiResponse<Brand[]>>(
       `/general/brands${params}`,
-      { headers: { lang: locale }, next: { revalidate: 60 } },
+      { headers: { lang: locale }, next: { revalidate: CACHE_TTL.STANDARD } },
     );
     return response.data;
   },
@@ -18,8 +19,9 @@ export const brandService = {
       `/general/brands/${encodeURIComponent(slug)}`,
       {
         headers: { lang: locale },
-        // Per-guest converted prices must bypass the shared Data Cache.
-        ...(currency ? { cache: "no-store" as RequestCache, currency } : { next: { revalidate: 60 } }),
+        // Price-bearing: always fresh, never Data-Cached.
+        cache: "no-store",
+        currency,
       },
     );
     return response.data;

@@ -1,9 +1,7 @@
 import { apiFetch, ApiError } from "@/shared/lib/api";
+import { CACHE_TTL } from "@/shared/constants/cache";
 import type { ApiResponse } from "@/shared/types";
 import type { SiteReview, SubmitSiteReviewPayload } from "../types";
-
-/** The public endpoint is cached for 4 hours on the backend. */
-const SITE_REVIEWS_CACHE_SECONDS = 60 * 60 * 4;
 
 type RawRecord = Record<string, unknown>;
 
@@ -39,7 +37,7 @@ export const siteReviewService = {
       "/general/site-reviews",
       {
         lang,
-        next: { revalidate: SITE_REVIEWS_CACHE_SECONDS },
+        next: { revalidate: CACHE_TTL.REVIEWS },
       },
     );
     const data = response?.data;

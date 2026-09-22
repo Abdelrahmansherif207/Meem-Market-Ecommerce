@@ -1,4 +1,5 @@
 import { apiFetch } from "@/shared/lib/api";
+import { CACHE_TTL } from "@/shared/constants/cache";
 import type { ApiResponse } from "@/shared/types";
 import type { Coupon, ApplyCouponResponse, AppliedCoupon } from "../types";
 
@@ -10,7 +11,7 @@ export const couponService = {
   getCoupons: async (locale: string, endpoint: string = "/general/coupons"): Promise<Coupon[]> => {
     const response = await apiFetch<ApiResponse<Coupon[]>>(
       endpoint,
-      { headers: { lang: locale }, next: { revalidate: 60 } },
+      { headers: { lang: locale }, next: { revalidate: CACHE_TTL.STANDARD } },
     );
     return response.data;
   },

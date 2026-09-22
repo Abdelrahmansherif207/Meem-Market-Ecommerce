@@ -73,6 +73,11 @@ type ApiFetchOptions = RequestInit & {
    * falls back to the catalog currency. Server-side callers must pass this
    * explicitly (e.g. via a Server Action argument). On the client it
    * defaults to the picker's stored UI preference.
+   *
+   * Per-guest converted prices must never enter the shared Data Cache (the
+   * fetch cache key does not vary by header), so passing a `currency`
+   * automatically forces `cache: "no-store"` unless the caller sets an
+   * explicit `cache` option.
    */
   currency?: string;
 };
@@ -118,6 +123,12 @@ export async function apiFetch<T>(
     normalizeCurrencyCode(currencyOption) ?? getStoredClientCurrency();
   if (effectiveCurrency && !headers.has(CURRENCY_HEADER)) {
     headers.set(CURRENCY_HEADER, effectiveCurrency);
+  }
+
+  // Currency-converted responses are per-guest: bypass the shared Data Cache
+  // unless the caller pinned an explicit cache mode.
+  if (effectiveCurrency && requestOptions.cache === undefined) {
+    requestOptions.cache = "no-store";
   }
 
   const enableLogs = process.env.NEXT_PUBLIC_XHR_LOGS === "true";

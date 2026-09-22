@@ -7,7 +7,8 @@ interface CacheEntry {
 }
 
 const cache = new Map<string, CacheEntry>();
-const TTL = 5 * 60 * 1000;
+/** Client-session cache for the drawer menu; matches the server NAV TTL. */
+const TTL = 2 * 60 * 1000;
 
 function getCached(key: string): CategoryMenuItem[] | null {
   const entry = cache.get(key);

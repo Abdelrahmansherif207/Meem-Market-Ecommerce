@@ -1,4 +1,5 @@
 import { apiFetch } from "@/shared/lib/api";
+import { CACHE_TTL } from "@/shared/constants/cache";
 import { normalizeCurrencyCode } from "@/shared/lib/currency";
 import type { ApiResponse } from "@/shared/types";
 import type { Currency } from "../types";
@@ -18,7 +19,7 @@ import type { Currency } from "../types";
 export async function getCurrencies(lang?: string): Promise<Currency[]> {
   const response = await apiFetch<ApiResponse<Currency[]>>(
     "/general/currencies",
-    { lang, next: { revalidate: 300 } },
+    { lang, next: { revalidate: CACHE_TTL.NAV } },
   );
   const list = Array.isArray(response.data) ? response.data : [];
   return list
