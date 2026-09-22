@@ -1,4 +1,5 @@
 import { apiFetch } from "@/shared/lib/api";
+import { CACHE_TTL } from "@/shared/constants/cache";
 import type { ApiResponse } from "@/shared/types";
 import type { Slider, SliderDetail } from "../types";
 
@@ -6,7 +7,7 @@ export const sliderService = {
   getSliders: async (locale: string, limit = 5): Promise<Slider[]> => {
     const response = await apiFetch<ApiResponse<Slider[]>>(
       `/general/sliders?limit=${limit}`,
-      { headers: { lang: locale }, next: { revalidate: 60 } },
+      { headers: { lang: locale }, next: { revalidate: CACHE_TTL.STANDARD } },
     );
     return response.data;
   },
@@ -16,8 +17,9 @@ export const sliderService = {
       `/general/sliders/${encodeURIComponent(slug)}`,
       {
         headers: { lang: locale },
-        // Per-guest converted prices must bypass the shared Data Cache.
-        ...(currency ? { cache: "no-store" as RequestCache, currency } : { next: { revalidate: 60 } }),
+        // Price-bearing: always fresh, never Data-Cached.
+        cache: "no-store",
+        currency,
       },
     );
     return response.data;

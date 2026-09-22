@@ -1,4 +1,5 @@
 import { apiFetch } from "@/shared/lib/api";
+import { CACHE_TTL } from "@/shared/constants/cache";
 import type { ApiResponse } from "@/shared/types";
 import CategoryGridSlider from "../categoryGridSlider/CategoryGridSlider";
 
@@ -18,7 +19,7 @@ export default async function FeaturedCategories({ locale }: { locale: string })
   try {
     const response = await apiFetch<ApiResponse<FeaturedCategory[]>>(
       "/featured-categories",
-      { headers: { lang: locale }, next: { revalidate: 120 } },
+      { headers: { lang: locale }, next: { revalidate: CACHE_TTL.FEATURED } },
     );
     categories = response.data;
   } catch {

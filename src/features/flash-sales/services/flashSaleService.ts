@@ -1,4 +1,5 @@
 import { apiFetch } from "@/shared/lib/api";
+import { CACHE_TTL } from "@/shared/constants/cache";
 import type { ApiResponse } from "@/shared/types";
 import type { FlashSale, FlashSaleDetail, FlashSaleProduct } from "../types";
 
@@ -6,7 +7,7 @@ export const flashSaleService = {
   getFlashSales: async (locale: string): Promise<FlashSale[]> => {
     const response = await apiFetch<ApiResponse<FlashSale[]>>(
       "/general/flash-sales",
-      { headers: { lang: locale }, next: { revalidate: 60 } },
+      { headers: { lang: locale }, next: { revalidate: CACHE_TTL.STANDARD } },
     );
     return response.data;
   },
@@ -16,8 +17,9 @@ export const flashSaleService = {
       `/general/flash-sales/${encodeURIComponent(slug)}`,
       {
         headers: { lang: locale },
-        // Per-guest converted prices must bypass the shared Data Cache.
-        ...(currency ? { cache: "no-store" as RequestCache, currency } : { next: { revalidate: 60 } }),
+        // Price-bearing: always fresh, never Data-Cached.
+        cache: "no-store",
+        currency,
       },
     );
     return response.data;
@@ -28,7 +30,8 @@ export const flashSaleService = {
       "/general/flash-sale-products-ending-today",
       {
         headers: { lang: locale },
-        ...(currency ? { cache: "no-store" as RequestCache, currency } : { next: { revalidate: 30 } }),
+        cache: "no-store",
+        currency,
       },
     );
     return Array.isArray(response.data) ? response.data : [];
@@ -39,7 +42,8 @@ export const flashSaleService = {
       "/general/flash-sale-products-ending-this-week",
       {
         headers: { lang: locale },
-        ...(currency ? { cache: "no-store" as RequestCache, currency } : { next: { revalidate: 60 } }),
+        cache: "no-store",
+        currency,
       },
     );
     return Array.isArray(response.data) ? response.data : [];

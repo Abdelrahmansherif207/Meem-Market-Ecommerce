@@ -5,6 +5,12 @@ const withNextIntl = createNextIntlPlugin("./src/i18n/request.ts");
 
 const nextConfig: NextConfig = {
   reactCompiler: true,
+  experimental: {
+    staleTimes: {
+      dynamic: 0,
+      static: 30,
+    },
+  },
   env: {
     NEXT_PUBLIC_XHR_LOGS: process.env.NEXT_PUBLIC_XHR_LOGS ?? "false",
   },
