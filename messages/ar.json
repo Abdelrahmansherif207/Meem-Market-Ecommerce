@@ -167,6 +167,17 @@
     "decreaseQuantity": "تقليل الكمية",
     "increaseQuantity": "زيادة الكمية"
   },
+  "coupons": {
+    "myCouponsTitle": "قسائمك",
+    "apply": "تطبيق",
+    "applied": "تم التطبيق",
+    "remainingUses": "{count, plural, =1 {استخدام واحد متبقٍ} other {# استخدامات متبقية}}",
+    "expiresOn": "تنتهي في {date}",
+    "loadError": "تعذر تحميل قسائمك",
+    "applyFailed": "تعذر تطبيق هذه القسيمة",
+    "retry": "إعادة المحاولة",
+    "expired": "منتهية"
+  },
   "wishlist": {
     "metaTitle": "قائمة الرغبات",
     "metaDescription": "منتجاتك المحفوظة في مكان واحد.",

@@ -1,13 +1,35 @@
 import { apiFetch } from "@/shared/lib/api";
 import { CACHE_TTL } from "@/shared/constants/cache";
 import type { ApiResponse } from "@/shared/types";
-import type { Coupon, ApplyCouponResponse, AppliedCoupon } from "../types";
+import type {
+  Coupon,
+  ApplyCouponResponse,
+  AppliedCoupon,
+  MyCouponsData,
+  MyCouponsResult,
+} from "../types";
 
 export type RemoveCouponResult =
   | { success: true }
   | { success: false; message: string; status?: number };
 
 export const couponService = {
+  getMyCoupons: async (locale: string): Promise<MyCouponsResult> => {
+    try {
+      const response = await apiFetch<ApiResponse<MyCouponsData>>(
+        "/general/coupons/mine",
+        { headers: { lang: locale } },
+      );
+      return { success: true, assignments: response.data.assignments ?? [] };
+    } catch (error: unknown) {
+      const err = error as { message?: string; status?: number };
+      return {
+        success: false,
+        message: err?.message,
+        status: err?.status,
+      };
+    }
+  },
   getCoupons: async (locale: string, endpoint: string = "/general/coupons"): Promise<Coupon[]> => {
     const response = await apiFetch<ApiResponse<Coupon[]>>(
       endpoint,

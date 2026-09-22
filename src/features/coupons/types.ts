@@ -26,3 +26,23 @@ export interface ApplyCouponResponse {
   data?: AppliedCoupon;
   status?: number;
 }
+
+export interface CouponAssignment {
+  id: number;
+  coupon_id: number;
+  code: string;
+  max_uses: number;
+  used: number;
+  remaining: number;
+  expired: boolean;
+  expires_at: string | null;
+  assigned_at: string;
+}
+
+export interface MyCouponsData {
+  assignments: CouponAssignment[];
+}
+
+export type MyCouponsResult =
+  | { success: true; assignments: CouponAssignment[] }
+  | { success: false; message?: string; status?: number };

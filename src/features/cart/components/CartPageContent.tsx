@@ -11,6 +11,7 @@ import { cartService } from "../services/cartService";
 import { CartSection } from "./CartSection";
 import { CartSummary } from "./CartSummary";
 import AvailableCoupons from "@/features/coupons/components/AvailableCoupons";
+import { MyCouponsList } from "@/features/coupons/components/MyCouponsList";
 import { calcSubtotal, calcTotalQuantity } from "../utils";
 import type { AppliedCoupon } from "@/features/coupons/types";
 import { couponService } from "@/features/coupons/services/couponService";
@@ -521,6 +522,12 @@ export function CartPageContent({ minimumOrderAmount }: CartPageContentProps) {
           <div className="lg:col-span-2 space-y-8">
             <CartSection
               items={displayItems}
+              couponSlot={
+                <MyCouponsList
+                  appliedCouponCode={appliedCoupon?.code ?? null}
+                  onApplied={refreshCart}
+                />
+              }
               pendingItemIds={state.pendingItemIds}
               onUpdateQuantity={handleUpdateQuantity}
               onRemove={handleRemove}
