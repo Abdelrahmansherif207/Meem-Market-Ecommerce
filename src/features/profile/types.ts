@@ -18,6 +18,7 @@ export interface Address {
     country: string;
     street_address: string;
   };
+  governorate_id: number | null;
   location?: {
     latitude: number;
     longitude: number;
@@ -36,6 +37,7 @@ export interface CreateAddressPayload {
     country: string;
     street_address: string;
   };
+  governorate_id: number;
   location?: {
     latitude: number;
     longitude: number;

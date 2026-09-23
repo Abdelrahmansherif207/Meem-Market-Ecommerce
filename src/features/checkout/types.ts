@@ -17,11 +17,21 @@ export interface EligiblePromotion {
   gift_items: { id?: number; name?: string; image?: string }[];
 }
 
+export interface GovernorateShippingPrice {
+  id: number;
+  governorate_id: number;
+  price: number;
+  estimated_days: number;
+  free_shipping_over: number;
+  status: boolean;
+}
+
 export interface Governorate {
   id: number;
   name: string;
   country_id: number;
   status: boolean;
+  shipping_price?: GovernorateShippingPrice | null;
 }
 
 export interface CheckoutRequest {

@@ -1,5 +1,6 @@
 export { CheckoutPage } from "./components/CheckoutPage";
 export { checkoutService } from "./services/checkoutService";
+export { governorateService } from "./services/governorateService";
 export type {
   Address,
   FulfillmentType,

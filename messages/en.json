@@ -375,6 +375,13 @@
         "editTitle": "Edit Address",
         "title": "Address Title",
         "titlePlaceholder": "Home, Work, etc.",
+        "governorate": "Governorate",
+        "governoratePlaceholder": "Select your governorate",
+        "governorateLoading": "Loading governorates...",
+        "governorateEmpty": "No governorates available",
+        "governorateError": "Could not load governorates. Please try again.",
+        "governorateRetry": "Retry",
+        "governorateRequired": "Please select a governorate",
         "country": "Country",
         "countryPlaceholder": "Country",
         "state": "State",
@@ -498,7 +505,8 @@
     "confirm": "Confirm Location",
     "saving": "Saving...",
     "loginRequired": "Please log in to save your location",
-    "saveError": "Failed to save location. Please try again."
+    "saveError": "Failed to save location. Please try again.",
+    "governorateNotFound": "Could not determine the governorate for this location. Please try a nearby area."
   },
   "checkout": {
     "metaTitle": "Checkout",

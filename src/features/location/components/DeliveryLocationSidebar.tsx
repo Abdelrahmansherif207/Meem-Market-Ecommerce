@@ -7,6 +7,9 @@ import { cn } from "@/shared/utils/cn";
 import { useLocationStore } from "../store/useLocationStore";
 import { useAuthStore } from "@/features/auth/store/useAuthStore";
 import { addressService } from "@/features/profile/services/addressService";
+import { governorateService } from "@/features/checkout";
+import { matchGovernorateByName } from "@/features/checkout/utils/matchGovernorate";
+import type { Governorate } from "@/features/checkout";
 import { MapPicker } from "./MapPicker";
 import type { PickedAddress } from "../types";
 
@@ -29,6 +32,15 @@ export function DeliveryLocationSidebar({ isOpen, onClose }: Props) {
 
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [governorates, setGovernorates] = useState<Governorate[]>([]);
+
+  useEffect(() => {
+    if (!isOpen) return;
+    governorateService
+      .getAll(locale)
+      .then(setGovernorates)
+      .catch(() => setGovernorates([]));
+  }, [isOpen, locale]);
 
   const initialValue = useMemo<PickedAddress | null>(() => {
     if (!deliveryCoords) return null;
@@ -64,6 +76,11 @@ export function DeliveryLocationSidebar({ isOpen, onClose }: Props) {
 
   const handleConfirm = async (picked: PickedAddress) => {
     if (!picked.coords || !picked.city.trim() || !picked.streetAddress.trim()) return;
+    const matchedGovernorate = matchGovernorateByName(picked.city, picked.state, governorates);
+    if (!matchedGovernorate) {
+      setError(t("governorateNotFound"));
+      return;
+    }
     setSaving(true);
     setError(null);
     try {
@@ -77,6 +94,7 @@ export function DeliveryLocationSidebar({ isOpen, onClose }: Props) {
           country: picked.country.trim() || "",
           street_address: picked.streetAddress.trim(),
         },
+        governorate_id: matchedGovernorate.id,
         location: {
           latitude: picked.coords.lat,
           longitude: picked.coords.lng,
