@@ -392,6 +392,13 @@
         "editTitle": "تعديل العنوان",
         "title": "اسم العنوان",
         "titlePlaceholder": "المنزل، العمل، إلخ.",
+        "governorate": "المحافظة",
+        "governoratePlaceholder": "اختر المحافظة",
+        "governorateLoading": "جار تحميل المحافظات...",
+        "governorateEmpty": "لا توجد محافظات متاحة",
+        "governorateError": "تعذر تحميل المحافظات. يرجى المحاولة مرة أخرى.",
+        "governorateRetry": "إعادة المحاولة",
+        "governorateRequired": "يرجى اختيار المحافظة",
         "country": "الدولة",
         "countryPlaceholder": "الدولة",
         "state": "الولاية",
@@ -515,7 +522,8 @@
     "confirm": "تأكيد الموقع",
     "saving": "جاري الحفظ...",
     "loginRequired": "يرجى تسجيل الدخول لحفظ الموقع",
-    "saveError": "فشل حفظ الموقع. يرجى المحاولة مرة أخرى."
+    "saveError": "فشل حفظ الموقع. يرجى المحاولة مرة أخرى.",
+    "governorateNotFound": "تعذر تحديد المحافظة لهذا الموقع. يرجى المحاولة بمنطقة قريبة."
   },
   "checkout": {
     "metaTitle": "إتمام الطلب",

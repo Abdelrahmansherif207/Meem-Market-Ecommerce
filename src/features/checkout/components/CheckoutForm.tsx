@@ -13,6 +13,7 @@ import { PickupSelector } from "./PickupSelector";
 import { cartService } from "@/features/cart/services/cartService";
 import { checkoutService } from "../services/checkoutService";
 import { governorateService } from "../services/governorateService";
+import { matchGovernorateByName } from "../utils/matchGovernorate";
 import { PromotionsPanel } from "./PromotionsPanel";
 import { OrderSummary } from "./OrderSummary";
 import { CheckoutFormSkeleton } from "./CheckoutFormSkeleton";
@@ -271,18 +272,8 @@ export function CheckoutForm() {
       });
   };
 
-  const matchGovernorate = (city: string, state: string) => {
-    const stripGov = (s: string) =>
-      s.replace(/governorate|محافظة/gi, "").trim().toLowerCase();
-    const pickedCity = stripGov(city);
-    const pickedState = stripGov(state);
-    return governorates.find((g) => {
-      const name = stripGov(g.name);
-      return name === pickedCity || name === pickedState ||
-        (pickedCity.length > 0 && (name.includes(pickedCity) || pickedCity.includes(name))) ||
-        (pickedState.length > 0 && (name.includes(pickedState) || pickedState.includes(name)));
-    });
-  };
+  const matchGovernorate = (city: string, state: string) =>
+    matchGovernorateByName(city, state, governorates);
 
   const applyAddressToForm = (addr: Address) => {
     setForm((prev) => {
@@ -345,6 +336,7 @@ export function CheckoutForm() {
           country: picked.country.trim() || " ",
           street_address: picked.streetAddress.trim() || " ",
         },
+        governorate_id: matched?.id ?? 0,
         location: { latitude: picked.coords.lat, longitude: picked.coords.lng },
       }, locale);
       setSavedAddresses((prev) => [...prev, created]);
