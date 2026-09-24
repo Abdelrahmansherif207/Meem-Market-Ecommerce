@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useTranslations } from "next-intl";
 import { Lock, Eye, EyeOff, Loader2, CheckCircle2 } from "lucide-react";
-import { authService } from "@/features/auth/services/authService";
+import { authService } from "@/features/auth";
 import { ApiError } from "@/shared/lib/api";
 
 export function ChangePasswordForm() {

@@ -1,13 +1,13 @@
 "use client";
 
-import { useAuthProfileSync } from "../hooks/useAuthProfileSync";
 import { useSocialLoginCallback } from "../hooks/useSocialLoginCallback";
 import { useAuthExpirationCheck } from "../hooks/useAuthExpirationCheck";
 import { useUnauthorizedSessionHandler } from "../hooks/useUnauthorizedSessionHandler";
+import { useSessionHydration } from "../hooks/useSessionHydration";
 
 export function AuthSyncHandler() {
+  useSessionHydration();
   useSocialLoginCallback();
-  useAuthProfileSync();
   useAuthExpirationCheck();
   useUnauthorizedSessionHandler();
   return null;

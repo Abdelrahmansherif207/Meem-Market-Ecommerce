@@ -1,4 +1,4 @@
-import { AuthPageSkeleton } from "@/features/auth/components/skeletons/AuthPageSkeleton";
+import { AuthPageSkeleton } from "@/features/auth";
 
 export default function Loading() {
   return (

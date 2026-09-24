@@ -1,10 +1,12 @@
 "use server";
 
-import { getLocale } from "next-intl/server";
+import { getLocale, getTranslations } from "next-intl/server";
 import { validateLoginForm } from "../utils/validation/Login";
 import { authService } from "../services/authService";
-import { ApiError } from "@/shared/lib/api";
 import { isSessionActive } from "../utils/sessionExpiration";
+import { setSessionCookie } from "../session/sessionCookies";
+import { mapActionError } from "../utils/mapActionError";
+import type { SessionSnapshot } from "../types";
 import type { ActionState } from "./types";
 
 export async function loginAction(
@@ -12,18 +14,19 @@ export async function loginAction(
   formData: FormData,
 ): Promise<ActionState> {
   const locale = await getLocale();
+  const t = await getTranslations("auth");
   const method = (formData.get("method") as "email" | "phone") || "email";
   const email = (formData.get("email") as string) || "";
   const phone = (formData.get("phone") as string) || "";
   const password = (formData.get("password") as string) || "";
 
-  const fieldErrors = validateLoginForm({ email, phone, password, method });
+  const fieldErrors = validateLoginForm({ email, phone, password, method }, t);
   if (Object.keys(fieldErrors).length > 0) {
     return {
       success: false,
       fieldErrors,
-      message: "Please fix the errors below.",
-      payload: { email, phone, password, method },
+      message: t("action.fixErrors"),
+      payload: { email, phone, method },
     };
   }
 
@@ -37,34 +40,39 @@ export async function loginAction(
     if (!response.data?.token || !isSessionActive(response.data.expires_at)) {
       return {
         success: false,
-        message: "The server returned an invalid session expiration date.",
+        message: t("action.invalidSessionExpiry"),
         payload: { email, phone, method },
       };
     }
 
+    await setSessionCookie(response.data.token, response.data.expires_at);
+
+    const snapshot: SessionSnapshot = {
+      isAuthenticated: true,
+      id: response.data.id,
+      permissions: response.data.permissions,
+      role: response.data.role,
+      email_verified: response.data.email_verified,
+      email: response.data.email,
+      phone_number: response.data.phone_number,
+      expires_at: response.data.expires_at,
+    };
+
     return {
       success: true,
-      message: response.message || "Login successful.",
-      data: response.data,
+      message: response.message || t("action.loginSuccess"),
+      data: snapshot,
     };
   } catch (error) {
-    if (error instanceof ApiError) {
-      const mapped: Record<string, string> = {};
-      for (const [key, msgs] of Object.entries(error.fields)) {
-        mapped[key] = Array.isArray(msgs) ? msgs[0] : String(msgs);
-      }
-      const hasFields = Object.keys(mapped).length > 0;
-      return {
-        success: false,
-        message: hasFields ? Object.values(mapped).join(" ") : error.message,
-        fieldErrors: hasFields ? mapped : undefined,
-        payload: { email, phone, password, method },
-      };
-    }
+    const { message, fieldErrors } = mapActionError(
+      error,
+      t("action.networkError"),
+    );
     return {
       success: false,
-      message: "Network error. Please try again.",
-      payload: { email, phone, password, method },
+      message,
+      fieldErrors,
+      payload: { email, phone, method },
     };
   }
 }

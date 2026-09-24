@@ -13,18 +13,28 @@ import { cn } from "@/shared/utils/cn";
 import { Button } from "@/components/ui/Button";
 import { couponService } from "../services/couponService";
 import { useMyCoupons } from "../hooks/useMyCoupons";
+import type { CouponAssignment } from "../types";
 
 interface MyCouponsListProps {
   /** Currently applied coupon code from the server cart (drives the Applied badge). */
   appliedCouponCode: string | null;
-  /** Called after a successful apply — the cart page re-fetches the cart. */
-  onApplied: () => void | Promise<void>;
+  /** Called after a successful apply with the applied code — the cart page re-fetches the cart. */
+  onApplied: (code: string) => void | Promise<void>;
+  /** Pre-fetched data from a parent (single shared `useMyCoupons` call). */
+  data?: {
+    assignments: CouponAssignment[];
+    loading: boolean;
+    error: string | null;
+    isAuthenticated: boolean;
+    reload: () => void;
+  };
 }
 
-export function MyCouponsList({ appliedCouponCode, onApplied }: MyCouponsListProps) {
+export function MyCouponsList({ appliedCouponCode, onApplied, data }: MyCouponsListProps) {
   const t = useTranslations("coupons");
   const locale = useLocale();
-  const { assignments, loading, error, isAuthenticated, reload } = useMyCoupons();
+  const internal = useMyCoupons({ enabled: data === undefined });
+  const { assignments, loading, error, isAuthenticated, reload } = data ?? internal;
 
   const [applyingCode, setApplyingCode] = useState<string | null>(null);
   const [applyError, setApplyError] = useState<{ code: string; message: string | null } | null>(null);
@@ -40,7 +50,7 @@ export function MyCouponsList({ appliedCouponCode, onApplied }: MyCouponsListPro
       const result = await couponService.applyCoupon(code, locale);
 
       if (result.success) {
-        await onApplied();
+        await onApplied(code);
       } else {
         setApplyError({ code, message: result.message ?? null });
       }

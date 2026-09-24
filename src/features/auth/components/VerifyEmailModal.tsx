@@ -5,7 +5,7 @@ import { AlertTriangle, Loader2, RefreshCw, ShieldCheck, X } from "lucide-react"
 import OtpInput from "@/components/ui/OtpInput";
 import { sendOtpCodeAction, otpAction } from "../actions";
 import { useAuthStore } from "../store/useAuthStore";
-import type { AuthLoginData } from "../types";
+import type { SessionSnapshot } from "../types";
 
 interface VerifyEmailModalProps {
   email: string;
@@ -15,10 +15,7 @@ interface VerifyEmailModalProps {
 const RESEND_COOLDOWN = 20;
 
 export function VerifyEmailModal({ email: propEmail, onClose }: VerifyEmailModalProps) {
-  const setAuthData = useAuthStore((s) => s.setAuthData);
-  const token = useAuthStore((s) => s.token);
-  const permissions = useAuthStore((s) => s.permissions);
-  const role = useAuthStore((s) => s.role);
+  const setSession = useAuthStore((s) => s.setSession);
   const storeEmail = useAuthStore((s) => s.email);
   const email = propEmail || storeEmail || "";
 
@@ -105,17 +102,13 @@ export function VerifyEmailModal({ email: propEmail, onClose }: VerifyEmailModal
 
     try {
       const result = await otpAction(null, formData);
-      if (result.success) {
-        const updatedData: AuthLoginData = {
-          token: token || result.data?.token || "",
-          permissions: result.data?.permissions ?? permissions,
-          role: result.data?.role ?? role,
+      if (result.success && result.data) {
+        const snapshot: SessionSnapshot = {
+          ...result.data,
           email_verified: true,
-          email: result.data?.email || email,
-          phone_number: result.data?.phone_number,
-          expires_at: result.data?.expires_at,
+          email: result.data.email || email,
         };
-        if (setAuthData(updatedData)) {
+        if (setSession(snapshot)) {
           onClose();
         } else {
           setError("Your session has expired. Please sign in again.");

@@ -143,7 +143,38 @@
     "loginSubtitle": "يرجى إدخال تفاصيل تسجيل الدخول أدناه للمتابعة.",
     "registerSubtitle": "استخدم تفاصيلك أدناه لإنشاء حساب جديد.",
     "showPassword": "إظهار كلمة المرور",
-    "hidePassword": "إخفاء كلمة المرور"
+    "hidePassword": "إخفاء كلمة المرور",
+    "validation": {
+      "emailInvalid": "يرجى إدخال بريد إلكتروني صحيح.",
+      "emailRequired": "البريد الإلكتروني مطلوب.",
+      "phoneRequired": "رقم الهاتف مطلوب.",
+      "phoneInvalid": "يرجى إدخال رقم هاتف صحيح.",
+      "passwordMin": "يجب ألا تقل كلمة المرور عن 8 أحرف.",
+      "confirmRequired": "يرجى تأكيد كلمة المرور.",
+      "passwordsDontMatch": "كلمتا المرور غير متطابقتين.",
+      "firstNameMin": "يجب ألا يقل الاسم الأول عن حرفين.",
+      "lastNameMin": "يجب ألا يقل اسم العائلة عن حرفين.",
+      "policyRequired": "يجب الموافقة على الشروط والأحكام.",
+      "codeExact6": "يجب أن يتكون الرمز من 6 أرقام بالضبط.",
+      "otpExact6": "يجب أن يتكون رمز OTP من 6 أرقام بالضبط."
+    },
+    "action": {
+      "fixErrors": "يرجى تصحيح الأخطاء أدناه.",
+      "networkError": "حدث خطأ في الشبكة. يرجى المحاولة مرة أخرى.",
+      "invalidSessionExpiry": "أعاد الخادم تاريخ انتهاء صلاحية جلسة غير صالح.",
+      "loginSuccess": "تم تسجيل الدخول بنجاح.",
+      "registerSuccess": "تم إنشاء الحساب بنجاح.",
+      "otpSent": "تم إرسال رمز التحقق بنجاح!",
+      "otpVerified": "تم التحقق من البريد الإلكتروني بنجاح!",
+      "verificationFailed": "فشل التحقق.",
+      "enterValidCode": "يرجى إدخال رمز من 6 أرقام صحيح.",
+      "contactRequired": "البريد الإلكتروني أو رقم الهاتف مطلوب.",
+      "checkInbox": "تحقق من بريدك الإلكتروني للحصول على رمز OTP.",
+      "invalidOtp": "رمز OTP غير صالح أو منتهي الصلاحية. حاول مرة أخرى.",
+      "otpVerifiedFp": "تم التحقق من رمز OTP بنجاح.",
+      "resetSuccess": "تمت إعادة تعيين كلمة المرور بنجاح. يرجى تسجيل الدخول بكلمة المرور الجديدة.",
+      "invalidStep": "خطوة غير صالحة."
+    }
   },
   "cartPage": {
     "metaTitle": "سلة التسوق",
@@ -186,6 +217,11 @@
   },
   "coupons": {
     "myCouponsTitle": "قسائمك",
+    "claimsTitle": "القسائم المستلمة",
+    "claimedOn": "تم الاستلام {date}",
+    "statusActive": "نشطة",
+    "statusRedeemed": "مستخدمة",
+    "statusExpired": "منتهية",
     "apply": "تطبيق",
     "applied": "تم التطبيق",
     "remainingUses": "{count, plural, =1 {استخدام واحد متبقٍ} other {# استخدامات متبقية}}",
@@ -356,6 +392,7 @@
       "orders": "الطلبات",
       "invoices": "الفواتير",
       "addresses": "العناوين",
+      "coupons": "الكوبونات",
       "security": "الأمان"
     },
     "info": {
@@ -567,6 +604,9 @@
     "subtotal": "المجموع الفرعي",
     "items": "منتجات",
     "shipping": "الشحن",
+    "shippingEstimate": "الشحن التقديري",
+    "shippingDays": "~{days} أيام",
+    "freeShipping": "مجاني",
     "promotionDiscount": "خصم العرض",
     "couponDiscount": "خصم الكوبون",
     "total": "الإجمالي",
@@ -780,6 +820,9 @@
     "hrAgo": "منذ {count} ساعة",
     "dayAgo": "منذ {count} يوم",
     "weekAgo": "منذ {count} أسبوع",
-    "retry": "إعادة المحاولة"
+    "retry": "إعادة المحاولة",
+    "claim": "استلام",
+    "claimed": "تم الاستلام",
+    "claimFailed": "تعذر استلام هذه القسيمة"
   }
 }

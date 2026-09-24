@@ -2,7 +2,7 @@
 
 import { useEffect, useRef } from "react";
 import { useLocale } from "next-intl";
-import { useAuthStore } from "@/features/auth/store/useAuthStore";
+import { useAuthStore } from "@/features/auth";
 import { useNotificationsHydration } from "../hooks/useNotificationsHydration";
 
 export function NotificationSyncHandler() {

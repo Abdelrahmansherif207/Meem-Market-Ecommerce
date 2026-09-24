@@ -3,7 +3,7 @@
 import { Truck, Zap, Minus } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { Price } from "@/components/ui/Price";
-import { useAuthStore } from "@/features/auth/store/useAuthStore";
+import { useAuthStore } from "@/features/auth";
 import CouponInput from "@/features/coupons/components/CouponInput";
 import type { AppliedCoupon } from "@/features/coupons/types";
 

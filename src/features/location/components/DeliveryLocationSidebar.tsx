@@ -5,7 +5,7 @@ import { useLocale, useTranslations } from "next-intl";
 import { X, MapPin } from "lucide-react";
 import { cn } from "@/shared/utils/cn";
 import { useLocationStore } from "../store/useLocationStore";
-import { useAuthStore } from "@/features/auth/store/useAuthStore";
+import { useAuthStore } from "@/features/auth";
 import { addressService } from "@/features/profile/services/addressService";
 import { governorateService } from "@/features/checkout";
 import { matchGovernorateByName } from "@/features/checkout/utils/matchGovernorate";

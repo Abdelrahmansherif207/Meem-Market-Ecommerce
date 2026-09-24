@@ -3,7 +3,7 @@
 import { ShoppingCart } from "lucide-react";
 import { useSyncExternalStore } from "react";
 import { Link } from "@/i18n/navigation";
-import { useAuthStore } from "@/features/auth/store/useAuthStore";
+import { useAuthStore } from "@/features/auth";
 import { useGuestCartStore } from "@/features/cart/store/useGuestCartStore";
 import { useServerCartStore } from "@/features/cart/store/useServerCartStore";
 

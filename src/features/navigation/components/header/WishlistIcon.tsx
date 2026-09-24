@@ -3,7 +3,7 @@
 import { Heart } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
-import { useAuthStore } from "@/features/auth/store/useAuthStore";
+import { useAuthStore } from "@/features/auth";
 
 export function WishlistIcon() {
   const t = useTranslations("header.mainNav");

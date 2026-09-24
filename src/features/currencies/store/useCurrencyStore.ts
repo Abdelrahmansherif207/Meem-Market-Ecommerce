@@ -8,6 +8,8 @@ import { resolveLocalized, type Currency } from "../types";
 interface CurrencyMeta {
   symbol: string;
   decimalPlaces: number;
+  /** Display-currency units per 1 base-currency unit (null when unknown). */
+  effectiveRate: number | null;
 }
 
 interface CurrencyState {
@@ -20,11 +22,13 @@ interface CurrencyState {
 }
 
 function metaOf(currency: Currency, locale = "en"): CurrencyMeta {
+  const rate = Number(currency.effective_rate);
   return {
     symbol: resolveLocalized(currency.symbol, locale, currency.code),
     decimalPlaces: Number.isFinite(currency.decimal_places)
       ? currency.decimal_places
       : 2,
+    effectiveRate: Number.isFinite(rate) ? rate : null,
   };
 }
 
