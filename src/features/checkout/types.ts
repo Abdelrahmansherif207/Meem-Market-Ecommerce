@@ -87,5 +87,4 @@ export interface CheckoutFormData {
   selected_promotion_id: number | null;
   selected_promotion_discount: number;
   selected_gift_product_id: number | null;
-  shipping_fee: number;
 }
