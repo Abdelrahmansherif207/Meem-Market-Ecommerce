@@ -4,11 +4,11 @@ import { useCallback, useState } from "react";
 import { Bell, CheckCheck, Loader2, RotateCw } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import { useRouter } from "@/i18n/navigation";
-import { useAuthStore } from "@/features/auth/store/useAuthStore";
-import { useAuthModalStore } from "@/features/auth/store/useAuthModalStore";
+import { useAuthStore, useAuthModalStore } from "@/features/auth";
 import { useNotificationStore } from "../store/useNotificationStore";
 import { notificationService, normalizeList } from "../services/notificationService";
 import { useNotificationsHydration } from "../hooks/useNotificationsHydration";
+import { useClaimableNotifications } from "../hooks/useClaimableNotifications";
 import { getNotificationConfig } from "../constants";
 import { NotificationItemRow } from "./NotificationItemRow";
 import { cn } from "@/shared/utils/cn";
@@ -31,6 +31,7 @@ export function NotificationsPage() {
   const unreadCount = useNotificationStore((s) => s.unreadCount);
 
   const hydrate = useNotificationsHydration(locale);
+  const { claimControlFor } = useClaimableNotifications();
   const [retrying, setRetrying] = useState(false);
 
   const loadNextPage = useCallback(async () => {
@@ -166,6 +167,7 @@ export function NotificationsPage() {
                   notification={n}
                   onRead={handleRead}
                   onDelete={handleDelete}
+                  claim={claimControlFor(n)}
                 />
               </div>
             ))}

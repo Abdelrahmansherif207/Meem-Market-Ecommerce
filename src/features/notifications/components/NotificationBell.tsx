@@ -4,11 +4,14 @@ import { useRef, useState, useCallback } from "react";
 import { Bell, CheckCheck } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import { Link, useRouter } from "@/i18n/navigation";
-import { useAuthStore } from "@/features/auth/store/useAuthStore";
+import { useAuthStore } from "@/features/auth";
 import { useClickOutside } from "@/shared/hooks/useClickOutside";
 import { useNotificationStore } from "../store/useNotificationStore";
+import { useClaimableNotifications } from "../hooks/useClaimableNotifications";
+import { isClaimableCouponNotification } from "../utils";
 import { getNotificationConfig } from "../constants";
 import { timeAgo } from "@/shared/utils/timeAgo";
+import { ClaimCouponButton } from "@/features/coupons";
 import { cn } from "@/shared/utils/cn";
 import { notificationService } from "../services/notificationService";
 import type { NotificationItem } from "../types";
@@ -25,6 +28,7 @@ export function NotificationBell() {
   const [open, setOpen] = useState(false);
   const [marking, setMarking] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
+  const { claimControlFor } = useClaimableNotifications({ enabled: open });
 
   const close = useCallback(() => setOpen(false), []);
   useClickOutside(containerRef, close, open);
@@ -115,12 +119,17 @@ export function NotificationBell() {
                   const config = getNotificationConfig(n.type);
                   const Icon = config.icon;
                   const isUnread = !n.readAt;
+                  const claim = claimControlFor(n);
+                  const showClaim = claim !== null && isClaimableCouponNotification(n);
                   return (
-                    <li key={n.id}>
+                    <li
+                      key={n.id}
+                      className="flex items-start gap-3 px-4 py-3 transition-colors hover:bg-surface/80"
+                    >
                       <button
                         type="button"
                         onClick={() => handleClick(n)}
-                        className="group flex w-full items-start gap-3 px-4 py-3 text-start transition-colors hover:bg-surface/80"
+                        className="group flex min-w-0 flex-1 items-start gap-3 text-start"
                       >
                         <span
                           className={cn(
@@ -150,6 +159,16 @@ export function NotificationBell() {
                           <span className="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-primary" />
                         )}
                       </button>
+                      {showClaim && claim && (
+                        <span className="mt-0.5" onClick={(e) => e.stopPropagation()}>
+                          <ClaimCouponButton
+                            claimed={claim.claimed}
+                            claiming={claim.claiming}
+                            onClaim={claim.onClaim}
+                            error={claim.error}
+                          />
+                        </span>
+                      )}
                     </li>
                   );
                 })}
