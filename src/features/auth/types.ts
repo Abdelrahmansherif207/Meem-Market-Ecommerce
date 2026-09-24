@@ -69,10 +69,35 @@ export interface AuthLoginData {
   expires_at?: string;
 }
 
+/**
+ * Client-safe session payload. Carries user metadata only — the raw token
+ * lives in the httpOnly session cookie and never reaches JavaScript.
+ */
+export interface SessionSnapshot {
+  isAuthenticated: true;
+  id?: number;
+  permissions?: string[];
+  role?: string[];
+  email_verified?: boolean;
+  email?: string;
+  phone_number?: string;
+  expires_at?: string;
+}
+
 export interface RegisterResponseData {
   message?: string;
   otp_status?: boolean;
   email?: string;
+}
+
+export interface SocialUser {
+  id?: number;
+  name?: string;
+  email?: string;
+  phone_number?: string;
+  email_verified?: boolean;
+  email_verified_at?: string | null;
+  expires_at?: string;
 }
 
 export interface SocialExchangeResponse {
@@ -80,6 +105,6 @@ export interface SocialExchangeResponse {
   token?: string;
   token_type?: string;
   expires_at?: string;
-  user?: Record<string, unknown>;
+  user?: SocialUser;
   message?: string;
 }

@@ -4,8 +4,7 @@ import { useState, useRef } from "react";
 import { useTranslations, useLocale } from "next-intl";
 import { Star, Loader2 } from "lucide-react";
 import { cn } from "@/shared/utils/cn";
-import { useAuthStore } from "@/features/auth/store/useAuthStore";
-import { useAuthModalStore } from "@/features/auth/store/useAuthModalStore";
+import { useAuthStore, useAuthModalStore } from "@/features/auth";
 import { reviewService } from "../services/reviewService";
 import type { ProductReview } from "../types";
 

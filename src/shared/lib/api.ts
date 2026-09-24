@@ -1,4 +1,4 @@
-import { AUTH_TOKEN_STORAGE_KEY } from "@/shared/constants/storageKeys";
+import { SESSION_HINT_COOKIE_NAME } from "@/shared/constants/sessionCookies";
 import { CURRENCY_HEADER, getStoredClientCurrency, normalizeCurrencyCode } from "@/shared/lib/currency";
 import { notifyUnauthorized } from "@/shared/lib/unauthorizedEvent";
 
@@ -14,7 +14,23 @@ export class ApiError extends Error {
   }
 }
 
-const BASE_URL = process.env.NEXT_PUBLIC_API_URL;
+/**
+ * Server-side callers hit the upstream API directly; browser callers use the
+ * same-origin `/api/v1` path which Next.js proxies and authenticates from the
+ * httpOnly session cookie.
+ */
+const SERVER_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
+const CLIENT_API_BASE_PATH = "/api/v1";
+
+function resolveBaseUrl(): string {
+  if (typeof window === "undefined") {
+    if (!SERVER_BASE_URL) {
+      throw new Error("Missing NEXT_PUBLIC_API_URL environment variable.");
+    }
+    return SERVER_BASE_URL;
+  }
+  return CLIENT_API_BASE_PATH;
+}
 
 /**
  * Credential mode for API requests. Defaults to `"same-origin"`.
@@ -25,9 +41,9 @@ const BASE_URL = process.env.NEXT_PUBLIC_API_URL;
  */
 export const API_REQUEST_CREDENTIALS: RequestCredentials = "same-origin";
 
-function getAuthToken() {
-  if (typeof window === "undefined") return null;
-  return window.localStorage.getItem(AUTH_TOKEN_STORAGE_KEY);
+function hasClientSession(): boolean {
+  if (typeof window === "undefined") return false;
+  return window.document.cookie.includes(`${SESSION_HINT_COOKIE_NAME}=`);
 }
 
 function extractApiMessage(body: Record<string, unknown>): string | undefined {
@@ -86,19 +102,14 @@ export async function apiFetch<T>(
   endpoint: string,
   options: ApiFetchOptions = {},
 ): Promise<T> {
-  if (!BASE_URL) {
-    throw new Error("Missing NEXT_PUBLIC_API_URL environment variable.");
-  }
-
   const cleanEndpoint = endpoint.startsWith("/") ? endpoint : `/${endpoint}`;
-  const url = `${BASE_URL}${cleanEndpoint}`;
+  const url = `${resolveBaseUrl()}${cleanEndpoint}`;
   const {
     lang,
     timeout: timeoutMs = 15_000,
     currency: currencyOption,
     ...requestOptions
   } = options;
-  const authToken = getAuthToken();
   const headers = new Headers(requestOptions.headers);
 
   const hasFormDataBody =
@@ -106,10 +117,6 @@ export async function apiFetch<T>(
 
   if (!headers.has("Content-Type") && !hasFormDataBody) {
     headers.set("Content-Type", "application/json");
-  }
-
-  if (authToken && !headers.has("Authorization")) {
-    headers.set("Authorization", `Bearer ${authToken}`);
   }
 
   if (lang && !headers.has("lang")) {
@@ -195,12 +202,7 @@ export async function apiFetch<T>(
     return parsedBody as T;
   }
 
-  if (
-    response.status === 401 &&
-    authToken &&
-    typeof window !== "undefined"
-  ) {
-    window.localStorage.removeItem(AUTH_TOKEN_STORAGE_KEY);
+  if (response.status === 401 && hasClientSession()) {
     notifyUnauthorized();
   }
 

@@ -3,7 +3,7 @@ import { useEffect, useRef, useReducer, useCallback, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import Link from "next/link";
 import { Loader2, AlertTriangle, RefreshCw } from "lucide-react";
-import { useAuthStore } from "@/features/auth/store/useAuthStore";
+import { useAuthStore } from "@/features/auth";
 import { useCurrencyStore } from "@/features/currencies";
 import { useGuestCartStore } from "../store/useGuestCartStore";
 import { useServerCartStore } from "../store/useServerCartStore";

@@ -119,7 +119,7 @@ export interface OrderProduct {
   };
 }
 
-export type ProfileTab = "info" | "orders" | "addresses" | "security" | "invoices";
+export type ProfileTab = "info" | "orders" | "invoices" | "addresses" | "security" | "coupons";
 
 export interface InvoiceListItem {
   uuid: string;

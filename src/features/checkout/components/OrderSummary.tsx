@@ -5,11 +5,12 @@ import CouponInput from "@/features/coupons/components/CouponInput";
 import CouponBadge from "@/features/coupons/components/CouponBadge";
 import { Price } from "@/components/ui/Price";
 import type { AppliedCoupon } from "@/features/coupons/types";
+import type { ShippingQuote } from "../utils/shippingFee";
 
 interface OrderSummaryProps {
   subtotal: number;
   totalQuantity: number;
-  shippingFee: number;
+  shipping?: ShippingQuote | null;
   promotionDiscount: number;
   couponDiscount: number;
   pickupLocationName?: string;
@@ -20,7 +21,7 @@ interface OrderSummaryProps {
 export function OrderSummary({
   subtotal,
   totalQuantity,
-  shippingFee,
+  shipping,
   promotionDiscount,
   couponDiscount,
   pickupLocationName,
@@ -28,7 +29,9 @@ export function OrderSummary({
   onCouponApplied,
 }: OrderSummaryProps) {
   const t = useTranslations("checkout");
-  const total = subtotal - promotionDiscount - couponDiscount + (pickupLocationName ? 0 : shippingFee);
+  const shippingFee = pickupLocationName ? 0 : shipping?.fee ?? 0;
+  const total = subtotal - promotionDiscount - couponDiscount + shippingFee;
+  const estimatedDays = pickupLocationName ? null : shipping?.estimatedDays ?? null;
 
   return (
     <div className="rounded-2xl border-2 border-border bg-white p-5 space-y-4">
@@ -77,14 +80,34 @@ export function OrderSummary({
               <span className="text-sm text-text-secondary">{t("pickupAt")} {pickupLocationName}</span>
             </div>
           </div>
-        ) : shippingFee > 0 ? (
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <Truck className="h-3.5 w-3.5 text-text-secondary shrink-0" />
-              <span className="text-sm text-text-secondary">{t("shipping")}</span>
+        ) : shipping && (shipping.free || shipping.fee > 0) ? (
+          shipping.free ? (
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Truck className="h-3.5 w-3.5 text-text-secondary shrink-0" />
+                <span className="text-sm text-text-secondary">
+                  {t("shipping")}
+                  {estimatedDays !== null && (
+                    <span className="ms-1 text-xs">{t("shippingDays", { days: estimatedDays })}</span>
+                  )}
+                </span>
+              </div>
+              <span className="text-sm font-semibold text-success">{t("freeShipping")}</span>
             </div>
-            <Price amount={shippingFee} className="text-sm font-semibold text-text-primary" />
-          </div>
+          ) : (
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Truck className="h-3.5 w-3.5 text-text-secondary shrink-0" />
+                <span className="text-sm text-text-secondary">
+                  {t("shippingEstimate")}
+                  {estimatedDays !== null && (
+                    <span className="ms-1 text-xs">{t("shippingDays", { days: estimatedDays })}</span>
+                  )}
+                </span>
+              </div>
+              <Price amount={shipping.fee} className="text-sm font-semibold text-text-primary" />
+            </div>
+          )
         ) : null}
       </div>
 

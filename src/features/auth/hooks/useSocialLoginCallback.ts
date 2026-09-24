@@ -3,11 +3,12 @@
 import { useEffect, useRef } from "react";
 import { useRouter } from "@/i18n/navigation";
 import { useAuthStore } from "../store/useAuthStore";
-import { clearAuthorizationCode, exchangeSocialCode } from "../services/socialService";
+import { exchangeSocialCodeAction } from "../actions/socialExchange";
+import { clearAuthorizationCode } from "../services/socialService";
 
 export function useSocialLoginCallback() {
   const router = useRouter();
-  const setAuthData = useAuthStore((s) => s.setAuthData);
+  const setSession = useAuthStore((s) => s.setSession);
   const handledRef = useRef(false);
 
   useEffect(() => {
@@ -19,32 +20,15 @@ export function useSocialLoginCallback() {
 
     handledRef.current = true;
 
-    exchangeSocialCode(code)
-      .then((response) => {
-        if (!response.success || !response.token) {
-          throw new Error(response.message || "Invalid or expired authorization code.");
-        }
-
-        const userExpiry = response.user?.expires_at;
-        const expiresAt =
-          response.expires_at ??
-          (typeof userExpiry === "string" ? userExpiry : undefined);
-        const stored = setAuthData({
-          token: response.token,
-          ...(response.user as Record<string, unknown>),
-          email_verified:
-            response.user?.email_verified === true ||
-            typeof response.user?.email_verified_at === "string",
-          expires_at: expiresAt,
-        });
-
-        if (!stored) {
-          throw new Error("The social login response has no valid expiration date.");
+    exchangeSocialCodeAction(code)
+      .then((snapshot) => {
+        if (!snapshot || !setSession(snapshot)) {
+          throw new Error("Social login could not establish a valid session.");
         }
         clearAuthorizationCode(window.location.pathname);
       })
       .catch(() => {
         router.replace("/auth?error=social_login_failed");
       });
-  }, [router, setAuthData]);
+  }, [router, setSession]);
 }

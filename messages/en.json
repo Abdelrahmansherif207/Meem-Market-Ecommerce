@@ -129,7 +129,38 @@
     "loginSubtitle": "Please enter your login details below to continue.",
     "registerSubtitle": "Use your details below to create a new account.",
     "showPassword": "Show password",
-    "hidePassword": "Hide password"
+    "hidePassword": "Hide password",
+    "validation": {
+      "emailInvalid": "Please enter a valid email address.",
+      "emailRequired": "Email is required.",
+      "phoneRequired": "Phone number is required.",
+      "phoneInvalid": "Please enter a valid phone number.",
+      "passwordMin": "Password must be at least 8 characters.",
+      "confirmRequired": "Please confirm your password.",
+      "passwordsDontMatch": "Passwords do not match.",
+      "firstNameMin": "First name must be at least 2 characters.",
+      "lastNameMin": "Last name must be at least 2 characters.",
+      "policyRequired": "You must agree to the terms & conditions.",
+      "codeExact6": "Code must be exactly 6 digits.",
+      "otpExact6": "OTP must be exactly 6 digits."
+    },
+    "action": {
+      "fixErrors": "Please fix the errors below.",
+      "networkError": "Network error. Please try again.",
+      "invalidSessionExpiry": "The server returned an invalid session expiration date.",
+      "loginSuccess": "Login successful.",
+      "registerSuccess": "Account created successfully.",
+      "otpSent": "OTP code sent successfully!",
+      "otpVerified": "Email verified successfully!",
+      "verificationFailed": "Verification failed.",
+      "enterValidCode": "Please enter a valid 6-digit code.",
+      "contactRequired": "Email or phone is required.",
+      "checkInbox": "Check your inbox for the OTP code.",
+      "invalidOtp": "Invalid or expired OTP. Please try again.",
+      "otpVerifiedFp": "OTP verified successfully.",
+      "resetSuccess": "Password has been reset successfully. Please sign in with your new password.",
+      "invalidStep": "Invalid step."
+    }
   },
   "cartPage": {
     "metaTitle": "Cart",
@@ -169,6 +200,11 @@
   },
   "coupons": {
     "myCouponsTitle": "Your Coupons",
+    "claimsTitle": "Claimed Coupons",
+    "claimedOn": "Claimed {date}",
+    "statusActive": "Active",
+    "statusRedeemed": "Redeemed",
+    "statusExpired": "Expired",
     "apply": "Apply",
     "applied": "Applied",
     "remainingUses": "{count, plural, =1 {# use left} other {# uses left}}",
@@ -339,6 +375,7 @@
       "orders": "Orders",
       "invoices": "Invoices",
       "addresses": "Addresses",
+      "coupons": "Coupons",
       "security": "Security"
     },
     "info": {
@@ -550,6 +587,9 @@
     "subtotal": "Subtotal",
     "items": "items",
     "shipping": "Shipping",
+    "shippingEstimate": "Estimated Shipping",
+    "shippingDays": "~{days} days",
+    "freeShipping": "Free",
     "promotionDiscount": "Promotion Discount",
     "couponDiscount": "Coupon Discount",
     "total": "Total",
@@ -760,6 +800,9 @@
     "hrAgo": "{count} hour(s) ago",
     "dayAgo": "{count} day(s) ago",
     "weekAgo": "{count} week(s) ago",
-    "retry": "Retry"
+    "retry": "Retry",
+    "claim": "Claim",
+    "claimed": "Claimed",
+    "claimFailed": "Couldn't claim this coupon"
   }
 }

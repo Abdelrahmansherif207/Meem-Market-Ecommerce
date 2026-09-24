@@ -2,7 +2,7 @@
 
 import { useEffect } from "react";
 import { useLocale } from "next-intl";
-import { useAuthStore } from "@/features/auth/store/useAuthStore";
+import { useAuthStore } from "@/features/auth";
 import { wishlistService } from "../services/wishlistService";
 import { useWishlistStore } from "../store/useWishlistStore";
 import { useResumePendingWishlistAction } from "../hooks/useResumePendingWishlistAction";

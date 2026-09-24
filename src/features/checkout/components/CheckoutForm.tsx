@@ -1,10 +1,10 @@
 "use client";
-import { useEffect, useRef, useState, useCallback } from "react";
-import { useRouter } from "next/navigation";
+import { useEffect, useMemo, useRef, useState, useCallback } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
 import { Loader2, CreditCard, MapPin, Store, Truck } from "lucide-react";
 import { useShallow } from "zustand/react/shallow";
-import { useAuthStore } from "@/features/auth/store/useAuthStore";
+import { useAuthStore } from "@/features/auth";
 import { useCurrencyStore } from "@/features/currencies";
 import { usePickupLocationStore } from "@/features/pickup-location";
 import { MapPickerModal, useLocationStore } from "@/features/location";
@@ -17,6 +17,7 @@ import { matchGovernorateByName } from "../utils/matchGovernorate";
 import { PromotionsPanel } from "./PromotionsPanel";
 import { OrderSummary } from "./OrderSummary";
 import { CheckoutFormSkeleton } from "./CheckoutFormSkeleton";
+import { resolveShippingQuote } from "../utils/shippingFee";
 import type { CheckoutFormData, FulfillmentType, PaymentMethod, EligiblePromotion, Governorate } from "../types";
 import { addressService } from "@/features/profile/services/addressService";
 import type { Address } from "@/features/profile/types";
@@ -39,7 +40,6 @@ const initialForm = (user: { name?: string | null; email?: string | null; phone?
   selected_promotion_id: null,
   selected_promotion_discount: 0,
   selected_gift_product_id: null,
-  shipping_fee: 0,
 });
 
 interface FieldError {
@@ -433,6 +433,24 @@ export function CheckoutForm() {
     }).catch(() => {});
   }, [locale]);
 
+  const selectedGovernorate = useMemo(
+    () => governorates.find((g) => g.id === form.governorate_id) ?? null,
+    [governorates, form.governorate_id],
+  );
+  const selectedCurrencyRate = useCurrencyStore(
+    (s) => s.byCode[s.selectedCode]?.effectiveRate ?? null,
+  );
+  const shippingQuote = useMemo(
+    () =>
+      resolveShippingQuote({
+        fulfillmentType: form.fulfillment_type,
+        governorate: selectedGovernorate,
+        subtotal: cartData?.subtotal ?? 0,
+        ratePerBase: selectedCurrencyRate,
+      }),
+    [form.fulfillment_type, selectedGovernorate, cartData?.subtotal, selectedCurrencyRate],
+  );
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setApiError(null);
@@ -795,7 +813,7 @@ export function CheckoutForm() {
             <OrderSummary
               subtotal={cartData?.subtotal ?? 0}
               totalQuantity={cartData?.totalQuantity ?? 0}
-              shippingFee={form.shipping_fee}
+              shipping={shippingQuote}
               promotionDiscount={form.selected_promotion_discount}
               couponDiscount={cartData?.couponDiscount ?? 0}
               pickupLocationName={pickupLocationName || undefined}
