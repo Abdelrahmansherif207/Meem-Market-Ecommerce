@@ -1,9 +1,9 @@
 "use server";
 
-import { getLocale } from "next-intl/server";
+import { getLocale, getTranslations } from "next-intl/server";
 import { validateRegisterForm } from "../utils/validation/Register";
 import { authService } from "../services/authService";
-import { ApiError } from "@/shared/lib/api";
+import { mapActionError } from "../utils/mapActionError";
 import type { ActionState } from "./types";
 
 export async function registerAction(
@@ -11,6 +11,7 @@ export async function registerAction(
   formData: FormData,
 ): Promise<ActionState> {
   const locale = await getLocale();
+  const t = await getTranslations("auth");
   const firstName = (formData.get("firstName") as string) || "";
   const lastName = (formData.get("lastName") as string) || "";
   const email = (formData.get("email") as string) || "";
@@ -22,18 +23,21 @@ export async function registerAction(
 
   const payload = { firstName, lastName, email, phone, password, passwordConfirmation, policy: policy ? "on" : "off" };
 
-  const fieldErrors = validateRegisterForm({
-    firstName,
-    lastName,
-    email,
-    phone,
-    password,
-    passwordConfirmation,
-    policy,
-  });
+  const fieldErrors = validateRegisterForm(
+    {
+      firstName,
+      lastName,
+      email,
+      phone,
+      password,
+      passwordConfirmation,
+      policy,
+    },
+    t,
+  );
 
   if (Object.keys(fieldErrors).length > 0) {
-    return { success: false, fieldErrors, message: "Please fix the errors below.", payload };
+    return { success: false, fieldErrors, message: t("action.fixErrors"), payload };
   }
 
   try {
@@ -53,28 +57,18 @@ export async function registerAction(
 
     return {
       success: true,
-      message: response.message || "Account created successfully.",
+      message: response.message || t("action.registerSuccess"),
       payload: { email, phone, otp_status: otpStatus },
     };
   } catch (error) {
-    if (error instanceof ApiError) {
-      const mapped: Record<string, string> = {};
-      const KEY_MAP: Record<string, string> = { phone_number: "phone" };
-      for (const [key, msgs] of Object.entries(error.fields)) {
-        const formKey = KEY_MAP[key] || key;
-        mapped[formKey] = Array.isArray(msgs) ? msgs[0] : String(msgs);
-      }
-      const hasFields = Object.keys(mapped).length > 0;
-      return {
-        success: false,
-        message: hasFields ? Object.values(mapped).join(" ") : error.message,
-        fieldErrors: hasFields ? mapped : undefined,
-        payload,
-      };
-    }
+    const { message, fieldErrors } = mapActionError(
+      error,
+      t("action.networkError"),
+    );
     return {
       success: false,
-      message: "Network error. Please try again.",
+      message,
+      fieldErrors,
       payload,
     };
   }

@@ -3,13 +3,14 @@
 import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
 
-import { AUTH_TOKEN_STORAGE_KEY } from "@/shared/constants/storageKeys";
-import { authService } from "../services/authService";
+import { logoutAction } from "../actions/session";
 import { isSessionActive } from "../utils/sessionExpiration";
-import type { AuthLoginData, LoginPayload, RegisterPayload } from "../types";
+import type { SessionSnapshot } from "../types";
+
+/** Pre-migration localStorage bearer token key, kept only to wipe leftovers. */
+const LEGACY_TOKEN_STORAGE_KEY = "auth_token";
 
 type AuthState = {
-  token: string | null;
   id: number | null;
   permissions: string[];
   role: string[];
@@ -23,29 +24,24 @@ type AuthState = {
   expiresAt: string | null;
   loading: boolean;
   error: string | null;
-  setAuthData: (authData: AuthLoginData) => boolean;
+  /** True once the server has confirmed whether the httpOnly session exists. */
+  sessionChecked: boolean;
+  setSession: (snapshot: SessionSnapshot) => boolean;
+  setSessionChecked: (checked: boolean) => void;
   setProfile: (id: number | null, name: string | null, image: string | null) => void;
   setEmail: (email: string | null) => void;
   setEmailVerified: (verified: boolean) => void;
   clearAuth: () => void;
-  login: (payload: LoginPayload) => Promise<void>;
-  register: (payload: RegisterPayload) => Promise<void>;
   logout: () => Promise<void>;
 };
 
-function writeTokenToStorage(token: string | null) {
+/** Removes any pre-migration localStorage bearer token left behind. */
+function clearLegacyTokenStorage() {
   if (typeof window === "undefined") return;
-
-  if (!token) {
-    window.localStorage.removeItem(AUTH_TOKEN_STORAGE_KEY);
-    return;
-  }
-
-  window.localStorage.setItem(AUTH_TOKEN_STORAGE_KEY, token);
+  window.localStorage.removeItem(LEGACY_TOKEN_STORAGE_KEY);
 }
 
 const initialState = {
-  token: null,
   id: null as number | null,
   permissions: [],
   role: [],
@@ -59,35 +55,35 @@ const initialState = {
   loading: false,
   error: null as string | null,
   expiresAt: null as string | null,
+  sessionChecked: false,
 };
 
 export const useAuthStore = create<AuthState>()(
   persist(
-    (set, get) => ({
+    (set) => ({
       ...initialState,
-      setAuthData: (authData) => {
-        const currentState = get();
-        const expiresAt =
-          authData.expires_at ??
-          (currentState.token === authData.token ? currentState.expiresAt : null);
+      setSessionChecked: (checked) => {
+        set({ sessionChecked: checked });
+      },
+      setSession: (snapshot) => {
+        const expiresAt = snapshot.expires_at ?? null;
 
-        if (!authData.token || !isSessionActive(expiresAt)) {
-          writeTokenToStorage(null);
-          set({ ...initialState });
+        if (!isSessionActive(expiresAt)) {
           return false;
         }
 
-        writeTokenToStorage(authData.token);
+        clearLegacyTokenStorage();
         set({
-          token: authData.token,
-          id: authData.id ?? null,
-          permissions: authData.permissions ?? [],
-          role: authData.role ?? [],
-          emailVerified: authData.email_verified ?? false,
+          ...initialState,
+          id: snapshot.id ?? null,
+          permissions: snapshot.permissions ?? [],
+          role: snapshot.role ?? [],
+          emailVerified: snapshot.email_verified ?? false,
+          email: snapshot.email ?? null,
+          phoneNumber: snapshot.phone_number ?? null,
           isAuthenticated: true,
-          email: authData.email ?? null,
-          phoneNumber: authData.phone_number ?? null,
           expiresAt,
+          sessionChecked: true,
           error: null,
         });
         return true;
@@ -102,64 +98,16 @@ export const useAuthStore = create<AuthState>()(
         set({ emailVerified: verified });
       },
       clearAuth: () => {
-        writeTokenToStorage(null);
-        set({ ...initialState });
-      },
-      login: async (payload) => {
-        set({ loading: true, error: null });
-        try {
-          const response = await authService.login(payload);
-          if (!response.success) {
-            throw new Error(response.message || "Unable to login.");
-          }
-
-          if (!get().setAuthData(response.data)) {
-            throw new Error("The login response contained an invalid expiration date.");
-          }
-          set({ loading: false, error: null });
-        } catch (error) {
-          const message =
-            error instanceof Error ? error.message : "Login request failed.";
-          set({ loading: false, error: message });
-          throw error;
-        }
-      },
-      register: async (payload) => {
-        set({ loading: true, error: null });
-        try {
-          const response = await authService.register(payload);
-          if (!response.success) {
-            throw new Error(response.message || "Unable to register.");
-          }
-
-          const data = response.data as AuthLoginData;
-          if (data?.token) {
-            if (!get().setAuthData(data)) {
-              throw new Error(
-                "The registration response contained an invalid expiration date.",
-              );
-            }
-            set({ loading: false, error: null });
-            return;
-          }
-
-          set({ loading: false, error: null });
-        } catch (error) {
-          const message =
-            error instanceof Error ? error.message : "Register request failed.";
-          set({ loading: false, error: message });
-          throw error;
-        }
+        clearLegacyTokenStorage();
+        set({ ...initialState, sessionChecked: true });
       },
       logout: async () => {
         set({ loading: true, error: null });
         try {
-          await authService.logout();
-        } catch {
-          // Token may be expired — still clear local state.
+          await logoutAction();
         } finally {
-          writeTokenToStorage(null);
-          set({ ...initialState });
+          clearLegacyTokenStorage();
+          set({ ...initialState, sessionChecked: true });
         }
       },
     }),
@@ -167,7 +115,6 @@ export const useAuthStore = create<AuthState>()(
       name: "auth-store",
       storage: createJSONStorage(() => localStorage),
       partialize: (state) => ({
-        token: state.token,
         id: state.id,
         permissions: state.permissions,
         role: state.role,
@@ -182,19 +129,18 @@ export const useAuthStore = create<AuthState>()(
       }),
       merge: (persistedState, currentState) => {
         const persisted = persistedState as Partial<AuthState>;
+        clearLegacyTokenStorage();
+
         const hasValidSession =
-          Boolean(persisted.token) && isSessionActive(persisted.expiresAt);
+          Boolean(persisted.isAuthenticated) && isSessionActive(persisted.expiresAt);
 
         if (!hasValidSession) {
-          writeTokenToStorage(null);
           return { ...currentState, ...initialState };
         }
 
-        writeTokenToStorage(persisted.token ?? null);
         return {
           ...currentState,
           ...persisted,
-          token: persisted.token ?? null,
           expiresAt: persisted.expiresAt ?? null,
           isAuthenticated: true,
         };

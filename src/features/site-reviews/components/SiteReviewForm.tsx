@@ -5,8 +5,7 @@ import { useLocale, useTranslations } from "next-intl";
 import { Loader2, Star } from "lucide-react";
 import { cn } from "@/shared/utils/cn";
 import { ApiError } from "@/shared/lib/api";
-import { useAuthStore } from "@/features/auth/store/useAuthStore";
-import { useAuthModalStore } from "@/features/auth/store/useAuthModalStore";
+import { useAuthStore, useAuthModalStore } from "@/features/auth";
 import { siteReviewService } from "../services/siteReviewService";
 
 export function SiteReviewForm() {

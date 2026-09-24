@@ -7,7 +7,7 @@ import { Truck, Zap, Gift, Star, ShoppingCart, Car, ShoppingBag, ChevronRight } 
 import { cn } from "@/shared/utils/cn";
 import { formatMoney, formatNumber } from "@/shared/utils/formatMoney";
 import { Button } from "@/components/ui/Button";
-import { useAuthStore } from "@/features/auth/store/useAuthStore";
+import { useAuthStore } from "@/features/auth";
 import type { CartLineIdentity, DeliveryType, HydratedCartItem } from "../types";
 import { getCartLineKey } from "../types";
 import { ProductCartItem } from "./ProductCartItem";

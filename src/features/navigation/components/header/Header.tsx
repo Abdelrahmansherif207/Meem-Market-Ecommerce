@@ -1,7 +1,7 @@
 import CategoryNav from "./CategoryNav";
 import DeliveryModes from "./DeliveryModes";
 import MainNav from "./MainNav";
-import { VerificationBanner } from "@/features/auth/components/VerificationBanner";
+import { VerificationBanner } from "@/features/auth";
 
 export default async function Header({
   params,

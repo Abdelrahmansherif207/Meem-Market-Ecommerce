@@ -9,7 +9,7 @@ import type {
   ResetPasswordPayload,
   SendOtpCodePayload,
   VerifyPasswordPayload,
-} from "@/features/auth/types";
+} from "../types";
 import type { ApiResponse } from "@/shared/types";
 
 function toRegisterBody(payload: RegisterPayload) {
@@ -87,17 +87,6 @@ export const authService = {
     lang?: string,
   ): Promise<MessageResponse> => {
     return apiFetch<MessageResponse>("/forget-password", {
-      method: "POST",
-      body: JSON.stringify(payload),
-      lang,
-    });
-  },
-
-  forgetPassword: async (
-    payload: VerifyPasswordPayload,
-    lang?: string,
-  ): Promise<MessageResponse> => {
-    return apiFetch<MessageResponse>("/verify-forget-password-token", {
       method: "POST",
       body: JSON.stringify(payload),
       lang,

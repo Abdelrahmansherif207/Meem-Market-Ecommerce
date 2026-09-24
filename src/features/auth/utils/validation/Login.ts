@@ -1,41 +1,45 @@
 import { z } from "zod";
 import type { FieldErrors } from "../../types";
 
-const passwordSchema = z.string().min(8, "Password must be at least 8 characters.");
+export type Translate = (key: string) => string;
+
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const PHONE_REGEX = /^\+[1-9]\d{6,15}$/;
 
-export const loginSchema = z
-  .object({
-    email: z.string().optional(),
-    phone: z.string().optional(),
-    password: passwordSchema,
-    method: z.enum(["email", "phone"]),
-  })
-  .superRefine((data, ctx) => {
-    if (data.method === "email") {
-      if (!data.email?.trim()) {
-        ctx.addIssue({ code: z.ZodIssueCode.custom, message: "Email is required.", path: ["email"] });
-      } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.email.trim())) {
-        ctx.addIssue({ code: z.ZodIssueCode.custom, message: "Please enter a valid email address.", path: ["email"] });
-      }
-    } else {
-      if (!data.phone?.trim()) {
-        ctx.addIssue({ code: z.ZodIssueCode.custom, message: "Phone number is required.", path: ["phone"] });
-      } else if (!PHONE_REGEX.test(data.phone.trim())) {
-        ctx.addIssue({ code: z.ZodIssueCode.custom, message: "Please enter a valid phone number.", path: ["phone"] });
-      }
-    }
-  });
-
-interface LoginFormData {
+export interface LoginFormData {
   email?: string;
   phone?: string;
   password: string;
   method: "email" | "phone";
 }
 
-export function validateLoginForm(data: LoginFormData): FieldErrors {
-  const result = loginSchema.safeParse(data);
+export function createLoginSchema(t: Translate) {
+  return z
+    .object({
+      email: z.string().optional(),
+      phone: z.string().optional(),
+      password: z.string().min(8, t("validation.passwordMin")),
+      method: z.enum(["email", "phone"]),
+    })
+    .superRefine((data, ctx) => {
+      if (data.method === "email") {
+        if (!data.email?.trim()) {
+          ctx.addIssue({ code: z.ZodIssueCode.custom, message: t("validation.emailRequired"), path: ["email"] });
+        } else if (!EMAIL_REGEX.test(data.email.trim())) {
+          ctx.addIssue({ code: z.ZodIssueCode.custom, message: t("validation.emailInvalid"), path: ["email"] });
+        }
+      } else {
+        if (!data.phone?.trim()) {
+          ctx.addIssue({ code: z.ZodIssueCode.custom, message: t("validation.phoneRequired"), path: ["phone"] });
+        } else if (!PHONE_REGEX.test(data.phone.trim())) {
+          ctx.addIssue({ code: z.ZodIssueCode.custom, message: t("validation.phoneInvalid"), path: ["phone"] });
+        }
+      }
+    });
+}
+
+export function validateLoginForm(data: LoginFormData, t: Translate): FieldErrors {
+  const result = createLoginSchema(t).safeParse(data);
   if (result.success) return {};
   return toFieldErrors(result.error);
 }

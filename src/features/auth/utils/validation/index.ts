@@ -1,3 +1,8 @@
-export { validateRegisterForm, registerSchema } from "./Register";
-export { validateLoginForm, loginSchema } from "./Login";
-export { otpSchema } from "./Otp";
+export type { Translate } from "./Login";
+export { validateLoginForm, createLoginSchema } from "./Login";
+export { validateRegisterForm, createRegisterSchema } from "./Register";
+export {
+  validateForgotPasswordStep,
+  createForgotOtpSchema,
+  createForgotResetSchema,
+} from "./ForgotPassword";

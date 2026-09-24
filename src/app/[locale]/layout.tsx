@@ -9,8 +9,8 @@ import MobileHeader from "@/features/navigation/components/mobile/MobileHeader";
 import MobileBottomNav from "@/features/navigation/components/mobile/MobileBottomNav";
 import Footer from "@/features/navigation/components/footer/Footer";
 import ScrollToTopButton from "@/components/ui/ScrollToTopButton";
-import { AuthModal } from "@/features/auth/components/AuthModal";
-import { AuthSyncHandler } from "@/features/auth/components/AuthSyncHandler";
+import { AuthModal, AuthSyncHandler } from "@/features/auth";
+import { ProfileSyncHandler } from "@/features/profile";
 import { CartSyncProvider } from "@/features/cart/components/CartSyncProvider";
 import { WishlistSyncProvider } from "@/features/wishlist/components/WishlistSyncProvider";
 import {
@@ -129,6 +129,7 @@ export default async function RootLayout({
           <MobileBottomNav />
           <ChannelThemeProvider />
           <AuthSyncHandler />
+          <ProfileSyncHandler />
           <NotificationSyncHandler />
           <NotificationRealtimeProvider />
           <CartSyncProvider>
