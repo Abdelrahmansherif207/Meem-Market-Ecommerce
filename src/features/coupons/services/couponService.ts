@@ -7,6 +7,8 @@ import type {
   AppliedCoupon,
   MyCouponsData,
   MyCouponsResult,
+  CouponClaim,
+  ClaimCouponResponse,
 } from "../types";
 
 export type RemoveCouponResult =
@@ -20,7 +22,8 @@ export const couponService = {
         "/general/coupons/mine",
         { headers: { lang: locale } },
       );
-      return { success: true, assignments: response.data.assignments ?? [] };
+      const claims: CouponClaim[] = response.data.claims ?? [];
+      return { success: true, assignments: response.data.assignments ?? [], claims };
     } catch (error: unknown) {
       const err = error as { message?: string; status?: number };
       return {
@@ -71,6 +74,26 @@ export const couponService = {
       return {
         success: false,
         message: err?.message || "Failed to apply coupon",
+        status: err?.status,
+      };
+    }
+  },
+
+  claimCoupon: async (couponId: number, locale: string): Promise<ClaimCouponResponse> => {
+    try {
+      const response = await apiFetch<ApiResponse<CouponClaim>>(
+        `/general/coupons/${couponId}/claim`,
+        {
+          method: "POST",
+          headers: { lang: locale },
+        },
+      );
+      return { success: true, data: response.data, message: response.message };
+    } catch (error: unknown) {
+      const err = error as { message?: string; status?: number };
+      return {
+        success: false,
+        message: err?.message || "Failed to claim coupon",
         status: err?.status,
       };
     }

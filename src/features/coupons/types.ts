@@ -39,10 +39,28 @@ export interface CouponAssignment {
   assigned_at: string;
 }
 
+export interface CouponClaim {
+  id: number;
+  coupon_id: number;
+  code: string;
+  status: "active" | "redeemed" | "expired" | string;
+  claimed_at: string;
+  expires_at: string | null;
+  redeemed_at: string | null;
+}
+
+export interface ClaimCouponResponse {
+  success: boolean;
+  data?: CouponClaim;
+  message?: string;
+  status?: number;
+}
+
 export interface MyCouponsData {
   assignments: CouponAssignment[];
+  claims?: CouponClaim[];
 }
 
 export type MyCouponsResult =
-  | { success: true; assignments: CouponAssignment[] }
+  | { success: true; assignments: CouponAssignment[]; claims: CouponClaim[] }
   | { success: false; message?: string; status?: number };
