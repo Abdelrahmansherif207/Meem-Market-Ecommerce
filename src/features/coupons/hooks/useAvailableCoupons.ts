@@ -5,7 +5,7 @@ import { useLocale } from "next-intl";
 import { useAuthStore } from "@/features/auth";
 import { usePaginatedFetch } from "@/shared/hooks/usePaginatedFetch";
 import { couponService } from "../services/couponService";
-import type { AvailableCoupon, AvailableCouponAction } from "../types";
+import type { AvailableCoupon } from "../types";
 import type { PageMeta } from "@/shared/types";
 
 interface UseAvailableCouponsOptions {
@@ -42,15 +42,29 @@ export function useAvailableCoupons(options?: UseAvailableCouponsOptions) {
   const split = useMemo(() => {
     const apply: AvailableCoupon[] = [];
     const claim: AvailableCoupon[] = [];
+    const claimed: AvailableCoupon[] = [];
     for (const coupon of items) {
-      (coupon.action === "claim" ? claim : apply).push(coupon);
+      // Server truth wins: a coupon that was already claimed arrives back
+      // with `claim_status: "claimed"`, `claim_id` set and `code: null`
+      // (and a misleading `action: "apply"`), so it must never be treated
+      // as an apply-ready card.
+      if (coupon.claim_status === "claimed" || coupon.claim_id != null) {
+        claimed.push(coupon);
+      } else if (coupon.action === "claim") {
+        claim.push(coupon);
+      } else if (coupon.code != null) {
+        apply.push(coupon);
+      }
+      // Items that are neither claimable nor carry a code are dropped —
+      // renderless shells would produce dead buttons on the shelf.
     }
-    return { apply, claim } satisfies Record<AvailableCouponAction, AvailableCoupon[]>;
+    return { apply, claim, claimed };
   }, [items]);
 
   return {
     applyCoupons: split.apply,
     claimCoupons: split.claim,
+    claimedCoupons: split.claimed,
     meta,
     loading,
     loadingMore,
@@ -61,6 +75,7 @@ export function useAvailableCoupons(options?: UseAvailableCouponsOptions) {
   } satisfies {
     applyCoupons: AvailableCoupon[];
     claimCoupons: AvailableCoupon[];
+    claimedCoupons: AvailableCoupon[];
     meta: PageMeta | null;
     loading: boolean;
     loadingMore: boolean;

@@ -89,6 +89,39 @@ Mixed shelf semantics:
   `claim_status: "claimable"`, `action: "claim"` (claim first, then the code
   shows up in `/general/coupons/mine` claims)
 
+### Claim flow (verified 2026-09-27)
+
+`POST /general/coupons/{id}/claim` → **201**:
+
+```json
+{ "status": 201, "message": "Coupon claimed successfully.", "success": true,
+  "data": { "id": 5, "coupon_id": 27, "code": "COUPON_ODQEDZP",
+    "status": "active", "claimed_at": "2026-09-27T11:35:24+00:00",
+    "expires_at": null, "redeemed_at": null } }
+```
+
+After a successful claim, the item in `GET /general/coupons/available` mutates:
+
+| Field | Before | After |
+| --- | --- | --- |
+| `claim_status` | `"claimable"` | `"claimed"` |
+| `claim_id` | `null` | set (e.g. `3`) |
+| `action` | `"claim"` | `"apply"` (**misleading** — `code` stays `null`) |
+| `code` | `null` | still `null` (real code lives in the 201 + `/mine`) |
+
+**UI must classify off `claim_status`/`claim_id`, never `action`** — otherwise
+the post-claim card renders as an apply card with no code (dead button).
+The generated per-customer code only appears in the 201 response and in
+`GET /general/coupons/mine` → `claims[]` (plus profile `MyClaimsList`).
+
+Shelf behavior in `MyAvailableCoupons`:
+- Claim idle → spinner → green **Claimed** badge + "Copy Code" seeded from the
+  201 `data.code`; failure shows an inline red error and the card stays claimable
+- Items with `claim_status: "claimed"` (from earlier sessions/remounts) render
+  claimed; their copy button appears only once a code is known client-side
+- Note: `claim_status: "claimed"` items keep appearing in `/available` responses —
+  the shelf does not filter them out
+
 ### Implementation (feature-first)
 
 - `src/shared/types/index.ts` — `PageMeta` (generic pagination envelope; `total`
@@ -101,10 +134,12 @@ Mixed shelf semantics:
   (clamped params, `no-store`; throws `ApiError` instead of returning a union —
   required by the shared hook contract)
 - `src/features/coupons/hooks/useAvailableCoupons.ts` — auth-gated wrapper around
-  `usePaginatedFetch`; splits items into `applyCoupons` / `claimCoupons`
+  `usePaginatedFetch`; splits items into `applyCoupons` / `claimCoupons` /
+  `claimedCoupons` (claimed = `claim_status === "claimed" || claim_id != null`)
 - `src/features/coupons/components/MyAvailableCoupons.tsx` — "Coupons For You"
   shelf on the cart page (above the public `AvailableCoupons`): copy code +
-  apply for `action: "apply"`, claim button for `action: "claim"`, "Show More"
-  appends pages while `has_more_pages`; hidden while loading/empty/error
+  apply for `action: "apply"`, claim → spinner → Claimed badge + Copy Code for
+  claimables, inline claim errors, "Show More" appends pages while
+  `has_more_pages`; hidden while loading/empty/error
 - `messages/{en,ar}.json` — `coupons.personalizedTitle`, `copyCode`, `copied`,
-  `expiresSoon`, `showMore`
+  `expiresSoon`, `showMore`, `claim`, `claimed`, `claimFailed`
