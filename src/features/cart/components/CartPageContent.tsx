@@ -585,6 +585,7 @@ export function CartPageContent({ minimumOrderAmount }: CartPageContentProps) {
                 onCouponApplied={async () => { await refreshCart(); }}
               />
               <MyAvailableCoupons
+                appliedCouponCode={appliedCoupon?.code ?? null}
                 onCouponApplied={async () => {
                   await refreshCart();
                 }}

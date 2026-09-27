@@ -13,22 +13,29 @@ import type { AvailableCoupon } from "../types";
 interface MyAvailableCouponsProps {
   /** Called after a coupon is applied so the cart can refresh. */
   onCouponApplied?: () => void | Promise<void>;
+  /** Currently applied coupon code from the server cart (drives the Applied badge). */
+  appliedCouponCode?: string | null;
 }
 
 /**
  * Personalized "Coupons For You" shelf (`GET /general/coupons/available`).
  * Advisory only — the real check still happens at apply/checkout:
  * - `action: "apply"` cards copy their code and apply via the coupon service.
- * - `action: "claim"` cards render the claim → claimed flow.
+ * - `action: "claim"` cards render the claim → claimed flow, then offer
+ *   Copy Code + Apply with the generated code (kept in `/mine` claims).
  * Pages are appended via "Show More" while `has_more_pages` is true.
  */
-export default function MyAvailableCoupons({ onCouponApplied }: MyAvailableCouponsProps) {
+export default function MyAvailableCoupons({
+  onCouponApplied,
+  appliedCouponCode = null,
+}: MyAvailableCouponsProps) {
   const t = useTranslations("coupons");
   const locale = useLocale();
   const {
     applyCoupons,
     claimCoupons,
     claimedCoupons,
+    claimedCodeById,
     loading,
     loadingMore,
     error,
@@ -44,6 +51,9 @@ export default function MyAvailableCoupons({ onCouponApplied }: MyAvailableCoupo
   /** Generated per-customer codes returned by the successful claim (201). */
   const [claimedCodes, setClaimedCodes] = useState<Map<number, string>>(() => new Map());
   const [claimErrors, setClaimErrors] = useState<Map<number, string>>(() => new Map());
+  /** Apply state for claimed cards (same conventions as MyCouponsList). */
+  const [applyError, setApplyError] = useState<{ id: number; message: string | null } | null>(null);
+  const [applyingId, setApplyingId] = useState<number | null>(null);
 
   useEffect(() => {
     if (!copiedId) return;
@@ -97,6 +107,22 @@ export default function MyAvailableCoupons({ onCouponApplied }: MyAvailableCoupo
     }
   };
 
+  /** Apply code claimed coupons — swaps in the server's message. */
+  const handleApplyClaimed = async (coupon: AvailableCoupon, code: string) => {
+    setApplyingId(coupon.id);
+    setApplyError(null);
+    // Mirror the cart-page convention (MyCouponsList / CouponInput):
+    // clear any current coupon first, then apply the new one.
+    await couponService.removeCoupon(locale);
+    const result = await couponService.applyCoupon(code, locale);
+    if (result.success) {
+      onCouponApplied?.();
+    } else {
+      setApplyError({ id: coupon.id, message: result.message ?? null });
+    }
+    setApplyingId(null);
+  };
+
   const handleClaim = async (coupon: AvailableCoupon) => {
     setClaimingId(coupon.id);
     setClaimErrors((prev) => {
@@ -144,11 +170,17 @@ export default function MyAvailableCoupons({ onCouponApplied }: MyAvailableCoupo
             coupon={coupon}
             claiming={claimingId === coupon.id}
             claimed={claimedIds.has(coupon.id)}
-            claimedCode={claimedCodes.get(coupon.id) ?? null}
+            claimedCode={claimedCodes.get(coupon.id) ?? claimedCodeById.get(coupon.id) ?? null}
             claimError={claimErrors.get(coupon.id) ?? null}
             copied={copiedId === coupon.id}
+            applying={applyingId === coupon.id}
+            applied={claimedCodeById.get(coupon.id) === appliedCouponCode && appliedCouponCode !== null}
+            appliedCouponCode={appliedCouponCode}
+            applyErrorId={applyError?.id ?? null}
+            applyErrorMessage={applyError?.message ?? null}
             onClaim={handleClaim}
             onCopyClaimed={handleClaimedCopy}
+            onApplyClaimed={handleApplyClaimed}
             t={t}
           />
         ))}
@@ -158,11 +190,17 @@ export default function MyAvailableCoupons({ onCouponApplied }: MyAvailableCoupo
             coupon={coupon}
             claiming={claimingId === coupon.id}
             claimed
-            claimedCode={claimedCodes.get(coupon.id) ?? null}
+            claimedCode={claimedCodes.get(coupon.id) ?? claimedCodeById.get(coupon.id) ?? null}
             claimError={null}
             copied={copiedId === coupon.id}
+            applying={applyingId === coupon.id}
+            applied={claimedCodeById.get(coupon.id) === appliedCouponCode && appliedCouponCode !== null}
+            appliedCouponCode={appliedCouponCode}
+            applyErrorId={applyError?.id ?? null}
+            applyErrorMessage={applyError?.message ?? null}
             onClaim={handleClaim}
             onCopyClaimed={handleClaimedCopy}
+            onApplyClaimed={handleApplyClaimed}
             t={t}
           />
         ))}
@@ -276,21 +314,37 @@ function ClaimCard({
   claimedCode,
   claimError,
   copied,
+  applying,
+  applied,
+  appliedCouponCode,
+  applyErrorId,
+  applyErrorMessage,
   onClaim,
   onCopyClaimed,
+  onApplyClaimed,
   t,
 }: {
   coupon: AvailableCoupon;
   claiming: boolean;
   claimed: boolean;
-  /** Code generated by the claim (from the 201 response), if known client-side. */
+  /** Code generated by the claim — from the 201 response or `/mine` claims. */
   claimedCode: string | null;
   claimError: string | null;
   copied: boolean;
+  applying: boolean;
+  /** This card's claimed code is the coupon currently applied to the cart. */
+  applied: boolean;
+  appliedCouponCode: string | null;
+  applyErrorId: number | null;
+  applyErrorMessage: string | null;
   onClaim: (coupon: AvailableCoupon) => Promise<void>;
   onCopyClaimed: (id: number, code: string | null) => Promise<void>;
+  onApplyClaimed: (coupon: AvailableCoupon, code: string) => Promise<void>;
   t: ReturnType<typeof useTranslations>;
 }) {
+  const claimableCode = claimedCode ?? (claimed ? coupon.code : null);
+  const isApplied = applied || (appliedCouponCode !== null && claimableCode === appliedCouponCode);
+
   return (
     <div
       className="flex w-52 shrink-0 flex-col gap-2 rounded-xl border p-3"
@@ -319,23 +373,43 @@ function ClaimCard({
             {t("claimed")}
           </span>
           {/* Server list keeps `code: null` for claimed coupons; the copy
-              button only appears once the generated code is known (201). */}
-          {claimedCode && (
-            <button
-              type="button"
-              onClick={() => onCopyClaimed(coupon.id, claimedCode)}
-              className="inline-flex w-fit items-center gap-1 text-[11px] text-primary transition-colors hover:text-primary-dark"
-            >
-              {copied ? (
-                <>
-                  <Check className="h-3 w-3" /> {t("copied")}
-                </>
-              ) : (
-                <>
-                  <Copy className="h-3 w-3" /> {t("copyCode")}
-                </>
-              )}
-            </button>
+              and apply buttons only appear once the generated code is
+              known (201 response or `/mine` claims map). */}
+          {claimableCode && !isApplied && (
+            <div className="flex items-center justify-between gap-2">
+              <button
+                type="button"
+                onClick={() => onCopyClaimed(coupon.id, claimableCode)}
+                className="inline-flex items-center gap-1 text-[11px] text-primary transition-colors hover:text-primary-dark"
+              >
+                {copied ? (
+                  <>
+                    <Check className="h-3 w-3" /> {t("copied")}
+                  </>
+                ) : (
+                  <>
+                    <Copy className="h-3 w-3" /> {t("copyCode")}
+                  </>
+                )}
+              </button>
+              <button
+                type="button"
+                disabled={applying}
+                onClick={() => onApplyClaimed(coupon, claimableCode)}
+                className="inline-flex items-center gap-1 rounded-lg bg-primary px-3 py-1 text-[11px] font-bold text-white transition-colors hover:bg-primary-dark disabled:opacity-60"
+              >
+                {applying ? (
+                  <span className="h-3 w-3 animate-spin rounded-full border-2 border-white/40 border-t-white" />
+                ) : null}
+                {t("apply")}
+              </button>
+            </div>
+          )}
+          {isApplied && (
+            <span className="inline-flex w-fit items-center gap-1.5 rounded-full bg-success/10 px-2.5 py-0.5 text-[11px] font-bold text-success">
+              <CheckCircle2 className="h-3 w-3" />
+              {t("applied")}
+            </span>
           )}
         </div>
       ) : (
@@ -355,6 +429,9 @@ function ClaimCard({
       )}
       {claimError && (
         <p className="text-[11px] text-error">{claimError}</p>
+      )}
+      {applyErrorId === coupon.id && applyErrorMessage && (
+        <p className="text-[11px] text-error">{applyErrorMessage}</p>
       )}
       {coupon.expires_at && (
         <p className="truncate text-[11px] text-text-secondary">
