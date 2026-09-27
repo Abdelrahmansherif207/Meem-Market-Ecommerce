@@ -1,14 +1,17 @@
 "use client";
 
+import { useCallback, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import {
   Ticket,
   CheckCircle2,
+  XCircle,
   AlertTriangle,
   RefreshCw,
 } from "lucide-react";
 import { cn } from "@/shared/utils/cn";
 import { Button } from "@/components/ui/Button";
+import { couponService } from "../services/couponService";
 import { useMyCoupons } from "../hooks/useMyCoupons";
 import type { CouponClaim } from "../types";
 
@@ -21,13 +24,40 @@ interface MyClaimsListProps {
     isAuthenticated: boolean;
     reload: () => void;
   };
+  /** Currently applied coupon code from the server cart (drives the Applied badge). */
+  appliedCouponCode?: string | null;
+  /** Called after a successful apply with the applied code. */
+  onApplied?: (code: string) => void | Promise<void>;
 }
 
-export function MyClaimsList({ data }: MyClaimsListProps) {
+export function MyClaimsList({ data, appliedCouponCode, onApplied }: MyClaimsListProps) {
   const t = useTranslations("coupons");
   const locale = useLocale();
   const internal = useMyCoupons({ enabled: data === undefined });
   const { claims, loading, error, isAuthenticated, reload } = data ?? internal;
+
+  const [applyingCode, setApplyingCode] = useState<string | null>(null);
+  const [applyError, setApplyError] = useState<{ code: string; message: string | null } | null>(null);
+
+  const handleApply = useCallback(
+    async (code: string) => {
+      setApplyingCode(code);
+      setApplyError(null);
+
+      // Mirror the cart-page convention (MyCouponsList): clear any current
+      // coupon first, then apply the new one.
+      await couponService.removeCoupon(locale);
+      const result = await couponService.applyCoupon(code, locale);
+
+      if (result.success) {
+        await onApplied?.(code);
+      } else {
+        setApplyError({ code, message: result.message ?? null });
+      }
+      setApplyingCode(null);
+    },
+    [locale, onApplied],
+  );
 
   if (!isAuthenticated) return null;
 
@@ -103,6 +133,10 @@ export function MyClaimsList({ data }: MyClaimsListProps) {
             icon: Ticket,
           };
           const StatusIcon = status.icon;
+          const isApplied = claim.code === appliedCouponCode;
+          const isApplying = applyingCode === claim.code;
+          const isBusy = applyingCode !== null;
+          const canApply = claim.status === "active" && !isApplied;
 
           return (
             <div
@@ -121,15 +155,41 @@ export function MyClaimsList({ data }: MyClaimsListProps) {
                 </div>
               </div>
 
-              <span
-                className={cn(
-                  "inline-flex shrink-0 items-center gap-1.5 rounded-full px-3 py-1 text-xs font-bold",
-                  status.className,
+              <div className="flex shrink-0 items-center gap-2">
+                {canApply && (
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    loading={isApplying}
+                    disabled={isBusy && !isApplying}
+                    onClick={() => handleApply(claim.code)}
+                  >
+                    {t("apply")}
+                  </Button>
                 )}
-              >
-                <StatusIcon className="h-3.5 w-3.5" />
-                {status.label}
-              </span>
+                {isApplied && (
+                  <span className="inline-flex items-center gap-1.5 rounded-full bg-success/10 px-3 py-1 text-xs font-bold text-success">
+                    <CheckCircle2 className="h-3.5 w-3.5" />
+                    {t("applied")}
+                  </span>
+                )}
+                <span
+                  className={cn(
+                    "inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-bold",
+                    status.className,
+                  )}
+                >
+                  <StatusIcon className="h-3.5 w-3.5" />
+                  {status.label}
+                </span>
+              </div>
+
+              {applyError?.code === claim.code && (
+                <p className="flex w-full items-center gap-1.5 text-xs text-error">
+                  <XCircle className="h-3.5 w-3.5 shrink-0" />
+                  {applyError.message || t("applyFailed")}
+                </p>
+              )}
             </div>
           );
         })}
