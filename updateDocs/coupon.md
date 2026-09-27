@@ -122,6 +122,23 @@ Shelf behavior in `MyAvailableCoupons`:
 - Note: `claim_status: "claimed"` items keep appearing in `/available` responses —
   the shelf does not filter them out
 
+### Closed circle (claim → apply → discount)
+
+Claimed shelf cards also offer **Apply** once their code is known; codes come
+from two sources merged client-side (201 `data.code` wins for the session, then
+`GET /general/coupons/mine` → `claims[]` filtered to `status: "active"` — the
+hook exposes this as `claimedCodeById: Map<coupon_id, code>` and refreshes it
+on mount/auth flip and together with `reload()`).
+
+- Apply mirrors the cart-page convention: `DELETE`-style `removeCoupon` first,
+  then `applyCoupon(code)`; failures render inline under the card.
+- Success → `onCouponApplied()` → cart refresh → discount line in the summary.
+- When the applied code equals the card's claimed code, the buttons swap to a
+  green **Applied** badge (driven by the `appliedCouponCode` prop from the cart).
+- Full circle: claim (201 with generated code) → Claimed badge + Copy Code →
+  Apply → Applied badge + discount → checkout. Manual entry via `CouponInput`
+  still works — the shelf is an accelerator, not the only path.
+
 ### Implementation (feature-first)
 
 - `src/shared/types/index.ts` — `PageMeta` (generic pagination envelope; `total`
@@ -135,11 +152,12 @@ Shelf behavior in `MyAvailableCoupons`:
   required by the shared hook contract)
 - `src/features/coupons/hooks/useAvailableCoupons.ts` — auth-gated wrapper around
   `usePaginatedFetch`; splits items into `applyCoupons` / `claimCoupons` /
-  `claimedCoupons` (claimed = `claim_status === "claimed" || claim_id != null`)
+  `claimedCoupons` (claimed = `claim_status === "claimed" || claim_id != null`);
+  also maintains `claimedCodeById` from `/mine` active claims
 - `src/features/coupons/components/MyAvailableCoupons.tsx` — "Coupons For You"
   shelf on the cart page (above the public `AvailableCoupons`): copy code +
-  apply for `action: "apply"`, claim → spinner → Claimed badge + Copy Code for
-  claimables, inline claim errors, "Show More" appends pages while
-  `has_more_pages`; hidden while loading/empty/error
+  apply for `action: "apply"`, claim → spinner → Claimed badge + Copy Code +
+  Apply → Applied badge for claimables, inline claim/apply errors, "Show More"
+  appends pages while `has_more_pages`; hidden while loading/empty/error
 - `messages/{en,ar}.json` — `coupons.personalizedTitle`, `copyCode`, `copied`,
   `expiresSoon`, `showMore`, `claim`, `claimed`, `claimFailed`
