@@ -212,7 +212,12 @@
     "loadError": "Couldn't load your coupons",
     "applyFailed": "Couldn't apply this coupon",
     "retry": "Retry",
-    "expired": "Expired"
+    "expired": "Expired",
+    "personalizedTitle": "Coupons For You",
+    "copyCode": "Copy Code",
+    "copied": "Copied",
+    "expiresSoon": "Expires {date}",
+    "showMore": "Show More"
   },
   "wishlist": {
     "metaTitle": "Wishlist",

@@ -58,13 +58,18 @@ export function usePaginatedFetch<T>(
     error: null,
   });
 
+  // "Latest" refs are synced inside effects, never during render
+  // (react-hooks/refs). State changes flow through `commit`, which
+  // keeps the mirror fresh for event handlers like `loadMore`.
   const fetchPageRef = useRef(fetchPage);
-  fetchPageRef.current = fetchPage;
   const stateRef = useRef(state);
-  stateRef.current = state;
   const generationRef = useRef(0);
   const inflightRef = useRef(false);
   const fetchedPagesRef = useRef<Set<number>>(new Set());
+
+  useEffect(() => {
+    fetchPageRef.current = fetchPage;
+  });
 
   const commit = useCallback((next: UsePaginatedFetchState<T>) => {
     stateRef.current = next;
@@ -76,17 +81,24 @@ export function usePaginatedFetch<T>(
       if (inflightRef.current) return;
       inflightRef.current = true;
       const generation = generationRef.current;
-      commit({ ...stateRef.current, loadingMore: true, error: null });
+      if (page === 1) {
+        fetchedPagesRef.current = new Set();
+      }
+      commit(
+        page === 1
+          ? { items: [], meta: null, loading: true, loadingMore: false, error: null }
+          : { ...stateRef.current, loadingMore: true, error: null },
+      );
       try {
         const result = await fetchPageRef.current(page, limit);
         if (generation !== generationRef.current) return;
-        fetchedPagesRef.current.add(page);
-        let fresh = result.items;
         const snapshot = stateRef.current;
+        let fresh = result.items;
         if (page > 1 && getItemId) {
           const seen = new Set(snapshot.items.map(getItemId));
           fresh = fresh.filter((item) => !seen.has(getItemId(item)));
         }
+        fetchedPagesRef.current.add(page);
         commit({
           items: page === 1 ? result.items : [...snapshot.items, ...fresh],
           meta: result.meta,
@@ -124,19 +136,15 @@ export function usePaginatedFetch<T>(
   useEffect(() => {
     // Bump the generation so in-flight requests from a previous
     // enabled/resetKey configuration are discarded instead of committed.
-    generationRef.current += 1;
-    if (!enabled) {
-      inflightRef.current = false;
-      fetchedPagesRef.current = new Set();
-      commit({ items: [], meta: null, loading: false, loadingMore: false, error: null });
-      return;
-    }
+    const generation = ++generationRef.current;
     inflightRef.current = false;
     fetchedPagesRef.current = new Set();
-    commit({ items: [], meta: null, loading: true, loadingMore: false, error: null });
-    // Intentional data-fetch-on-mount/reset (same convention as useMyCoupons).
     void (async () => {
-      const generation = generationRef.current;
+      if (!enabled) {
+        commit({ items: [], meta: null, loading: false, loadingMore: false, error: null });
+        return;
+      }
+      commit({ items: [], meta: null, loading: true, loadingMore: false, error: null });
       try {
         const page = await fetchPageRef.current(1, limit);
         if (generation !== generationRef.current) return;
@@ -149,9 +157,12 @@ export function usePaginatedFetch<T>(
       } finally {
         if (generation === generationRef.current) inflightRef.current = false;
       }
-    })(); // eslint-disable-line react-hooks/set-state-in-effect
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [enabled, resetKey, commit]);
+    })();
+    return () => {
+      // Invalidate this generation on cleanup/re-run.
+      generationRef.current += 1;
+    };
+  }, [enabled, resetKey, limit, commit]);
 
   return {
     items: state.items,

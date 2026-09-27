@@ -12,6 +12,7 @@ import { cartService } from "../services/cartService";
 import { CartSection } from "./CartSection";
 import { CartSummary } from "./CartSummary";
 import AvailableCoupons from "@/features/coupons/components/AvailableCoupons";
+import MyAvailableCoupons from "@/features/coupons/components/MyAvailableCoupons";
 import { MyCouponsList } from "@/features/coupons/components/MyCouponsList";
 import { calcSubtotal, calcTotalQuantity } from "../utils";
 import type { AppliedCoupon } from "@/features/coupons/types";
@@ -559,6 +560,11 @@ export function CartPageContent({ minimumOrderAmount }: CartPageContentProps) {
                 appliedCoupon={appliedCoupon}
                 couponDiscount={couponDiscount}
                 onCouponApplied={async () => { await refreshCart(); }}
+              />
+              <MyAvailableCoupons
+                onCouponApplied={async () => {
+                  await refreshCart();
+                }}
               />
               <AvailableCoupons
                 onSelectCoupon={async (coupon) => {

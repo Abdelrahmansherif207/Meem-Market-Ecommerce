@@ -1,6 +1,6 @@
 import { apiFetch } from "@/shared/lib/api";
 import { CACHE_TTL } from "@/shared/constants/cache";
-import type { ApiResponse } from "@/shared/types";
+import type { ApiResponse, PageMeta } from "@/shared/types";
 import type {
   Coupon,
   ApplyCouponResponse,
@@ -9,13 +9,49 @@ import type {
   MyCouponsResult,
   CouponClaim,
   ClaimCouponResponse,
+  AvailableCoupon,
+  AvailableCouponsData,
 } from "../types";
 
 export type RemoveCouponResult =
   | { success: true }
   | { success: false; message: string; status?: number };
 
+export const clampPage = (page: number): number => Math.max(1, Math.trunc(page) || 1);
+export const clampLimit = (limit: number): number => Math.min(50, Math.max(1, Math.trunc(limit) || 1));
+
 export const couponService = {
+  /**
+   * GET /general/coupons/available — personalized, advisory shelf for the
+   * authenticated customer. Pagination is page/limit (`limit` 1–50);
+   * `meta.total` counts only the current page, use `has_more_pages`.
+   * Throws `ApiError` on 401/422/network — callers decide how to degrade.
+   */
+  getAvailableCoupons: async (
+    locale: string,
+    page: number = 1,
+    limit: number = 15,
+  ): Promise<{ items: AvailableCoupon[]; meta: PageMeta }> => {
+    const params = new URLSearchParams({
+      page: String(clampPage(page)),
+      limit: String(clampLimit(limit)),
+    });
+    const response = await apiFetch<ApiResponse<AvailableCouponsData>>(
+      `/general/coupons/available?${params.toString()}`,
+      { headers: { lang: locale }, cache: "no-store" },
+    );
+    const data = response.data;
+    return {
+      items: data.data ?? [],
+      meta:
+        data.meta ?? {
+          current_page: clampPage(page),
+          per_page: clampLimit(limit),
+          total: (data.data ?? []).length,
+          has_more_pages: false,
+        },
+    };
+  },
   getMyCoupons: async (locale: string): Promise<MyCouponsResult> => {
     try {
       const response = await apiFetch<ApiResponse<MyCouponsData>>(
