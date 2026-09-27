@@ -208,6 +208,8 @@
     "apply": "Apply",
     "applied": "Applied",
     "claim": "Claim",
+    "claimed": "Claimed",
+    "claimFailed": "Couldn't claim this coupon",
     "remainingUses": "{count, plural, =1 {# use left} other {# uses left}}",
     "expiresOn": "Expires {date}",
     "loadError": "Couldn't load your coupons",

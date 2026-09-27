@@ -208,6 +208,8 @@
     "apply": "تطبيق",
     "applied": "تم التطبيق",
     "claim": "استلام",
+    "claimed": "تم الاستلام",
+    "claimFailed": "تعذر استلام هذه القسيمة",
     "remainingUses": "{count, plural, =1 {استخدام واحد متبقٍ} other {# استخدامات متبقية}}",
     "expiresOn": "تنتهي في {date}",
     "loadError": "تعذر تحميل قسائمك",
