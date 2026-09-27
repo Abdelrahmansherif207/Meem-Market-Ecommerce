@@ -18,7 +18,11 @@ export function ProfileCouponsSection() {
         onApplied={handleApplied}
         data={coupons}
       />
-      <MyClaimsList data={coupons} />
+      <MyClaimsList
+        data={coupons}
+        appliedCouponCode={appliedCouponCode}
+        onApplied={handleApplied}
+      />
     </div>
   );
 }
