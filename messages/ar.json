@@ -207,6 +207,7 @@
     "statusExpired": "منتهية",
     "apply": "تطبيق",
     "applied": "تم التطبيق",
+    "claim": "استلام",
     "remainingUses": "{count, plural, =1 {استخدام واحد متبقٍ} other {# استخدامات متبقية}}",
     "expiresOn": "تنتهي في {date}",
     "loadError": "تعذر تحميل قسائمك",
