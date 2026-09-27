@@ -229,7 +229,12 @@
     "loadError": "تعذر تحميل قسائمك",
     "applyFailed": "تعذر تطبيق هذه القسيمة",
     "retry": "إعادة المحاولة",
-    "expired": "منتهية"
+    "expired": "منتهية",
+    "personalizedTitle": "كوبونات لك",
+    "copyCode": "نسخ الكود",
+    "copied": "تم النسخ",
+    "expiresSoon": "تنتهي في {date}",
+    "showMore": "عرض المزيد"
   },
   "wishlist": {
     "metaTitle": "قائمة الرغبات",

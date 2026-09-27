@@ -58,3 +58,53 @@
 - `POST /general/coupons/apply` requires authentication (returns `"Unauthenticated"` for guests)
 - No valid coupon codes could be tested — the success response shape is inferred. Error messages are parsed generically (`INVALID` → "Invalid coupon code", `ALREADY_APPLIED` → "Coupon already applied", `expired` → "Coupon has expired")
 - `DELETE /general/coupons/apply` returns "Method Not Allowed" — removing a coupon may require a different endpoint or is handled on the backend automatically
+
+## Endpoint: `GET /general/coupons/available` (personalized, paginated)
+
+Advisory shelf of coupons the logged-in customer can use; the real check still
+happens at apply/checkout.
+
+- Query: `page` (min 1) and `limit` (1–50) — both optional, defaults `1`/`15`.
+  Backend 422s with `errors.{page|limit}` on out-of-range values (`page=0`,
+  `limit=51` verified).
+- 200 envelope: `ApiResponse<{ data: AvailableCoupon[]; meta }>` where
+  `meta = { current_page, per_page, total, has_more_pages }`.
+- **Warning: `meta.total` counts only the items on the current page** (verified:
+  15 items on page 1, 4 on page 2) — never use it for "are there more?"
+  decisions; rely on `has_more_pages` exclusively.
+- Errors: 401 `{"message":"Unauthenticated"}` without token.
+
+### Verified item shape (2026-09-27)
+
+```json
+{ "id": 20, "name": "Happy Hour", "slug": "happy-hour", "image": null,
+  "visibility": "public", "claim_status": "not_required", "requires_claim": false,
+  "code": "HAPPY30", "claim_id": null, "expires_at": "2026-10-23T00:00:00+00:00",
+  "action": "apply" }
+```
+
+Mixed shelf semantics:
+- `visibility: "public"` → `code` is present, `action: "apply"` (copy/apply now)
+- `visibility: "targeted"` → `code: null`, `requires_claim: true`,
+  `claim_status: "claimable"`, `action: "claim"` (claim first, then the code
+  shows up in `/general/coupons/mine` claims)
+
+### Implementation (feature-first)
+
+- `src/shared/types/index.ts` — `PageMeta` (generic pagination envelope; `total`
+  may be page-scoped, prefer `has_more_pages`)
+- `src/shared/hooks/usePaginatedFetch.ts` — generic page/limit hook driven only
+  by `has_more_pages`; inflight/duplicate-page guards; consumers own the domain
+- `src/features/coupons/types.ts` — `AvailableCoupon`, `AvailableCouponsData`,
+  `AvailableCouponsResult`, `AvailableCouponAction`
+- `src/features/coupons/services/couponService.ts` — `getAvailableCoupons(locale, page=1, limit=15)`
+  (clamped params, `no-store`; throws `ApiError` instead of returning a union —
+  required by the shared hook contract)
+- `src/features/coupons/hooks/useAvailableCoupons.ts` — auth-gated wrapper around
+  `usePaginatedFetch`; splits items into `applyCoupons` / `claimCoupons`
+- `src/features/coupons/components/MyAvailableCoupons.tsx` — "Coupons For You"
+  shelf on the cart page (above the public `AvailableCoupons`): copy code +
+  apply for `action: "apply"`, claim button for `action: "claim"`, "Show More"
+  appends pages while `has_more_pages`; hidden while loading/empty/error
+- `messages/{en,ar}.json` — `coupons.personalizedTitle`, `copyCode`, `copied`,
+  `expiresSoon`, `showMore`

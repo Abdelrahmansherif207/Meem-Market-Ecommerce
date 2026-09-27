@@ -1,3 +1,5 @@
+import type { PageMeta } from "@/shared/types";
+
 export interface CouponImage {
   desktop: string;
   mobile: string;
@@ -60,6 +62,36 @@ export interface MyCouponsData {
   assignments: CouponAssignment[];
   claims?: CouponClaim[];
 }
+
+export type AvailableCouponAction = "apply" | "claim";
+
+/**
+ * Coupon shell from `GET /general/coupons/available` — a personalized,
+ * advisory shelf. Public coupons carry their `code`; targeted ones come
+ * with `code: null` and `action: "claim"` until they are claimed.
+ */
+export interface AvailableCoupon {
+  id: number;
+  name: string;
+  slug: string;
+  image: string | null;
+  visibility: "public" | "targeted" | string;
+  claim_status: "not_required" | "claimable" | string;
+  requires_claim: boolean;
+  code: string | null;
+  claim_id: number | null;
+  expires_at: string | null;
+  action: AvailableCouponAction;
+}
+
+export interface AvailableCouponsData {
+  data: AvailableCoupon[];
+  meta: PageMeta;
+}
+
+export type AvailableCouponsResult =
+  | { success: true; items: AvailableCoupon[]; meta: PageMeta }
+  | { success: false; message?: string; status?: number };
 
 export type MyCouponsResult =
   | { success: true; assignments: CouponAssignment[]; claims: CouponClaim[] }
