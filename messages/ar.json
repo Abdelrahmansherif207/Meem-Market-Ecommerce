@@ -505,7 +505,8 @@
         "processing": "قيد المعالجة",
         "delivered": "تم التوصيل",
         "shipped": "تم الشحن"
-      }
+      },
+      "shippingChip": "الشحن: {value}"
     },
     "invoices": {
       "tab": "الفواتير",
@@ -668,7 +669,21 @@
     },
     "fastCheckout": "الشراء السريع",
     "fastDelivery": "توصيل سريع",
-    "fastDeliveryDesc": "ادفع واحصل على منتجاتك السريعة فورًا"
+    "fastDeliveryDesc": "ادفع واحصل على منتجاتك السريعة فورًا",
+    "shippingType": {
+      "title": "نوع الشحن",
+      "local": "محلي",
+      "international": "دولي"
+    },
+    "flowInputs": {
+      "title": "تفاصيل إضافية",
+      "required": "هذا الحقل مطلوب",
+      "requiredField": "{field} مطلوب",
+      "invalidValue": "القيمة المُدخلة في {field} غير صالحة",
+      "loadError": "تعذّر تحميل تفاصيل الطلب الإضافية. سيتم المتابعة بالدفع القياسي.",
+      "optionLoading": "جارٍ تحميل الخيارات…",
+      "noOptions": "لا توجد خيارات متاحة"
+    }
   },
   "siteReviews": {
     "metaTitle": "آراء العملاء",

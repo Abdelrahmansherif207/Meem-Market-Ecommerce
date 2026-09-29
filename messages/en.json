@@ -505,7 +505,8 @@
         "processing": "Processing",
         "delivered": "Delivered",
         "shipped": "Shipped"
-      }
+      },
+      "shippingChip": "Shipping: {value}"
     },
     "invoices": {
       "tab": "Invoices",
@@ -668,7 +669,21 @@
     },
     "fastCheckout": "Fast Checkout",
     "fastDelivery": "Fast Delivery",
-    "fastDeliveryDesc": "Pay and get your fast items shipped immediately"
+    "fastDeliveryDesc": "Pay and get your fast items shipped immediately",
+    "shippingType": {
+      "title": "Shipping Type",
+      "local": "Local",
+      "international": "International"
+    },
+    "flowInputs": {
+      "title": "Additional Details",
+      "required": "This field is required",
+      "requiredField": "{field} is required",
+      "invalidValue": "The value for {field} is invalid",
+      "loadError": "Couldn't load additional order details. Continuing with standard checkout.",
+      "optionLoading": "Loading options…",
+      "noOptions": "No options available"
+    }
   },
   "siteReviews": {
     "metaTitle": "Customer Reviews",

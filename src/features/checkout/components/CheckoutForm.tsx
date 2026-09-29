@@ -11,16 +11,20 @@ import { usePickupLocationStore } from "@/features/pickup-location";
 import { MapPickerModal, useLocationStore } from "@/features/location";
 import type { PickedAddress } from "@/features/location";
 import { PickupSelector } from "./PickupSelector";
+import { FlowInputsSection, isCheckoutRequired } from "./FlowInputsSection";
+import { ShippingTypeSelector } from "./ShippingTypeSelector";
 import { cartService } from "@/features/cart/services/cartService";
 import { checkoutService } from "../services/checkoutService";
 import { governorateService } from "../services/governorateService";
+import { orderFlowService } from "../services/orderFlowService";
 import { matchGovernorateByName } from "../utils/matchGovernorate";
 import { PromotionsPanel } from "./PromotionsPanel";
 import { OrderSummary } from "./OrderSummary";
 import { CheckoutFormSkeleton } from "./CheckoutFormSkeleton";
 import { resolveShippingQuote } from "../utils/shippingFee";
 import { mapCheckoutError } from "../utils/errorMessages";
-import type { CheckoutFormData, FulfillmentType, PaymentMethod, EligiblePromotion, Governorate, PaymentGatewayOption } from "../types";
+import type { CheckoutFormData, FlowValue, FlowValues, FulfillmentType, LocalizedText, OrderFlowDefinition, PaymentMethod, EligiblePromotion, Governorate, PaymentGatewayOption, ShippingType } from "../types";
+import { localizedText, SHIPPING_TYPE_CODES } from "../types";
 import { addressService } from "@/features/profile/services/addressService";
 import type { Address } from "@/features/profile/types";
 import { useOnlineStatus } from "@/shared/hooks/useOnlineStatus";
@@ -43,6 +47,7 @@ const initialForm = (user: { name?: string | null; email?: string | null; phone?
   selected_promotion_id: null,
   selected_promotion_discount: 0,
   selected_gift_product_id: null,
+  shipping_type: "local",
 });
 
 interface FieldError {
@@ -58,7 +63,66 @@ interface CartCheckoutData {
   expired: boolean;
 }
 
-function validate(form: CheckoutFormData, governorateId: number | null, vt: (key: string) => string): FieldError[] {
+function isEmptyFlowValue(value: FlowValue | undefined): boolean {
+  if (value === undefined || value === null) return true;
+  if (typeof value === "string") return value.trim() === "";
+  if (Array.isArray(value)) return value.length === 0;
+  return false;
+}
+
+/**
+ * Maps checkout 422 errors to field errors. `apiFetch` normalizes both error
+ * shapes (bare FormRequest maps and the `{data:{errors}}` service envelope)
+ * into `ApiError.fields`, so each error key is mapped to its flow input and
+ * rendered under the field (`flow:<key>`); unknown keys land in the banner.
+ */
+function handleCheckoutSubmitError(
+  err: unknown,
+  t: ReturnType<typeof useTranslations>,
+  locale: string,
+  flow: OrderFlowDefinition | null,
+  onFieldErrors: (errors: FieldError[]) => void,
+  onGeneric: () => void,
+  onUnknownKey: () => void,
+): void {
+  if (!(err instanceof ApiError) || Object.keys(err.fields).length === 0) {
+    onGeneric();
+    return;
+  }
+  const inputsByKey = new Map((flow?.inputs ?? []).map((input) => [input.key, input]));
+  const fieldErrors: FieldError[] = [];
+  let hasUnknown = false;
+  for (const [field, messages] of Object.entries(err.fields)) {
+    const input = inputsByKey.get(field);
+    if (input) {
+      const label = localizedText(input.label, locale);
+      fieldErrors.push({
+        field: `flow:${field}`,
+        message: messages[0] ?? t("flowInputs.invalidValue", { field: label }),
+      });
+    } else {
+      fieldErrors.push({ field, message: messages[0] });
+      hasUnknown = true;
+    }
+  }
+  if (hasUnknown) {
+    onUnknownKey();
+  }
+  if (fieldErrors.length > 0) {
+    onFieldErrors(fieldErrors);
+  } else {
+    onGeneric();
+  }
+}
+
+function validate(
+  form: CheckoutFormData,
+  governorateId: number | null,
+  flow: OrderFlowDefinition | null,
+  flowValues: FlowValues,
+  flowLabel: (input: { key: string; label: LocalizedText }) => string,
+  vt: (key: string) => string,
+): FieldError[] {
   const errors: FieldError[] = [];
   if (!form.name.trim()) errors.push({ field: "name", message: vt("nameRequired") });
   if (!form.user_phone.trim()) errors.push({ field: "user_phone", message: vt("phoneRequired") });
@@ -72,6 +136,14 @@ function validate(form: CheckoutFormData, governorateId: number | null, vt: (key
     if (!form.city.trim()) errors.push({ field: "city", message: vt("cityRequired") });
     if (!form.country.trim()) errors.push({ field: "country", message: vt("countryRequired") });
     if (!form.street_address.trim()) errors.push({ field: "street_address", message: vt("streetRequired") });
+  }
+  if (flow) {
+    for (const input of flow.inputs ?? []) {
+      if (!isCheckoutRequired(input)) continue;
+      if (isEmptyFlowValue(flowValues[input.key])) {
+        errors.push({ field: `flow:${input.key}`, message: flowLabel(input) });
+      }
+    }
   }
   return errors;
 }
@@ -108,6 +180,10 @@ export function CheckoutForm() {
   const [selectedGateway, setSelectedGateway] = useState<string | null>(null);
   const [gatewaysRefreshKey, setGatewaysRefreshKey] = useState(0);
   const [navStalled, setNavStalled] = useState(false);
+  const [availableShippingTypes, setAvailableShippingTypes] = useState<ShippingType[]>(SHIPPING_TYPE_CODES);
+  const [flow, setFlow] = useState<OrderFlowDefinition | null>(null);
+  const [flowValues, setFlowValues] = useState<FlowValues>({});
+  const [flowError, setFlowError] = useState(false);
   const isOnline = useOnlineStatus();
 
   const [savedAddresses, setSavedAddresses] = useState<Address[]>([]);
@@ -234,6 +310,73 @@ export function CheckoutForm() {
     setGatewaysError(false);
     setGatewaysRefreshKey((key) => key + 1);
   }, []);
+
+  const isNotSupportedMessage = useCallback((message: string) => {
+    const normalized = message.toLowerCase();
+    return normalized.includes("not supported") || normalized.includes("not available");
+  }, []);
+
+  const fetchFlow = useCallback(
+    async (shippingType: ShippingType, signal: { aborted: boolean }) => {
+      setFlow(null);
+      setFlowValues({});
+      setFlowError(false);
+      try {
+        const definition = await orderFlowService.getByShippingType(shippingType, locale);
+        if (signal.aborted) return;
+        setFlow(definition?.inputs && definition.inputs.length > 0 ? definition : null);
+      } catch (err) {
+        if (signal.aborted) return;
+        if (
+          err instanceof ApiError &&
+          err.status === 422 &&
+          isNotSupportedMessage(err.message ?? "")
+        ) {
+          // Shipping option unsupported for this store/account: hide it and
+          // fall back to the remaining flow (or classic checkout).
+          setAvailableShippingTypes((prev) => prev.filter((t) => t !== shippingType));
+          setFlow(null);
+          setForm((prev) => {
+            if (prev.shipping_type !== shippingType) return prev;
+            const remaining = SHIPPING_TYPE_CODES.filter((t) => t !== shippingType);
+            return remaining.length > 0 ? { ...prev, shipping_type: remaining[0] } : prev;
+          });
+          return;
+        }
+        // Neutral small error + classic checkout fallback (no flow_values).
+        setFlow(null);
+        setFlowError(true);
+      }
+    },
+    [locale, isNotSupportedMessage],
+  );
+
+  useEffect(() => {
+    // Flow definitions require auth; skip until the session store hydrates.
+    if (!hydrated || !isAuthenticated) return;
+    const signal = { aborted: false };
+    fetchFlow(form.shipping_type, signal);
+    return () => {
+      signal.aborted = true;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [form.shipping_type, locale, hydrated, isAuthenticated]);
+
+  const handleShippingTypeChange = (type: ShippingType) => {
+    setForm((prev) => ({ ...prev, shipping_type: type }));
+    setErrors((prev) => prev.filter((e) => !e.field.startsWith("flow:")));
+    setApiError(null);
+  };
+
+  const handleFlowValueChange = (key: string, value: FlowValue) => {
+    setFlowValues((prev) => ({ ...prev, [key]: value }));
+    setErrors((prev) => prev.filter((e) => e.field !== `flow:${key}`));
+    setApiError(null);
+  };
+
+  const handleFlowFieldBlur = () => {
+    setApiError(null);
+  };
 
   const applyAddressToForm = useCallback((addr: Address) => {
     setForm((prev) => ({
@@ -476,11 +619,22 @@ export function CheckoutForm() {
     e.preventDefault();
     setApiError(null);
 
-    const validationErrors = validate(form, selectedGovernorateId, (key) => t(`validation.${key}`));
+    const validationErrors = validate(
+      form,
+      selectedGovernorateId,
+      flow,
+      flowValues,
+      (input) => t("flowInputs.requiredField", { field: localizedText(input.label, locale) }),
+      (key) => t(`validation.${key}`),
+    );
     if (validationErrors.length > 0) {
       setErrors(validationErrors);
       setApiError(t("fixRequiredFields"));
-      const firstEl = document.querySelector(`[name="${validationErrors[0].field}"]`);
+      const firstError = validationErrors[0];
+      const selector = firstError.field.startsWith("flow:")
+        ? `[data-flow-key="${firstError.field.slice(5)}"]`
+        : `[name="${firstError.field}"]`;
+      const firstEl = document.querySelector(selector);
       firstEl?.scrollIntoView({ behavior: "smooth", block: "center" });
       (firstEl as HTMLElement)?.focus();
       return;
@@ -493,6 +647,23 @@ export function CheckoutForm() {
 
     setSubmitting(true);
 
+    // flow_values contract:
+    // - only keys that exist among the flow's active inputs are sent
+    //   (unknown keys are rejected server-side — fail closed);
+    // - sent when the flow loaded and the user provided values (all
+    //   checkout-required inputs are already enforced by `validate`);
+    // - omitted entirely when no flow loaded (classic checkout) or nothing
+    //   was filled.
+    const flowInputKeySet = new Set((flow?.inputs ?? []).map((i) => i.key));
+    const sanitizedFlowValues: FlowValues | null = flow
+      ? Object.fromEntries(
+          Object.entries(flowValues).filter(
+            ([key, value]) => flowInputKeySet.has(key) && !isEmptyFlowValue(value),
+          ),
+        )
+      : null;
+    const includeFlowValues =
+      sanitizedFlowValues !== null && Object.keys(sanitizedFlowValues).length > 0;
     if (isFast) {
       const payload = {
         name: form.name.trim(),
@@ -508,6 +679,8 @@ export function CheckoutForm() {
         ...(selectedGateway ? { gateway: selectedGateway } : {}),
         selected_promotion_id: form.selected_promotion_id,
         selected_gift_product_id: form.selected_gift_product_id,
+        shipping_type: form.shipping_type,
+        ...(includeFlowValues ? { flow_values: sanitizedFlowValues } : {}),
       };
 
       try {
@@ -520,16 +693,14 @@ export function CheckoutForm() {
           router.push("/payment");
         }
       } catch (err) {
-        if (err instanceof ApiError && Object.keys(err.fields).length > 0) {
-          const fieldErrors: FieldError[] = [];
-          for (const [field, messages] of Object.entries(err.fields)) {
-            fieldErrors.push({ field, message: messages[0] });
-          }
+        handleCheckoutSubmitError(err, t, locale, flow, (fieldErrors) => {
           setErrors(fieldErrors);
           setApiError(t("fixRequiredFields"));
-        } else {
+        }, () => {
           setApiError(mapCheckoutError(err, t));
-        }
+        }, () => {
+          setApiError(t("fixRequiredFields"));
+        });
         setSubmitting(false);
       }
       return;
@@ -555,6 +726,8 @@ export function CheckoutForm() {
       selected_promotion_id: form.selected_promotion_id,
       selected_gift_product_id: form.selected_gift_product_id,
       ...(form.fulfillment_type === "pickup" && { pickup_location_id: selectedLocationId }),
+      shipping_type: form.shipping_type,
+      ...(includeFlowValues ? { flow_values: sanitizedFlowValues } : {}),
     };
 
     try {
@@ -572,16 +745,14 @@ export function CheckoutForm() {
         router.push(`/payment/success?order_id=${result.order_id}&transaction_id=${result.transaction_uuid}`);
       }
     } catch (err) {
-      if (err instanceof ApiError && Object.keys(err.fields).length > 0) {
-        const fieldErrors: FieldError[] = [];
-        for (const [field, messages] of Object.entries(err.fields)) {
-          fieldErrors.push({ field, message: messages[0] });
-        }
+      handleCheckoutSubmitError(err, t, locale, flow, (fieldErrors) => {
         setErrors(fieldErrors);
         setApiError(t("fixRequiredFields"));
-      } else {
+      }, () => {
         setApiError(mapCheckoutError(err, t));
-      }
+      }, () => {
+        setApiError(t("fixRequiredFields"));
+      });
       setSubmitting(false);
     }
   };
@@ -673,6 +844,21 @@ export function CheckoutForm() {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <div className="lg:col-span-2 space-y-6">
+          <ShippingTypeSelector
+            value={form.shipping_type}
+            available={availableShippingTypes}
+            onChange={handleShippingTypeChange}
+          />
+
+          {flowError && (
+            <div
+              role="status"
+              className="rounded-xl border-2 border-border bg-surface px-4 py-3 text-sm text-text-secondary"
+            >
+              {t("flowInputs.loadError")}
+            </div>
+          )}
+
           <div className="rounded-2xl border-2 border-border bg-white p-6 space-y-5">
             <div className="flex items-center gap-2">
               <div className="h-1 w-6 rounded-full bg-primary" />
@@ -861,6 +1047,19 @@ export function CheckoutForm() {
               <PickupSelector onSelect={setPickupLocationName} />
             )}
           </div>
+
+          {flow && (
+            <FlowInputsSection
+              inputs={flow.inputs ?? []}
+              values={flowValues}
+              errors={errors.filter((e) => e.field.startsWith("flow:")).map((e) => ({
+                field: e.field.slice(5),
+                message: e.message,
+              }))}
+              onChange={handleFlowValueChange}
+              onBlurField={handleFlowFieldBlur}
+            />
+          )}
 
           {!isFast && (
           <div className="rounded-2xl border-2 border-border bg-white p-6 space-y-4">

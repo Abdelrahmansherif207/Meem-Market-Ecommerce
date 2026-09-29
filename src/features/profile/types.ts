@@ -49,7 +49,22 @@ export type UpdateAddressPayload = CreateAddressPayload;
 export interface Order {
   id: number;
   order_number: string;
-  status: "pending" | "processing" | "completed" | "delivered" | "cancelled";
+  /**
+   * Machine status code from a growing catalog (22+ codes). Never translated;
+   * display text comes from `current_status.name` (localized) or a prettified
+   * fallback.
+   */
+  status: string;
+  current_status?: {
+    code: string;
+    name?: { en?: string; ar?: string } | null;
+  } | null;
+  flow?: {
+    code: string;
+    name?: { en?: string; ar?: string } | null;
+    shipping_type: string;
+  } | null;
+  shipping_type?: string | null;
   subtotal: number;
   discount: number;
   coupon: unknown | null;
