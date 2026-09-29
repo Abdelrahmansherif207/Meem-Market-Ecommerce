@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { CheckCircle, Clock3, HelpCircle, Loader2 } from "lucide-react";
 import Link from "next/link";
@@ -22,16 +22,18 @@ const VERIFY_POLL_MAX_ATTEMPTS = 3;
 export function VerifiedPaymentSuccess({ orderId, transactionId }: VerifiedPaymentSuccessProps) {
   const t = useTranslations("payment");
   const locale = useLocale();
-  const [state, setState] = useState<VerifyState>(orderId ? "loading" : "unconfirmed");
+  const parsedOrderId = useMemo(() => {
+    if (!orderId) return null;
+    const id = Number(orderId);
+    return Number.isInteger(id) && id > 0 ? id : null;
+  }, [orderId]);
+  const [state, setState] = useState<VerifyState>(() =>
+    parsedOrderId === null ? "unconfirmed" : "loading",
+  );
   const [paymentMethod, setPaymentMethod] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!orderId) return;
-    const id = Number(orderId);
-    if (!Number.isInteger(id) || id <= 0) {
-      setState("unconfirmed"); // eslint-disable-line react-hooks/set-state-in-effect
-      return;
-    }
+    if (!parsedOrderId) return;
 
     let cancelled = false;
     let timer: ReturnType<typeof setTimeout> | undefined;
@@ -39,7 +41,7 @@ export function VerifiedPaymentSuccess({ orderId, transactionId }: VerifiedPayme
 
     const check = async () => {
       try {
-        const order = await orderService.getById(id, locale);
+        const order = await orderService.getById(parsedOrderId, locale);
         if (cancelled) return;
         setPaymentMethod(order.payment_method);
 
@@ -72,7 +74,7 @@ export function VerifiedPaymentSuccess({ orderId, transactionId }: VerifiedPayme
       cancelled = true;
       if (timer) clearTimeout(timer);
     };
-  }, [orderId, locale]);
+  }, [parsedOrderId, locale]);
 
   if (state === "loading") {
     return (

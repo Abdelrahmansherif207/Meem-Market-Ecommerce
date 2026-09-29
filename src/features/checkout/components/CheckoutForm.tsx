@@ -23,6 +23,7 @@ import { mapCheckoutError } from "../utils/errorMessages";
 import type { CheckoutFormData, FulfillmentType, PaymentMethod, EligiblePromotion, Governorate, PaymentGatewayOption } from "../types";
 import { addressService } from "@/features/profile/services/addressService";
 import type { Address } from "@/features/profile/types";
+import { useOnlineStatus } from "@/shared/hooks/useOnlineStatus";
 import type { CartApiCart } from "@/features/cart/types";
 import type { AppliedCoupon } from "@/features/coupons/types";
 import { ApiError } from "@/shared/lib/api";
@@ -57,7 +58,7 @@ interface CartCheckoutData {
   expired: boolean;
 }
 
-function validate(form: CheckoutFormData, vt: (key: string) => string): FieldError[] {
+function validate(form: CheckoutFormData, governorateId: number | null, vt: (key: string) => string): FieldError[] {
   const errors: FieldError[] = [];
   if (!form.name.trim()) errors.push({ field: "name", message: vt("nameRequired") });
   if (!form.user_phone.trim()) errors.push({ field: "user_phone", message: vt("phoneRequired") });
@@ -67,7 +68,7 @@ function validate(form: CheckoutFormData, vt: (key: string) => string): FieldErr
     errors.push({ field: "user_email", message: vt("emailInvalid") });
   }
   if (form.fulfillment_type === "delivery") {
-    if (form.governorate_id === null) errors.push({ field: "governorate_id", message: vt("governorateRequired") });
+    if (governorateId === null) errors.push({ field: "governorate_id", message: vt("governorateRequired") });
     if (!form.city.trim()) errors.push({ field: "city", message: vt("cityRequired") });
     if (!form.country.trim()) errors.push({ field: "country", message: vt("countryRequired") });
     if (!form.street_address.trim()) errors.push({ field: "street_address", message: vt("streetRequired") });
@@ -105,8 +106,9 @@ export function CheckoutForm() {
   const [gateways, setGateways] = useState<PaymentGatewayOption[] | null>(null);
   const [gatewaysError, setGatewaysError] = useState(false);
   const [selectedGateway, setSelectedGateway] = useState<string | null>(null);
-  const [isOnline, setIsOnline] = useState(true);
+  const [gatewaysRefreshKey, setGatewaysRefreshKey] = useState(0);
   const [navStalled, setNavStalled] = useState(false);
+  const isOnline = useOnlineStatus();
 
   const [savedAddresses, setSavedAddresses] = useState<Address[]>([]);
   const [addressesLoading, setAddressesLoading] = useState(false);
@@ -116,7 +118,7 @@ export function CheckoutForm() {
   const [mapModalOpen, setMapModalOpen] = useState(false);
   const [savingLocation, setSavingLocation] = useState(false);
   const [mapSaveError, setMapSaveError] = useState<string | null>(null);
-  const [hydrated, setHydrated] = useState(false);
+  const [hydrated, setHydrated] = useState(() => useAuthStore.persist.hasHydrated());
   const [stickyTop, setStickyTop] = useState<number | null>(null);
   const browserCoords = useLocationStore((s) => s.coords);
 
@@ -125,21 +127,18 @@ export function CheckoutForm() {
     if (!header) return;
     const update = () =>
       setStickyTop(window.innerWidth >= 1024 ? header.offsetHeight + 12 : null);
-    update(); // eslint-disable-line react-hooks/set-state-in-effect
+    const rafId = requestAnimationFrame(update);
     const observer = new ResizeObserver(update);
     observer.observe(header);
     window.addEventListener("resize", update);
     return () => {
+      cancelAnimationFrame(rafId);
       observer.disconnect();
       window.removeEventListener("resize", update);
     };
   }, []);
 
-  useEffect(() => {
-    const unsub = useAuthStore.persist.onFinishHydration(() => setHydrated(true));
-    if (useAuthStore.persist.hasHydrated()) setHydrated(true); // eslint-disable-line react-hooks/set-state-in-effect
-    return unsub;
-  }, []);
+  useEffect(() => useAuthStore.persist.onFinishHydration(() => setHydrated(true)), []);
 
   const fetchedKey = useRef<string | null>(null);
 
@@ -194,29 +193,26 @@ export function CheckoutForm() {
 
   useEffect(() => {
     let cancelled = false;
-    setGovernoratesLoading(true); // eslint-disable-line react-hooks/set-state-in-effect
-    setGovernoratesError(false);
     governorateService.getAll(locale)
       .then((data) => {
-        if (!cancelled) {
-          setGovernorates(data);
-          setGovernoratesLoading(false);
-        }
+        if (cancelled) return;
+        setGovernorates(data);
+        setGovernoratesError(false);
+        setGovernoratesLoading(false);
       })
       .catch(() => {
-        if (!cancelled) {
-          setGovernoratesError(true);
-          setGovernoratesLoading(false);
-        }
+        if (cancelled) return;
+        setGovernoratesError(true);
+        setGovernoratesLoading(false);
       });
     return () => { cancelled = true; };
   }, [locale]);
 
-  const loadGateways = useCallback(() => {
-    setGateways(null);
-    setGatewaysError(false);
+  useEffect(() => {
+    let cancelled = false;
     checkoutService.getPaymentGateways(locale)
       .then((list) => {
+        if (cancelled) return;
         const eligible = list.filter((g) => g.supports_catalog_currency);
         setGateways(eligible);
         setSelectedGateway((prev) =>
@@ -224,61 +220,54 @@ export function CheckoutForm() {
         );
       })
       .catch(() => {
+        if (cancelled) return;
         setGateways([]);
         setGatewaysError(true);
       });
-  }, [locale]);
+    return () => { cancelled = true; };
+  }, [locale, gatewaysRefreshKey]);
 
-  useEffect(() => {
-    loadGateways(); // eslint-disable-line react-hooks/set-state-in-effect
-  }, [loadGateways]);
+  const retryGateways = useCallback(() => {
+    setGateways(null);
+    setGatewaysError(false);
+    setGatewaysRefreshKey((key) => key + 1);
+  }, []);
 
-  useEffect(() => {
-    setIsOnline(navigator.onLine); // eslint-disable-line react-hooks/set-state-in-effect
-    const handleOffline = () => setIsOnline(false);
-    const handleOnline = () => setIsOnline(true);
-    window.addEventListener("offline", handleOffline);
-    window.addEventListener("online", handleOnline);
-    return () => {
-      window.removeEventListener("offline", handleOffline);
-      window.removeEventListener("online", handleOnline);
-    };
+  const applyAddressToForm = useCallback((addr: Address) => {
+    setForm((prev) => ({
+      ...prev,
+      city: addr.address.city,
+      state: addr.address.state,
+      country: addr.address.country,
+      street_address: addr.address.street_address,
+      governorate_id: null,
+    }));
+    setErrors((prev) => prev.filter(
+      (e) => !["city", "state", "country", "street_address", "governorate_id"].includes(e.field),
+    ));
   }, []);
 
   useEffect(() => {
     if (!hydrated || !isAuthenticated) return;
     let cancelled = false;
-    setAddressesLoading(true); // eslint-disable-line react-hooks/set-state-in-effect
-    setAddressesError(false);
     addressService.getAll(locale)
       .then((data) => {
         if (cancelled) return;
         setSavedAddresses(data);
+        setAddressesError(false);
+        setAddressesLoading(false);
         if (data.length > 0) {
           setSelectedAddressId(data[0].id);
           applyAddressToForm(data[0]);
         }
-        setAddressesLoading(false);
       })
       .catch(() => {
-        if (!cancelled) {
-          setAddressesLoading(false);
-          setAddressesError(true);
-        }
+        if (cancelled) return;
+        setAddressesError(true);
+        setAddressesLoading(false);
       });
     return () => { cancelled = true; };
-  }, [locale, hydrated, isAuthenticated]);
-
-  useEffect(() => {
-    if (governoratesLoading || governorates.length === 0) return;
-    if (form.governorate_id !== null || !selectedAddressId) return;
-    const addr = savedAddresses.find((a) => a.id === selectedAddressId);
-    if (!addr) return;
-    const matched = matchGovernorate(addr.address.city, addr.address.state);
-    if (matched) {
-      setForm((prev) => (prev.governorate_id === null ? { ...prev, governorate_id: matched.id } : prev));
-    }
-  }, [governorates, governoratesLoading, selectedAddressId, savedAddresses]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [locale, hydrated, isAuthenticated, applyAddressToForm]);
 
   const handleRetryAddresses = () => {
     setAddressesError(false);
@@ -312,26 +301,6 @@ export function CheckoutForm() {
       });
   };
 
-  const matchGovernorate = (city: string, state: string) =>
-    matchGovernorateByName(city, state, governorates);
-
-  const applyAddressToForm = (addr: Address) => {
-    setForm((prev) => {
-      const matched = matchGovernorate(addr.address.city, addr.address.state);
-      return {
-        ...prev,
-        city: addr.address.city,
-        state: addr.address.state,
-        country: addr.address.country,
-        street_address: addr.address.street_address,
-        ...(matched ? { governorate_id: matched.id } : {}),
-      };
-    });
-    setErrors((prev) => prev.filter(
-      (e) => !["city", "state", "country", "street_address", "governorate_id"].includes(e.field),
-    ));
-  };
-
   const handleAddressSelect = (id: number | null) => {
     setSelectedAddressId(id);
     if (id === null) {
@@ -359,7 +328,7 @@ export function CheckoutForm() {
     }));
     setErrors((prev) => prev.filter((e) => !["city", "state", "country", "street_address"].includes(e.field)));
 
-    const matched = matchGovernorate(picked.city, picked.state);
+    const matched = matchGovernorateByName(picked.city, picked.state, governorates);
     if (matched) {
       setForm((prev) => ({ ...prev, governorate_id: matched.id }));
       setErrors((prev) => prev.filter((e) => e.field !== "governorate_id"));
@@ -475,9 +444,17 @@ export function CheckoutForm() {
     }).catch(() => {});
   }, [locale]);
 
+  const autoGovernorateId = useMemo<number | null>(() => {
+    if (form.governorate_id !== null) return null;
+    if (governoratesLoading || governorates.length === 0 || !selectedAddressId) return null;
+    const addr = savedAddresses.find((a) => a.id === selectedAddressId);
+    if (!addr) return null;
+    return matchGovernorateByName(addr.address.city, addr.address.state, governorates)?.id ?? null;
+  }, [form.governorate_id, governorates, governoratesLoading, selectedAddressId, savedAddresses]);
+  const selectedGovernorateId = form.governorate_id ?? autoGovernorateId;
   const selectedGovernorate = useMemo(
-    () => governorates.find((g) => g.id === form.governorate_id) ?? null,
-    [governorates, form.governorate_id],
+    () => governorates.find((g) => g.id === selectedGovernorateId) ?? null,
+    [governorates, selectedGovernorateId],
   );
   const selectedCurrencyRate = useCurrencyStore(
     (s) => s.byCode[s.selectedCode]?.effectiveRate ?? null,
@@ -497,7 +474,7 @@ export function CheckoutForm() {
     e.preventDefault();
     setApiError(null);
 
-    const validationErrors = validate(form, (key) => t(`validation.${key}`));
+    const validationErrors = validate(form, selectedGovernorateId, (key) => t(`validation.${key}`));
     if (validationErrors.length > 0) {
       setErrors(validationErrors);
       setApiError(t("fixRequiredFields"));
@@ -525,7 +502,7 @@ export function CheckoutForm() {
           country: form.country.trim(),
         },
         notes: form.notes.trim() || undefined,
-        governorate_id: form.governorate_id!,
+        governorate_id: selectedGovernorateId!,
         ...(selectedGateway ? { gateway: selectedGateway } : {}),
         selected_promotion_id: form.selected_promotion_id,
         selected_gift_product_id: form.selected_gift_product_id,
@@ -572,7 +549,7 @@ export function CheckoutForm() {
       ...(form.payment_method === "online" && selectedGateway
         ? { gateway: selectedGateway }
         : {}),
-      governorate_id: form.fulfillment_type === "delivery" ? form.governorate_id ?? undefined : undefined,
+      governorate_id: form.fulfillment_type === "delivery" ? selectedGovernorateId ?? undefined : undefined,
       selected_promotion_id: form.selected_promotion_id,
       selected_gift_product_id: form.selected_gift_product_id,
       ...(form.fulfillment_type === "pickup" && { pickup_location_id: selectedLocationId }),
@@ -830,7 +807,7 @@ export function CheckoutForm() {
                         <select
                           name="governorate_id"
                           className={fieldError("governorate_id") ? errorClass : inputClass}
-                          value={form.governorate_id ?? ""}
+                          value={selectedGovernorateId ?? ""}
                           onChange={handleGovernorateChange}
                         >
                           <option value="">{t("governoratePlaceholder")}</option>
@@ -931,7 +908,7 @@ export function CheckoutForm() {
                       <span>{t("paymentGatewaysError")}</span>
                       <button
                         type="button"
-                        onClick={loadGateways}
+                        onClick={retryGateways}
                         className="font-semibold underline"
                       >
                         {t("retry")}
