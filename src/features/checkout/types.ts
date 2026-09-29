@@ -8,6 +8,13 @@ export interface Address {
 export type FulfillmentType = "delivery" | "pickup";
 export type PaymentMethod = "online" | "cod" | "pay_at_cashier";
 
+export interface PaymentGatewayOption {
+  code: string;
+  display_name: string;
+  supported_currencies?: string[];
+  supports_catalog_currency: boolean;
+}
+
 export interface EligiblePromotion {
   id: number;
   type: string;

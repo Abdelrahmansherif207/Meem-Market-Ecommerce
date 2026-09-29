@@ -1,6 +1,6 @@
 import { apiFetch } from "@/shared/lib/api";
 import type { ApiResponse } from "@/shared/types";
-import type { CheckoutRequest, CheckoutResponse, EligiblePromotion } from "../types";
+import type { CheckoutRequest, CheckoutResponse, EligiblePromotion, PaymentGatewayOption } from "../types";
 
 export const checkoutService = {
   processCheckout: async (
@@ -23,5 +23,13 @@ export const checkoutService = {
       { lang },
     );
     return response.data.eligible_promotions;
+  },
+
+  getPaymentGateways: async (lang?: string): Promise<PaymentGatewayOption[]> => {
+    const response = await apiFetch<ApiResponse<{ gateways: PaymentGatewayOption[] }>>(
+      "/general/payment-gateways",
+      { lang },
+    );
+    return response.data.gateways ?? [];
   },
 };
