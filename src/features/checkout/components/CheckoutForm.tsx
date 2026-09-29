@@ -1,8 +1,9 @@
 "use client";
 import { useEffect, useMemo, useRef, useState, useCallback } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import Link from "next/link";
 import { useLocale, useTranslations } from "next-intl";
-import { Loader2, CreditCard, MapPin, Store, Truck } from "lucide-react";
+import { Loader2, CreditCard, MapPin, Store, Truck, WifiOff } from "lucide-react";
 import { useShallow } from "zustand/react/shallow";
 import { useAuthStore } from "@/features/auth";
 import { useCurrencyStore } from "@/features/currencies";
@@ -18,9 +19,11 @@ import { PromotionsPanel } from "./PromotionsPanel";
 import { OrderSummary } from "./OrderSummary";
 import { CheckoutFormSkeleton } from "./CheckoutFormSkeleton";
 import { resolveShippingQuote } from "../utils/shippingFee";
-import type { CheckoutFormData, FulfillmentType, PaymentMethod, EligiblePromotion, Governorate } from "../types";
+import { mapCheckoutError } from "../utils/errorMessages";
+import type { CheckoutFormData, FulfillmentType, PaymentMethod, EligiblePromotion, Governorate, PaymentGatewayOption } from "../types";
 import { addressService } from "@/features/profile/services/addressService";
 import type { Address } from "@/features/profile/types";
+import { useOnlineStatus } from "@/shared/hooks/useOnlineStatus";
 import type { CartApiCart } from "@/features/cart/types";
 import type { AppliedCoupon } from "@/features/coupons/types";
 import { ApiError } from "@/shared/lib/api";
@@ -55,7 +58,7 @@ interface CartCheckoutData {
   expired: boolean;
 }
 
-function validate(form: CheckoutFormData, vt: (key: string) => string): FieldError[] {
+function validate(form: CheckoutFormData, governorateId: number | null, vt: (key: string) => string): FieldError[] {
   const errors: FieldError[] = [];
   if (!form.name.trim()) errors.push({ field: "name", message: vt("nameRequired") });
   if (!form.user_phone.trim()) errors.push({ field: "user_phone", message: vt("phoneRequired") });
@@ -65,7 +68,7 @@ function validate(form: CheckoutFormData, vt: (key: string) => string): FieldErr
     errors.push({ field: "user_email", message: vt("emailInvalid") });
   }
   if (form.fulfillment_type === "delivery") {
-    if (form.governorate_id === null) errors.push({ field: "governorate_id", message: vt("governorateRequired") });
+    if (governorateId === null) errors.push({ field: "governorate_id", message: vt("governorateRequired") });
     if (!form.city.trim()) errors.push({ field: "city", message: vt("cityRequired") });
     if (!form.country.trim()) errors.push({ field: "country", message: vt("countryRequired") });
     if (!form.street_address.trim()) errors.push({ field: "street_address", message: vt("streetRequired") });
@@ -100,6 +103,12 @@ export function CheckoutForm() {
   const [governorates, setGovernorates] = useState<Governorate[]>([]);
   const [governoratesLoading, setGovernoratesLoading] = useState(true);
   const [governoratesError, setGovernoratesError] = useState(false);
+  const [gateways, setGateways] = useState<PaymentGatewayOption[] | null>(null);
+  const [gatewaysError, setGatewaysError] = useState(false);
+  const [selectedGateway, setSelectedGateway] = useState<string | null>(null);
+  const [gatewaysRefreshKey, setGatewaysRefreshKey] = useState(0);
+  const [navStalled, setNavStalled] = useState(false);
+  const isOnline = useOnlineStatus();
 
   const [savedAddresses, setSavedAddresses] = useState<Address[]>([]);
   const [addressesLoading, setAddressesLoading] = useState(false);
@@ -109,7 +118,7 @@ export function CheckoutForm() {
   const [mapModalOpen, setMapModalOpen] = useState(false);
   const [savingLocation, setSavingLocation] = useState(false);
   const [mapSaveError, setMapSaveError] = useState<string | null>(null);
-  const [hydrated, setHydrated] = useState(false);
+  const [hydrated, setHydrated] = useState(() => useAuthStore.persist.hasHydrated());
   const [stickyTop, setStickyTop] = useState<number | null>(null);
   const browserCoords = useLocationStore((s) => s.coords);
 
@@ -118,21 +127,18 @@ export function CheckoutForm() {
     if (!header) return;
     const update = () =>
       setStickyTop(window.innerWidth >= 1024 ? header.offsetHeight + 12 : null);
-    update(); // eslint-disable-line react-hooks/set-state-in-effect
+    const rafId = requestAnimationFrame(update);
     const observer = new ResizeObserver(update);
     observer.observe(header);
     window.addEventListener("resize", update);
     return () => {
+      cancelAnimationFrame(rafId);
       observer.disconnect();
       window.removeEventListener("resize", update);
     };
   }, []);
 
-  useEffect(() => {
-    const unsub = useAuthStore.persist.onFinishHydration(() => setHydrated(true));
-    if (useAuthStore.persist.hasHydrated()) setHydrated(true); // eslint-disable-line react-hooks/set-state-in-effect
-    return unsub;
-  }, []);
+  useEffect(() => useAuthStore.persist.onFinishHydration(() => setHydrated(true)), []);
 
   const fetchedKey = useRef<string | null>(null);
 
@@ -187,58 +193,81 @@ export function CheckoutForm() {
 
   useEffect(() => {
     let cancelled = false;
-    setGovernoratesLoading(true); // eslint-disable-line react-hooks/set-state-in-effect
-    setGovernoratesError(false);
     governorateService.getAll(locale)
       .then((data) => {
-        if (!cancelled) {
-          setGovernorates(data);
-          setGovernoratesLoading(false);
-        }
+        if (cancelled) return;
+        setGovernorates(data);
+        setGovernoratesError(false);
+        setGovernoratesLoading(false);
       })
       .catch(() => {
-        if (!cancelled) {
-          setGovernoratesError(true);
-          setGovernoratesLoading(false);
-        }
+        if (cancelled) return;
+        setGovernoratesError(true);
+        setGovernoratesLoading(false);
       });
     return () => { cancelled = true; };
   }, [locale]);
 
   useEffect(() => {
+    let cancelled = false;
+    checkoutService.getPaymentGateways(locale)
+      .then((list) => {
+        if (cancelled) return;
+        const eligible = list.filter((g) => g.supports_catalog_currency);
+        setGateways(eligible);
+        setSelectedGateway((prev) =>
+          prev && eligible.some((g) => g.code === prev) ? prev : eligible[0]?.code ?? null,
+        );
+      })
+      .catch(() => {
+        if (cancelled) return;
+        setGateways([]);
+        setGatewaysError(true);
+      });
+    return () => { cancelled = true; };
+  }, [locale, gatewaysRefreshKey]);
+
+  const retryGateways = useCallback(() => {
+    setGateways(null);
+    setGatewaysError(false);
+    setGatewaysRefreshKey((key) => key + 1);
+  }, []);
+
+  const applyAddressToForm = useCallback((addr: Address) => {
+    setForm((prev) => ({
+      ...prev,
+      city: addr.address.city,
+      state: addr.address.state,
+      country: addr.address.country,
+      street_address: addr.address.street_address,
+      governorate_id: null,
+    }));
+    setErrors((prev) => prev.filter(
+      (e) => !["city", "state", "country", "street_address", "governorate_id"].includes(e.field),
+    ));
+  }, []);
+
+  useEffect(() => {
     if (!hydrated || !isAuthenticated) return;
     let cancelled = false;
-    setAddressesLoading(true); // eslint-disable-line react-hooks/set-state-in-effect
-    setAddressesError(false);
     addressService.getAll(locale)
       .then((data) => {
         if (cancelled) return;
         setSavedAddresses(data);
+        setAddressesError(false);
+        setAddressesLoading(false);
         if (data.length > 0) {
           setSelectedAddressId(data[0].id);
           applyAddressToForm(data[0]);
         }
-        setAddressesLoading(false);
       })
       .catch(() => {
-        if (!cancelled) {
-          setAddressesLoading(false);
-          setAddressesError(true);
-        }
+        if (cancelled) return;
+        setAddressesError(true);
+        setAddressesLoading(false);
       });
     return () => { cancelled = true; };
-  }, [locale, hydrated, isAuthenticated]);
-
-  useEffect(() => {
-    if (governoratesLoading || governorates.length === 0) return;
-    if (form.governorate_id !== null || !selectedAddressId) return;
-    const addr = savedAddresses.find((a) => a.id === selectedAddressId);
-    if (!addr) return;
-    const matched = matchGovernorate(addr.address.city, addr.address.state);
-    if (matched) {
-      setForm((prev) => (prev.governorate_id === null ? { ...prev, governorate_id: matched.id } : prev));
-    }
-  }, [governorates, governoratesLoading, selectedAddressId, savedAddresses]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [locale, hydrated, isAuthenticated, applyAddressToForm]);
 
   const handleRetryAddresses = () => {
     setAddressesError(false);
@@ -272,26 +301,6 @@ export function CheckoutForm() {
       });
   };
 
-  const matchGovernorate = (city: string, state: string) =>
-    matchGovernorateByName(city, state, governorates);
-
-  const applyAddressToForm = (addr: Address) => {
-    setForm((prev) => {
-      const matched = matchGovernorate(addr.address.city, addr.address.state);
-      return {
-        ...prev,
-        city: addr.address.city,
-        state: addr.address.state,
-        country: addr.address.country,
-        street_address: addr.address.street_address,
-        ...(matched ? { governorate_id: matched.id } : {}),
-      };
-    });
-    setErrors((prev) => prev.filter(
-      (e) => !["city", "state", "country", "street_address", "governorate_id"].includes(e.field),
-    ));
-  };
-
   const handleAddressSelect = (id: number | null) => {
     setSelectedAddressId(id);
     if (id === null) {
@@ -319,7 +328,7 @@ export function CheckoutForm() {
     }));
     setErrors((prev) => prev.filter((e) => !["city", "state", "country", "street_address"].includes(e.field)));
 
-    const matched = matchGovernorate(picked.city, picked.state);
+    const matched = matchGovernorateByName(picked.city, picked.state, governorates);
     if (matched) {
       setForm((prev) => ({ ...prev, governorate_id: matched.id }));
       setErrors((prev) => prev.filter((e) => e.field !== "governorate_id"));
@@ -435,9 +444,17 @@ export function CheckoutForm() {
     }).catch(() => {});
   }, [locale]);
 
+  const autoGovernorateId = useMemo<number | null>(() => {
+    if (form.governorate_id !== null) return null;
+    if (governoratesLoading || governorates.length === 0 || !selectedAddressId) return null;
+    const addr = savedAddresses.find((a) => a.id === selectedAddressId);
+    if (!addr) return null;
+    return matchGovernorateByName(addr.address.city, addr.address.state, governorates)?.id ?? null;
+  }, [form.governorate_id, governorates, governoratesLoading, selectedAddressId, savedAddresses]);
+  const selectedGovernorateId = form.governorate_id ?? autoGovernorateId;
   const selectedGovernorate = useMemo(
-    () => governorates.find((g) => g.id === form.governorate_id) ?? null,
-    [governorates, form.governorate_id],
+    () => governorates.find((g) => g.id === selectedGovernorateId) ?? null,
+    [governorates, selectedGovernorateId],
   );
   const selectedCurrencyRate = useCurrencyStore(
     (s) => s.byCode[s.selectedCode]?.effectiveRate ?? null,
@@ -457,13 +474,18 @@ export function CheckoutForm() {
     e.preventDefault();
     setApiError(null);
 
-    const validationErrors = validate(form, (key) => t(`validation.${key}`));
+    const validationErrors = validate(form, selectedGovernorateId, (key) => t(`validation.${key}`));
     if (validationErrors.length > 0) {
       setErrors(validationErrors);
       setApiError(t("fixRequiredFields"));
       const firstEl = document.querySelector(`[name="${validationErrors[0].field}"]`);
       firstEl?.scrollIntoView({ behavior: "smooth", block: "center" });
       (firstEl as HTMLElement)?.focus();
+      return;
+    }
+
+    if (form.payment_method === "online" && !selectedGateway) {
+      setApiError(gatewaysError ? t("paymentGatewaysError") : t("onlineUnavailable"));
       return;
     }
 
@@ -480,7 +502,8 @@ export function CheckoutForm() {
           country: form.country.trim(),
         },
         notes: form.notes.trim() || undefined,
-        governorate_id: form.governorate_id!,
+        governorate_id: selectedGovernorateId!,
+        ...(selectedGateway ? { gateway: selectedGateway } : {}),
         selected_promotion_id: form.selected_promotion_id,
         selected_gift_product_id: form.selected_gift_product_id,
       };
@@ -489,22 +512,21 @@ export function CheckoutForm() {
         const result = await checkoutService.processFastCheckout(payload);
 
         if (result.url) {
+          setTimeout(() => setNavStalled(true), 10_000);
           window.location.href = result.url;
         } else {
           router.push("/payment");
         }
       } catch (err) {
-        if (err instanceof ApiError) {
-          setApiError(err.message);
-          if (Object.keys(err.fields).length > 0) {
-            const fieldErrors: FieldError[] = [];
-            for (const [field, messages] of Object.entries(err.fields)) {
-              fieldErrors.push({ field, message: messages[0] });
-            }
-            setErrors(fieldErrors);
+        if (err instanceof ApiError && Object.keys(err.fields).length > 0) {
+          const fieldErrors: FieldError[] = [];
+          for (const [field, messages] of Object.entries(err.fields)) {
+            fieldErrors.push({ field, message: messages[0] });
           }
+          setErrors(fieldErrors);
+          setApiError(t("fixRequiredFields"));
         } else {
-          setApiError(err instanceof Error ? err.message : t("errorProcessing"));
+          setApiError(mapCheckoutError(err, t));
         }
         setSubmitting(false);
       }
@@ -524,8 +546,10 @@ export function CheckoutForm() {
       notes: form.notes.trim() || undefined,
       fulfillment_type: form.fulfillment_type,
       payment_method: form.payment_method,
-      gateway: "myfatoorah",
-      governorate_id: form.fulfillment_type === "delivery" ? form.governorate_id ?? undefined : undefined,
+      ...(form.payment_method === "online" && selectedGateway
+        ? { gateway: selectedGateway }
+        : {}),
+      governorate_id: form.fulfillment_type === "delivery" ? selectedGovernorateId ?? undefined : undefined,
       selected_promotion_id: form.selected_promotion_id,
       selected_gift_product_id: form.selected_gift_product_id,
       ...(form.fulfillment_type === "pickup" && { pickup_location_id: selectedLocationId }),
@@ -535,6 +559,7 @@ export function CheckoutForm() {
       const result = await checkoutService.processCheckout(payload);
 
       if (form.payment_method === "online" && result.url) {
+        setTimeout(() => setNavStalled(true), 10_000);
         window.location.href = result.url;
       } else if (form.payment_method === "cod") {
         router.push(`/payment/success?order_id=${result.order_id}`);
@@ -545,17 +570,15 @@ export function CheckoutForm() {
         router.push(`/payment/success?order_id=${result.order_id}&transaction_id=${result.transaction_uuid}`);
       }
     } catch (err) {
-      if (err instanceof ApiError) {
-        setApiError(err.message);
-        if (Object.keys(err.fields).length > 0) {
-          const fieldErrors: FieldError[] = [];
-          for (const [field, messages] of Object.entries(err.fields)) {
-            fieldErrors.push({ field, message: messages[0] });
-          }
-          setErrors(fieldErrors);
+      if (err instanceof ApiError && Object.keys(err.fields).length > 0) {
+        const fieldErrors: FieldError[] = [];
+        for (const [field, messages] of Object.entries(err.fields)) {
+          fieldErrors.push({ field, message: messages[0] });
         }
+        setErrors(fieldErrors);
+        setApiError(t("fixRequiredFields"));
       } else {
-        setApiError(err instanceof Error ? err.message : t("errorProcessing"));
+        setApiError(mapCheckoutError(err, t));
       }
       setSubmitting(false);
     }
@@ -583,10 +606,37 @@ export function CheckoutForm() {
 
   if (submitting) {
     return (
-      <div className="flex flex-col items-center justify-center py-24 text-center">
-        <Loader2 className="mb-4 size-10 animate-spin text-primary" />
+      <div
+        role="status"
+        aria-live="polite"
+        className="flex flex-col items-center justify-center py-24 text-center"
+      >
+        <Loader2 className="mb-4 size-10 animate-spin text-primary" aria-hidden="true" />
         <h1 className="text-xl font-bold text-text-primary">{t("processing")}</h1>
         <p className="mt-2 text-sm text-text-secondary">{t("processingDesc")}</p>
+        {navStalled && (
+          <div className="mt-8 w-full max-w-sm rounded-2xl border-2 border-border bg-white p-5">
+            <p className="text-sm text-text-secondary">{t("navStalledHint")}</p>
+            <div className="mt-4 flex items-center justify-center gap-3">
+              <Link
+                href="/profile"
+                className="inline-flex items-center rounded-xl border border-border px-4 py-2 text-sm font-semibold text-text-primary transition-colors hover:bg-surface"
+              >
+                {t("checkOrders")}
+              </Link>
+              <button
+                type="button"
+                onClick={() => {
+                  setNavStalled(false);
+                  setSubmitting(false);
+                }}
+                className="inline-flex items-center rounded-xl bg-primary px-4 py-2 text-sm font-semibold text-white transition-colors hover:opacity-90"
+              >
+                {t("retry")}
+              </button>
+            </div>
+          </div>
+        )}
       </div>
     );
   }
@@ -600,8 +650,21 @@ export function CheckoutForm() {
 
   return (
     <form onSubmit={handleSubmit}>
+      {!isOnline && (
+        <div
+          role="alert"
+          className="mb-6 flex items-center gap-2 rounded-xl border-2 border-amber-300 bg-amber-50 p-4 text-sm font-medium text-amber-800"
+        >
+          <WifiOff className="size-4 shrink-0" aria-hidden="true" />
+          {t("offlineBanner")}
+        </div>
+      )}
       {apiError && (
-        <div className="mb-6 rounded-xl border-2 border-red-200 bg-red-50 p-4 text-sm text-red-700">
+        <div
+          role="alert"
+          aria-live="polite"
+          className="mb-6 rounded-xl border-2 border-red-200 bg-red-50 p-4 text-sm text-red-700"
+        >
           {apiError}
         </div>
       )}
@@ -744,7 +807,7 @@ export function CheckoutForm() {
                         <select
                           name="governorate_id"
                           className={fieldError("governorate_id") ? errorClass : inputClass}
-                          value={form.governorate_id ?? ""}
+                          value={selectedGovernorateId ?? ""}
                           onChange={handleGovernorateChange}
                         >
                           <option value="">{t("governoratePlaceholder")}</option>
@@ -805,7 +868,8 @@ export function CheckoutForm() {
                   {t("paymentMethod")}
                 </h2>
               </div>
-              <div className="space-y-2">
+              <fieldset className="space-y-2">
+                <legend className="sr-only">{t("paymentMethod")}</legend>
                 {((form.fulfillment_type === "delivery"
                   ? ["online", "cod"]
                   : ["online", "pay_at_cashier"]) as PaymentMethod[]).map((method) => (
@@ -830,7 +894,59 @@ export function CheckoutForm() {
                     </div>
                   </label>
                 ))}
-              </div>
+              </fieldset>
+              {form.payment_method === "online" && (
+                <div className="border-t border-border pt-3">
+                  {gateways === null && !gatewaysError && (
+                    <div className="flex items-center justify-center gap-2 py-2 text-sm text-text-secondary">
+                      <Loader2 className="size-4 animate-spin" />
+                      {t("loadingPaymentGateways")}
+                    </div>
+                  )}
+                  {gatewaysError && (
+                    <div className="flex items-center justify-between gap-2 rounded-xl bg-error/5 px-3 py-2 text-sm text-error">
+                      <span>{t("paymentGatewaysError")}</span>
+                      <button
+                        type="button"
+                        onClick={retryGateways}
+                        className="font-semibold underline"
+                      >
+                        {t("retry")}
+                      </button>
+                    </div>
+                  )}
+                  {gateways !== null && !gatewaysError && gateways.length === 0 && (
+                    <p className="py-1 text-sm text-text-secondary">{t("onlineUnavailable")}</p>
+                  )}
+                  {gateways !== null && !gatewaysError && gateways.length > 0 && (
+                    <>
+                      <p className="text-sm font-semibold text-text-primary">{t("paymentGatewayLabel")}</p>
+                      <fieldset className="mt-2 space-y-2">
+                        <legend className="sr-only">{t("paymentGatewayLabel")}</legend>
+                        {gateways.map((gateway) => (
+                          <label
+                            key={gateway.code}
+                            className={`flex items-center gap-3 rounded-xl border p-3 cursor-pointer transition-colors ${
+                              selectedGateway === gateway.code
+                                ? "border-primary bg-primary/5"
+                                : "border-border hover:border-primary/50"
+                            }`}
+                          >
+                            <input
+                              type="radio"
+                              name="gateway"
+                              checked={selectedGateway === gateway.code}
+                              onChange={() => setSelectedGateway(gateway.code)}
+                              className={radioClass}
+                            />
+                            <span className="text-sm font-medium text-text-primary">{gateway.display_name}</span>
+                          </label>
+                        ))}
+                      </fieldset>
+                    </>
+                  )}
+                </div>
+              )}
             </div>
           )}
 
@@ -871,7 +987,9 @@ export function CheckoutForm() {
 
             <button
               type="submit"
-              className="flex w-full items-center justify-center gap-2 rounded-xl bg-primary py-3.5 text-sm font-bold text-white transition-all hover:opacity-90"
+              disabled={!isOnline}
+              aria-busy={submitting}
+              className="flex w-full items-center justify-center gap-2 rounded-xl bg-primary py-3.5 text-sm font-bold text-white transition-all hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
             >
               <CreditCard className="size-4" />
               {isFast
