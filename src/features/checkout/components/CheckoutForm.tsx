@@ -1,8 +1,9 @@
 "use client";
 import { useEffect, useMemo, useRef, useState, useCallback } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import Link from "next/link";
 import { useLocale, useTranslations } from "next-intl";
-import { Loader2, CreditCard, MapPin, Store, Truck } from "lucide-react";
+import { Loader2, CreditCard, MapPin, Store, Truck, WifiOff } from "lucide-react";
 import { useShallow } from "zustand/react/shallow";
 import { useAuthStore } from "@/features/auth";
 import { useCurrencyStore } from "@/features/currencies";
@@ -18,7 +19,8 @@ import { PromotionsPanel } from "./PromotionsPanel";
 import { OrderSummary } from "./OrderSummary";
 import { CheckoutFormSkeleton } from "./CheckoutFormSkeleton";
 import { resolveShippingQuote } from "../utils/shippingFee";
-import type { CheckoutFormData, FulfillmentType, PaymentMethod, EligiblePromotion, Governorate } from "../types";
+import { mapCheckoutError } from "../utils/errorMessages";
+import type { CheckoutFormData, FulfillmentType, PaymentMethod, EligiblePromotion, Governorate, PaymentGatewayOption } from "../types";
 import { addressService } from "@/features/profile/services/addressService";
 import type { Address } from "@/features/profile/types";
 import type { CartApiCart } from "@/features/cart/types";
@@ -100,6 +102,11 @@ export function CheckoutForm() {
   const [governorates, setGovernorates] = useState<Governorate[]>([]);
   const [governoratesLoading, setGovernoratesLoading] = useState(true);
   const [governoratesError, setGovernoratesError] = useState(false);
+  const [gateways, setGateways] = useState<PaymentGatewayOption[] | null>(null);
+  const [gatewaysError, setGatewaysError] = useState(false);
+  const [selectedGateway, setSelectedGateway] = useState<string | null>(null);
+  const [isOnline, setIsOnline] = useState(true);
+  const [navStalled, setNavStalled] = useState(false);
 
   const [savedAddresses, setSavedAddresses] = useState<Address[]>([]);
   const [addressesLoading, setAddressesLoading] = useState(false);
@@ -204,6 +211,39 @@ export function CheckoutForm() {
       });
     return () => { cancelled = true; };
   }, [locale]);
+
+  const loadGateways = useCallback(() => {
+    setGateways(null);
+    setGatewaysError(false);
+    checkoutService.getPaymentGateways(locale)
+      .then((list) => {
+        const eligible = list.filter((g) => g.supports_catalog_currency);
+        setGateways(eligible);
+        setSelectedGateway((prev) =>
+          prev && eligible.some((g) => g.code === prev) ? prev : eligible[0]?.code ?? null,
+        );
+      })
+      .catch(() => {
+        setGateways([]);
+        setGatewaysError(true);
+      });
+  }, [locale]);
+
+  useEffect(() => {
+    loadGateways(); // eslint-disable-line react-hooks/set-state-in-effect
+  }, [loadGateways]);
+
+  useEffect(() => {
+    setIsOnline(navigator.onLine); // eslint-disable-line react-hooks/set-state-in-effect
+    const handleOffline = () => setIsOnline(false);
+    const handleOnline = () => setIsOnline(true);
+    window.addEventListener("offline", handleOffline);
+    window.addEventListener("online", handleOnline);
+    return () => {
+      window.removeEventListener("offline", handleOffline);
+      window.removeEventListener("online", handleOnline);
+    };
+  }, []);
 
   useEffect(() => {
     if (!hydrated || !isAuthenticated) return;
@@ -467,6 +507,11 @@ export function CheckoutForm() {
       return;
     }
 
+    if (form.payment_method === "online" && !selectedGateway) {
+      setApiError(gatewaysError ? t("paymentGatewaysError") : t("onlineUnavailable"));
+      return;
+    }
+
     setSubmitting(true);
 
     if (isFast) {
@@ -481,6 +526,7 @@ export function CheckoutForm() {
         },
         notes: form.notes.trim() || undefined,
         governorate_id: form.governorate_id!,
+        ...(selectedGateway ? { gateway: selectedGateway } : {}),
         selected_promotion_id: form.selected_promotion_id,
         selected_gift_product_id: form.selected_gift_product_id,
       };
@@ -489,22 +535,21 @@ export function CheckoutForm() {
         const result = await checkoutService.processFastCheckout(payload);
 
         if (result.url) {
+          setTimeout(() => setNavStalled(true), 10_000);
           window.location.href = result.url;
         } else {
           router.push("/payment");
         }
       } catch (err) {
-        if (err instanceof ApiError) {
-          setApiError(err.message);
-          if (Object.keys(err.fields).length > 0) {
-            const fieldErrors: FieldError[] = [];
-            for (const [field, messages] of Object.entries(err.fields)) {
-              fieldErrors.push({ field, message: messages[0] });
-            }
-            setErrors(fieldErrors);
+        if (err instanceof ApiError && Object.keys(err.fields).length > 0) {
+          const fieldErrors: FieldError[] = [];
+          for (const [field, messages] of Object.entries(err.fields)) {
+            fieldErrors.push({ field, message: messages[0] });
           }
+          setErrors(fieldErrors);
+          setApiError(t("fixRequiredFields"));
         } else {
-          setApiError(err instanceof Error ? err.message : t("errorProcessing"));
+          setApiError(mapCheckoutError(err, t));
         }
         setSubmitting(false);
       }
@@ -524,7 +569,9 @@ export function CheckoutForm() {
       notes: form.notes.trim() || undefined,
       fulfillment_type: form.fulfillment_type,
       payment_method: form.payment_method,
-      gateway: "myfatoorah",
+      ...(form.payment_method === "online" && selectedGateway
+        ? { gateway: selectedGateway }
+        : {}),
       governorate_id: form.fulfillment_type === "delivery" ? form.governorate_id ?? undefined : undefined,
       selected_promotion_id: form.selected_promotion_id,
       selected_gift_product_id: form.selected_gift_product_id,
@@ -535,6 +582,7 @@ export function CheckoutForm() {
       const result = await checkoutService.processCheckout(payload);
 
       if (form.payment_method === "online" && result.url) {
+        setTimeout(() => setNavStalled(true), 10_000);
         window.location.href = result.url;
       } else if (form.payment_method === "cod") {
         router.push(`/payment/success?order_id=${result.order_id}`);
@@ -545,17 +593,15 @@ export function CheckoutForm() {
         router.push(`/payment/success?order_id=${result.order_id}&transaction_id=${result.transaction_uuid}`);
       }
     } catch (err) {
-      if (err instanceof ApiError) {
-        setApiError(err.message);
-        if (Object.keys(err.fields).length > 0) {
-          const fieldErrors: FieldError[] = [];
-          for (const [field, messages] of Object.entries(err.fields)) {
-            fieldErrors.push({ field, message: messages[0] });
-          }
-          setErrors(fieldErrors);
+      if (err instanceof ApiError && Object.keys(err.fields).length > 0) {
+        const fieldErrors: FieldError[] = [];
+        for (const [field, messages] of Object.entries(err.fields)) {
+          fieldErrors.push({ field, message: messages[0] });
         }
+        setErrors(fieldErrors);
+        setApiError(t("fixRequiredFields"));
       } else {
-        setApiError(err instanceof Error ? err.message : t("errorProcessing"));
+        setApiError(mapCheckoutError(err, t));
       }
       setSubmitting(false);
     }
@@ -583,10 +629,37 @@ export function CheckoutForm() {
 
   if (submitting) {
     return (
-      <div className="flex flex-col items-center justify-center py-24 text-center">
-        <Loader2 className="mb-4 size-10 animate-spin text-primary" />
+      <div
+        role="status"
+        aria-live="polite"
+        className="flex flex-col items-center justify-center py-24 text-center"
+      >
+        <Loader2 className="mb-4 size-10 animate-spin text-primary" aria-hidden="true" />
         <h1 className="text-xl font-bold text-text-primary">{t("processing")}</h1>
         <p className="mt-2 text-sm text-text-secondary">{t("processingDesc")}</p>
+        {navStalled && (
+          <div className="mt-8 w-full max-w-sm rounded-2xl border-2 border-border bg-white p-5">
+            <p className="text-sm text-text-secondary">{t("navStalledHint")}</p>
+            <div className="mt-4 flex items-center justify-center gap-3">
+              <Link
+                href="/profile"
+                className="inline-flex items-center rounded-xl border border-border px-4 py-2 text-sm font-semibold text-text-primary transition-colors hover:bg-surface"
+              >
+                {t("checkOrders")}
+              </Link>
+              <button
+                type="button"
+                onClick={() => {
+                  setNavStalled(false);
+                  setSubmitting(false);
+                }}
+                className="inline-flex items-center rounded-xl bg-primary px-4 py-2 text-sm font-semibold text-white transition-colors hover:opacity-90"
+              >
+                {t("retry")}
+              </button>
+            </div>
+          </div>
+        )}
       </div>
     );
   }
@@ -600,8 +673,21 @@ export function CheckoutForm() {
 
   return (
     <form onSubmit={handleSubmit}>
+      {!isOnline && (
+        <div
+          role="alert"
+          className="mb-6 flex items-center gap-2 rounded-xl border-2 border-amber-300 bg-amber-50 p-4 text-sm font-medium text-amber-800"
+        >
+          <WifiOff className="size-4 shrink-0" aria-hidden="true" />
+          {t("offlineBanner")}
+        </div>
+      )}
       {apiError && (
-        <div className="mb-6 rounded-xl border-2 border-red-200 bg-red-50 p-4 text-sm text-red-700">
+        <div
+          role="alert"
+          aria-live="polite"
+          className="mb-6 rounded-xl border-2 border-red-200 bg-red-50 p-4 text-sm text-red-700"
+        >
           {apiError}
         </div>
       )}
@@ -805,7 +891,8 @@ export function CheckoutForm() {
                   {t("paymentMethod")}
                 </h2>
               </div>
-              <div className="space-y-2">
+              <fieldset className="space-y-2">
+                <legend className="sr-only">{t("paymentMethod")}</legend>
                 {((form.fulfillment_type === "delivery"
                   ? ["online", "cod"]
                   : ["online", "pay_at_cashier"]) as PaymentMethod[]).map((method) => (
@@ -830,7 +917,59 @@ export function CheckoutForm() {
                     </div>
                   </label>
                 ))}
-              </div>
+              </fieldset>
+              {form.payment_method === "online" && (
+                <div className="border-t border-border pt-3">
+                  {gateways === null && !gatewaysError && (
+                    <div className="flex items-center justify-center gap-2 py-2 text-sm text-text-secondary">
+                      <Loader2 className="size-4 animate-spin" />
+                      {t("loadingPaymentGateways")}
+                    </div>
+                  )}
+                  {gatewaysError && (
+                    <div className="flex items-center justify-between gap-2 rounded-xl bg-error/5 px-3 py-2 text-sm text-error">
+                      <span>{t("paymentGatewaysError")}</span>
+                      <button
+                        type="button"
+                        onClick={loadGateways}
+                        className="font-semibold underline"
+                      >
+                        {t("retry")}
+                      </button>
+                    </div>
+                  )}
+                  {gateways !== null && !gatewaysError && gateways.length === 0 && (
+                    <p className="py-1 text-sm text-text-secondary">{t("onlineUnavailable")}</p>
+                  )}
+                  {gateways !== null && !gatewaysError && gateways.length > 0 && (
+                    <>
+                      <p className="text-sm font-semibold text-text-primary">{t("paymentGatewayLabel")}</p>
+                      <fieldset className="mt-2 space-y-2">
+                        <legend className="sr-only">{t("paymentGatewayLabel")}</legend>
+                        {gateways.map((gateway) => (
+                          <label
+                            key={gateway.code}
+                            className={`flex items-center gap-3 rounded-xl border p-3 cursor-pointer transition-colors ${
+                              selectedGateway === gateway.code
+                                ? "border-primary bg-primary/5"
+                                : "border-border hover:border-primary/50"
+                            }`}
+                          >
+                            <input
+                              type="radio"
+                              name="gateway"
+                              checked={selectedGateway === gateway.code}
+                              onChange={() => setSelectedGateway(gateway.code)}
+                              className={radioClass}
+                            />
+                            <span className="text-sm font-medium text-text-primary">{gateway.display_name}</span>
+                          </label>
+                        ))}
+                      </fieldset>
+                    </>
+                  )}
+                </div>
+              )}
             </div>
           )}
 
@@ -871,7 +1010,9 @@ export function CheckoutForm() {
 
             <button
               type="submit"
-              className="flex w-full items-center justify-center gap-2 rounded-xl bg-primary py-3.5 text-sm font-bold text-white transition-all hover:opacity-90"
+              disabled={!isOnline}
+              aria-busy={submitting}
+              className="flex w-full items-center justify-center gap-2 rounded-xl bg-primary py-3.5 text-sm font-bold text-white transition-all hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
             >
               <CreditCard className="size-4" />
               {isFast

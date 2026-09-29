@@ -5,6 +5,7 @@ export type {
   Address,
   FulfillmentType,
   PaymentMethod,
+  PaymentGatewayOption,
   EligiblePromotion,
   Governorate,
   CheckoutRequest,
