@@ -116,7 +116,9 @@ export function CheckoutForm() {
   const [mapModalOpen, setMapModalOpen] = useState(false);
   const [savingLocation, setSavingLocation] = useState(false);
   const [mapSaveError, setMapSaveError] = useState<string | null>(null);
-  const [hydrated, setHydrated] = useState(() => useAuthStore.persist.hasHydrated());
+  const [hydrated, setHydrated] = useState(() =>
+    typeof window !== "undefined" ? useAuthStore.persist.hasHydrated() : false,
+  );
   const [stickyTop, setStickyTop] = useState<number | null>(null);
   const browserCoords = useLocationStore((s) => s.coords);
 
