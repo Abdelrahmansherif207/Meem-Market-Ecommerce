@@ -166,6 +166,24 @@ button {
   }
 }
 
+@keyframes skeleton-shimmer {
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+@keyframes skeleton-shimmer-rtl {
+  100% {
+    transform: translateX(-100%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-slot="skeleton"]::before {
+    animation: none;
+  }
+}
+
 @keyframes auth-fall-down {
   0% {
     transform: translate3d(-50%, -130%, 0);

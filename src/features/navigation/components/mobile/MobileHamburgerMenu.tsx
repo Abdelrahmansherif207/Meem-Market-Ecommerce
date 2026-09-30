@@ -5,6 +5,7 @@ import { Menu, X, ChevronDown } from "lucide-react";
 import Link from "next/link";
 import { useLocale } from "next-intl";
 import { cn } from "@/shared/utils/cn";
+import Skeleton from "@/components/ui/Skeleton";
 import type { CategoryMenuItem } from "@/features/categories/types";
 import { categoryMenuWithCache } from "@/features/categories/services/categoryMenuCache";
 
@@ -139,7 +140,7 @@ export default function MobileHamburgerMenu() {
               {loading ? (
                 <div className="space-y-3 py-4">
                   {Array.from({ length: 6 }).map((_, i) => (
-                    <div key={i} className="h-4 w-3/4 animate-pulse bg-surface rounded" />
+                    <Skeleton key={i} className="h-4 w-3/4" />
                   ))}
                 </div>
               ) : categories.length > 0 ? (

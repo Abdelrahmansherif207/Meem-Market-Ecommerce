@@ -10,6 +10,7 @@ import {
   RefreshCw,
 } from "lucide-react";
 import { cn } from "@/shared/utils/cn";
+import Skeleton from "@/components/ui/Skeleton";
 import { Button } from "@/components/ui/Button";
 import { couponService } from "../services/couponService";
 import { useMyCoupons } from "../hooks/useMyCoupons";
@@ -69,8 +70,8 @@ export function MyClaimsList({ data, appliedCouponCode, onApplied }: MyClaimsLis
           {t("claimsTitle")}
         </div>
         <div className="space-y-2" aria-busy="true">
-          <div className="h-16 animate-pulse rounded-xl bg-surface" />
-          <div className="h-16 w-3/4 animate-pulse rounded-xl bg-surface" />
+          <Skeleton className="h-16 rounded-xl" />
+          <Skeleton className="h-16 w-3/4 rounded-xl" />
         </div>
       </div>
     );

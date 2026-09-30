@@ -5,6 +5,7 @@ import { MapPin, Phone, Mail, Clock, ExternalLink, ChevronDown, ChevronUp } from
 import { pickupLocationService } from "../services/pickupLocationService";
 import { usePickupLocationStore } from "../store/usePickupLocationStore";
 import type { PickupLocation } from "../types";
+import Skeleton from "@/components/ui/Skeleton";
 
 export function PickupLocationSelector() {
   const t = useTranslations("pickupLocation");
@@ -51,9 +52,9 @@ export function PickupLocationSelector() {
         </div>
         <div className="space-y-3">
           {[1, 2, 3].map((i) => (
-            <div key={i} className="animate-pulse rounded-xl border border-border p-4 space-y-2">
-              <div className="h-4 w-3/4 rounded bg-border" />
-              <div className="h-3 w-1/2 rounded bg-border" />
+            <div key={i} className="rounded-xl border border-border p-4 space-y-2">
+              <Skeleton className="h-4 w-3/4" />
+              <Skeleton className="h-3 w-1/2" />
             </div>
           ))}
         </div>

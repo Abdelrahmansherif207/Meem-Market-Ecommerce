@@ -683,7 +683,25 @@
       "loadError": "Couldn't load additional order details. Continuing with standard checkout.",
       "optionLoading": "Loading options…",
       "noOptions": "No options available"
-    }
+    },
+    "steps": {
+      "contact": "Contact",
+      "delivery": "Delivery",
+      "payment": "Payment",
+      "review": "Review"
+    },
+    "stepOf": "Step {current} of {total}",
+    "actions": {
+      "back": "Back",
+      "continue": "Continue"
+    },
+    "review": {
+      "title": "Review Your Order",
+      "noPromotion": "None",
+      "noNotes": "None",
+      "summaryHint": "Your order total is always visible here."
+    },
+    "promotionsError": "Couldn't load available promotions."
   },
   "siteReviews": {
     "metaTitle": "Customer Reviews",

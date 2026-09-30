@@ -12,6 +12,7 @@ import { useClaimableNotifications } from "../hooks/useClaimableNotifications";
 import { getNotificationConfig } from "../constants";
 import { NotificationItemRow } from "./NotificationItemRow";
 import { cn } from "@/shared/utils/cn";
+import Skeleton from "@/components/ui/Skeleton";
 import type { NotificationItem, RawNotificationListResponse } from "../types";
 
 export function NotificationsPage() {
@@ -134,9 +135,9 @@ export function NotificationsPage() {
         {initialLoading ? (
           <div className="flex flex-col gap-3">
             {Array.from({ length: 4 }).map((_, i) => (
-              <div
+              <Skeleton
                 key={i}
-                className="h-[88px] animate-pulse rounded-2xl border border-border bg-surface"
+                className="h-[88px] rounded-2xl border border-border"
               />
             ))}
           </div>

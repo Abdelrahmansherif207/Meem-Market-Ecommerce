@@ -1,39 +1,41 @@
+import Skeleton from "@/components/ui/Skeleton";
+
 export function OrderDetailSkeleton() {
   return (
-    <div className="space-y-6 animate-pulse">
+    <div className="space-y-6">
       <div className="flex justify-between">
-        <div className="h-6 w-40 rounded bg-gray-200" />
-        <div className="h-6 w-24 rounded-full bg-gray-200" />
+        <Skeleton className="h-6 w-40" />
+        <Skeleton className="h-6 w-24 rounded-full" />
       </div>
 
       <div className="grid grid-cols-2 gap-4">
         <div className="space-y-2">
-          <div className="h-3 w-20 rounded bg-gray-200" />
-          <div className="h-4 w-36 rounded bg-gray-200" />
+          <Skeleton className="h-3 w-20" />
+          <Skeleton className="h-4 w-36" />
         </div>
         <div className="space-y-2">
-          <div className="h-3 w-20 rounded bg-gray-200" />
-          <div className="h-4 w-36 rounded bg-gray-200" />
+          <Skeleton className="h-3 w-20" />
+          <Skeleton className="h-4 w-36" />
         </div>
       </div>
 
       <div className="space-y-3">
         {[1, 2, 3].map((i) => (
           <div key={i} className="flex items-center gap-3">
-            <div className="h-14 w-14 rounded-lg bg-gray-200" />
+            <Skeleton className="h-14 w-14 rounded-lg" />
             <div className="flex-1 space-y-2">
-              <div className="h-3 w-32 rounded bg-gray-200" />
-              <div className="h-3 w-20 rounded bg-gray-200" />
+              <Skeleton className="h-3 w-32" />
+              <Skeleton className="h-3 w-20" />
             </div>
-            <div className="h-4 w-16 rounded bg-gray-200" />
+            <Skeleton className="h-4 w-16" />
           </div>
         ))}
       </div>
 
       <div className="space-y-2 border-t border-border pt-4">
-        <div className="h-3 w-full rounded bg-gray-200" />
-        <div className="h-3 w-3/4 rounded bg-gray-200" />
-        <div className="h-3 w-1/2 rounded bg-gray-200" />
+        <Skeleton className="h-3 w-full" />
+        <Skeleton className="h-3 w-3/4" />
+        <Skeleton className="h-3 w-1/2" />
       </div>
     </div>
   );
