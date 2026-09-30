@@ -34,6 +34,8 @@ export interface Currency {
   sort_order: number;
   is_base: boolean;
   is_catalog: boolean;
+  /** Display-currency units per 1 base-currency unit (e.g. KWD "0.221"). */
+  effective_rate?: string | number;
   created_at?: string;
   updated_at?: string;
 }

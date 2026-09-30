@@ -5,7 +5,7 @@ import { useLocale } from "next-intl";
 import { Loader2, CheckCircle, AlertCircle, XCircle } from "lucide-react";
 import { cn } from "@/shared/utils/cn";
 import { couponService } from "../services/couponService";
-import { useAuthModalStore } from "@/features/auth/store/useAuthModalStore";
+import { useAuthModalStore } from "@/features/auth";
 
 interface CouponInputProps {
   onApplied?: () => void;

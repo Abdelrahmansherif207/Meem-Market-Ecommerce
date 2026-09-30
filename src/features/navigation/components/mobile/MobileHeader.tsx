@@ -5,7 +5,7 @@ import { CurrencySwitcher } from "@/features/currencies";
 import { WishlistIcon } from "../header/WishlistIcon";
 import { NotificationBell } from "@/features/notifications";
 import { LocationDisplay } from "@/features/location";
-import { MobileAuthButton } from "@/features/auth/components/MobileAuthButton";
+import { MobileAuthButton } from "@/features/auth";
 import MobileFooterDrawer from "./MobileFooterDrawer";
 import { assembleFooterContent } from "../../services/footerService";
 

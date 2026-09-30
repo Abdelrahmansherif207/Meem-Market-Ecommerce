@@ -22,6 +22,7 @@ export async function fetchCatalogInCurrency(
   const code = normalizeCurrencyCode(currency);
   return apiFetch<unknown>(endpoint, {
     ...(lang ? { lang } : {}),
-    ...(code ? { currency: code, cache: "no-store" as RequestCache } : {}),
+    // Passing `currency` makes `apiFetch` bypass the Data Cache automatically.
+    ...(code ? { currency: code } : {}),
   });
 }

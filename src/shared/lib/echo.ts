@@ -92,13 +92,14 @@ export function getEcho(): Echo<"pusher"> {
 
   const key = process.env.NEXT_PUBLIC_PUSHER_APP_KEY;
   const cluster = process.env.NEXT_PUBLIC_PUSHER_CLUSTER;
-  const authEndpoint = `${process.env.NEXT_PUBLIC_API_URL}/broadcasting/auth`;
+  // Same-origin path proxied by Next.js: the httpOnly session cookie is sent
+  // automatically and the server-side proxy injects the Bearer token.
+  const authEndpoint = "/api/v1/broadcasting/auth";
 
   pusherLog("initializing Echo", {
     key,
     cluster,
     authEndpoint,
-    hasToken: Boolean(window.localStorage.getItem("auth_token")),
   });
 
   echo = new Echo<"pusher">({
@@ -107,11 +108,6 @@ export function getEcho(): Echo<"pusher"> {
     cluster,
     encrypted: true,
     authEndpoint,
-    auth: {
-      headers: {
-        Authorization: `Bearer ${window.localStorage.getItem("auth_token") ?? ""}`,
-      },
-    },
   });
 
   attachPusherLogging(echo);
@@ -168,7 +164,7 @@ export function subscribeToUserNotifications(
 
 export function unsubscribeUserNotifications(userId: number): void {
   if (!echo || typeof window === "undefined") return;
-  const channelName = `private.users.${userId}`;
+  const channelName = `private-users.${userId}`;
   pusherLog(`unsubscribing from channel "${channelName}"`);
   echo.leaveChannel(channelName);
   if (activeChannelId === channelName) {

@@ -1,10 +1,11 @@
 "use client";
 
-import { useState } from "react";
-import { useTranslations } from "next-intl";
+import { useEffect, useState } from "react";
+import { useLocale, useTranslations } from "next-intl";
 import { X, Loader2, MapPin } from "lucide-react";
 import { MapPickerModal, useLocationStore } from "@/features/location";
 import type { PickedAddress } from "@/features/location";
+import { governorateService, type Governorate } from "@/features/checkout";
 import type { Address, CreateAddressPayload } from "../types";
 
 interface AddressFormModalProps {
@@ -17,6 +18,7 @@ interface AddressFormModalProps {
 
 export function AddressFormModal({ open, onClose, onSubmit, editingAddress, customerId }: AddressFormModalProps) {
   const t = useTranslations("profile.address.form");
+  const locale = useLocale();
   const [form, setForm] = useState(() => {
     if (editingAddress) {
       return {
@@ -26,9 +28,10 @@ export function AddressFormModal({ open, onClose, onSubmit, editingAddress, cust
         state: editingAddress.address.state,
         country: editingAddress.address.country,
         street_address: editingAddress.address.street_address,
+        governorate_id: editingAddress.governorate_id ?? null as number | null,
       };
     }
-    return { title: "", zip: "", city: "", state: "", country: "", street_address: "" };
+    return { title: "", zip: "", city: "", state: "", country: "", street_address: "", governorate_id: null as number | null };
   });
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -36,7 +39,32 @@ export function AddressFormModal({ open, onClose, onSubmit, editingAddress, cust
   const [location, setLocation] = useState<{ latitude: number; longitude: number } | null>(
     editingAddress?.location ?? null,
   );
+  const [governorates, setGovernorates] = useState<Governorate[]>([]);
+  const [governoratesLoading, setGovernoratesLoading] = useState(true);
+  const [governoratesError, setGovernoratesError] = useState(false);
   const browserCoords = useLocationStore((s) => s.coords);
+
+  useEffect(() => {
+    if (!open) return;
+    let cancelled = false;
+    setGovernoratesLoading(true); // eslint-disable-line react-hooks/set-state-in-effect
+    setGovernoratesError(false);
+    governorateService
+      .getAll(locale)
+      .then((data) => {
+        if (cancelled) return;
+        setGovernorates(data);
+        setGovernoratesLoading(false);
+      })
+      .catch(() => {
+        if (cancelled) return;
+        setGovernoratesError(true);
+        setGovernoratesLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [open, locale]);
 
   if (!open) return null;
 
@@ -76,9 +104,20 @@ export function AddressFormModal({ open, onClose, onSubmit, editingAddress, cust
     setError(null);
   };
 
+  const handleGovernorateChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const val = e.target.value ? Number(e.target.value) : null;
+    setForm((prev) => ({ ...prev, governorate_id: val }));
+    setError(null);
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
+
+    if (!form.governorate_id) {
+      setError(t("governorateRequired"));
+      return;
+    }
 
     if (!form.title || !form.city || !form.state || !form.country || !form.street_address) {
       setError(t("required"));
@@ -97,6 +136,7 @@ export function AddressFormModal({ open, onClose, onSubmit, editingAddress, cust
           country: form.country,
           street_address: form.street_address,
         },
+        governorate_id: form.governorate_id,
         ...(location ? { location } : {}),
       });
       onClose();
@@ -133,6 +173,54 @@ export function AddressFormModal({ open, onClose, onSubmit, editingAddress, cust
           <div className="space-y-1.5">
             <label className={labelClass}>{t("title")}</label>
             <input className={inputClass} value={form.title} onChange={set("title")} placeholder={t("titlePlaceholder")} />
+          </div>
+
+          <div className="space-y-1.5">
+            <label className={labelClass}>{t("governorate")}</label>
+            {governoratesLoading ? (
+              <select disabled className={inputClass}>
+                <option>{t("governorateLoading")}</option>
+              </select>
+            ) : governoratesError ? (
+              <div className="space-y-2">
+                <p className="text-xs text-red-700">{t("governorateError")}</p>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setGovernoratesError(false);
+                    setGovernoratesLoading(true);
+                    governorateService
+                      .getAll(locale)
+                      .then((data) => {
+                        setGovernorates(data);
+                        setGovernoratesLoading(false);
+                      })
+                      .catch(() => {
+                        setGovernoratesError(true);
+                        setGovernoratesLoading(false);
+                      });
+                  }}
+                  className="text-xs font-semibold text-primary underline underline-offset-2"
+                >
+                  {t("governorateRetry")}
+                </button>
+              </div>
+            ) : governorates.length === 0 ? (
+              <p className="text-xs text-text-secondary">{t("governorateEmpty")}</p>
+            ) : (
+              <select
+                className={inputClass}
+                value={form.governorate_id ?? ""}
+                onChange={handleGovernorateChange}
+              >
+                <option value="">{t("governoratePlaceholder")}</option>
+                {governorates.map((g) => (
+                  <option key={g.id} value={g.id}>
+                    {g.name}
+                  </option>
+                ))}
+              </select>
+            )}
           </div>
 
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">

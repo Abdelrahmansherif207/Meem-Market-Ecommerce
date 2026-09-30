@@ -28,7 +28,7 @@ function AuthModalContent({ close, logo }: { close: () => void; logo?: string | 
   const t = useTranslations("auth");
   const [method, setMethod] = useState<ContactMethod>("phone");
   const [state, formAction, pending] = useActionState(loginAction, null);
-  const setAuthData = useAuthStore((s) => s.setAuthData);
+  const setSession = useAuthStore((s) => s.setSession);
   const router = useRouter();
   const overlayRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -57,10 +57,16 @@ function AuthModalContent({ close, logo }: { close: () => void; logo?: string | 
 
   /* Handle login success */
   useEffect(() => {
-    if (state?.success && state.data && setAuthData(state.data)) {
+    const data = state?.data;
+    if (
+      state?.success &&
+      data &&
+      !("token" in data) &&
+      setSession(data)
+    ) {
       close();
     }
-  }, [state, setAuthData, close]);
+  }, [state, setSession, close]);
 
 function handleOverlayClick(e: React.MouseEvent<HTMLDivElement>) {
     if (e.target === overlayRef.current) close();

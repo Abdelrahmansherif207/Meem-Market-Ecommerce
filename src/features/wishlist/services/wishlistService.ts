@@ -1,4 +1,5 @@
 import { apiFetch, ApiError } from "@/shared/lib/api";
+import { CACHE_TTL } from "@/shared/constants/cache";
 import type { ApiResponse } from "@/shared/types";
 import type { WishlistResponse, WishlistItem, WishlistProduct } from "../types";
 
@@ -108,7 +109,7 @@ export const wishlistService = {
   getWishlists: async (lang?: string, page = 1): Promise<WishlistResponse> => {
     const response = await apiFetch<ApiResponse<WishlistResponse>>(
       `/wishlists?page=${page}`,
-      { lang, next: { revalidate: 0 } },
+      { lang, next: { revalidate: CACHE_TTL.NONE } },
     );
     return normalizeResponse(response);
   },
@@ -117,7 +118,7 @@ export const wishlistService = {
   getInWishlist: async (productId: number, lang?: string): Promise<boolean> => {
     const response = await apiFetch<ApiResponse<unknown>>(
       `/wishlists/in_wishlist/${productId}`,
-      { lang, next: { revalidate: 0 } },
+      { lang, next: { revalidate: CACHE_TTL.NONE } },
     );
     const data = response?.data as unknown;
     if (typeof data === "boolean") return data;

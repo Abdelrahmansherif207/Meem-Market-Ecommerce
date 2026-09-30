@@ -116,9 +116,9 @@ export async function getCategoryPageData(
       headers: {
         "lang": locale,
       },
-      // Currency-converted prices are per-guest: never share them through
-      // the Data Cache (fetch cache key does not vary by header).
-      ...(currency ? { cache: "no-store" as RequestCache, currency } : { next: { revalidate: 60 } }),
+      // Price-bearing: always fresh, never Data-Cached.
+      cache: "no-store",
+      currency,
     },
   );
 
@@ -167,8 +167,9 @@ export async function getSearchPageData(
     `/general/products?${params.toString()}`,
     {
       headers: { "lang": locale },
-      // Per-guest converted prices must bypass the shared Data Cache.
-      ...(currency ? { cache: "no-store" as RequestCache, currency } : { next: { revalidate: 60 } }),
+      // Price-bearing: always fresh, never Data-Cached.
+      cache: "no-store",
+      currency,
     },
   );
 

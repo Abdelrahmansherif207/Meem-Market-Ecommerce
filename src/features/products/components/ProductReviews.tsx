@@ -5,7 +5,7 @@ import { useTranslations } from "next-intl";
 import { Star, User, Pencil } from "lucide-react";
 import Image from "next/image";
 import { cn } from "@/shared/utils/cn";
-import { useAuthStore } from "@/features/auth/store/useAuthStore";
+import { useAuthStore } from "@/features/auth";
 import EmptyState from "@/components/ui/EmptyState";
 import type { ProductReview } from "../types";
 import { getAverageRating } from "../utils";

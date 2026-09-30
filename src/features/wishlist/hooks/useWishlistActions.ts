@@ -1,8 +1,7 @@
 "use client";
 import { useCallback, useEffect, useState } from "react";
 import { useLocale } from "next-intl";
-import { useAuthModalStore } from "@/features/auth/store/useAuthModalStore";
-import { useAuthStore } from "@/features/auth/store/useAuthStore";
+import { useAuthModalStore, useAuthStore } from "@/features/auth";
 import { wishlistService } from "../services/wishlistService";
 import { useWishlistStore } from "../store/useWishlistStore";
 import { useWishlistInitialState } from "./useWishlistInitialState";

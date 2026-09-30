@@ -1,4 +1,5 @@
 import Skeleton from "@/components/ui/Skeleton";
+import { PRODUCT_SLIDER_CARD_WIDTHS } from "./ProductSliderSkeleton";
 import type { SectionFrontSetting } from "../../types";
 
 interface FlashSalesSkeletonProps {
@@ -36,13 +37,13 @@ export default function FlashSalesSkeleton({ type, setting }: FlashSalesSkeleton
   return (
     <section className="w-full max-w-[1600px] mx-auto px-4 sm:px-8 lg:px-12 my-16" aria-label="Loading flash sales">
       {/* Banner Skeleton */}
-      <div className="relative w-full h-[140px] sm:h-[180px] lg:h-[220px] rounded-[24px] rounded-b-none bg-surface animate-pulse" />
+      <Skeleton className="relative w-full h-[140px] sm:h-[180px] lg:h-[220px] rounded-[24px] rounded-b-none" />
 
       {/* Carousel Skeleton */}
       <div className="-mt-3 relative">
-        <div className="flex gap-4 overflow-hidden pt-3">
-          {Array.from({ length: 6 }).map((_, i) => (
-            <div key={i} className="flex flex-col w-[248px] shrink-0 bg-white rounded-[18px] border border-border-subtle overflow-hidden">
+        <div className="flex gap-2 overflow-hidden px-6 sm:px-10 lg:px-12 pt-3">
+          {Array.from({ length: 8 }).map((_, i) => (
+            <div key={i} className={`${PRODUCT_SLIDER_CARD_WIDTHS} shrink-0 bg-white rounded-[18px] border border-border-subtle overflow-hidden`}>
               <Skeleton className="h-[260px] w-full rounded-none" />
               <div className="flex flex-col gap-2.5 p-4">
                 <Skeleton className="h-5 w-full" />

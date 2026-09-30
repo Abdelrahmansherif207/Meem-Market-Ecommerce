@@ -43,13 +43,14 @@ export default function AuthGateway({ logo }: AuthGatewayProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const redirectTo = searchParams.get("redirect") || "/";
-  const setAuthData = useAuthStore((s) => s.setAuthData);
+  const setSession = useAuthStore((s) => s.setSession);
   const socialError = useSocialLoginError();
 
   const [loginState, loginFormAction, loginPending] = useActionState(loginAction, null);
   const [registerState, registerFormAction, registerPending] = useActionState(registerAction, null);
   const [otpState, otpFormAction, otpPending] = useActionState(otpAction, null);
   const [forgotPasswordState, forgotPasswordFormAction, forgotPasswordPending] = useActionState(forgotPasswordAction, null);
+  const [resendState, resendFormAction, resendPending] = useActionState(sendOtpCodeAction, null);
 
   const isLogin = mode === "login";
   const registerHandledRef = useRef(false);
@@ -63,8 +64,8 @@ export default function AuthGateway({ logo }: AuthGatewayProps) {
     } else {
       return;
     }
-    sendOtpCodeAction(null, formData);
-  }, [otpEmail, otpPhone, otpMethod]);
+    resendFormAction(formData);
+  }, [otpEmail, otpPhone, otpMethod, resendFormAction]);
 
   const handleAskMeLater = useCallback(() => {
     router.push("/auth");
@@ -102,20 +103,24 @@ export default function AuthGateway({ logo }: AuthGatewayProps) {
   }, [registerState]);
 
   useEffect(() => {
-    if (otpState?.success && otpState.data && setAuthData(otpState.data)) {
+    if (
+      otpState?.success &&
+      otpState.data &&
+      setSession(otpState.data)
+    ) {
       router.push(redirectTo);
     }
-  }, [otpState, setAuthData, router, redirectTo]);
+  }, [otpState, setSession, router, redirectTo]);
 
   useEffect(() => {
     if (
       loginState?.success &&
       loginState.data &&
-      setAuthData(loginState.data)
+      setSession(loginState.data)
     ) {
       router.push(redirectTo);
     }
-  }, [loginState, setAuthData, router, redirectTo]);
+  }, [loginState, setSession, router, redirectTo]);
 
   function onProfileImageChange(file: File | null) {
     setProfileFileName(file?.name);
@@ -163,6 +168,13 @@ export default function AuthGateway({ logo }: AuthGatewayProps) {
             phone={otpPhone}
             otpStatus={otpStatus}
             method={otpMethod}
+            notice={
+              registerState?.success
+                ? registerState.message
+                : null
+            }
+            resendPending={resendPending}
+            resendState={resendState}
             onBack={() => setMode("login")}
             onAskMeLater={handleAskMeLater}
             onResend={handleResend}

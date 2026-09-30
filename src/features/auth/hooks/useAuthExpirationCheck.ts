@@ -1,22 +1,21 @@
 "use client";
 
 import { useEffect } from "react";
-import { useRouter } from "@/i18n/navigation";
-import { AUTH_TOKEN_STORAGE_KEY } from "@/shared/constants/storageKeys";
+import { AUTH_STORE_STORAGE_KEY } from "../store/authStoreKeys";
 import { useAuthStore } from "../store/useAuthStore";
 import {
   getSessionInvalidationTime,
+  isSessionActive,
   MAX_TIMEOUT_MS,
 } from "../utils/sessionExpiration";
 
 export function useAuthExpirationCheck() {
-  const router = useRouter();
-  const token = useAuthStore((state) => state.token);
+  const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
   const expiresAt = useAuthStore((state) => state.expiresAt);
   const clearAuth = useAuthStore((state) => state.clearAuth);
 
   useEffect(() => {
-    if (!token) return;
+    if (!isAuthenticated) return;
 
     let timeoutId: ReturnType<typeof setTimeout> | undefined;
     let invalidated = false;
@@ -25,7 +24,6 @@ export function useAuthExpirationCheck() {
       if (invalidated) return;
       invalidated = true;
       clearAuth();
-      router.replace("/");
     };
 
     const scheduleExpiration = () => {
@@ -47,7 +45,22 @@ export function useAuthExpirationCheck() {
       if (document.visibilityState === "visible") scheduleExpiration();
     };
     const handleStorage = (event: StorageEvent) => {
-      if (event.key === AUTH_TOKEN_STORAGE_KEY && event.newValue === null) {
+      if (event.key !== AUTH_STORE_STORAGE_KEY) return;
+
+      if (!event.newValue) {
+        invalidateSession();
+        return;
+      }
+
+      try {
+        const persisted = JSON.parse(event.newValue) as {
+          state?: { isAuthenticated?: boolean; expiresAt?: string | null };
+        };
+        const state = persisted.state;
+        if (!state?.isAuthenticated || !isSessionActive(state.expiresAt)) {
+          invalidateSession();
+        }
+      } catch {
         invalidateSession();
       }
     };
@@ -63,5 +76,5 @@ export function useAuthExpirationCheck() {
       window.removeEventListener("storage", handleStorage);
       document.removeEventListener("visibilitychange", handleVisibilityChange);
     };
-  }, [token, expiresAt, clearAuth, router]);
+  }, [isAuthenticated, expiresAt, clearAuth]);
 }

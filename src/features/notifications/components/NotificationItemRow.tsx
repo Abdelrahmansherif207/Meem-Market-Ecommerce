@@ -3,23 +3,29 @@
 import { CheckCheck, Trash2 } from "lucide-react";
 import { useLocale } from "next-intl";
 import { getNotificationConfig } from "../constants";
+import { isClaimableCouponNotification } from "../utils";
 import { timeAgo } from "@/shared/utils/timeAgo";
+import { ClaimCouponButton } from "@/features/coupons";
 import { cn } from "@/shared/utils/cn";
+import type { NotificationClaimControl } from "../hooks/useClaimableNotifications";
 import type { NotificationItem } from "../types";
 
 export function NotificationItemRow({
   notification,
   onRead,
   onDelete,
+  claim,
 }: {
   notification: NotificationItem;
   onRead: (n: NotificationItem) => void;
   onDelete: (n: NotificationItem) => void;
+  claim?: NotificationClaimControl | null;
 }) {
   const locale = useLocale();
   const config = getNotificationConfig(notification.type);
   const Icon = config.icon;
   const isUnread = !notification.readAt;
+  const showClaim = claim !== undefined && isClaimableCouponNotification(notification);
 
   return (
     <div
@@ -59,25 +65,37 @@ export function NotificationItemRow({
         </p>
       </div>
 
-      <div className="flex shrink-0 items-center gap-1">
-        {isUnread && (
+      <div className="flex shrink-0 items-start gap-1">
+        {showClaim && claim && (
+          <span onClick={(e) => e.stopPropagation()}>
+            <ClaimCouponButton
+              claimed={claim.claimed}
+              claiming={claim.claiming}
+              onClaim={claim.onClaim}
+              error={claim.error}
+            />
+          </span>
+        )}
+        <div className="flex shrink-0 items-center gap-1">
+          {isUnread && (
+            <button
+              type="button"
+              aria-label="Mark as read"
+              onClick={() => onRead(notification)}
+              className="flex h-8 w-8 items-center justify-center rounded-full text-text-secondary/70 transition-colors hover:bg-primary/10 hover:text-primary"
+            >
+              <CheckCheck className="h-4 w-4" />
+            </button>
+          )}
           <button
             type="button"
-            aria-label="Mark as read"
-            onClick={() => onRead(notification)}
-            className="flex h-8 w-8 items-center justify-center rounded-full text-text-secondary/70 transition-colors hover:bg-primary/10 hover:text-primary"
+            aria-label="Delete"
+            onClick={() => onDelete(notification)}
+            className="flex h-8 w-8 items-center justify-center rounded-full text-text-secondary/70 transition-colors hover:bg-error/10 hover:text-red-600"
           >
-            <CheckCheck className="h-4 w-4" />
+            <Trash2 className="h-4 w-4" />
           </button>
-        )}
-        <button
-          type="button"
-          aria-label="Delete"
-          onClick={() => onDelete(notification)}
-          className="flex h-8 w-8 items-center justify-center rounded-full text-text-secondary/70 transition-colors hover:bg-error/10 hover:text-red-600"
-        >
-          <Trash2 className="h-4 w-4" />
-        </button>
+        </div>
       </div>
     </div>
   );

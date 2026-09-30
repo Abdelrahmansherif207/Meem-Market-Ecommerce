@@ -2,7 +2,7 @@ import Skeleton from "@/components/ui/Skeleton";
 
 export default function BrandDetailSkeleton() {
   return (
-    <div className="flex flex-col gap-6 p-4 md:p-6 animate-pulse" aria-label="Loading brand">
+    <div className="flex flex-col gap-6 p-4 md:p-6" aria-label="Loading brand">
       <Skeleton className="h-5 w-48" />
       <div className="w-full flex flex-col items-center gap-4 rounded-xl bg-surface p-6 md:p-8">
         <Skeleton className="h-28 w-28 rounded-xl md:h-36 md:w-36" />

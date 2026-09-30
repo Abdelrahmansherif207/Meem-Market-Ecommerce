@@ -2,18 +2,22 @@
 
 import { useEffect } from "react";
 import { useLocale } from "next-intl";
-import { profileService } from "@/features/profile";
-import { useAuthStore } from "../store/useAuthStore";
+import { useAuthStore } from "@/features/auth";
+import { profileService } from "../services/profileService";
 
-export function useAuthProfileSync() {
+/**
+ * Auth→profile sync owned by the profile feature: watches the auth store and
+ * refreshes the user's profile flags when a session becomes active.
+ */
+export function ProfileSyncHandler() {
   const locale = useLocale();
-  const token = useAuthStore((s) => s.token);
+  const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
   const setEmailVerified = useAuthStore((s) => s.setEmailVerified);
   const setProfile = useAuthStore((s) => s.setProfile);
   const setEmail = useAuthStore((s) => s.setEmail);
 
   useEffect(() => {
-    if (!token) return;
+    if (!isAuthenticated) return;
 
     let cancelled = false;
 
@@ -32,5 +36,7 @@ export function useAuthProfileSync() {
     return () => {
       cancelled = true;
     };
-  }, [token, locale, setEmailVerified, setProfile, setEmail]);
+  }, [isAuthenticated, locale, setEmailVerified, setProfile, setEmail]);
+
+  return null;
 }

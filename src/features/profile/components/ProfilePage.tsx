@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import { getTranslations } from "next-intl/server";
 import Breadcrumb from "@/components/ui/Breadcrumb";
 import { ProfileTabs } from "./ProfileTabs";
@@ -20,7 +21,9 @@ export async function ProfilePage({ locale }: ProfilePageProps) {
       />
 
       <div className="mt-6">
-        <ProfileTabs />
+        <Suspense fallback={null}>
+          <ProfileTabs />
+        </Suspense>
       </div>
     </div>
   );

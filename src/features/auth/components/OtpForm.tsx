@@ -13,6 +13,10 @@ interface OtpFormProps {
   phone?: string;
   otpStatus?: string;
   method?: "email" | "phone";
+  /** Success notice carried over from registration (e.g. "Account created successfully"). */
+  notice?: string | null;
+  resendPending?: boolean;
+  resendState?: ActionState | null;
   onBack: () => void;
   onAskMeLater?: () => void;
   onResend?: () => void;
@@ -24,7 +28,22 @@ const MAX_ATTEMPTS = 3;
 const RATE_LIMIT_COOLDOWN = 60;
 
 export function OtpForm(props: OtpFormProps) {
-  const { action, pending, state, email, phone, otpStatus, method = "email", onBack, onAskMeLater, onResend, onMethodChange } = props;
+  const {
+    action,
+    pending,
+    state,
+    email,
+    phone,
+    otpStatus,
+    method = "email",
+    notice,
+    resendPending = false,
+    resendState,
+    onBack,
+    onAskMeLater,
+    onResend,
+    onMethodChange,
+  } = props;
   const fieldErrors = state?.fieldErrors ?? {};
   const p = state?.payload ?? {};
   const formRef = useRef<HTMLFormElement | null>(null);
@@ -76,6 +95,19 @@ export function OtpForm(props: OtpFormProps) {
 
   return (
     <>
+      {notice && (
+        <div className="mx-auto mt-4 max-w-md rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-center">
+          <p className="text-sm font-medium text-emerald-700">{notice}</p>
+          <p className="mt-1 text-xs text-emerald-600">
+            We sent a verification code to {method === "email" ? identity : identityPhone}.
+          </p>
+        </div>
+      )}
+      {resendState && !resendState.success && resendState.message && (
+        <div className="mx-auto mt-4 max-w-md rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-center">
+          <p className="text-sm font-medium text-red-700">{resendState.message}</p>
+        </div>
+      )}
       {rateLimitCooldown > 0 && (
         <div className="mb-4 rounded-xl border border-red-200 bg-red-50 p-4 text-center">
           <p className="text-sm font-semibold text-red-700">Too many attempts</p>
@@ -126,12 +158,26 @@ export function OtpForm(props: OtpFormProps) {
           </div>
           <div className="mt-4 flex flex-wrap items-center justify-center gap-4 text-xs">
             {!isOtpDown && (
-              <button type="button" onClick={handleResend} disabled={resendCooldown > 0 || !onResend} className="font-semibold text-primary transition hover:text-primary-dark disabled:cursor-not-allowed disabled:opacity-50">{resendCooldown > 0 ? "Resend in " + resendCooldown + "s" : "Resend code"}</button>
+              <button
+                type="button"
+                onClick={handleResend}
+                disabled={resendCooldown > 0 || resendPending || !onResend}
+                className="font-semibold text-primary transition hover:text-primary-dark disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                {resendPending
+                  ? "Sending..."
+                  : resendCooldown > 0
+                    ? "Resend in " + resendCooldown + "s"
+                    : "Resend code"}
+              </button>
             )}
             {!isOtpDown && onAskMeLater && (
               <button type="button" onClick={onAskMeLater} className="font-semibold text-amber-600 transition hover:text-amber-700">Ask me later</button>
             )}
           </div>
+          {resendState?.success && resendState.message && (
+            <p className="mt-2 text-center text-xs font-medium text-emerald-600">{resendState.message}</p>
+          )}
           {isOtpDown && onMethodChange && method === "email" && (
             <div className="mt-3 text-center">
               <button type="button" onClick={() => onMethodChange("phone")} className="inline-flex items-center gap-1 text-xs font-semibold text-primary transition hover:text-primary-dark"><Smartphone className="h-3 w-3" /> Verify with phone instead</button>

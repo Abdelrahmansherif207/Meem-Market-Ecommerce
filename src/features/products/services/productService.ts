@@ -7,8 +7,9 @@ export const productService = {
     const response = await apiFetch<ApiResponse<ProductDetail>>(
       `/general/products/${encodeURIComponent(slug)}`,
       {
-        // Per-guest converted prices must bypass the shared Data Cache.
-        ...(currency ? { cache: "no-store" as RequestCache, currency } : { next: { revalidate: 60 } }),
+        // Price-bearing: always fresh, never Data-Cached.
+        cache: "no-store",
+        currency,
         lang,
       },
     );

@@ -8,6 +8,16 @@ const nextConfig: NextConfig = {
   env: {
     NEXT_PUBLIC_XHR_LOGS: process.env.NEXT_PUBLIC_XHR_LOGS ?? "false",
   },
+  async rewrites() {
+    const apiBaseUrl = process.env.API_URL ?? process.env.NEXT_PUBLIC_API_URL;
+    if (!apiBaseUrl) return [];
+    return [
+      {
+        source: "/api/v1/:path*",
+        destination: `${apiBaseUrl}/:path*`,
+      },
+    ];
+  },
   images: {
     unoptimized: true,
     remotePatterns: [

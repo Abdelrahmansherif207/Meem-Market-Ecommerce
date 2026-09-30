@@ -1,5 +1,12 @@
 import type { NotificationItem, RawNotification } from "./types";
 
+const CLAIMABLE_COUPON_NOTIFICATION_TYPES = ["coupon.available", "coupon.claim_required"];
+
+/** A notification the user can act on with a coupon claim (`POST /general/coupons/{id}/claim`). */
+export function isClaimableCouponNotification(n: NotificationItem): boolean {
+  return CLAIMABLE_COUPON_NOTIFICATION_TYPES.includes(n.type) && n.resourceId != null;
+}
+
 export function resolveLocalizedText(
   value: string | { en: string; ar: string } | undefined,
   locale: string,

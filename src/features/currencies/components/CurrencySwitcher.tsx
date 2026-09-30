@@ -5,7 +5,7 @@ import { useLocale, useTranslations } from "next-intl";
 import { Check, ChevronDown, Loader2 } from "lucide-react";
 import { cn } from "@/shared/utils/cn";
 import { useClickOutside } from "@/shared/hooks/useClickOutside";
-import { AUTH_TOKEN_STORAGE_KEY } from "@/shared/constants/storageKeys";
+import { SESSION_HINT_COOKIE_NAME } from "@/shared/constants/sessionCookies";
 import { normalizeCurrencyCode } from "@/shared/lib/currency";
 import { currencyService } from "../services/currencyService";
 import { useCurrencyStore } from "../store/useCurrencyStore";
@@ -13,6 +13,11 @@ import { resolveLocalized, type Currency } from "../types";
 
 interface CurrencySwitcherProps {
   className?: string;
+}
+
+function hasClientSession(): boolean {
+  if (typeof window === "undefined") return false;
+  return window.document.cookie.includes(`${SESSION_HINT_COOKIE_NAME}=`);
 }
 
 export function CurrencySwitcher({ className }: CurrencySwitcherProps) {
@@ -61,9 +66,7 @@ export function CurrencySwitcher({ className }: CurrencySwitcherProps) {
     // Authenticated users persist the preference server-side
     // (`user_preferences`); guests just start sending `X-Currency: <code>`
     // via the central client — no backend call needed.
-    const isAuthenticated =
-      typeof window !== "undefined" &&
-      !!window.localStorage.getItem(AUTH_TOKEN_STORAGE_KEY);
+    const isAuthenticated = hasClientSession();
     if (isAuthenticated) {
       try {
         await currencyService.selectCurrency(code, locale);

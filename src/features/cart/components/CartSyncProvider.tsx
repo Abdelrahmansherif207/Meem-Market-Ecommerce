@@ -3,7 +3,7 @@
 import type { ReactNode } from "react";
 import { useEffect } from "react";
 import { useLocale } from "next-intl";
-import { useAuthStore } from "@/features/auth/store/useAuthStore";
+import { useAuthStore } from "@/features/auth";
 import { useSyncCartOnLogin } from "../hooks/useSyncCartOnLogin";
 import { useServerCartStore } from "../store/useServerCartStore";
 

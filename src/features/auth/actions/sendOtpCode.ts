@@ -1,8 +1,8 @@
 "use server";
 
-import { getLocale } from "next-intl/server";
+import { getLocale, getTranslations } from "next-intl/server";
 import { authService } from "../services/authService";
-import { ApiError } from "@/shared/lib/api";
+import { mapActionError } from "../utils/mapActionError";
 import type { ActionState } from "./types";
 
 export async function sendOtpCodeAction(
@@ -10,11 +10,12 @@ export async function sendOtpCodeAction(
   formData: FormData,
 ): Promise<ActionState> {
   const locale = await getLocale();
+  const t = await getTranslations("auth");
   const email = (formData.get("email") as string) || "";
   const phone = (formData.get("phone") as string) || "";
 
   if (!email && !phone) {
-    return { success: false, message: "Email or phone is required." };
+    return { success: false, message: t("action.contactRequired") };
   }
 
   try {
@@ -23,18 +24,13 @@ export async function sendOtpCodeAction(
 
     return {
       success: true,
-      message: response.message || "OTP code sent successfully!",
+      message: response.message || t("action.otpSent"),
     };
   } catch (error) {
-    if (error instanceof ApiError) {
-      return {
-        success: false,
-        message: error.message,
-      };
-    }
+    const { message } = mapActionError(error, t("action.networkError"));
     return {
       success: false,
-      message: "Network error. Please try again.",
+      message,
     };
   }
 }

@@ -1,55 +1,38 @@
 "use client";
-import { useEffect, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { Percent, Tag } from "lucide-react";
-import { checkoutService } from "../services/checkoutService";
+import Skeleton from "@/components/ui/Skeleton";
+import { SectionHeader } from "./steps/stepStyles";
 import type { EligiblePromotion } from "../types";
 
 interface PromotionsPanelProps {
+  /** `null` while loading, `[]` when none available. */
+  promotions: EligiblePromotion[] | null;
+  error: boolean;
+  onRetry: () => void;
   selectedId: number | null;
   onSelect: (promotion: EligiblePromotion | null) => void;
 }
 
-export function PromotionsPanel({ selectedId, onSelect }: PromotionsPanelProps) {
+export function PromotionsPanel({
+  promotions,
+  error,
+  onRetry,
+  selectedId,
+  onSelect,
+}: PromotionsPanelProps) {
   const t = useTranslations("checkout");
   const locale = useLocale();
-  const [promotions, setPromotions] = useState<EligiblePromotion[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(false);
-
-  useEffect(() => {
-    let cancelled = false;
-    setLoading(true); // eslint-disable-line react-hooks/set-state-in-effect
-    setError(false);
-
-    checkoutService.getEligiblePromotions(locale)
-      .then((data) => {
-        if (cancelled) return;
-        setPromotions(data);
-        setLoading(false);
-      })
-      .catch(() => {
-        if (cancelled) return;
-        setError(true);
-        setLoading(false);
-      });
-
-    return () => { cancelled = true; };
-  }, [locale]);
+  const loading = promotions === null && !error;
 
   if (loading) {
     return (
       <div className="rounded-2xl border-2 border-border bg-white p-5 space-y-3">
-        <div className="flex items-center gap-2">
-          <div className="h-1 w-6 rounded-full bg-primary" />
-          <h3 className="text-sm font-bold uppercase tracking-wider text-text-primary">
-            {t("promotions")}
-          </h3>
-        </div>
+        <SectionHeader title={t("promotions")} />
         {[1, 2].map((i) => (
-          <div key={i} className="animate-pulse rounded-xl border border-border p-4 space-y-2">
-            <div className="h-4 w-3/4 rounded bg-border" />
-            <div className="h-3 w-1/2 rounded bg-border" />
+          <div key={i} className="rounded-xl border border-border p-4 space-y-2">
+            <Skeleton className="h-4 w-3/4" />
+            <Skeleton className="h-3 w-1/2" />
           </div>
         ))}
       </div>
@@ -57,88 +40,88 @@ export function PromotionsPanel({ selectedId, onSelect }: PromotionsPanelProps) 
   }
 
   if (error) {
-    return null;
+    return (
+      <div className="rounded-2xl border-2 border-border bg-white p-5 space-y-3">
+        <SectionHeader title={t("promotions")} />
+        <p className="text-sm text-text-secondary">{t("promotionsError")}</p>
+        <button type="button" onClick={onRetry} className="text-xs font-semibold text-primary underline underline-offset-2">
+          {t("retry")}
+        </button>
+      </div>
+    );
   }
 
-  if (promotions.length === 0) {
+  if (promotions!.length === 0) {
     return (
       <div className="rounded-2xl border-2 border-border bg-white p-5">
-        <div className="flex items-center gap-2 mb-3">
-          <div className="h-1 w-6 rounded-full bg-primary" />
-          <h3 className="text-sm font-bold uppercase tracking-wider text-text-primary">
-            {t("promotions")}
-          </h3>
-        </div>
-        <p className="text-sm text-text-secondary">{t("noPromotions")}</p>
+        <SectionHeader title={t("promotions")} />
+        <p className="mt-3 text-sm text-text-secondary">{t("noPromotions")}</p>
       </div>
     );
   }
 
   return (
     <div className="rounded-2xl border-2 border-border bg-white p-5 space-y-3">
-      <div className="flex items-center gap-2">
-        <div className="h-1 w-6 rounded-full bg-primary" />
-        <h3 className="text-sm font-bold uppercase tracking-wider text-text-primary">
-          {t("promotions")}
-        </h3>
-      </div>
+      <SectionHeader title={t("promotions")} />
 
       <p className="text-xs text-text-secondary">{t("promotionsHint")}</p>
 
-      <div className="space-y-2">
+      <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
         <label
-          className={`flex items-center gap-3 rounded-xl border p-4 cursor-pointer transition-colors ${
+          className={`flex flex-col gap-1.5 rounded-xl border p-3 cursor-pointer transition-colors ${
             selectedId === null
               ? "border-primary bg-primary/5"
               : "border-border hover:border-primary/50"
           }`}
         >
-          <input
-            type="radio"
-            name="promotion"
-            checked={selectedId === null}
-            onChange={() => onSelect(null)}
-            className="h-4 w-4 accent-primary"
-          />
-          <span className="text-sm text-text-secondary">{t("noPromotion")}</span>
+          <div className="flex items-center justify-between gap-2">
+            <span className="text-xs font-medium text-text-secondary">{t("noPromotion")}</span>
+            <input
+              type="radio"
+              name="promotion"
+              checked={selectedId === null}
+              onChange={() => onSelect(null)}
+              className="h-3.5 w-3.5 accent-primary"
+            />
+          </div>
         </label>
 
-        {promotions.map((p) => (
+        {promotions!.map((p) => (
           <label
             key={p.id}
-            className={`flex items-start gap-3 rounded-xl border p-4 cursor-pointer transition-colors ${
+            className={`flex flex-col gap-1.5 rounded-xl border p-3 cursor-pointer transition-colors ${
               selectedId === p.id
                 ? "border-primary bg-primary/5"
                 : "border-border hover:border-primary/50"
             }`}
           >
-            <input
-              type="radio"
-              name="promotion"
-              checked={selectedId === p.id}
-              onChange={() => onSelect(p)}
-              className="mt-0.5 h-4 w-4 shrink-0 accent-primary"
-            />
-            <div className="flex-1 min-w-0">
-              <div className="flex items-center gap-2">
-                {p.type === "fixed_rate" ? (
-                  <Tag className="h-4 w-4 text-blue-600 shrink-0" />
-                ) : (
-                  <Percent className="h-4 w-4 text-success shrink-0" />
-                )}
-                <span className="text-sm font-medium text-text-primary">{p.title}</span>
-              </div>
-              <p className="mt-1 text-xs text-text-secondary">
-                {t("saveAmount", {
-                  amount: p.discount.toLocaleString(locale === "ar" ? "ar-KW" : "en-KW", {
-                    minimumFractionDigits: 2,
-                    maximumFractionDigits: 2,
-                    numberingSystem: locale === "ar" ? "arab" : "latn",
-                  }),
-                })}
-                {p.gift_items.length > 0 && ` + ${p.gift_items.length} gift item(s)`}
-              </p>
+            <div className="flex items-center justify-between gap-2">
+              {p.type === "fixed_rate" ? (
+                <Tag className="h-4 w-4 shrink-0 text-blue-600" aria-hidden="true" />
+              ) : (
+                <Percent className="h-4 w-4 shrink-0 text-success" aria-hidden="true" />
+              )}
+              <input
+                type="radio"
+                name="promotion"
+                checked={selectedId === p.id}
+                onChange={() => onSelect(p)}
+                className="h-3.5 w-3.5 shrink-0 accent-primary"
+              />
             </div>
+            <span className="text-xs font-medium leading-4 text-text-primary line-clamp-2">
+              {p.title}
+            </span>
+            <span className="text-2xs text-success">
+              {t("saveAmount", {
+                amount: p.discount.toLocaleString(locale === "ar" ? "ar-KW" : "en-KW", {
+                  minimumFractionDigits: 2,
+                  maximumFractionDigits: 2,
+                  numberingSystem: locale === "ar" ? "arab" : "latn",
+                }),
+              })}
+              {p.gift_items.length > 0 && ` + ${p.gift_items.length}`}
+            </span>
           </label>
         ))}
       </div>

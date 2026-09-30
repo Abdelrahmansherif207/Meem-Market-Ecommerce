@@ -8,7 +8,7 @@ import ErrorState from "@/components/ui/ErrorState";
 import RetryButton from "@/components/ui/RetryButton";
 import { isServerDownError } from "@/shared/lib/errors";
 import { ApiError } from "@/shared/lib/api";
-import { useAuthModalStore } from "@/features/auth/store/useAuthModalStore";
+import { useAuthModalStore } from "@/features/auth";
 
 export default function AuthError({
   error,

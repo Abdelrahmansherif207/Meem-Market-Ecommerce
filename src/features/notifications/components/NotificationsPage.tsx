@@ -4,14 +4,15 @@ import { useCallback, useState } from "react";
 import { Bell, CheckCheck, Loader2, RotateCw } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import { useRouter } from "@/i18n/navigation";
-import { useAuthStore } from "@/features/auth/store/useAuthStore";
-import { useAuthModalStore } from "@/features/auth/store/useAuthModalStore";
+import { useAuthStore, useAuthModalStore } from "@/features/auth";
 import { useNotificationStore } from "../store/useNotificationStore";
 import { notificationService, normalizeList } from "../services/notificationService";
 import { useNotificationsHydration } from "../hooks/useNotificationsHydration";
+import { useClaimableNotifications } from "../hooks/useClaimableNotifications";
 import { getNotificationConfig } from "../constants";
 import { NotificationItemRow } from "./NotificationItemRow";
 import { cn } from "@/shared/utils/cn";
+import Skeleton from "@/components/ui/Skeleton";
 import type { NotificationItem, RawNotificationListResponse } from "../types";
 
 export function NotificationsPage() {
@@ -31,6 +32,7 @@ export function NotificationsPage() {
   const unreadCount = useNotificationStore((s) => s.unreadCount);
 
   const hydrate = useNotificationsHydration(locale);
+  const { claimControlFor } = useClaimableNotifications();
   const [retrying, setRetrying] = useState(false);
 
   const loadNextPage = useCallback(async () => {
@@ -133,9 +135,9 @@ export function NotificationsPage() {
         {initialLoading ? (
           <div className="flex flex-col gap-3">
             {Array.from({ length: 4 }).map((_, i) => (
-              <div
+              <Skeleton
                 key={i}
-                className="h-[88px] animate-pulse rounded-2xl border border-border bg-surface"
+                className="h-[88px] rounded-2xl border border-border"
               />
             ))}
           </div>
@@ -166,6 +168,7 @@ export function NotificationsPage() {
                   notification={n}
                   onRead={handleRead}
                   onDelete={handleDelete}
+                  claim={claimControlFor(n)}
                 />
               </div>
             ))}

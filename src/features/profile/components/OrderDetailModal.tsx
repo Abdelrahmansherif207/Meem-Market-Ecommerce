@@ -1,11 +1,15 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { X, Package, MapPin, CreditCard, Truck, Store, ExternalLink } from "lucide-react";
 import { orderService } from "../services/orderService";
 import type { Order, OrderDetail } from "../types";
 import { OrderDetailSkeleton } from "./OrderDetailSkeleton";
+import {
+  OrderStatusBadge,
+  resolveShippingChipLabel,
+} from "./OrderStatusBadge";
 
 interface OrderDetailModalProps {
   order: Order;
@@ -14,16 +18,9 @@ interface OrderDetailModalProps {
   onViewInvoice: (invoiceId: string) => void;
 }
 
-const statusColors: Record<string, string> = {
-  completed: "bg-green-100 text-green-700",
-  pending: "bg-amber-100 text-amber-700",
-  cancelled: "bg-red-100 text-red-700",
-  processing: "bg-blue-100 text-blue-700",
-  delivered: "bg-purple-100 text-purple-700",
-};
-
 export function OrderDetailModal({ order, open, onClose, onViewInvoice }: OrderDetailModalProps) {
   const t = useTranslations("profile.orders");
+  const locale = useLocale();
   const [detail, setDetail] = useState<OrderDetail | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -50,8 +47,6 @@ export function OrderDetailModal({ order, open, onClose, onViewInvoice }: OrderD
   }, [open, onClose]);
 
   if (!open) return null;
-
-  const statusClass = statusColors[order.status] || "bg-gray-100 text-gray-700";
 
   return (
     <div
@@ -91,10 +86,17 @@ export function OrderDetailModal({ order, open, onClose, onViewInvoice }: OrderD
                   )}
                   <span>{t(detail.fulfillment_type)}</span>
                 </div>
+                {resolveShippingChipLabel(detail, locale, (key, values) =>
+                  t(key, values as never),
+                ) && (
+                  <p className="text-xs text-text-secondary">
+                    {resolveShippingChipLabel(detail, locale, (key, values) =>
+                      t(key, values as never),
+                    )}
+                  </p>
+                )}
               </div>
-              <span className={`text-[11px] font-semibold px-2.5 py-1 rounded-full capitalize ${statusClass}`}>
-                {t(`status.${detail.status}`, { defaultValue: detail.status })}
-              </span>
+              <OrderStatusBadge order={detail} />
             </div>
 
             <div className="rounded-xl bg-surface p-4 space-y-3">

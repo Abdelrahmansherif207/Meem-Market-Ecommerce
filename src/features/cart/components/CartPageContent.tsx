@@ -3,14 +3,17 @@ import { useEffect, useRef, useReducer, useCallback, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import Link from "next/link";
 import { Loader2, AlertTriangle, RefreshCw } from "lucide-react";
-import { useAuthStore } from "@/features/auth/store/useAuthStore";
+import { useAuthStore } from "@/features/auth";
 import { useCurrencyStore } from "@/features/currencies";
+import { CartPageContentSkeleton } from "./skeletons/CartPageContentSkeleton";
 import { useGuestCartStore } from "../store/useGuestCartStore";
 import { useServerCartStore } from "../store/useServerCartStore";
 import { cartService } from "../services/cartService";
 import { CartSection } from "./CartSection";
 import { CartSummary } from "./CartSummary";
 import AvailableCoupons from "@/features/coupons/components/AvailableCoupons";
+import MyAvailableCoupons from "@/features/coupons/components/MyAvailableCoupons";
+import { MyCouponsList } from "@/features/coupons/components/MyCouponsList";
 import { calcSubtotal, calcTotalQuantity } from "../utils";
 import type { AppliedCoupon } from "@/features/coupons/types";
 import { couponService } from "@/features/coupons/services/couponService";
@@ -104,7 +107,9 @@ function cartReducer(state: CartState, action: CartAction): CartState {
 function deriveInitialSource(
   isAuthenticated: boolean,
   isSyncing: boolean,
+  authHydrated: boolean,
 ): CartSource {
+  if (!authHydrated) return "loading";
   if (!isAuthenticated) return "guest";
   if (isSyncing) return "syncing";
   return "loading";
@@ -130,13 +135,23 @@ export function CartPageContent({ minimumOrderAmount }: CartPageContentProps) {
   const syncError = useGuestCartStore((s) => s.syncError);
   const setServerTotalQuantity = useServerCartStore((s) => s.setTotalQuantity);
 
+  // The auth store rehydrates from localStorage asynchronously. Until that
+  // finishes, `isAuthenticated` is a stale `false` — trusting it caused the
+  // reload flash "empty cart → loading → cart". Same pattern as CheckoutForm.
+  const [authHydrated, setAuthHydrated] = useState(false);
+  useEffect(() => {
+    const unsub = useAuthStore.persist.onFinishHydration(() => setAuthHydrated(true));
+    if (useAuthStore.persist.hasHydrated()) setAuthHydrated(true); // eslint-disable-line react-hooks/set-state-in-effect
+    return unsub;
+  }, []);
+
   // Initialise source synchronously from store — prevents guest spinner flash
   // and correctly shows "syncing" if the hook is mid-sync when the page opens.
   const [state, dispatch] = useReducer(
     cartReducer,
     undefined,
     (): CartState => ({
-      source: deriveInitialSource(isAuthenticated, isSyncing),
+      source: deriveInitialSource(isAuthenticated, isSyncing, authHydrated),
       serverItems: [],
       error: null,
       pendingItemIds: new Set<string>(),
@@ -276,6 +291,10 @@ export function CartPageContent({ minimumOrderAmount }: CartPageContentProps) {
   // via abortRef, so calling it multiple times is safe.
   // -------------------------------------------------------------------------
   useEffect(() => {
+    // Auth metadata is still rehydrating — don't trust the stale
+    // `isAuthenticated: false` snapshot to dispatch SET_GUEST or fetch.
+    if (!authHydrated) return;
+
     if (!isAuthenticated) {
       abortRef.current?.abort();
       dispatch({ type: "SET_GUEST" });
@@ -297,7 +316,7 @@ export function CartPageContent({ minimumOrderAmount }: CartPageContentProps) {
 
     // Authenticated and sync complete (or no guest items): load from server.
     loadServerCart(); // eslint-disable-line react-hooks/set-state-in-effect
-  }, [isAuthenticated, isSyncing, syncError, loadServerCart]);
+  }, [authHydrated, isAuthenticated, isSyncing, syncError, loadServerCart]);
 
   // Abort any in-flight request on unmount (navigation away).
   useEffect(() => {
@@ -442,11 +461,7 @@ export function CartPageContent({ minimumOrderAmount }: CartPageContentProps) {
   // Render states
   // -------------------------------------------------------------------------
   if (state.source === "loading") {
-    return (
-      <div className="flex items-center justify-center py-24">
-        <Loader2 className="h-6 w-6 animate-spin text-primary" />
-      </div>
-    );
+    return <CartPageContentSkeleton />;
   }
 
   if (state.source === "syncing") {
@@ -525,6 +540,12 @@ export function CartPageContent({ minimumOrderAmount }: CartPageContentProps) {
               onUpdateQuantity={handleUpdateQuantity}
               onRemove={handleRemove}
               minimumOrderAmount={minimumOrderAmount}
+              couponSlot={
+                <MyCouponsList
+                  appliedCouponCode={appliedCoupon?.code ?? null}
+                  onApplied={refreshCart}
+                />
+              }
             />
           </div>
 
@@ -539,6 +560,12 @@ export function CartPageContent({ minimumOrderAmount }: CartPageContentProps) {
                 appliedCoupon={appliedCoupon}
                 couponDiscount={couponDiscount}
                 onCouponApplied={async () => { await refreshCart(); }}
+              />
+              <MyAvailableCoupons
+                appliedCouponCode={appliedCoupon?.code ?? null}
+                onCouponApplied={async () => {
+                  await refreshCart();
+                }}
               />
               <AvailableCoupons
                 onSelectCoupon={async (coupon) => {
