@@ -16,7 +16,7 @@ export async function PaymentFailedPage({
   const tb = await getTranslations({ locale, namespace: "header.breadcrumb" });
 
   return (
-    <div className="py-6 min-h-screen">
+    <div className="py-6">
       <Breadcrumb
         items={[
           { label: tb("home"), href: "/" },

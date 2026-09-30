@@ -1,85 +1,69 @@
 "use client";
-import { useEffect, useMemo, useRef, useState, useCallback } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { useLocale, useTranslations } from "next-intl";
-import { Loader2, CreditCard, MapPin, Store, Truck, WifiOff } from "lucide-react";
+import { ChevronLeft, ChevronRight, CreditCard, Loader2, Store, WifiOff } from "lucide-react";
 import { useShallow } from "zustand/react/shallow";
 import { useAuthStore } from "@/features/auth";
 import { useCurrencyStore } from "@/features/currencies";
 import { usePickupLocationStore } from "@/features/pickup-location";
 import { MapPickerModal, useLocationStore } from "@/features/location";
 import type { PickedAddress } from "@/features/location";
-import { PickupSelector } from "./PickupSelector";
-import { cartService } from "@/features/cart/services/cartService";
-import { checkoutService } from "../services/checkoutService";
-import { governorateService } from "../services/governorateService";
+import Stepper, { type StepperStep } from "@/components/ui/Stepper";
+import { useRouter as useIntlRouter } from "@/i18n/navigation";
 import { matchGovernorateByName } from "../utils/matchGovernorate";
-import { PromotionsPanel } from "./PromotionsPanel";
 import { OrderSummary } from "./OrderSummary";
 import { CheckoutFormSkeleton } from "./CheckoutFormSkeleton";
 import { resolveShippingQuote } from "../utils/shippingFee";
 import { mapCheckoutError } from "../utils/errorMessages";
-import type { CheckoutFormData, FulfillmentType, PaymentMethod, EligiblePromotion, Governorate, PaymentGatewayOption } from "../types";
-import { addressService } from "@/features/profile/services/addressService";
-import type { Address } from "@/features/profile/types";
+import { handleCheckoutSubmitError } from "../utils/submitErrors";
+import { saveMapPickedAddress, useCheckoutForm } from "../hooks/useCheckoutForm";
+import { useCheckoutData } from "../hooks/useCheckoutData";
+import { checkoutService } from "../services/checkoutService";
+import {
+  validateContactStep,
+  validateDeliveryStep,
+  validatePaymentStep,
+} from "../schemas/checkoutSchema";
+import type { FieldError } from "../schemas/checkoutSchema";
+import { ContactStep } from "./steps/ContactStep";
+import { DeliveryStep } from "./steps/DeliveryStep";
+import { PaymentStep } from "./steps/PaymentStep";
+import { ReviewStep, type ReviewSectionId } from "./steps/ReviewStep";
+import { localizedText, SHIPPING_TYPE_CODES } from "../types";
+import type { ShippingType } from "../types";
 import { useOnlineStatus } from "@/shared/hooks/useOnlineStatus";
-import type { CartApiCart } from "@/features/cart/types";
-import type { AppliedCoupon } from "@/features/coupons/types";
-import { ApiError } from "@/shared/lib/api";
 
-const initialForm = (user: { name?: string | null; email?: string | null; phone?: string | null }): CheckoutFormData => ({
-  name: user.name ?? "",
-  user_phone: user.phone ?? "",
-  user_email: user.email ?? "",
-  governorate_id: null,
-  city: "",
-  state: "",
-  country: "",
-  street_address: "",
-  notes: "",
-  fulfillment_type: "delivery",
-  payment_method: "online",
-  selected_promotion_id: null,
-  selected_promotion_discount: 0,
-  selected_gift_product_id: null,
-});
+type StepId = "contact" | "delivery" | "payment" | "review";
 
-interface FieldError {
-  field: string;
-  message: string;
+const ALL_STEPS: StepId[] = ["contact", "delivery", "payment", "review"];
+
+/** Maps a field name to the wizard step that owns it (for 422 error jumps). */
+function fieldToStep(field: string): StepId {
+  if (["name", "user_phone", "user_email"].includes(field)) return "contact";
+  if (
+    ["governorate_id", "city", "state", "country", "street_address"].includes(field) ||
+    field.startsWith("flow:")
+  ) {
+    return "delivery";
+  }
+  return "payment";
 }
 
-interface CartCheckoutData {
-  subtotal: number;
-  totalQuantity: number;
-  couponDiscount: number;
-  appliedCoupon: AppliedCoupon | null;
-  expired: boolean;
-}
-
-function validate(form: CheckoutFormData, governorateId: number | null, vt: (key: string) => string): FieldError[] {
-  const errors: FieldError[] = [];
-  if (!form.name.trim()) errors.push({ field: "name", message: vt("nameRequired") });
-  if (!form.user_phone.trim()) errors.push({ field: "user_phone", message: vt("phoneRequired") });
-  if (!form.user_email.trim()) {
-    errors.push({ field: "user_email", message: vt("emailRequired") });
-  } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.user_email)) {
-    errors.push({ field: "user_email", message: vt("emailInvalid") });
+function stepOfFieldErrors(errors: FieldError[]): StepId {
+  for (const error of errors) {
+    if (error.field === "__gateway") continue;
+    return fieldToStep(error.field);
   }
-  if (form.fulfillment_type === "delivery") {
-    if (governorateId === null) errors.push({ field: "governorate_id", message: vt("governorateRequired") });
-    if (!form.city.trim()) errors.push({ field: "city", message: vt("cityRequired") });
-    if (!form.country.trim()) errors.push({ field: "country", message: vt("countryRequired") });
-    if (!form.street_address.trim()) errors.push({ field: "street_address", message: vt("streetRequired") });
-  }
-  return errors;
+  return "delivery";
 }
 
 export function CheckoutForm() {
   const t = useTranslations("checkout");
   const locationT = useTranslations("locationPicker");
   const router = useRouter();
+  const intlRouter = useIntlRouter();
   const locale = useLocale();
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
   // Re-fetch cart totals when the currency changes (client `apiFetch`
@@ -92,37 +76,114 @@ export function CheckoutForm() {
   const isFast = searchParams.get("type") === "fast";
   const selectedLocationId = usePickupLocationStore((s) => s.selectedLocationId);
   const clearLocation = usePickupLocationStore((s) => s.clear);
-
-  const [form, setForm] = useState<CheckoutFormData>(() => initialForm(user));
-  const [errors, setErrors] = useState<FieldError[]>([]);
-  const [submitting, setSubmitting] = useState(false);
-  const [apiError, setApiError] = useState<string | null>(null);
-  const [cartData, setCartData] = useState<CartCheckoutData | null>(null);
-  const [cartLoading, setCartLoading] = useState(true);
-  const [pickupLocationName, setPickupLocationName] = useState<string>("");
-  const [governorates, setGovernorates] = useState<Governorate[]>([]);
-  const [governoratesLoading, setGovernoratesLoading] = useState(true);
-  const [governoratesError, setGovernoratesError] = useState(false);
-  const [gateways, setGateways] = useState<PaymentGatewayOption[] | null>(null);
-  const [gatewaysError, setGatewaysError] = useState(false);
-  const [selectedGateway, setSelectedGateway] = useState<string | null>(null);
-  const [gatewaysRefreshKey, setGatewaysRefreshKey] = useState(0);
-  const [navStalled, setNavStalled] = useState(false);
   const isOnline = useOnlineStatus();
+  const browserCoords = useLocationStore((s) => s.coords);
 
-  const [savedAddresses, setSavedAddresses] = useState<Address[]>([]);
-  const [addressesLoading, setAddressesLoading] = useState(false);
-  const [addressesError, setAddressesError] = useState(false);
-  const [selectedAddressId, setSelectedAddressId] = useState<number | null>(null);
-  const [addressTitle, setAddressTitle] = useState("");
-  const [mapModalOpen, setMapModalOpen] = useState(false);
-  const [savingLocation, setSavingLocation] = useState(false);
-  const [mapSaveError, setMapSaveError] = useState<string | null>(null);
+  const controller = useCheckoutForm({ user });
+  const { form } = controller;
+
   const [hydrated, setHydrated] = useState(() =>
     typeof window !== "undefined" ? useAuthStore.persist.hasHydrated() : false,
   );
+
+  useEffect(() => useAuthStore.persist.onFinishHydration(() => setHydrated(true)), []);
+
+  const steps: StepId[] = useMemo(
+    () => (isFast ? ALL_STEPS.filter((s) => s !== "payment") : ALL_STEPS),
+    [isFast],
+  );
+
+  // ---- URL-synced step state ------------------------------------------------
+  const stepParam = searchParams.get("step");
+  const [stepIndex, setStepIndex] = useState(() => {
+    const idx = steps.indexOf((stepParam ?? "") as StepId);
+    return idx >= 0 ? idx : 0;
+  });
+  const mountedRef = useRef(false);
+  const prevStepRef = useRef(stepIndex);
+
+  const goToStep = useCallback(
+    (index: number) => {
+      const clamped = Math.min(Math.max(index, 0), steps.length - 1);
+      setStepIndex(clamped);
+      const query: Record<string, string> = {};
+      if (isFast) query.type = "fast";
+      if (clamped > 0) query.step = steps[clamped];
+      intlRouter.replace(
+        { pathname: "/payment", query },
+        { scroll: false },
+      );
+    },
+    [intlRouter, isFast, steps],
+  );
+
+  useEffect(() => {
+    // Sanitize stale/foreign `?step=` values (e.g. after locale change).
+    if (!mountedRef.current) return;
+    const idx = stepParam ? steps.indexOf(stepParam as StepId) : 0;
+    if (idx >= 0 && idx !== stepIndex) setStepIndex(idx);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [stepParam]);
+
+  useEffect(() => {
+    if (prevStepRef.current !== stepIndex) {
+      prevStepRef.current = stepIndex;
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+  }, [stepIndex]);
+
+  useEffect(() => {
+    mountedRef.current = true;
+  }, []);
+
+  // ---- Shared data ----------------------------------------------------------
+  const data = useCheckoutData({
+    locale,
+    currency: selectedCurrency,
+    hydrated,
+    isAuthenticated,
+    shippingType: form.shipping_type,
+    onShippingTypeUnsupported: (type) => {
+      if (form.shipping_type !== type) return;
+      const remaining = SHIPPING_TYPE_CODES.filter((st) => st !== type);
+      if (remaining.length > 0) controller.setShippingType(remaining[0] as ShippingType);
+    },
+    onFirstAddressSelected: (address) => {
+      controller.setSelectedAddressId(address.id);
+      controller.applyAddress(address);
+    },
+  });
+
+  const {
+    cartData,
+    cartLoading,
+    refreshCartCoupon,
+    governorates,
+    governoratesLoading,
+    governoratesError,
+    retryGovernorates,
+    gateways,
+    gatewaysError,
+    retryGateways,
+    selectedGateway,
+    setSelectedGateway,
+    availableShippingTypes,
+    flow,
+    flowError,
+    savedAddresses,
+    addressesLoading,
+    addressesError,
+    retryAddresses,
+    addSavedAddress,
+    promotions,
+    promotionsError,
+    retryPromotions,
+  } = data;
+
+  const [submitting, setSubmitting] = useState(false);
+  const [apiError, setApiError] = useState<string | null>(null);
+  const [navStalled, setNavStalled] = useState(false);
   const [stickyTop, setStickyTop] = useState<number | null>(null);
-  const browserCoords = useLocationStore((s) => s.coords);
 
   useEffect(() => {
     const header = document.querySelector("header");
@@ -140,227 +201,31 @@ export function CheckoutForm() {
     };
   }, []);
 
-  useEffect(() => useAuthStore.persist.onFinishHydration(() => setHydrated(true)), []);
+  // ---- Derived values -------------------------------------------------------
+  const autoGovernorateId = useMemo<number | null>(() => {
+    if (form.governorate_id !== null) return null;
+    if (governoratesLoading || governorates.length === 0 || !controller.selectedAddressId) return null;
+    const addr = savedAddresses.find((a) => a.id === controller.selectedAddressId);
+    if (!addr) return null;
+    return matchGovernorateByName(addr.address.city, addr.address.state, governorates)?.id ?? null;
+  }, [form.governorate_id, governorates, governoratesLoading, controller.selectedAddressId, savedAddresses]);
+  const selectedGovernorateId = form.governorate_id ?? autoGovernorateId;
 
-  const fetchedKey = useRef<string | null>(null);
+  const selectedCurrencyRate = useCurrencyStore(
+    (s) => s.byCode[s.selectedCode]?.effectiveRate ?? null,
+  );
+  const shippingQuote = useMemo(
+    () =>
+      resolveShippingQuote({
+        fulfillmentType: form.fulfillment_type,
+        governorate: governorates.find((g) => g.id === selectedGovernorateId) ?? null,
+        subtotal: cartData?.subtotal ?? 0,
+        ratePerBase: selectedCurrencyRate,
+      }),
+    [form.fulfillment_type, governorates, selectedGovernorateId, cartData?.subtotal, selectedCurrencyRate],
+  );
 
-  useEffect(() => {
-    if (!hydrated) return;
-    if (!isAuthenticated) {
-      router.replace("/auth?redirect=/payment");
-      return;
-    }
-    // Fetch once per locale+currency (re-fetch when either changes).
-    const key = `${locale}:${selectedCurrency}`;
-    if (fetchedKey.current === key) return;
-    fetchedKey.current = key;
-
-    setCartLoading(true);
-    cartService.getCart(locale)
-      .then((cart: CartApiCart | null) => {
-        if (!cart) {
-          setCartData({ subtotal: 0, totalQuantity: 0, couponDiscount: 0, appliedCoupon: null, expired: true });
-          return;
-        }
-        const appliedCoupon: AppliedCoupon | null = cart.coupon && cart.coupon_code
-          ? { code: cart.coupon_code, name: cart.coupon.name, discount_amount: cart.coupon_discount }
-          : null;
-        setCartData({
-          subtotal: cart.subtotal,
-          totalQuantity: cart.total_quantity,
-          couponDiscount: cart.coupon_discount,
-          appliedCoupon,
-          expired: false,
-        });
-      })
-      .catch(() => {
-        setCartData({ subtotal: 0, totalQuantity: 0, couponDiscount: 0, appliedCoupon: null, expired: true });
-      })
-      .finally(() => setCartLoading(false));
-  }, [hydrated, isAuthenticated, locale, selectedCurrency, router]);
-
-  useEffect(() => {
-    if (!isAuthenticated) return;
-    let cancelled = false;
-    const interval = setInterval(async () => {
-      try {
-        const cart = await cartService.getCart(locale);
-        if (!cancelled && (!cart || cart.status === "expired")) {
-          setCartData((prev) => prev ? { ...prev, expired: true } : prev);
-        }
-      } catch {}
-    }, 30000);
-    return () => { cancelled = true; clearInterval(interval); };
-  }, [isAuthenticated, locale]);
-
-  useEffect(() => {
-    let cancelled = false;
-    governorateService.getAll(locale)
-      .then((data) => {
-        if (cancelled) return;
-        setGovernorates(data);
-        setGovernoratesError(false);
-        setGovernoratesLoading(false);
-      })
-      .catch(() => {
-        if (cancelled) return;
-        setGovernoratesError(true);
-        setGovernoratesLoading(false);
-      });
-    return () => { cancelled = true; };
-  }, [locale]);
-
-  useEffect(() => {
-    let cancelled = false;
-    checkoutService.getPaymentGateways(locale)
-      .then((list) => {
-        if (cancelled) return;
-        const eligible = list.filter((g) => g.supports_catalog_currency);
-        setGateways(eligible);
-        setSelectedGateway((prev) =>
-          prev && eligible.some((g) => g.code === prev) ? prev : eligible[0]?.code ?? null,
-        );
-      })
-      .catch(() => {
-        if (cancelled) return;
-        setGateways([]);
-        setGatewaysError(true);
-      });
-    return () => { cancelled = true; };
-  }, [locale, gatewaysRefreshKey]);
-
-  const retryGateways = useCallback(() => {
-    setGateways(null);
-    setGatewaysError(false);
-    setGatewaysRefreshKey((key) => key + 1);
-  }, []);
-
-  const applyAddressToForm = useCallback((addr: Address) => {
-    setForm((prev) => ({
-      ...prev,
-      city: addr.address.city,
-      state: addr.address.state,
-      country: addr.address.country,
-      street_address: addr.address.street_address,
-      governorate_id: null,
-    }));
-    setErrors((prev) => prev.filter(
-      (e) => !["city", "state", "country", "street_address", "governorate_id"].includes(e.field),
-    ));
-  }, []);
-
-  useEffect(() => {
-    if (!hydrated || !isAuthenticated) return;
-    let cancelled = false;
-    addressService.getAll(locale)
-      .then((data) => {
-        if (cancelled) return;
-        setSavedAddresses(data);
-        setAddressesError(false);
-        setAddressesLoading(false);
-        if (data.length > 0) {
-          setSelectedAddressId(data[0].id);
-          applyAddressToForm(data[0]);
-        }
-      })
-      .catch(() => {
-        if (cancelled) return;
-        setAddressesError(true);
-        setAddressesLoading(false);
-      });
-    return () => { cancelled = true; };
-  }, [locale, hydrated, isAuthenticated, applyAddressToForm]);
-
-  const handleRetryAddresses = () => {
-    setAddressesError(false);
-    setAddressesLoading(true);
-    addressService.getAll(locale)
-      .then((data) => {
-        setSavedAddresses(data);
-        if (data.length > 0) {
-          setSelectedAddressId(data[0].id);
-          applyAddressToForm(data[0]);
-        }
-        setAddressesLoading(false);
-      })
-      .catch(() => {
-        setAddressesLoading(false);
-        setAddressesError(true);
-      });
-  };
-
-  const handleRetryGovernorates = () => {
-    setGovernoratesError(false);
-    setGovernoratesLoading(true);
-    governorateService.getAll(locale)
-      .then((data) => {
-        setGovernorates(data);
-        setGovernoratesLoading(false);
-      })
-      .catch(() => {
-        setGovernoratesError(true);
-        setGovernoratesLoading(false);
-      });
-  };
-
-  const handleAddressSelect = (id: number | null) => {
-    setSelectedAddressId(id);
-    if (id === null) {
-      setForm((prev) => ({
-        ...prev,
-        city: "",
-        state: "",
-        country: "",
-        street_address: "",
-      }));
-    } else {
-      const addr = savedAddresses.find((a) => a.id === id);
-      if (addr) applyAddressToForm(addr);
-    }
-  };
-
-  const handleMapPicked = async (picked: PickedAddress) => {
-    setMapSaveError(null);
-    setForm((prev) => ({
-      ...prev,
-      city: picked.city.trim() || prev.city,
-      state: picked.state.trim() || prev.state,
-      country: picked.country.trim() || prev.country,
-      street_address: picked.streetAddress.trim() || prev.street_address,
-    }));
-    setErrors((prev) => prev.filter((e) => !["city", "state", "country", "street_address"].includes(e.field)));
-
-    const matched = matchGovernorateByName(picked.city, picked.state, governorates);
-    if (matched) {
-      setForm((prev) => ({ ...prev, governorate_id: matched.id }));
-      setErrors((prev) => prev.filter((e) => e.field !== "governorate_id"));
-    }
-
-    setSavingLocation(true);
-    try {
-      const created = await addressService.create({
-        title: picked.title.trim() || picked.formattedAddress.trim() || locationT("defaultTitle"),
-        address: {
-          zip: picked.zip.trim() || " ",
-          city: picked.city.trim() || " ",
-          state: picked.state.trim() || " ",
-          country: picked.country.trim() || " ",
-          street_address: picked.streetAddress.trim() || " ",
-        },
-        governorate_id: matched?.id ?? 0,
-        location: { latitude: picked.coords.lat, longitude: picked.coords.lng },
-      }, locale);
-      setSavedAddresses((prev) => [...prev, created]);
-      setSelectedAddressId(created.id);
-      setMapModalOpen(false);
-    } catch {
-      setMapSaveError(locationT("saveError"));
-    } finally {
-      setSavingLocation(false);
-    }
-  };
-
-  const selectedAddress = savedAddresses.find((a) => a.id === selectedAddressId) ?? null;
+  const selectedAddress = savedAddresses.find((a) => a.id === controller.selectedAddressId) ?? null;
   const mapDefaultCenter = selectedAddress?.location
     ? { lat: selectedAddress.location.latitude, lng: selectedAddress.location.longitude }
     : browserCoords;
@@ -369,7 +234,7 @@ export function CheckoutForm() {
         title: selectedAddress.title,
         coords: selectedAddress.location
           ? { lat: selectedAddress.location.latitude, lng: selectedAddress.location.longitude }
-          : browserCoords ?? { lat: 30.0444, lng: 31.2357 },
+          : browserCoords ?? { lat: 29.3759, lng: 47.9774 },
         formattedAddress: [
           selectedAddress.address.street_address,
           selectedAddress.address.city,
@@ -384,207 +249,267 @@ export function CheckoutForm() {
       }
     : null;
 
-  const fieldError = (name: string) => errors.find((e) => e.field === name)?.message;
+  // ---- Validation -----------------------------------------------------------
+  const vt = useCallback((key: string) => t(`validation.${key}`), [t]);
+  const flowLabel = useCallback(
+    (input: { key: string; label: { en?: string; ar?: string } }) =>
+      t("flowInputs.requiredField", { field: localizedText(input.label, locale) }),
+    [t, locale],
+  );
 
-  const set = (field: keyof CheckoutFormData) => (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>,
-  ) => {
-    const value = e.target.value;
-    setForm((prev) => ({ ...prev, [field]: value }));
-    setErrors((prev) => prev.filter((e) => e.field !== field));
-    setApiError(null);
-  };
-
-  const handleGovernorateChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const val = e.target.value;
-    setForm((prev) => ({ ...prev, governorate_id: val ? Number(val) : null }));
-    setErrors((prev) => prev.filter((e) => e.field !== "governorate_id"));
-    setApiError(null);
-  };
-
-  const handleFulfillmentChange = (type: FulfillmentType) => {
-    setForm((prev) => {
-      let payment_method = prev.payment_method;
-      if (type === "pickup" && payment_method === "cod") payment_method = "online";
-      if (type === "delivery" && payment_method === "pay_at_cashier") payment_method = "online";
-      return { ...prev, fulfillment_type: type, payment_method };
-    });
-    if (type === "pickup") {
-      setErrors((prev) => prev.filter(
-        (e) => !["governorate_id", "city", "state", "country", "street_address"].includes(e.field),
-      ));
-    }
-    if (type === "delivery") {
-      clearLocation();
-    }
-  };
-
-  const handlePaymentMethodChange = (method: PaymentMethod) => {
-    setForm((prev) => ({ ...prev, payment_method: method }));
-  };
-
-  const handlePromotionSelect = (promotion: EligiblePromotion | null) => {
-    setForm((prev) => ({
-      ...prev,
-      selected_promotion_id: promotion?.id ?? null,
-      selected_promotion_discount: promotion?.discount ?? 0,
-    }));
-  };
-
-  const handleCouponApplied = useCallback(() => {
-    cartService.getCart(locale).then((cart) => {
-      if (cart) {
-        const appliedCoupon: AppliedCoupon | null = cart.coupon && cart.coupon_code
-          ? { code: cart.coupon_code, name: cart.coupon.name, discount_amount: cart.coupon_discount }
-          : null;
-        setCartData((prev) => prev ? {
-          ...prev,
-          couponDiscount: cart.coupon_discount,
-          appliedCoupon,
-        } : prev);
+  const runStepValidation = useCallback(
+    (step: StepId): FieldError[] => {
+      switch (step) {
+        case "contact":
+          return validateContactStep(form, { vt });
+        case "delivery":
+          return validateDeliveryStep(form, {
+            vt,
+            governorateId: selectedGovernorateId,
+            flow,
+            flowValues: controller.flowValues,
+            flowLabel,
+          });
+        case "payment":
+          return validatePaymentStep(form, { selectedGateway, gatewaysError });
+        default:
+          return [];
       }
-    }).catch(() => {});
-  }, [locale]);
-
-  const autoGovernorateId = useMemo<number | null>(() => {
-    if (form.governorate_id !== null) return null;
-    if (governoratesLoading || governorates.length === 0 || !selectedAddressId) return null;
-    const addr = savedAddresses.find((a) => a.id === selectedAddressId);
-    if (!addr) return null;
-    return matchGovernorateByName(addr.address.city, addr.address.state, governorates)?.id ?? null;
-  }, [form.governorate_id, governorates, governoratesLoading, selectedAddressId, savedAddresses]);
-  const selectedGovernorateId = form.governorate_id ?? autoGovernorateId;
-  const selectedGovernorate = useMemo(
-    () => governorates.find((g) => g.id === selectedGovernorateId) ?? null,
-    [governorates, selectedGovernorateId],
-  );
-  const selectedCurrencyRate = useCurrencyStore(
-    (s) => s.byCode[s.selectedCode]?.effectiveRate ?? null,
-  );
-  const shippingQuote = useMemo(
-    () =>
-      resolveShippingQuote({
-        fulfillmentType: form.fulfillment_type,
-        governorate: selectedGovernorate,
-        subtotal: cartData?.subtotal ?? 0,
-        ratePerBase: selectedCurrencyRate,
-      }),
-    [form.fulfillment_type, selectedGovernorate, cartData?.subtotal, selectedCurrencyRate],
+    },
+    [form, vt, selectedGovernorateId, flow, controller.flowValues, flowLabel, selectedGateway, gatewaysError],
   );
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setApiError(null);
+  const handleContinue = useCallback(
+    (step: StepId) => {
+      setApiError(null);
+      const errors = runStepValidation(step);
+      if (errors.length > 0) {
+        const bannerError = errors.find((e) => e.field === "__gateway");
+        if (bannerError) {
+          setApiError(t(bannerError.message));
+          return;
+        }
+        controller.setErrors(errors);
+        setApiError(t("fixRequiredFields"));
+        const firstError = errors[0];
+        const selector = firstError.field.startsWith("flow:")
+          ? `[data-flow-key="${firstError.field.slice(5)}"]`
+          : `[name="${firstError.field}"]`;
+        const firstEl = document.querySelector(selector);
+        firstEl?.scrollIntoView({ behavior: "smooth", block: "center" });
+        (firstEl as HTMLElement)?.focus();
+        return;
+      }
+      goToStep(stepIndex + 1);
+    },
+    [runStepValidation, controller, goToStep, stepIndex, t],
+  );
 
-    const validationErrors = validate(form, selectedGovernorateId, (key) => t(`validation.${key}`));
-    if (validationErrors.length > 0) {
-      setErrors(validationErrors);
-      setApiError(t("fixRequiredFields"));
-      const firstEl = document.querySelector(`[name="${validationErrors[0].field}"]`);
-      firstEl?.scrollIntoView({ behavior: "smooth", block: "center" });
-      (firstEl as HTMLElement)?.focus();
-      return;
-    }
+  // ---- Submission (contracts unchanged) -------------------------------------
+  const handleSubmit = useCallback(
+    async (e: React.FormEvent) => {
+      e.preventDefault();
+      setApiError(null);
 
-    if (form.payment_method === "online" && !selectedGateway) {
-      setApiError(gatewaysError ? t("paymentGatewaysError") : t("onlineUnavailable"));
-      return;
-    }
+      // Final gate: validate every step, jump to the first offender.
+      const allErrors = [
+        ...validateContactStep(form, { vt }),
+        ...validateDeliveryStep(form, {
+          vt,
+          governorateId: selectedGovernorateId,
+          flow,
+          flowValues: controller.flowValues,
+          flowLabel,
+        }),
+      ];
+      const gatewayErrors = validatePaymentStep(form, { selectedGateway, gatewaysError });
+      if (allErrors.length > 0 || gatewayErrors.length > 0) {
+        const bannerError = gatewayErrors.find((err) => err.field === "__gateway");
+        if (allErrors.length > 0) {
+          controller.setErrors(allErrors);
+          setApiError(t("fixRequiredFields"));
+          const offender = stepOfFieldErrors(allErrors);
+          goToStep(steps.indexOf(offender));
+        } else {
+          setApiError(t(bannerError ? bannerError.message : "fixRequiredFields"));
+          goToStep(steps.indexOf("payment"));
+        }
+        return;
+      }
+      if (form.payment_method === "online" && !selectedGateway) {
+        setApiError(gatewaysError ? t("paymentGatewaysError") : t("onlineUnavailable"));
+        return;
+      }
 
-    setSubmitting(true);
+      setSubmitting(true);
+      // The submit CTA lives at the bottom of the review step; the processing
+      // panel renders at the top of the page. Jump there instantly so the
+      // loading state is actually in the viewport.
+      window.scrollTo({ top: 0, behavior: "auto" });
 
-    if (isFast) {
+      // flow_values contract:
+      // - only keys that exist among the flow's active inputs are sent
+      //   (unknown keys are rejected server-side — fail closed);
+      // - sent when the flow loaded and the user provided values;
+      // - omitted entirely when no flow loaded (classic checkout) or nothing
+      //   was filled.
+      const flowInputKeySet = new Set((flow?.inputs ?? []).map((i) => i.key));
+      const sanitizedFlowValues = flow
+        ? Object.fromEntries(
+            Object.entries(controller.flowValues).filter(
+              ([key, value]) =>
+                flowInputKeySet.has(key) &&
+                !(value === undefined || value === null ||
+                  (typeof value === "string" && value.trim() === "") ||
+                  (Array.isArray(value) && value.length === 0)),
+            ),
+          )
+        : null;
+      const includeFlowValues =
+        sanitizedFlowValues !== null && Object.keys(sanitizedFlowValues).length > 0;
+
+      const jumpToFieldErrors = (fieldErrors: FieldError[]) => {
+        controller.setErrors(fieldErrors);
+        setApiError(t("fixRequiredFields"));
+        const target = stepOfFieldErrors(fieldErrors);
+        goToStep(steps.indexOf(target));
+      };
+
+      if (isFast) {
+        const payload = {
+          name: form.name.trim(),
+          user_phone: form.user_phone.trim(),
+          user_email: form.user_email.trim(),
+          address: {
+            address: form.street_address.trim(),
+            city: form.city.trim(),
+            country: form.country.trim(),
+          },
+          notes: form.notes.trim() || undefined,
+          governorate_id: selectedGovernorateId!,
+          ...(selectedGateway ? { gateway: selectedGateway } : {}),
+          selected_promotion_id: form.selected_promotion_id,
+          selected_gift_product_id: form.selected_gift_product_id,
+          shipping_type: form.shipping_type,
+          ...(includeFlowValues ? { flow_values: sanitizedFlowValues } : {}),
+        };
+
+        try {
+          const result = await checkoutService.processFastCheckout(payload);
+
+          if (result.url) {
+            setTimeout(() => setNavStalled(true), 10_000);
+            window.location.href = result.url;
+          } else {
+            intlRouter.push("/payment");
+          }
+        } catch (err) {
+          handleCheckoutSubmitError(err, t, locale, flow, jumpToFieldErrors, () => {
+            setApiError(mapCheckoutError(err, t));
+          }, () => {
+            setApiError(t("fixRequiredFields"));
+          });
+          setSubmitting(false);
+        }
+        return;
+      }
+
       const payload = {
         name: form.name.trim(),
         user_phone: form.user_phone.trim(),
         user_email: form.user_email.trim(),
         address: {
-          address: form.street_address.trim(),
-          city: form.city.trim(),
-          country: form.country.trim(),
+          city: form.fulfillment_type === "delivery" ? form.city.trim() : "",
+          state: form.fulfillment_type === "delivery" ? form.state.trim() : "",
+          country: form.fulfillment_type === "delivery" ? form.country.trim() : "",
+          street_address: form.fulfillment_type === "delivery" ? form.street_address.trim() : "",
         },
         notes: form.notes.trim() || undefined,
-        governorate_id: selectedGovernorateId!,
-        ...(selectedGateway ? { gateway: selectedGateway } : {}),
+        fulfillment_type: form.fulfillment_type,
+        payment_method: form.payment_method,
+        ...(form.payment_method === "online" && selectedGateway
+          ? { gateway: selectedGateway }
+          : {}),
+        governorate_id: form.fulfillment_type === "delivery" ? selectedGovernorateId ?? undefined : undefined,
         selected_promotion_id: form.selected_promotion_id,
         selected_gift_product_id: form.selected_gift_product_id,
+        ...(form.fulfillment_type === "pickup" && { pickup_location_id: selectedLocationId }),
+        shipping_type: form.shipping_type,
+        ...(includeFlowValues ? { flow_values: sanitizedFlowValues } : {}),
       };
 
       try {
-        const result = await checkoutService.processFastCheckout(payload);
+        const result = await checkoutService.processCheckout(payload);
 
-        if (result.url) {
+        if (form.payment_method === "online" && result.url) {
           setTimeout(() => setNavStalled(true), 10_000);
           window.location.href = result.url;
-        } else {
-          router.push("/payment");
+        } else if (form.payment_method === "cod") {
+          intlRouter.push(`/payment/success?order_id=${result.order_id}`);
+        } else if (form.payment_method === "pay_at_cashier") {
+          if (result.qr_code) {
+            sessionStorage.setItem("checkout_qr", result.qr_code);
+          }
+          intlRouter.push(`/payment/success?order_id=${result.order_id}&transaction_id=${result.transaction_uuid}`);
         }
       } catch (err) {
-        if (err instanceof ApiError && Object.keys(err.fields).length > 0) {
-          const fieldErrors: FieldError[] = [];
-          for (const [field, messages] of Object.entries(err.fields)) {
-            fieldErrors.push({ field, message: messages[0] });
-          }
-          setErrors(fieldErrors);
-          setApiError(t("fixRequiredFields"));
-        } else {
+        handleCheckoutSubmitError(err, t, locale, flow, jumpToFieldErrors, () => {
           setApiError(mapCheckoutError(err, t));
-        }
+        }, () => {
+          setApiError(t("fixRequiredFields"));
+        });
         setSubmitting(false);
       }
-      return;
-    }
+    },
+    [form, vt, selectedGovernorateId, flow, controller, selectedGateway, gatewaysError, t, locale, flowLabel, isFast, selectedLocationId, goToStep, steps, intlRouter],
+  );
 
-    const payload = {
-      name: form.name.trim(),
-      user_phone: form.user_phone.trim(),
-      user_email: form.user_email.trim(),
-      address: {
-        city: form.fulfillment_type === "delivery" ? form.city.trim() : "",
-        state: form.fulfillment_type === "delivery" ? form.state.trim() : "",
-        country: form.fulfillment_type === "delivery" ? form.country.trim() : "",
-        street_address: form.fulfillment_type === "delivery" ? form.street_address.trim() : "",
-      },
-      notes: form.notes.trim() || undefined,
-      fulfillment_type: form.fulfillment_type,
-      payment_method: form.payment_method,
-      ...(form.payment_method === "online" && selectedGateway
-        ? { gateway: selectedGateway }
-        : {}),
-      governorate_id: form.fulfillment_type === "delivery" ? selectedGovernorateId ?? undefined : undefined,
-      selected_promotion_id: form.selected_promotion_id,
-      selected_gift_product_id: form.selected_gift_product_id,
-      ...(form.fulfillment_type === "pickup" && { pickup_location_id: selectedLocationId }),
-    };
+  // ---- Map pick (unchanged behavior) ----------------------------------------
+  const handleMapPicked = useCallback(
+    async (picked: PickedAddress) => {
+      controller.setMapError(null);
+      controller.applyPickedAddress(picked);
 
-    try {
-      const result = await checkoutService.processCheckout(payload);
+      const matched = matchGovernorateByName(picked.city, picked.state, governorates);
+      if (matched) controller.setGovernorate(matched.id);
 
-      if (form.payment_method === "online" && result.url) {
-        setTimeout(() => setNavStalled(true), 10_000);
-        window.location.href = result.url;
-      } else if (form.payment_method === "cod") {
-        router.push(`/payment/success?order_id=${result.order_id}`);
-      } else if (form.payment_method === "pay_at_cashier") {
-        if (result.qr_code) {
-          sessionStorage.setItem("checkout_qr", result.qr_code);
-        }
-        router.push(`/payment/success?order_id=${result.order_id}&transaction_id=${result.transaction_uuid}`);
-      }
-    } catch (err) {
-      if (err instanceof ApiError && Object.keys(err.fields).length > 0) {
-        const fieldErrors: FieldError[] = [];
-        for (const [field, messages] of Object.entries(err.fields)) {
-          fieldErrors.push({ field, message: messages[0] });
-        }
-        setErrors(fieldErrors);
-        setApiError(t("fixRequiredFields"));
+      controller.setMapSaving(true);
+      const created = await saveMapPickedAddress(
+        picked,
+        locale,
+        locationT("defaultTitle"),
+        matched?.id ?? null,
+      );
+      controller.setMapSaving(false);
+      if (created) {
+        addSavedAddress(created);
+        controller.setSelectedAddressId(created.id);
+        controller.closeMapModal();
       } else {
-        setApiError(mapCheckoutError(err, t));
+        controller.setMapError(locationT("saveError"));
       }
-      setSubmitting(false);
+    },
+    [controller, governorates, locale, locationT, addSavedAddress],
+  );
+
+  const handleCouponApplied = useCallback(() => {
+    refreshCartCoupon();
+  }, [refreshCartCoupon]);
+
+  // ---- Guards ----------------------------------------------------------------
+  useEffect(() => {
+    if (!hydrated) return;
+    if (!isAuthenticated) {
+      router.replace("/auth?redirect=/payment");
     }
-  };
+  }, [hydrated, isAuthenticated, router]);
+
+  const handleEditSection = useCallback(
+    (section: ReviewSectionId) => {
+      goToStep(steps.indexOf(section));
+    },
+    [goToStep, steps],
+  );
 
   if (!isAuthenticated) return null;
 
@@ -593,7 +518,7 @@ export function CheckoutForm() {
   if (cartData?.expired) {
     return (
       <div className="flex flex-col items-center justify-center py-24 text-center">
-        <Store className="mb-4 size-12 text-text-secondary" />
+        <Store className="mb-4 size-12 text-text-secondary" aria-hidden="true" />
         <h1 className="text-xl font-bold text-text-primary">{t("cartExpired")}</h1>
         <p className="mt-2 text-sm text-text-secondary">{t("cartExpiredDesc")}</p>
         <button
@@ -611,13 +536,13 @@ export function CheckoutForm() {
       <div
         role="status"
         aria-live="polite"
-        className="flex flex-col items-center justify-center py-24 text-center"
+        className="flex flex-col items-center justify-center py-10 text-center"
       >
         <Loader2 className="mb-4 size-10 animate-spin text-primary" aria-hidden="true" />
         <h1 className="text-xl font-bold text-text-primary">{t("processing")}</h1>
         <p className="mt-2 text-sm text-text-secondary">{t("processingDesc")}</p>
         {navStalled && (
-          <div className="mt-8 w-full max-w-sm rounded-2xl border-2 border-border bg-white p-5">
+          <div className="mt-6 w-full max-w-sm rounded-2xl border-2 border-border bg-white p-5">
             <p className="text-sm text-text-secondary">{t("navStalledHint")}</p>
             <div className="mt-4 flex items-center justify-center gap-3">
               <Link
@@ -643,15 +568,74 @@ export function CheckoutForm() {
     );
   }
 
-  const inputClass =
-    "w-full rounded-xl border-2 border-border bg-white px-4 py-3 text-sm text-text-primary outline-none transition-colors placeholder:text-text-secondary/50 focus:border-primary";
-  const errorClass =
-    "w-full rounded-xl border-2 border-red-300 bg-white px-4 py-3 text-sm text-text-primary outline-none transition-colors placeholder:text-text-secondary/50 focus:border-red-400";
-  const labelClass = "text-sm font-semibold text-text-primary";
-  const radioClass = "h-4 w-4 accent-primary";
+  const stepperSteps: StepperStep[] = steps.map((id) => ({ id, label: t(`steps.${id}`) }));
+  const currentStep = steps[stepIndex];
+  const isReviewStep = currentStep === "review";
+
+  const stepContent = (() => {
+    switch (currentStep) {
+      case "contact":
+        return (
+          <ContactStep
+            form={form}
+            controller={controller}
+            availableShippingTypes={availableShippingTypes}
+          />
+        );
+      case "delivery":
+        return (
+          <DeliveryStep
+            isFast={isFast}
+            form={form}
+            controller={controller}
+            selectedGovernorateId={selectedGovernorateId}
+            governorates={governorates}
+            governoratesLoading={governoratesLoading}
+            governoratesError={governoratesError}
+            onRetryGovernorates={retryGovernorates}
+            savedAddresses={savedAddresses}
+            addressesLoading={addressesLoading}
+            addressesError={addressesError}
+            onRetryAddresses={retryAddresses}
+            flow={flow}
+            flowError={flowError}
+            onFulfillmentChange={(type) => {
+              controller.setFulfillment(type);
+              if (type === "delivery") clearLocation();
+            }}
+          />
+        );
+      case "payment":
+        return (
+          <PaymentStep
+            form={form}
+            controller={controller}
+            gateways={gateways}
+            gatewaysError={gatewaysError}
+            onRetryGateways={retryGateways}
+            selectedGateway={selectedGateway}
+            onSelectGateway={setSelectedGateway}
+            promotions={promotions}
+            promotionsError={promotionsError}
+            onRetryPromotions={retryPromotions}
+          />
+        );
+      default:
+        return null;
+    }
+  })();
 
   return (
-    <form onSubmit={handleSubmit}>
+    <form
+      onSubmit={(e) => {
+        if (isReviewStep) {
+          void handleSubmit(e);
+        } else {
+          e.preventDefault();
+          handleContinue(currentStep);
+        }
+      }}
+    >
       {!isOnline && (
         <div
           role="alert"
@@ -673,302 +657,56 @@ export function CheckoutForm() {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <div className="lg:col-span-2 space-y-6">
-          <div className="rounded-2xl border-2 border-border bg-white p-6 space-y-5">
-            <div className="flex items-center gap-2">
-              <div className="h-1 w-6 rounded-full bg-primary" />
-              <h2 className="text-sm font-bold uppercase tracking-wider text-text-primary">
-                {t("contactInfo")}
-              </h2>
-            </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div className="sm:col-span-2 space-y-1.5">
-                <label className={labelClass}>{t("name")}</label>
-                <input name="name" className={fieldError("name") ? errorClass : inputClass} value={form.name} onChange={set("name")} />
-                {fieldError("name") && <p className="text-xs text-error">{fieldError("name")}</p>}
-              </div>
-              <div className="space-y-1.5">
-                <label className={labelClass}>{t("phone")}</label>
-                <input name="user_phone" className={fieldError("user_phone") ? errorClass : inputClass} value={form.user_phone} onChange={set("user_phone")} />
-                {fieldError("user_phone") && <p className="text-xs text-error">{fieldError("user_phone")}</p>}
-              </div>
-              <div className="space-y-1.5">
-                <label className={labelClass}>{t("email")}</label>
-                <input name="user_email" className={fieldError("user_email") ? errorClass : inputClass} type="email" value={form.user_email} onChange={set("user_email")} />
-                {fieldError("user_email") && <p className="text-xs text-error">{fieldError("user_email")}</p>}
-              </div>
-            </div>
-          </div>
+          <Stepper
+            steps={stepperSteps}
+            current={stepIndex}
+            clickableCount={stepIndex}
+            onStepClick={goToStep}
+            stepOfLabel={t("stepOf", { current: stepIndex + 1, total: steps.length })}
+          />
 
-          <div className="rounded-2xl border-2 border-border bg-white p-6 space-y-4">
-            <div className="flex items-center gap-2">
-              <div className="h-1 w-6 rounded-full bg-primary" />
-              <h2 className="text-sm font-bold uppercase tracking-wider text-text-primary">
-                {isFast ? t("fastDelivery") : t("fulfillmentType")}
-              </h2>
-            </div>
-            {!isFast && (
-                <div className="flex gap-3">
-                  <button
-                    type="button"
-                    onClick={() => handleFulfillmentChange("delivery")}
-                    className={`flex-1 flex items-center justify-center gap-2 rounded-xl border-2 p-4 text-sm font-semibold transition-colors ${
-                      form.fulfillment_type === "delivery"
-                        ? "border-primary bg-primary/5 text-primary"
-                        : "border-border text-text-secondary hover:border-primary/50"
-                    }`}
-                  >
-                    <Truck className="size-5" />
-                    {t("delivery")}
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => handleFulfillmentChange("pickup")}
-                    className={`flex-1 flex items-center justify-center gap-2 rounded-xl border-2 p-4 text-sm font-semibold transition-colors ${
-                      form.fulfillment_type === "pickup"
-                        ? "border-primary bg-primary/5 text-primary"
-                        : "border-border text-text-secondary hover:border-primary/50"
-                    }`}
-                  >
-                    <MapPin className="size-5" />
-                    {t("pickup")}
-                  </button>
-                </div>
-            )}
+          {stepContent}
 
-            {(form.fulfillment_type === "delivery" || isFast) && (
-              <div className="space-y-4">
-                <div className={isFast ? "" : "border-t border-border pt-4 space-y-4"}>
-                  <h3 className="text-xs font-bold uppercase tracking-wider text-text-secondary">
-                    {isFast ? t("fastDelivery") : t("addressTitle")}
-                  </h3>
-
-                  {addressesLoading ? (
-                    <div className="h-10 w-full animate-pulse rounded-xl bg-border" />
-                  ) : addressesError ? (
-                    <div className="space-y-2">
-                      <p className="text-xs text-error">{t("addressesError")}</p>
-                      <button
-                        type="button"
-                        onClick={handleRetryAddresses}
-                        className="text-xs font-semibold text-primary underline underline-offset-2"
-                      >
-                        {t("governorateRetry")}
-                      </button>
-                    </div>
-                  ) : savedAddresses.length > 0 && (
-                    <div className="space-y-1.5">
-                      <label className={labelClass}>{t("savedAddresses")}</label>
-                      <select
-                        className={inputClass}
-                        value={selectedAddressId ?? ""}
-                        onChange={(e) => handleAddressSelect(e.target.value ? Number(e.target.value) : null)}
-                      >
-                        <option value="">{t("newAddress")}</option>
-                        {savedAddresses.map((a) => (
-                          <option key={a.id} value={a.id}>
-                            {a.title}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
-                  )}
-
-                  {selectedAddressId === null && (
-                    <div className="space-y-1.5">
-                      <label className={labelClass}>{locationT("addressTitle")}</label>
-                      <input
-                        className={inputClass}
-                        value={addressTitle}
-                        onChange={(e) => setAddressTitle(e.target.value)}
-                        placeholder={locationT("addressTitlePlaceholder")}
-                      />
-                    </div>
-                  )}
-
-                  <div className="space-y-1.5">
-                    <label className={labelClass}>{t("governorate")}</label>
-                    {governoratesLoading ? (
-                      <select disabled className={inputClass}>
-                        <option>{t("governorateLoading")}</option>
-                      </select>
-                    ) : governoratesError ? (
-                      <div className="space-y-2">
-                        <p className="text-xs text-error">{t("governorateError")}</p>
-                        <button
-                          type="button"
-                          onClick={handleRetryGovernorates}
-                          className="text-xs font-semibold text-primary underline underline-offset-2"
-                        >
-                          {t("governorateRetry")}
-                        </button>
-                      </div>
-                    ) : governorates.length === 0 ? (
-                      <p className="text-xs text-text-secondary">{t("governorateEmpty")}</p>
-                    ) : (
-                      <>
-                        <select
-                          name="governorate_id"
-                          className={fieldError("governorate_id") ? errorClass : inputClass}
-                          value={selectedGovernorateId ?? ""}
-                          onChange={handleGovernorateChange}
-                        >
-                          <option value="">{t("governoratePlaceholder")}</option>
-                          {governorates.map((g) => (
-                            <option key={g.id} value={g.id}>
-                              {g.name}
-                            </option>
-                          ))}
-                        </select>
-                        {fieldError("governorate_id") && (
-                          <p className="text-xs text-error">{fieldError("governorate_id")}</p>
-                        )}
-                      </>
-                    )}
-                  </div>
-
-                  <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-                    <div className="space-y-1.5">
-                      <label className={labelClass}>{t("country")}</label>
-                    <input name="country" className={fieldError("country") ? errorClass : inputClass} value={form.country} onChange={set("country")} />
-                    {fieldError("country") && <p className="text-xs text-error">{fieldError("country")}</p>}
-                    </div>
-                    <div className="space-y-1.5 sm:col-span-2">
-                      <label className={labelClass}>{t("city")}</label>
-                      <input name="city" className={fieldError("city") ? errorClass : inputClass} value={form.city} onChange={set("city")} />
-                      {fieldError("city") && <p className="text-xs text-error">{fieldError("city")}</p>}
-                    </div>
-                  </div>
-
-                  <div className="space-y-1.5">
-                    <label className={labelClass}>{t("streetAddress")}</label>
-                    <input name="street_address" className={fieldError("street_address") ? errorClass : inputClass} value={form.street_address} onChange={set("street_address")} />
-                    {fieldError("street_address") && <p className="text-xs text-error">{fieldError("street_address")}</p>}
-                  </div>
-
-                  <button
-                    type="button"
-                    onClick={() => { setMapSaveError(null); setMapModalOpen(true); }}
-                    className="flex items-center justify-center gap-2 rounded-xl border-2 border-dashed border-border px-4 py-3 text-sm font-semibold text-primary transition-all hover:border-primary hover:bg-primary/5"
-                  >
-                    <MapPin className="size-4" />
-                    {t("pickOnMap")}
-                  </button>
-                </div>
-              </div>
-            )}
-
-            {form.fulfillment_type === "pickup" && (
-              <PickupSelector onSelect={setPickupLocationName} />
-            )}
-          </div>
-
-          {!isFast && (
-          <div className="rounded-2xl border-2 border-border bg-white p-6 space-y-4">
-              <div className="flex items-center gap-2">
-                <div className="h-1 w-6 rounded-full bg-primary" />
-                <h2 className="text-sm font-bold uppercase tracking-wider text-text-primary">
-                  {t("paymentMethod")}
-                </h2>
-              </div>
-              <fieldset className="space-y-2">
-                <legend className="sr-only">{t("paymentMethod")}</legend>
-                {((form.fulfillment_type === "delivery"
-                  ? ["online", "cod"]
-                  : ["online", "pay_at_cashier"]) as PaymentMethod[]).map((method) => (
-                  <label
-                    key={method}
-                    className={`flex items-center gap-3 rounded-xl border p-4 cursor-pointer transition-colors ${
-                      form.payment_method === method
-                        ? "border-primary bg-primary/5"
-                        : "border-border hover:border-primary/50"
-                    }`}
-                  >
-                    <input
-                      type="radio"
-                      name="payment_method"
-                      checked={form.payment_method === method}
-                      onChange={() => handlePaymentMethodChange(method)}
-                      className={radioClass}
-                    />
-                    <div>
-                      <span className="text-sm font-medium text-text-primary">{t(`${method}Label`)}</span>
-                      <p className="text-xs text-text-secondary mt-0.5">{t(`${method}Desc`)}</p>
-                    </div>
-                  </label>
-                ))}
-              </fieldset>
-              {form.payment_method === "online" && (
-                <div className="border-t border-border pt-3">
-                  {gateways === null && !gatewaysError && (
-                    <div className="flex items-center justify-center gap-2 py-2 text-sm text-text-secondary">
-                      <Loader2 className="size-4 animate-spin" />
-                      {t("loadingPaymentGateways")}
-                    </div>
-                  )}
-                  {gatewaysError && (
-                    <div className="flex items-center justify-between gap-2 rounded-xl bg-error/5 px-3 py-2 text-sm text-error">
-                      <span>{t("paymentGatewaysError")}</span>
-                      <button
-                        type="button"
-                        onClick={retryGateways}
-                        className="font-semibold underline"
-                      >
-                        {t("retry")}
-                      </button>
-                    </div>
-                  )}
-                  {gateways !== null && !gatewaysError && gateways.length === 0 && (
-                    <p className="py-1 text-sm text-text-secondary">{t("onlineUnavailable")}</p>
-                  )}
-                  {gateways !== null && !gatewaysError && gateways.length > 0 && (
-                    <>
-                      <p className="text-sm font-semibold text-text-primary">{t("paymentGatewayLabel")}</p>
-                      <fieldset className="mt-2 space-y-2">
-                        <legend className="sr-only">{t("paymentGatewayLabel")}</legend>
-                        {gateways.map((gateway) => (
-                          <label
-                            key={gateway.code}
-                            className={`flex items-center gap-3 rounded-xl border p-3 cursor-pointer transition-colors ${
-                              selectedGateway === gateway.code
-                                ? "border-primary bg-primary/5"
-                                : "border-border hover:border-primary/50"
-                            }`}
-                          >
-                            <input
-                              type="radio"
-                              name="gateway"
-                              checked={selectedGateway === gateway.code}
-                              onChange={() => setSelectedGateway(gateway.code)}
-                              className={radioClass}
-                            />
-                            <span className="text-sm font-medium text-text-primary">{gateway.display_name}</span>
-                          </label>
-                        ))}
-                      </fieldset>
-                    </>
-                  )}
-                </div>
+          {isReviewStep ? (
+            <ReviewStep
+              isFast={isFast}
+              form={form}
+              flow={flow}
+              flowValues={controller.flowValues}
+              controller={controller}
+              selectedGovernorateId={selectedGovernorateId}
+              governorates={governorates}
+              selectedGateway={selectedGateway}
+              gateways={gateways}
+              promotions={promotions}
+              pickupLocationName={controller.pickupLocationName}
+              onEdit={handleEditSection}
+              submitting={submitting}
+              submitDisabled={!isOnline}
+            />
+          ) : (
+            <div className="flex items-center justify-between gap-3">
+              {stepIndex > 0 ? (
+                <button
+                  type="button"
+                  onClick={() => goToStep(stepIndex - 1)}
+                  className="inline-flex items-center gap-2 rounded-xl border border-border px-5 py-3 text-sm font-semibold text-text-primary transition-colors hover:bg-surface"
+                >
+                  <ChevronLeft className="size-4 rtl:rotate-180" aria-hidden="true" />
+                  {t("actions.back")}
+                </button>
+              ) : (
+                <span />
               )}
+              <button
+                type="submit"
+                className="inline-flex items-center gap-2 rounded-xl bg-primary px-8 py-3 text-sm font-bold text-white transition-all hover:opacity-90"
+              >
+                {t("actions.continue")}
+                <ChevronRight className="size-4 rtl:rotate-180" aria-hidden="true" />
+              </button>
             </div>
           )}
-
-          <div className="rounded-2xl border-2 border-border bg-white p-6 space-y-3">
-            <div className="flex items-center gap-2">
-              <div className="h-1 w-6 rounded-full bg-primary" />
-              <h2 className="text-sm font-bold uppercase tracking-wider text-text-primary">{t("notes")}</h2>
-            </div>
-            <textarea
-              className={`${inputClass} min-h-[80px] resize-none`}
-              placeholder={t("notesPlaceholder")}
-              value={form.notes}
-              onChange={set("notes")}
-            />
-          </div>
-
-          <PromotionsPanel
-            selectedId={form.selected_promotion_id}
-            onSelect={handlePromotionSelect}
-          />
         </div>
 
         <div className="lg:col-span-1">
@@ -982,18 +720,41 @@ export function CheckoutForm() {
               shipping={shippingQuote}
               promotionDiscount={form.selected_promotion_discount}
               couponDiscount={cartData?.couponDiscount ?? 0}
-              pickupLocationName={pickupLocationName || undefined}
+              pickupLocationName={controller.pickupLocationName || undefined}
               appliedCoupon={cartData?.appliedCoupon}
               onCouponApplied={handleCouponApplied}
             />
+            <p className="hidden items-center justify-center gap-2 text-xs text-text-secondary lg:flex">
+              <CreditCard className="size-3.5" aria-hidden="true" />
+              {t("review.summaryHint")}
+            </p>
+          </div>
+        </div>
+      </div>
 
+      {/* Mobile sticky step navigation (above the global bottom nav) */}
+      <div className="fixed inset-x-0 bottom-14 z-40 border-t border-border bg-white px-4 py-3 lg:hidden">
+        <div className="mx-auto flex max-w-3xl items-center justify-between gap-3">
+          {stepIndex > 0 ? (
+            <button
+              type="button"
+              onClick={() => goToStep(stepIndex - 1)}
+              className="inline-flex items-center gap-1 rounded-xl border border-border px-4 py-2.5 text-sm font-semibold text-text-primary"
+            >
+              <ChevronLeft className="size-4 rtl:rotate-180" aria-hidden="true" />
+              {t("actions.back")}
+            </button>
+          ) : (
+            <span />
+          )}
+          {isReviewStep ? (
             <button
               type="submit"
               disabled={!isOnline}
               aria-busy={submitting}
-              className="flex w-full items-center justify-center gap-2 rounded-xl bg-primary py-3.5 text-sm font-bold text-white transition-all hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
+              className="flex-1 inline-flex items-center justify-center gap-2 rounded-xl bg-primary py-2.5 text-sm font-bold text-white disabled:opacity-50"
             >
-              <CreditCard className="size-4" />
+              <CreditCard className="size-4" aria-hidden="true" />
               {isFast
                 ? t("fastCheckout")
                 : form.payment_method === "online"
@@ -1002,20 +763,28 @@ export function CheckoutForm() {
                     ? t("placeOrderCod")
                     : t("placeOrderCashier")}
             </button>
-          </div>
+          ) : (
+            <button
+              type="submit"
+              className="flex-1 inline-flex items-center justify-center gap-1 rounded-xl bg-primary py-2.5 text-sm font-bold text-white"
+            >
+              {t("actions.continue")}
+              <ChevronRight className="size-4 rtl:rotate-180" aria-hidden="true" />
+            </button>
+          )}
         </div>
       </div>
 
       <MapPickerModal
-        open={mapModalOpen}
-        onClose={() => setMapModalOpen(false)}
+        open={controller.mapModalOpen}
+        onClose={controller.closeMapModal}
         onConfirm={handleMapPicked}
         initialValue={mapInitialValue}
-        initialTitle={selectedAddressId === null ? addressTitle : undefined}
+        initialTitle={controller.selectedAddressId === null ? controller.addressTitle : undefined}
         defaultCenter={mapDefaultCenter}
         title={t("pickOnMapTitle")}
-        saving={savingLocation}
-        error={mapSaveError}
+        saving={controller.savingLocation}
+        error={controller.mapSaveError}
       />
     </form>
   );
