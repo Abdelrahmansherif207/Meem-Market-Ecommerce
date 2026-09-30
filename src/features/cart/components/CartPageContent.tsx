@@ -176,7 +176,7 @@ export function CartPageContent({ minimumOrderAmount }: CartPageContentProps) {
     if (!header) return;
     const update = () =>
       setStickyTop(window.innerWidth >= 1024 ? header.offsetHeight + 24 : null);
-    update(); // eslint-disable-line react-hooks/set-state-in-effect
+    update();
     const observer = new ResizeObserver(update);
     observer.observe(header);
     window.addEventListener("resize", update);
