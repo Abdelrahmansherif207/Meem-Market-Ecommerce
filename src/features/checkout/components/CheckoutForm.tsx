@@ -33,6 +33,12 @@ import { PaymentStep } from "./steps/PaymentStep";
 import { ReviewStep, type ReviewSectionId } from "./steps/ReviewStep";
 import { localizedText, SHIPPING_TYPE_CODES } from "../types";
 import type { ShippingType } from "../types";
+import {
+  savePaymentReturnNote,
+  consumePaymentReturnNote,
+  peekPaymentReturnNote,
+} from "../utils/paymentReturn";
+import { orderService } from "@/features/profile";
 import { useOnlineStatus } from "@/shared/hooks/useOnlineStatus";
 
 type StepId = "contact" | "delivery" | "payment" | "review";
@@ -184,6 +190,78 @@ export function CheckoutForm() {
   const [apiError, setApiError] = useState<string | null>(null);
   const [navStalled, setNavStalled] = useState(false);
   const [stickyTop, setStickyTop] = useState<number | null>(null);
+  const paymentOrderIdRef = useRef<number | null>(null);
+  const handlingPaymentReturnRef = useRef(false);
+
+  const routeToPaymentSuccess = useCallback(
+    (orderId?: number) => {
+      intlRouter.replace(
+        orderId
+          ? { pathname: "/payment/success", query: { order_id: String(orderId) } }
+          : "/payment/success",
+      );
+    },
+    [intlRouter],
+  );
+
+  /**
+   * Returning from the payment gateway (Back button or gateway redirect)
+   * either restores this page frozen from bfcache (`pageshow.persisted`) or
+   * reloads `/payment` fresh. Both paths converge here: read the return note
+   * recorded before the jump, resolve the in-flight order and route to the
+   * success page, which owns the confirm/verify states.
+   */
+  const handlePaymentReturn = useCallback(async () => {
+    if (handlingPaymentReturnRef.current) return;
+    handlingPaymentReturnRef.current = true;
+    try {
+      const note = consumePaymentReturnNote();
+      if (!note && paymentOrderIdRef.current === null) {
+        // Restore unrelated to an online payment — leave the page as-is.
+        return;
+      }
+      let orderId = note?.orderId ?? paymentOrderIdRef.current ?? undefined;
+      if (!orderId) {
+        try {
+          const orders = await orderService.getAll({ limit: 5 });
+          const candidate = orders.data
+            .filter((o) => o.payment_method === "online" && o.status === "pending")
+            .sort(
+              (a, b) =>
+                new Date(b.created_at).getTime() - new Date(a.created_at).getTime(),
+            )[0];
+          if (candidate) orderId = candidate.id;
+        } catch {}
+      }
+      if (orderId) {
+        paymentOrderIdRef.current = orderId;
+        routeToPaymentSuccess(orderId);
+        return;
+      }
+      // No in-flight order — unfreeze back to the form (cart screen decides next).
+      setNavStalled(false);
+      setSubmitting(false);
+    } finally {
+      handlingPaymentReturnRef.current = false;
+    }
+  }, [routeToPaymentSuccess]);
+
+  // Case 2: real reload (no bfcache) landing back on /payment — a saved note
+  // means we just came back from the gateway (the handler consumes the note).
+  useEffect(() => {
+    if (!peekPaymentReturnNote()) return;
+    handlePaymentReturn();
+  }, [handlePaymentReturn]);
+
+  // Case 1: bfcache restore fires `pageshow` with `persisted = true`.
+  useEffect(() => {
+    const onPageShow = (event: PageTransitionEvent) => {
+      if (!event.persisted) return;
+      handlePaymentReturn();
+    };
+    window.addEventListener("pageshow", onPageShow);
+    return () => window.removeEventListener("pageshow", onPageShow);
+  }, [handlePaymentReturn]);
 
   useEffect(() => {
     const header = document.querySelector("header");
@@ -398,6 +476,16 @@ export function CheckoutForm() {
           const result = await checkoutService.processFastCheckout(payload);
 
           if (result.url) {
+            if (result.order_id) paymentOrderIdRef.current = result.order_id;
+            savePaymentReturnNote(result.order_id);
+            if (result.order_id) {
+              // Make the Back-target URL meaningful for non-bfcache reloads.
+              history.replaceState(
+                null,
+                "",
+                `/${locale}/payment/success?order_id=${result.order_id}`,
+              );
+            }
             setTimeout(() => setNavStalled(true), 10_000);
             window.location.href = result.url;
           } else {
@@ -442,6 +530,18 @@ export function CheckoutForm() {
         const result = await checkoutService.processCheckout(payload);
 
         if (form.payment_method === "online" && result.url) {
+          if (result.order_id) paymentOrderIdRef.current = result.order_id;
+          // Leave a note so a Back-button return (or gateway redirect) can
+          // resolve the in-flight order instead of restoring a frozen form.
+          savePaymentReturnNote(result.order_id);
+          if (result.order_id) {
+            // Make the Back-target URL meaningful for non-bfcache reloads.
+            history.replaceState(
+              null,
+              "",
+              `/${locale}/payment/success?order_id=${result.order_id}`,
+            );
+          }
           setTimeout(() => setNavStalled(true), 10_000);
           window.location.href = result.url;
         } else if (form.payment_method === "cod") {
@@ -553,10 +653,7 @@ export function CheckoutForm() {
               </Link>
               <button
                 type="button"
-                onClick={() => {
-                  setNavStalled(false);
-                  setSubmitting(false);
-                }}
+                onClick={() => routeToPaymentSuccess(paymentOrderIdRef.current ?? undefined)}
                 className="inline-flex items-center rounded-xl bg-primary px-4 py-2 text-sm font-semibold text-white transition-colors hover:opacity-90"
               >
                 {t("retry")}

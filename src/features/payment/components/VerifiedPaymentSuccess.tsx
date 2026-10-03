@@ -16,8 +16,8 @@ interface VerifiedPaymentSuccessProps {
 
 const CONFIRMED_STATUSES = new Set(["completed", "delivered", "processing"]);
 const PAY_LATER_METHODS = new Set(["cod", "pay_at_cashier"]);
-const VERIFY_POLL_INTERVAL_MS = 2_000;
-const VERIFY_POLL_MAX_ATTEMPTS = 3;
+const VERIFY_POLL_INTERVAL_MS = 2_500;
+const VERIFY_POLL_MAX_ATTEMPTS = 6;
 
 export function VerifiedPaymentSuccess({ orderId, transactionId }: VerifiedPaymentSuccessProps) {
   const t = useTranslations("payment");
