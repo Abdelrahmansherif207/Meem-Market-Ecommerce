@@ -12,6 +12,9 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Gitignored reference implementation and agent artifacts:
+    "Catch-Beauty-Ecommerce/**",
+    ".opencode/**",
   ]),
 ]);
 

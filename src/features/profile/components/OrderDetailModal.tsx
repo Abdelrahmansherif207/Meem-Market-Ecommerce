@@ -26,18 +26,22 @@ export function OrderDetailModal({ order, open, onClose, onViewInvoice }: OrderD
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!open) return;
-
-    setDetail(null);
-    setLoading(true);
-    setError(null);
-
+    const cancelled = { current: false };
     orderService
       .getById(order.id)
-      .then(setDetail)
-      .catch((err) => setError(err instanceof Error ? err.message : t("detailLoadError")))
-      .finally(() => setLoading(false));
-  }, [open, order.id, t]);
+      .then((data) => {
+        if (!cancelled.current) setDetail(data);
+      })
+      .catch((err) => {
+        if (!cancelled.current) setError(err instanceof Error ? err.message : t("detailLoadError"));
+      })
+      .finally(() => {
+        if (!cancelled.current) setLoading(false);
+      });
+    return () => {
+      cancelled.current = true;
+    };
+  }, [order.id, t]);
 
   useEffect(() => {
     if (!open) return;

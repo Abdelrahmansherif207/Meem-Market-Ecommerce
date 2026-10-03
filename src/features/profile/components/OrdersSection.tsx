@@ -26,25 +26,31 @@ export function OrdersSection() {
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   const [invoiceError, setInvoiceError] = useState<string | null>(null);
 
-  const fetchOrders = useCallback(async (page: number, status: StatusFilter) => {
-    setLoading(true);
-    setError(null);
-    try {
-      const params = { page, limit: 15, ...(status !== "all" ? { status } : {}) };
-      const data = await orderService.getAll(params);
-      setOrders(data.data);
-      setLastPage(data.links.last_page);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : t("loadError"));
-    } finally {
-      setLoading(false);
-    }
-  }, [t]);
-
   useEffect(() => {
-    fetchOrders(currentPage, activeStatus);
-  }, [currentPage, activeStatus, fetchOrders]);
+    let cancelled = false;
+    const load = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        const params = { page: currentPage, limit: 15, ...(activeStatus !== "all" ? { status: activeStatus } : {}) };
+        const data = await orderService.getAll(params);
+        if (!cancelled) {
+          setOrders(data.data);
+          setLastPage(data.links.last_page);
+        }
+      } catch (err) {
+        if (!cancelled) setError(err instanceof Error ? err.message : t("loadError"));
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    };
+    load();
+    return () => {
+      cancelled = true;
+    };
+  }, [currentPage, activeStatus, t]);
 
+  // Refresh orders after invoice viewing closes (order state may have changed).
   useEffect(() => {
     if (!invoiceError) return;
     const timer = setTimeout(() => setInvoiceError(null), 5000);

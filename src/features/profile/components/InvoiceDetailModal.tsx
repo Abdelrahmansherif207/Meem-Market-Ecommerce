@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
-import { X, ExternalLink, Loader2, Package, MapPin, CreditCard, Receipt } from "lucide-react";
+import { X, ExternalLink, Package, MapPin, CreditCard, Receipt } from "lucide-react";
 import { invoiceService } from "../services/invoiceService";
 import type { InvoiceListItem, InvoiceDetail } from "../types";
 import { InvoiceDetailSkeleton } from "./InvoiceDetailSkeleton";
@@ -20,18 +20,22 @@ export function InvoiceDetailModal({ invoice, open, onClose }: InvoiceDetailModa
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!open) return;
-
-    setDetail(null);
-    setLoading(true);
-    setError(null);
-
+    let cancelled = false;
     invoiceService
       .getByUuid(invoice.uuid)
-      .then(setDetail)
-      .catch((err) => setError(err instanceof Error ? err.message : t("detailLoadError")))
-      .finally(() => setLoading(false));
-  }, [open, invoice.uuid, t]);
+      .then((data) => {
+        if (!cancelled) setDetail(data);
+      })
+      .catch((err) => {
+        if (!cancelled) setError(err instanceof Error ? err.message : t("detailLoadError"));
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [invoice.uuid, t]);
 
   useEffect(() => {
     if (!open) return;
