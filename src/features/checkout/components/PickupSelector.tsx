@@ -5,6 +5,7 @@ import { MapPin } from "lucide-react";
 import { pickupLocationService } from "@/features/pickup-location/services/pickupLocationService";
 import { usePickupLocationStore } from "@/features/pickup-location/store/usePickupLocationStore";
 import type { PickupLocation } from "@/features/pickup-location/types";
+import Skeleton from "@/components/ui/Skeleton";
 
 interface PickupSelectorProps {
   onSelect?: (name: string) => void;
@@ -53,9 +54,9 @@ export function PickupSelector({ onSelect }: PickupSelectorProps) {
           </h3>
         </div>
         {[1, 2].map((i) => (
-          <div key={i} className="animate-pulse rounded-xl border border-border p-4 space-y-2">
-            <div className="h-4 w-3/4 rounded bg-border" />
-            <div className="h-3 w-1/2 rounded bg-border" />
+          <div key={i} className="rounded-xl border border-border p-4 space-y-2">
+            <Skeleton className="h-4 w-3/4" />
+            <Skeleton className="h-3 w-1/2" />
           </div>
         ))}
       </div>

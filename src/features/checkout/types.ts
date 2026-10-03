@@ -8,6 +8,69 @@ export interface Address {
 export type FulfillmentType = "delivery" | "pickup";
 export type PaymentMethod = "online" | "cod" | "pay_at_cashier";
 
+/**
+ * Machine identifiers for the order-flow shipping types. Never translated;
+ * UI copy lives in `checkout.shippingType.*` messages.
+ */
+export type ShippingType = "local" | "international";
+
+export interface LocalizedText {
+  en?: string;
+  ar?: string;
+}
+
+export type FlowWidgetType = "text" | "number" | "boolean" | "date" | "select" | "multi_select";
+
+export type FlowOptionSource = "countries" | "governorates" | "warehouses" | "pickup_locations";
+
+export interface OrderFlowInput {
+  key: string;
+  type: FlowWidgetType;
+  label: LocalizedText;
+  placeholder?: LocalizedText | null;
+  help_text?: LocalizedText | null;
+  required?: boolean;
+  /** e.g. "checkout" or "transition:<code>" — only "checkout" is enforced client-side. */
+  required_at?: string | null;
+  source?: FlowOptionSource | null;
+  sort_order?: number;
+}
+
+export interface OrderFlowStatus {
+  code: string;
+  name?: LocalizedText | null;
+}
+
+export interface OrderFlowDefinition {
+  code: string;
+  name?: LocalizedText | null;
+  shipping_type: ShippingType;
+  is_default?: boolean;
+  is_active?: boolean;
+  statuses?: OrderFlowStatus[];
+  inputs?: OrderFlowInput[];
+}
+
+export type FlowValue = string | number | boolean | string[];
+export type FlowValues = Record<string, FlowValue>;
+
+/** External sort/widget contract: `"local" | "international"` labels come from messages. */
+export const SHIPPING_TYPE_CODES: ShippingType[] = ["local", "international"];
+
+/** Normalizes any localized object/mixed payload to a display string with en↔ar fallback. */
+export function localizedText(value: LocalizedText | string | null | undefined, locale: string): string {
+  if (value == null) return "";
+  if (typeof value === "string") return value;
+  const primary = locale === "ar" ? value.ar : value.en;
+  const fallback = locale === "ar" ? value.en : value.ar;
+  return (primary || fallback || "").toString();
+}
+
+export interface FlowOption {
+  id: string;
+  name: string;
+}
+
 export interface PaymentGatewayOption {
   code: string;
   display_name: string;
@@ -54,6 +117,13 @@ export interface CheckoutRequest {
   selected_promotion_id?: number | null;
   selected_gift_product_id?: number | null;
   pickup_location_id?: number | null;
+  shipping_type?: ShippingType;
+  /**
+   * Only sent when the chosen flow defines checkout-required inputs. Keys must
+   * exist among the flow's active inputs; select/multi_select values must be
+   * active ids from their source.
+   */
+  flow_values?: FlowValues;
 }
 
 export interface CheckoutResponse {
@@ -78,4 +148,5 @@ export interface CheckoutFormData {
   selected_promotion_id: number | null;
   selected_promotion_discount: number;
   selected_gift_product_id: number | null;
+  shipping_type: ShippingType;
 }

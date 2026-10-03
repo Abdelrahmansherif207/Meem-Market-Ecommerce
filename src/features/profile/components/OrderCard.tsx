@@ -5,25 +5,16 @@ import Image from "next/image";
 import { Package, ChevronDown, ChevronUp, Truck, Store, ExternalLink } from "lucide-react";
 import { useState } from "react";
 import type { Order } from "../types";
+import { OrderStatusBadge } from "./OrderStatusBadge";
 
 interface OrderCardProps {
   order: Order;
   onViewDetails: (order: Order) => void;
 }
 
-const statusColors: Record<string, string> = {
-  completed: "bg-green-100 text-success",
-  pending: "bg-amber-100 text-amber-700",
-  cancelled: "bg-red-100 text-red-700",
-  processing: "bg-blue-100 text-blue-700",
-  delivered: "bg-purple-100 text-purple-700",
-};
-
 export function OrderCard({ order, onViewDetails }: OrderCardProps) {
   const t = useTranslations("profile.orders");
   const [expanded, setExpanded] = useState(false);
-
-  const statusClass = statusColors[order.status] || "bg-surface text-text-primary";
 
   return (
     <div className="rounded-2xl border-2 border-border bg-white overflow-hidden">
@@ -50,9 +41,7 @@ export function OrderCard({ order, onViewDetails }: OrderCardProps) {
         </div>
 
         <div className="flex items-center gap-3">
-          <span className={`text-[11px] font-semibold px-2.5 py-1 rounded-full capitalize ${statusClass}`}>
-            {t(`status.${order.status}`, { defaultValue: order.status })}
-          </span>
+          <OrderStatusBadge order={order} />
           <span className="text-sm font-bold text-text-primary">{order.total} {order.currency}</span>
           {expanded ? <ChevronUp className="h-4 w-4 text-text-secondary" /> : <ChevronDown className="h-4 w-4 text-text-secondary" />}
         </div>

@@ -3,7 +3,7 @@
 import { useTranslations, useLocale } from "next-intl";
 import { useRouter } from "next/navigation";
 import type { ReactNode } from "react";
-import { Truck, Gift, Star, ShoppingCart, Car, ShoppingBag, ChevronRight } from "lucide-react";
+import { Gift, Star, ShoppingCart, Car, ShoppingBag, ChevronRight } from "lucide-react";
 import { cn } from "@/shared/utils/cn";
 import { formatMoney, formatNumber } from "@/shared/utils/formatMoney";
 import { Button } from "@/components/ui/Button";

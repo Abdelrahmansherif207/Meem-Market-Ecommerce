@@ -39,21 +39,24 @@ export function VerifiedPaymentSuccess({ orderId, transactionId }: VerifiedPayme
     let timer: ReturnType<typeof setTimeout> | undefined;
     let attempts = 0;
 
-    const check = async () => {
-      try {
-        const order = await orderService.getById(parsedOrderId, locale);
-        if (cancelled) return;
-        setPaymentMethod(order.payment_method);
+  const check = async () => {
+    try {
+      const order = await orderService.getById(parsedOrderId, locale);
+      if (cancelled) return;
+      setPaymentMethod(order.payment_method);
 
-        const confirmed =
-          CONFIRMED_STATUSES.has(order.status) ||
-          (order.status === "pending" && PAY_LATER_METHODS.has(order.payment_method));
-        if (confirmed) {
-          setState("success");
-          return;
-        }
+      // New order-flow catalog codes may be present in current_status.code;
+      // fall back to the legacy status string for older payloads.
+      const statusCode = order.current_status?.code ?? order.status;
+      const confirmed =
+        CONFIRMED_STATUSES.has(statusCode) ||
+        (statusCode === "pending" && PAY_LATER_METHODS.has(order.payment_method));
+      if (confirmed) {
+        setState("success");
+        return;
+      }
 
-        if (order.status === "pending" && order.payment_method === "online") {
+      if (statusCode === "pending" && order.payment_method === "online") {
           attempts += 1;
           if (attempts < VERIFY_POLL_MAX_ATTEMPTS) {
             timer = setTimeout(check, VERIFY_POLL_INTERVAL_MS);

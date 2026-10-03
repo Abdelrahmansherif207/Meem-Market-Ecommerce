@@ -176,7 +176,7 @@ export function CartPageContent({ minimumOrderAmount }: CartPageContentProps) {
     if (!header) return;
     const update = () =>
       setStickyTop(window.innerWidth >= 1024 ? header.offsetHeight + 24 : null);
-    update(); // eslint-disable-line react-hooks/set-state-in-effect
+    update();
     const observer = new ResizeObserver(update);
     observer.observe(header);
     window.addEventListener("resize", update);
@@ -536,16 +536,16 @@ export function CartPageContent({ minimumOrderAmount }: CartPageContentProps) {
           <div className="lg:col-span-2 space-y-8">
             <CartSection
               items={displayItems}
+              pendingItemIds={state.pendingItemIds}
+              onUpdateQuantity={handleUpdateQuantity}
+              onRemove={handleRemove}
+              minimumOrderAmount={minimumOrderAmount}
               couponSlot={
                 <MyCouponsList
                   appliedCouponCode={appliedCoupon?.code ?? null}
                   onApplied={refreshCart}
                 />
               }
-              pendingItemIds={state.pendingItemIds}
-              onUpdateQuantity={handleUpdateQuantity}
-              onRemove={handleRemove}
-              minimumOrderAmount={minimumOrderAmount}
             />
           </div>
 
