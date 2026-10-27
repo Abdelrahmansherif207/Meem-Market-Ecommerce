@@ -28,7 +28,7 @@ export default function FooterBottomRow({ data }: Props) {
           unoptimized
         />
       </a>
-      <span className="me-2 text-xs leading-normal font-normal text-white">{data.title}</span>
+      <span className="me-2 text-xs leading-normal font-normal text-footer-muted">{data.title}</span>
     </div>
   );
 }

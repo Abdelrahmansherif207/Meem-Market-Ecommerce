@@ -4,8 +4,8 @@ import { useState } from "react";
 import Image from "next/image";
 import { Link } from "@/i18n/navigation";
 import { Heart, Star } from "lucide-react";
-import { useLocale } from "next-intl";
 import { cn } from "@/shared/utils/cn";
+import { Price } from "./Price";
 
 export interface FlashSaleCardItem {
   id: number | string;
@@ -27,18 +27,10 @@ interface FlashSaleCardProps {
 
 export default function FlashSaleCard({ item, priority }: FlashSaleCardProps) {
   const [wishlisted, setWishlisted] = useState(false);
-  const locale = useLocale();
   const discountPercent =
     item.price && item.originalPrice && item.originalPrice > item.price
       ? Math.round((1 - item.price / item.originalPrice) * 100)
       : 0;
-
-  const formatPrice = (val: number) =>
-    val.toLocaleString(locale === "ar" ? "ar-KW" : "en-US", {
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 3,
-      numberingSystem: locale === "ar" ? "arab" : "latn",
-    });
 
   return (
     <div className="group/card flex flex-col w-full bg-white rounded-lg border border-border-subtle shadow-elev-1 transition-all duration-300 hover:-translate-y-1 hover:shadow-elev-2 overflow-hidden">
@@ -114,15 +106,14 @@ export default function FlashSaleCard({ item, priority }: FlashSaleCardProps) {
 
         {/* Pricing */}
         {item.price != null && (
-          <div className="flex items-baseline gap-1.5 flex-wrap" dir="ltr">
-            <span className="text-sm font-bold text-text-primary">
-              {formatPrice(item.price)} EGP
-            </span>
+          <div className="flex items-baseline gap-1.5 flex-wrap">
+            <Price amount={item.price} className="text-sm font-bold text-text-primary" />
             {item.originalPrice != null && item.originalPrice > item.price && (
               <>
-                <span className="text-xs text-text-muted line-through">
-                  {formatPrice(item.originalPrice)}
-                </span>
+                <Price
+                  amount={item.originalPrice}
+                  className="text-xs text-text-muted line-through"
+                />
                 <span className="text-xs font-semibold text-success">
                   {discountPercent}%
                 </span>

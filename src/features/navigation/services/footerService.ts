@@ -1,4 +1,5 @@
 import { getCachedSettings } from "@/features/settings/services/settingsService";
+import { DEFAULT_FOOTER_LOGO, DEFAULT_LOGO } from "@/features/settings/constants";
 import type { FooterData, SocialLink } from "../types";
 
 export interface AssembledFooterContent {
@@ -13,8 +14,8 @@ export interface AssembledFooterContent {
 export async function assembleFooterContent(locale: string): Promise<AssembledFooterContent> {
   const data = await footerService.getFooter(locale);
 
-  let logoSrc = "/new-footer-logo.png";
-  let mainLogoSrc = "/meem-new.png";
+  let logoSrc = DEFAULT_FOOTER_LOGO;
+  let mainLogoSrc = DEFAULT_LOGO;
   let siteName = "";
   let copyright = "";
   const settingsSocial: { platform: string; url: string }[] = [];
@@ -119,7 +120,7 @@ function getMockFooterData(lang: string): FooterData {
         id: 3,
         title: isAr ? "معلومات عنا" : "About Us",
         links: [
-          { id: 6, label: isAr ? "عن ميم ماركت" : "About Meem Market", slug: "/info/about" },
+          { id: 6, label: isAr ? "عن روض الأصيل" : "About Rawd Al-Aseel", slug: "/info/about" },
           { id: 7, label: isAr ? "شركتنا" : "Our Company", slug: "/info/company" },
           { id: 8, label: isAr ? "المسؤولية المجتمعية" : "Community & Society", slug: "/info/community" },
           { id: 9, label: isAr ? "النشرة البريدية" : "Newsletter", slug: "/info/newsletter" },
@@ -157,10 +158,10 @@ function getMockFooterData(lang: string): FooterData {
     ],
     contactInfo: {
       stayInTouchText: isAr ? "ابق على تواصل معنا" : "Stay in touch with us",
-      whatsappUrl: "https://api.whatsapp.com/send?phone=%2B201111185469",
+      whatsappUrl: "https://api.whatsapp.com/send?phone=%2B966550000000", // placeholder — replace with the official brand number
       assistanceText: isAr ? "تحدث معنا للمساعدة" : "Have a question? We are here to help.",
       callUsText: isAr ? "اتصل بنا للمساعدة" : "Call us for assistance",
-      phoneNumber: "16061",
+      phoneNumber: "+966 55 000 0000",
     },
     bottomRow: {
       title: isAr ? "حمل تطبيقنا" : "Download Our App",

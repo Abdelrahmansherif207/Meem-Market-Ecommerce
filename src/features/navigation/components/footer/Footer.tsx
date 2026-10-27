@@ -16,7 +16,7 @@ export default async function Footer({ params }: FooterProps) {
     await assembleFooterContent(locale);
 
   return (
-    <footer className="hidden bg-black text-white mt-10 lg:block">
+    <footer className="hidden bg-footer-surface text-white mt-10 lg:block">
       <div className="px-4 py-6 md:px-10">
         {/* ── Mobile Accordion ── */}
         <div className="lg:hidden">
@@ -34,20 +34,22 @@ export default async function Footer({ params }: FooterProps) {
           <div className="grid grid-cols-5 gap-4">
             <div>
               <Logo src={logoSrc || ""} alt={siteName || "Logo"} textFallback={logoSrc ? undefined : (siteName || undefined)} width={140} height={90} />
-              <p className="mt-4 text-xs leading-normal font-normal text-white">{data.contactInfo.stayInTouchText}</p>
+              <p className="mt-4 text-xs leading-normal font-normal text-footer-muted">{data.contactInfo.stayInTouchText}</p>
               <div className="mt-2 flex">
                 {mergedSocialLinks.map((s) => (
                   <a
                     key={s.platform}
                     href={s.url || "#"}
                     aria-label={s.label}
-                    className="pr-2 transition-opacity hover:opacity-80"
+                    className="pr-2 transition-colors hover:text-secondary"
                   >
                     <SocialIcon platform={s.platform} className="h-6 w-6" />
                   </a>
                 ))}
               </div>
-              <FooterContactCard contactInfo={data.contactInfo} />
+              <div className="mt-4">
+                <FooterContactCard contactInfo={data.contactInfo} />
+              </div>
             </div>
 
             {data.columns.slice(1).map((col, index) => (
@@ -63,7 +65,7 @@ export default async function Footer({ params }: FooterProps) {
 
           <div className="flex items-center justify-between mt-6">
             {copyright && (
-              <p className="text-xs text-white/60">{copyright}</p>
+              <p className="text-xs text-footer-muted">{copyright}</p>
             )}
             <FooterBottomRow data={data.bottomRow} />
           </div>

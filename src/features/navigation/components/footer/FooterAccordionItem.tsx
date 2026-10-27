@@ -17,7 +17,7 @@ export default function FooterAccordionItem({
   const [open, setOpen] = useState(defaultOpen);
 
   return (
-    <div className="border-b border-white">
+    <div className="border-b border-footer-border">
       <button
         type="button"
         onClick={() => setOpen((prev) => !prev)}

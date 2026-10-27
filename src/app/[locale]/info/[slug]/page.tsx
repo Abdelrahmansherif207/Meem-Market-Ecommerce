@@ -13,7 +13,7 @@ export async function generateMetadata({
   const page = getInfoPageContent(slug, locale);
   if (page) {
     return {
-      title: page.title,
+      title: { absolute: page.title },
       description: page.title,
     };
   }

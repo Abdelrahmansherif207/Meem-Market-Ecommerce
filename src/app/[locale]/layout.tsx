@@ -19,7 +19,7 @@ import {
   NotificationToast,
 } from "@/features/notifications";
 import { ChannelThemeProvider } from "@/features/fast-shipping/components/ChannelThemeProvider";
-import { IBM_Plex_Sans_Arabic } from "next/font/google";
+import { Amiri, Playfair_Display } from "next/font/google";
 import { cn } from "@/shared/utils/cn";
 import { getSiteMeta } from "@/features/settings/lib/metadata";
 import { getCachedSettings } from "@/features/settings/services/settingsService";
@@ -28,10 +28,15 @@ export function generateStaticParams() {
   return routing.locales.map((locale) => ({ locale }));
 }
 
-const ibmPlexSansArabic = IBM_Plex_Sans_Arabic({
-  weight: ["300", "400", "500", "600", "700"],
-  subsets: ["arabic"],
-  variable: "--font-ibm-arabic",
+const amiri = Amiri({
+  weight: ["400", "700"],
+  subsets: ["arabic", "latin"],
+  variable: "--font-amiri",
+});
+
+const playfair = Playfair_Display({
+  subsets: ["latin"],
+  variable: "--font-playfair",
 });
 
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
@@ -116,8 +121,8 @@ export default async function RootLayout({
   }
   
   return (
-      <html lang={locale} dir={dir} className="overflow-x-clip">
-      <body className={cn("flex min-h-dvh flex-col overflow-x-clip", ibmPlexSansArabic.variable)}>
+      <html lang={locale} dir={dir} className={cn("overflow-x-clip", amiri.variable, playfair.variable)}>
+      <body className="flex min-h-dvh flex-col overflow-x-clip">
         <link rel="preconnect" href={process.env.NEXT_PUBLIC_API_URL} />
         <NextIntlClientProvider locale={locale} messages={messages}>
           <div className="hidden lg:block sticky top-0 z-50">

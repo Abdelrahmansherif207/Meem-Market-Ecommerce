@@ -1,19 +1,15 @@
 import type { Metadata } from "next";
 import { getCachedSettings } from "../services/settingsService";
+import {
+  DEFAULT_FAVICON,
+  DEFAULT_FOOTER_LOGO,
+  DEFAULT_LOGO,
+  DEFAULT_SITE_DESCRIPTION,
+  DEFAULT_SITE_NAME,
+} from "../constants";
 
-export const DEFAULT_SITE_NAME: Record<string, string> = {
-  ar: "ميم ماركت",
-  en: "Meem Market",
-};
-
-export const DEFAULT_SITE_DESCRIPTION: Record<string, string> = {
-  ar: "تسوق أفضل المنتجات في ميم ماركت - إلكترونيات، أزياء، منتجات المنزل والمزيد",
-  en: "Shop the best products at Meem Market — electronics, fashion, home goods, and more.",
-};
-
-export const DEFAULT_FAVICON = "/meem-icon.jpeg";
-export const DEFAULT_LOGO = "/meem-new.png";
-export const DEFAULT_FOOTER_LOGO = "/new-footer-logo.png";
+// Re-exported so existing imports from `lib/metadata` keep working.
+export { DEFAULT_FAVICON, DEFAULT_FOOTER_LOGO, DEFAULT_LOGO, DEFAULT_SITE_DESCRIPTION, DEFAULT_SITE_NAME };
 
 export interface SiteMeta {
   siteName: string;
@@ -42,7 +38,7 @@ export async function getSiteMeta(locale: string): Promise<SiteMeta> {
     if (settings.favicon) meta.favicon = settings.favicon;
     if (settings.logo) meta.logo = settings.logo;
   } catch {
-    // settings unavailable — keep locale-aware Meem Market defaults
+    // settings unavailable — keep locale-aware Rawd Al-Aseel defaults
   }
 
   return meta;

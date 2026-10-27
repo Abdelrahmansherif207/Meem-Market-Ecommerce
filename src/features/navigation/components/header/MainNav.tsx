@@ -16,6 +16,7 @@ import { useServerCartStore } from "@/features/cart/store/useServerCartStore";
 import { cn } from "@/shared/utils/cn";
 import { Link } from "@/i18n/navigation";
 import { LocationDisplay } from "@/features/location";
+import { DEFAULT_LOGO } from "@/features/settings/constants";
 
 export default function MainNav({ settingsLogo, currencyEnabled = false }: { settingsLogo?: string | null; currencyEnabled?: boolean }) {
   const mounted = useSyncExternalStore(
@@ -36,7 +37,7 @@ export default function MainNav({ settingsLogo, currencyEnabled = false }: { set
   return (
     <div className="grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-3 md:gap-6">
       <div className="flex items-center gap-2 md:gap-3 shrink-0">
-        <Logo src={settingsLogo || "/meem-new.png"} alt="Logo" priority width={140} height={91} />
+        <Logo src={settingsLogo || DEFAULT_LOGO} alt="Logo" priority width={140} height={91} />
         <LocationDisplay />
       </div>
 

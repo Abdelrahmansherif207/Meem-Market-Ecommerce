@@ -16,7 +16,7 @@ export default function FooterAccordion({ columns }: Props) {
               <li key={link.id}>
                 <Link
                   href={link.slug || "#"}
-                  className="block text-xs leading-normal font-normal text-white transition-colors hover:text-white hover:underline"
+                  className="block text-xs leading-normal font-normal text-footer-muted transition-colors duration-200 hover:text-secondary hover:underline"
                 >
                   {link.label}
                 </Link>

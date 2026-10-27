@@ -40,7 +40,7 @@ export default function FooterMobileContent({
         defaultOpen
       >
         <div>
-          <p className="mt-2 text-xs leading-normal font-normal text-white">
+          <p className="mt-2 text-xs leading-normal font-normal text-footer-muted">
             {data.contactInfo.stayInTouchText}
           </p>
           <div className="mt-2 flex">
@@ -72,7 +72,7 @@ export default function FooterMobileContent({
         </div>
       )}
       {showCopyright && copyright && (
-        <p className="text-xs text-white/60 text-center mt-4 pb-4">{copyright}</p>
+        <p className="text-xs text-footer-muted text-center mt-4 pb-4">{copyright}</p>
       )}
     </div>
   );

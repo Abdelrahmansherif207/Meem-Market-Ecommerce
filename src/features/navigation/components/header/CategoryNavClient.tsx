@@ -1,8 +1,10 @@
 ﻿"use client";
 
-import { useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { useLocale } from "next-intl";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import type { CategoryMenuItem } from "@/features/categories/types";
 import CategoryMenuClient from "@/features/categories/components/CategoryMenuClient";
 import SubCategoryPane from "@/features/categories/components/SubCategoryPane";
@@ -13,14 +15,63 @@ type CategoryNavClientProps = {
   categories: CategoryMenuItem[];
 };
 
+const SCROLL_AMOUNT = 240;
+const EDGE_EPSILON = 1;
+
 export default function CategoryNavClient({
   allCategoriesLabel,
   categories,
 }: CategoryNavClientProps) {
+  const locale = useLocale();
+  const isRtl = locale === "ar";
   const [hoveredCategory, setHoveredCategory] = useState<CategoryMenuItem | null>(null);
   const [isAllMenuOpen, setIsAllMenuOpen] = useState(false);
+  const scrollRef = useRef<HTMLDivElement | null>(null);
+  const [canScrollLeft, setCanScrollLeft] = useState(false);
+  const [canScrollRight, setCanScrollRight] = useState(false);
+
+  // Whether content continues beyond the visible left/right edges. RTL-aware:
+  // in RTL the content starts at the right edge (scrollLeft = 0) and grows
+  // negative toward the end, per the CSSOM scrolling spec.
+  const updateScrollState = useCallback(() => {
+    const el = scrollRef.current;
+    if (!el) return;
+    const maxOffset = el.scrollWidth - el.clientWidth;
+    if (isRtl) {
+      setCanScrollLeft(Math.abs(el.scrollLeft) < maxOffset - EDGE_EPSILON);
+      setCanScrollRight(el.scrollLeft < -EDGE_EPSILON);
+    } else {
+      setCanScrollLeft(el.scrollLeft > EDGE_EPSILON);
+      setCanScrollRight(el.scrollLeft < maxOffset - EDGE_EPSILON);
+    }
+  }, [isRtl]);
+
+  useEffect(() => {
+    const el = scrollRef.current;
+    if (!el) return;
+    updateScrollState();
+    el.addEventListener("scroll", updateScrollState, { passive: true });
+    const observer = new ResizeObserver(updateScrollState);
+    observer.observe(el);
+    window.addEventListener("resize", updateScrollState);
+    return () => {
+      el.removeEventListener("scroll", updateScrollState);
+      observer.disconnect();
+      window.removeEventListener("resize", updateScrollState);
+    };
+  }, [updateScrollState]);
+
+  const scrollTo = (direction: "left" | "right") => {
+    scrollRef.current?.scrollBy({
+      left: direction === "left" ? -SCROLL_AMOUNT : SCROLL_AMOUNT,
+      behavior: "smooth",
+    });
+  };
 
   if (!categories?.length) return null;
+
+  const arrowClasses =
+    "absolute top-1/2 z-10 flex h-7 w-7 -translate-y-1/2 items-center justify-center rounded-full border border-border bg-background text-text-secondary shadow-elev-1 transition-colors hover:bg-surface hover:text-primary";
 
   return (
     <nav aria-label="Categories" className="w-full">
@@ -59,7 +110,10 @@ export default function CategoryNavClient({
           className="relative flex-1 min-w-0"
           onMouseLeave={() => setHoveredCategory(null)}
         >
-          <div className="no-scrollbar overflow-x-auto overflow-y-hidden">
+          <div
+            ref={scrollRef}
+            className="no-scrollbar overflow-x-auto overflow-y-hidden"
+          >
             <ul className="flex w-max items-center whitespace-nowrap pe-2 text-base text-primary-dark gap-4 sm:gap-6 md:gap-8">
               {categories.map((item) => (
                 <li
@@ -87,6 +141,40 @@ export default function CategoryNavClient({
               ))}
             </ul>
           </div>
+
+          {canScrollLeft && (
+            <>
+              <div
+                aria-hidden="true"
+                className="pointer-events-none absolute inset-y-0 left-0 z-[5] w-8 bg-gradient-to-r from-background to-transparent"
+              />
+              <button
+                type="button"
+                aria-label={isRtl ? "Next" : "Previous"}
+                onClick={() => scrollTo("left")}
+                className={cn(arrowClasses, "left-0")}
+              >
+                <ChevronLeft size={16} />
+              </button>
+            </>
+          )}
+
+          {canScrollRight && (
+            <>
+              <div
+                aria-hidden="true"
+                className="pointer-events-none absolute inset-y-0 right-0 z-[5] w-8 bg-gradient-to-l from-background to-transparent"
+              />
+              <button
+                type="button"
+                aria-label={isRtl ? "Previous" : "Next"}
+                onClick={() => scrollTo("right")}
+                className={cn(arrowClasses, "right-0")}
+              >
+                <ChevronRight size={16} />
+              </button>
+            </>
+          )}
 
           {hoveredCategory && (
             <div className="absolute left-0 top-full z-50 pt-2 w-full max-w-6xl">

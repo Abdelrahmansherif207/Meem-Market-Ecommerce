@@ -17,7 +17,7 @@ export default function FooterColumn({ column, cookieSettingsLabel }: Props) {
           <li key={link.id}>
             <Link
               href={link.slug || "#"}
-              className="text-xs leading-normal font-normal text-white transition-colors hover:text-white hover:underline"
+              className="text-xs leading-normal font-normal text-footer-muted transition-colors duration-200 hover:text-secondary hover:underline"
             >
               {link.label}
             </Link>
@@ -27,7 +27,7 @@ export default function FooterColumn({ column, cookieSettingsLabel }: Props) {
       {cookieSettingsLabel && (
         <button
           type="button"
-          className="text-xs leading-normal font-normal text-white transition-colors hover:text-white hover:underline"
+          className="text-xs leading-normal font-normal text-footer-muted transition-colors duration-200 hover:text-secondary hover:underline"
         >
           {cookieSettingsLabel}
         </button>

@@ -74,7 +74,7 @@ export default function MobileFooterDrawer({
                 <X className="h-5 w-5" />
               </button>
             </div>
-            <div className="flex-1 overflow-y-auto px-4 py-2 text-text-primary [&_span]:text-text-primary [&_a]:text-text-primary [&_.border-b]:border-black/20 [&_button]:text-text-primary [&_svg]:text-text-primary">
+            <div className="flex-1 overflow-y-auto px-4 py-2 text-text-primary [&_span]:text-text-primary [&_a]:text-text-primary [&_p]:text-text-primary [&_.border-b]:border-black/20 [&_button]:text-text-primary [&_svg]:text-text-primary">
               <FooterMobileContent
                 data={data}
                 logoSrc={mainLogoSrc}
@@ -86,7 +86,7 @@ export default function MobileFooterDrawer({
               />
             </div>
             <div className="shrink-0 border-t border-black/20 px-4 py-3 text-text-primary [&_span]:text-text-primary">
-              <FooterContactCard contactInfo={data.contactInfo} vertical />
+              <FooterContactCard contactInfo={data.contactInfo} />
               {copyright && (
                 <p className="mt-2 pb-1 text-center text-xs text-text-secondary">
                   {copyright}

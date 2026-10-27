@@ -9,7 +9,7 @@ import { AuthTabs } from "./AuthTabs";
 import { AuthFeedback } from "./AuthFeedback";
 import { GoogleLoginButton } from "./GoogleLoginButton";
 import Logo from "@/components/ui/Logo";
-import { DEFAULT_LOGO } from "@/features/settings/lib/metadata";
+import { DEFAULT_LOGO } from "@/features/settings/constants";
 import { useAuthModalStore } from "../store/useAuthModalStore";
 import { useAuthStore } from "../store/useAuthStore";
 import { loginAction } from "../actions";
@@ -102,7 +102,7 @@ function handleOverlayClick(e: React.MouseEvent<HTMLDivElement>) {
         <div className="px-6 pb-7 pt-10">
           {/* Heading */}
           <div className="mb-4 flex justify-center">
-            <Logo src={logo || DEFAULT_LOGO} alt="Meem Market" width={180} height={70} className="rounded-lg" />
+            <Logo src={logo || DEFAULT_LOGO} alt="Rawd Al-Aseel" width={180} height={70} className="rounded-lg" />
           </div>
           <h2 className="mb-4 text-center text-xl font-bold text-text-primary">
             {t("welcomeHeading")}
