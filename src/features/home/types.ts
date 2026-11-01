@@ -176,7 +176,7 @@ export interface SectionFrontSetting {
   timer_end_at?: string;
   theme?: "dark" | "light";
   badge_text?: string;
-  layout?: "grid" | "list";
+  layout?: "grid" | "slider" | "list";
 }
 
 export interface SectionSetting {

@@ -43,15 +43,15 @@ function SectionBlock({
 
   switch (type) {
     case "sliders":
-      return <SliderHeroSection locale={locale} />;
+      return <SliderHeroSection locale={locale} title={title} setting={setting} endpoint={endpoint} />;
     case "banners_hero":
       return <BannerHeroSection locale={locale} />;
     case "banners_strip":
       return <BannerStripSection locale={locale} title={title} />;
     case "promotions":
-      return <PromotionsSection locale={locale} />;
+      return <PromotionsSection locale={locale} title={title} setting={setting} endpoint={endpoint} />;
     case "brands":
-      return <BrandsStripSection locale={locale} title={title} />;
+      return <BrandsStripSection locale={locale} title={title} setting={setting} endpoint={endpoint} />;
     case "flash-sale":
       return <FlashSaleBannerSection locale={locale} />;
     case "ending_today":
@@ -87,9 +87,9 @@ function getSectionSkeleton(type: string, setting?: SectionFrontSetting): React.
     case "banners_strip":
       return <BannerStripSkeleton />;
     case "promotions":
-      return <PromotionsSectionSkeleton />;
+      return <PromotionsSectionSkeleton setting={setting} />;
     case "brands":
-      return <BrandsStripSkeleton />;
+      return <BrandsStripSkeleton setting={setting} />;
     case "flash-sale":
       return <FlashSaleBannerSkeleton />;
     case "ending_today":
@@ -102,9 +102,9 @@ function getSectionSkeleton(type: string, setting?: SectionFrontSetting): React.
     case "categories":
       return <ContentSectionSkeleton setting={setting} />;
     case "products":
-      return <ProductSliderSkeleton />;
+      return <ProductSliderSkeleton setting={setting} />;
     case "banners":
-      return <BannerSectionSkeleton />;
+      return <BannerSectionSkeleton setting={setting} />;
     case "tags":
       return <TagsBannerSkeleton />;
     default:

@@ -31,6 +31,8 @@ export default async function ContentSection({
       isCircle={isCircle}
       autoplay={setting?.autoplay}
       sliderSpeed={setting?.slider_speed}
+      columnsCount={setting?.columns_count}
+      layout={setting?.layout}
     />
   );
 }

@@ -24,7 +24,8 @@ export default function ProductSlider({
   const isRtl = locale === "ar";
   const [swiper, setSwiper] = useState<SwiperType | null>(null);
   const [isLocked, setIsLocked] = useState(true);
-  const cols = columnsCount ?? 5;
+  // Card widths are designed for up to 8 columns; clamp admin `columns_count`.
+  const cols = Math.max(1, Math.min(8, Math.round(columnsCount ?? 5)));
 
   const onPrevious = () => swiper?.slidePrev();
   const onNext = () => swiper?.slideNext();
@@ -59,9 +60,9 @@ export default function ProductSlider({
         loop={safeItems.length >= 6}
         watchOverflow={true}
         breakpoints={{
-          480: { slidesPerView: 3 },
-          768: { slidesPerView: 4 },
-          1024: { slidesPerView: 8 },
+          480: { slidesPerView: Math.min(3, cols) },
+          768: { slidesPerView: Math.min(4, cols) },
+          1024: { slidesPerView: cols },
         }}
         className="w-full"
       >
