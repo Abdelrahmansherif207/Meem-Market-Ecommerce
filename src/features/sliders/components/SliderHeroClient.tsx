@@ -12,6 +12,8 @@ import type { Slider } from "../types";
 interface SliderHeroClientProps {
   sliders: Slider[];
   locale: string;
+  autoplay?: boolean;
+  sliderSpeed?: number;
 }
 
 const AUTO_PLAY_MS = 5000;
@@ -30,11 +32,20 @@ function SliderSlideImage({ slider, isFirst }: { slider: Slider; isFirst: boolea
   );
 }
 
-export default function SliderHeroClient({ sliders, locale }: SliderHeroClientProps) {
+export default function SliderHeroClient({
+  sliders,
+  locale,
+  autoplay,
+  sliderSpeed,
+}: SliderHeroClientProps) {
   const isRtl = locale === "ar";
   const total = sliders.length;
   const [currentIndex, setCurrentIndex] = useState(0);
   const [swiper, setSwiper] = useState<SwiperType | null>(null);
+
+  // Front settings: honor autoplay: false and a custom slider_speed.
+  const autoplayEnabled = autoplay !== false;
+  const autoplayDelay = sliderSpeed ?? AUTO_PLAY_MS;
 
   const goTo = (index: number) => {
     if (!swiper) return;
@@ -62,9 +73,9 @@ export default function SliderHeroClient({ sliders, locale }: SliderHeroClientPr
           slidesPerView={1}
           keyboard={{ enabled: true }}
           autoplay={
-            total > 1
+            autoplayEnabled && total > 1
               ? {
-                  delay: AUTO_PLAY_MS,
+                  delay: autoplayDelay,
                   disableOnInteraction: false,
                   pauseOnMouseEnter: true,
                 }
