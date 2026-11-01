@@ -3,15 +3,21 @@ import { productService } from "@/features/products/services/productService";
 import { resolveProductDescriptionHtml, stripProductHtml } from "@/features/products/utils";
 import { ApiError } from "@/shared/lib/api";
 import type { Metadata } from "next";
+import { withStaticLocale } from "@/i18n/staticLocale";
 
 interface PageProps {
   params: Promise<{ locale: string; slug: string }>;
 }
 
+/**
+ * Product pages are price-bearing and fetched with `no-store` (see CACHE_TTL
+ * doctrine), so they always render fresh server-side — force-dynamic keeps
+ * that contract explicit. Per-guest price/stock personalization is client-side.
+ */
 export const dynamic = "force-dynamic";
 
 export async function generateMetadata({ params }: { params: Promise<{ locale: string; slug: string }> }): Promise<Metadata> {
-  const { locale, slug } = await params;
+  const { locale, slug } = await withStaticLocale(params);
 
   try {
     const product = await productService.getProductBySlug(slug, locale);
@@ -43,7 +49,7 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
 }
 
 export default async function ProductPage({ params }: PageProps) {
-  const { locale, slug } = await params;
+  const { locale, slug } = await withStaticLocale(params);
 
   return <ProductDetailsPage slug={slug} locale={locale} />;
 }

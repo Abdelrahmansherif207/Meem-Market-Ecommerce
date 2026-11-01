@@ -1,9 +1,10 @@
 import { CheckoutPage } from "@/features/checkout";
 import { getTranslations } from "next-intl/server";
 import type { Metadata } from "next";
+import { withStaticLocale } from "@/i18n/staticLocale";
 
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
-  const { locale } = await params;
+  const { locale } = await withStaticLocale(params);
   const t = await getTranslations({ locale, namespace: "checkout" });
 
   return {
@@ -13,6 +14,6 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
 }
 
 export default async function Page({ params }: { params: Promise<{ locale: string }> }) {
-  const { locale } = await params;
+  const { locale } = await withStaticLocale(params);
   return <CheckoutPage locale={locale} />;
 }

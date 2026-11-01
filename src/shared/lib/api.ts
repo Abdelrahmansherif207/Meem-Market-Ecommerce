@@ -49,13 +49,16 @@ function hasClientSession(): boolean {
 
 async function getChannel() {
   if (typeof window === "undefined") {
-    try {
-      const { cookies } = await import("next/headers");
-      const cookieStore = await cookies();
-      return cookieStore.get(CHANNEL_STORAGE_KEY)?.value ?? "home";
-    } catch {
-      return "home";
-    }
+    // Never read request cookies() here: `cookies()` is a request-time API and
+    // would opt every server-rendered route out of static rendering. The
+    // channel is a client-side UI preference (see useChannelStore); browser
+    // callers send the real value via `X-Channel` from localStorage.
+    //
+    // NORETURN-NOTE: no server-side fetch requires the guest channel today
+    // (fastShippingService passes `channel: false`); if one is added, pass the
+    // channel explicitly via a Server Action argument instead of reading it
+    // from the request here.
+    return "home";
   }
   return window.localStorage.getItem(CHANNEL_STORAGE_KEY) ?? "home";
 }

@@ -359,6 +359,7 @@ html[lang="ar"] {
   }
 }
 
+
 @keyframes auth-sway-spin {
   0% {
     transform: rotate(-16deg) scale(0.96);
