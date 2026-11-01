@@ -18,15 +18,20 @@ interface CategoryGridSliderProps {
   isCircle?: boolean;
   autoplay?: boolean;
   sliderSpeed?: number;
+  /** Admin front setting `columns_count` (columns on large screens). */
+  columnsCount?: number;
+  /** Admin front setting `layout`: "grid" renders a static grid without the carousel. */
+  layout?: "grid" | "slider" | "list";
 }
 
 const ROW_LIMIT = 2;
 
-function getColumnsForWidth(width: number) {
-  if (width >= 1024) return 8;
-  if (width >= 768) return 6;
-  if (width >= 640) return 4;
-  return 3;
+function getColumnsForWidth(width: number, columnsCount?: number) {
+  const max = Math.max(1, columnsCount ?? 8);
+  if (width >= 1024) return max;
+  if (width >= 768) return Math.min(6, max);
+  if (width >= 640) return Math.min(4, max);
+  return Math.min(3, max);
 }
 
 export default function CategoryGridSlider({
@@ -35,19 +40,22 @@ export default function CategoryGridSlider({
   isCircle,
   autoplay = true,
   sliderSpeed = 4500,
+  columnsCount,
+  layout,
 }: CategoryGridSliderProps) {
   const locale = useLocale();
   const isRtl = locale === "ar";
   const [swiper, setSwiper] = useState<SwiperType | null>(null);
-  const [columns, setColumns] = useState(3);
+  const [columns, setColumns] = useState(() => getColumnsForWidth(0, columnsCount));
 
   useEffect(() => {
-    const update = () => setColumns(getColumnsForWidth(window.innerWidth));
+    const update = () => setColumns(getColumnsForWidth(window.innerWidth, columnsCount));
     update();
     window.addEventListener("resize", update);
     return () => window.removeEventListener("resize", update);
-  }, []);
+  }, [columnsCount]);
 
+  const isGrid = layout === "grid";
   const itemsPerSlide = columns * ROW_LIMIT;
 
   const pages = useMemo(() => {
@@ -62,6 +70,26 @@ export default function CategoryGridSlider({
 
   const onPrevious = () => swiper?.slidePrev();
   const onNext = () => swiper?.slideNext();
+
+  // Shared per-breakpoint column sizing for both layouts (inline style keeps
+  // arbitrary column counts working without generated utility classes).
+  const gridStyle = { gridTemplateColumns: `repeat(${columns}, minmax(0, 1fr))` };
+
+  const renderItems = (page: HomeCategory[]) =>
+    page.map((category) => (
+      <ContentItem key={category.id} item={category} isCircle={isCircle} />
+    ));
+
+  if (isGrid) {
+    return (
+      <div className="relative w-full">
+        {title && <SectionTitle title={title} />}
+        <div className="grid gap-x-4 gap-y-4 xl:gap-x-6" style={gridStyle}>
+          {renderItems(categories)}
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="relative w-full">
@@ -86,10 +114,8 @@ export default function CategoryGridSlider({
         >
           {pages.map((page, index) => (
             <SwiperSlide key={index}>
-              <div className="grid grid-cols-3 gap-x-4 gap-y-4 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 xl:gap-x-6">
-                {page.map((category) => (
-                  <ContentItem key={category.id} item={category} isCircle={isCircle} />
-                ))}
+              <div className="grid gap-x-4 gap-y-4 xl:gap-x-6" style={gridStyle}>
+                {renderItems(page)}
               </div>
             </SwiperSlide>
           ))}

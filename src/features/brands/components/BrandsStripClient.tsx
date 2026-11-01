@@ -1,20 +1,27 @@
 "use client";
 
 import SectionTitle from "@/components/ui/SectionTitle";
+import { gridColumnsClass } from "@/shared/utils/gridClasses";
 import BrandCard from "./BrandCard";
 import type { Brand } from "../types";
 
 interface BrandsStripClientProps {
   brands: Brand[];
   title?: string;
+  /** Admin front setting `columns_count`. */
+  columnsCount?: number;
 }
 
-export default function BrandsStripClient({ brands, title }: BrandsStripClientProps) {
+export default function BrandsStripClient({ brands, title, columnsCount }: BrandsStripClientProps) {
+  const limit = Math.max(1, Math.min(8, Math.round(columnsCount ?? 8)));
+
   return (
     <section className="group relative w-full pb-4">
       {title ? <SectionTitle title={title} /> : null}
-      <div className="grid grid-cols-2 sm:grid-cols-4">
-        {brands.slice(0, 8).map((brand) => (
+      <div
+        className={`grid gap-4 ${gridColumnsClass(limit, "two")}`}
+      >
+        {brands.slice(0, limit).map((brand) => (
           <BrandCard key={brand.id} brand={brand} />
         ))}
       </div>

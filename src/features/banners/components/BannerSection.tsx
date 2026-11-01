@@ -81,6 +81,9 @@ export default async function BannerSection({ endpoint, locale, title, setting }
           locale={locale}
           initialItems={productItems}
           columnsCount={setting?.columns_count}
+          autoplay={setting?.autoplay}
+          sliderSpeed={setting?.slider_speed}
+          badgeText={setting?.badge_text}
         />
       )}
     </section>
