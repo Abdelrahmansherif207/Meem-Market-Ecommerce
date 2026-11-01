@@ -5,6 +5,7 @@ import { checkoutService } from "../services/checkoutService";
 import { governorateService } from "../services/governorateService";
 import { orderFlowService } from "../services/orderFlowService";
 import { addressService } from "@/features/profile/services/addressService";
+import { isGatewayEligible } from "../utils/gatewayEligibility";
 import type { Address } from "@/features/profile/types";
 import type { AppliedCoupon } from "@/features/coupons/types";
 import type { CartApiCart } from "@/features/cart/types";
@@ -187,7 +188,7 @@ export function useCheckoutData({
     checkoutService.getPaymentGateways(locale)
       .then((list) => {
         if (cancelled) return;
-        const eligible = list.filter((g) => g.supports_catalog_currency);
+        const eligible = list.filter(isGatewayEligible);
         setGateways(eligible);
         setSelectedGateway((prev) =>
           prev && eligible.some((g) => g.code === prev) ? prev : eligible[0]?.code ?? null,

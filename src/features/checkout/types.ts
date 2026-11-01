@@ -76,6 +76,10 @@ export interface PaymentGatewayOption {
   display_name: string;
   supported_currencies?: string[];
   supports_catalog_currency: boolean;
+  /** Admin-enabled in the backend settings (requires stored credentials). */
+  enabled?: boolean;
+  /** Operationally usable right now (enabled + credentials + provider OK). */
+  available?: boolean;
 }
 
 export interface EligiblePromotion {
