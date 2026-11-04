@@ -43,3 +43,7 @@ next-env.d.ts
 .jira-config
 opencode.json
 Catch-Beauty-Ecommerce
+
+# downloaded reference material (never commit third-party site dumps)
+/niceone-src
+.buildlog.txt

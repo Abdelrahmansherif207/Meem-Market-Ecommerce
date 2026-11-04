@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 import { getTranslations } from "next-intl/server";
-import Breadcrumb from "@/components/ui/Breadcrumb";
+import NiceOneBreadcrumb from "./niceone/NiceOneBreadcrumb";
 import ErrorState from "@/components/ui/ErrorState";
 import RetryButton from "@/components/ui/RetryButton";
 import type { ProductCategory } from "../types";
@@ -48,7 +48,7 @@ export async function ProductDetailsPage({ slug, locale }: ProductDetailsPagePro
 
   return (
     <div className="py-6">
-      <Breadcrumb
+      <NiceOneBreadcrumb
         items={[
           { label: t("home"), href: "/" },
           ...buildCategoryBreadcrumbs(product.categories),

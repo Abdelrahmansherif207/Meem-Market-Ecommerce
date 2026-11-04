@@ -4,7 +4,8 @@ import RetryButton from "@/components/ui/RetryButton";
 import { guardLoad } from "@/shared/lib/guardedFetch";
 import { homePageService } from "./services/homePageService";
 import type { HomeContentPage } from "./types";
-import { SectionSuspense } from "@/features/pages/components/SectionRenderer";
+import { CatchSectionSuspense } from "./redesign/CatchSectionRenderer";
+import CatchHelpBanner from "./redesign/CatchHelpBanner";
 
 export async function HomePage({ locale }: { locale: string }) {
   const result = await guardLoad(() => homePageService.getHomePage(locale), {
@@ -28,10 +29,14 @@ export async function HomePage({ locale }: { locale: string }) {
   const page: HomeContentPage = result.data;
 
   return (
-    <main className="flex flex-col gap-y-12">
-      {page.sections.map((section) => (
-        <SectionSuspense key={section.id} section={section} locale={locale} />
-      ))}
-    </main>
+    <>
+      <main className="mx-auto flex w-full max-w-[1440px] flex-col gap-y-12 py-6">
+        {page.sections.map((section) => (
+          <CatchSectionSuspense key={section.id} section={section} locale={locale} />
+        ))}
+      </main>
+      {/* Screen's static help banner sits between content and footer */}
+      <CatchHelpBanner locale={locale} />
+    </>
   );
 }

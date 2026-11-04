@@ -34,7 +34,6 @@ export default function ProductsSidebar({
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const [brandSearchQuery, setBrandSearchQuery] = useState("");
-  const [collapsedSections, setCollapsedSections] = useState<string[]>([]);
   const [isCollapsed, setIsCollapsed] = useState(false);
 
   const entries = Object.entries(filters).filter(
@@ -43,6 +42,20 @@ export default function ProductsSidebar({
       Array.isArray(entry[1]) &&
       entry[1].length > 0,
   );
+
+  /**
+   * Default accordion state: all sections collapsed except the first one.
+   * Groups that already carry active selections from the URL stay open so
+   * applied filters are never hidden behind a collapsed header.
+   */
+  const [collapsedSections, setCollapsedSections] = useState<string[]>(() => {
+    const isActive = (key: string) =>
+      (searchParams.get(key)?.split(",").filter(Boolean).length ?? 0) > 0;
+    return entries
+      .slice(1)
+      .map(([key]) => key)
+      .filter((key) => !isActive(key));
+  });
 
   const navigateWithParams = (params: URLSearchParams) => {
     const query = params.toString();

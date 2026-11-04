@@ -1,0 +1,37 @@
+"use client";
+
+import { cn } from "@/shared/utils/cn";
+
+/**
+ * "Add to cart" icon from `public/add.svg` (same path data), inlined with
+ * `currentColor` so it follows the button's text color and states.
+ */
+export default function AddToCartIcon({ className }: { className?: string }) {
+  return (
+    <svg
+      width="20"
+      height="19"
+      viewBox="0 0 20 19"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      className={cn("h-5 w-5", className)}
+      aria-hidden
+    >
+      <path
+        d="M16.25 9.10417C15.3993 6.71326 14.3366 5.9375 11.1909 5.9375L8.04182 5.9375C4.78774 5.9375 3.52898 6.71964 2.62908 9.68786C1.81852 12.3614 1.41325 13.6981 1.83697 14.7348C2.09646 15.3696 2.55718 15.9201 3.16078 16.3166C4.36672 17.1086 7.48339 17.4831 10.4167 17.407"
+        stroke="currentColor"
+        strokeLinecap="round"
+      />
+      <path
+        d="M5.83333 6.33333V5.03787C5.83333 3.12998 7.51226 1.58333 9.58333 1.58333C11.6544 1.58333 13.3333 3.12998 13.3333 5.03787V6.33333"
+        stroke="currentColor"
+      />
+      <path
+        d="M11.6667 14.25L18.3333 14.25M15 17.4167L15 11.0833"
+        stroke="currentColor"
+        strokeLinecap="round"
+      />
+      <path d="M8.75 8.70833H10.4167" stroke="currentColor" strokeLinecap="round" />
+    </svg>
+  );
+}

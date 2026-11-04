@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback } from "react";
-import ProductCard from "@/components/ui/ProductCard";
+import CatchProductCard from "@/features/home/redesign/CatchProductCard";
 import { getBrandProductsAction } from "../actions/brandCurrencyActions";
 import { useCurrencyRefetch } from "@/features/currencies";
 import type { BrandProduct } from "../types";
@@ -36,30 +36,25 @@ export function BrandProductsIsland({
   );
 
   return (
-    <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6">
-      {products.map((product) => {
-        const discountPercent =
-          product.price_after_discount > 0 && product.price_after_discount < product.price
-            ? Math.round((1 - product.price_after_discount / product.price) * 100)
-            : 0;
-        return (
-          <ProductCard
-            key={product.id}
-            productId={product.id}
-            image={product.image.thumbnail}
-            title={product.name}
-            price={product.price_after_discount > 0 ? product.price_after_discount : product.price}
-            originalPrice={product.price}
-            currency={product.currency}
-            discountPercent={discountPercent}
-            slug={product.slug}
-            isInStock
-                inWishlist={product.in_wishlist}
-                tags={product.tags}
-                pricesLoading={isRefreshing}
-              />
-        );
-      })}
+    <div className="grid grid-cols-2 gap-3 sm:gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6">
+      {products.map((product) => (
+        <CatchProductCard
+          key={product.id}
+          item={{
+            id: product.id,
+            title: product.name,
+            image: product.image?.thumbnail ?? "",
+            price: product.price_after_discount > 0 ? product.price_after_discount : product.price,
+            originalPrice: product.price,
+            slug: product.slug,
+            currency: product.currency,
+            isInStock: true,
+            inWishlist: product.in_wishlist,
+            tags: product.tags,
+          }}
+          pricesLoading={isRefreshing}
+        />
+      ))}
     </div>
   );
 }

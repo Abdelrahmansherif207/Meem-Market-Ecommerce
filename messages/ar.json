@@ -18,6 +18,7 @@
     "categoryNav": {
       "allCategories": "جميع الفئات",
       "all": "الجميع",
+      "allProducts": "كل المنتجات",
       "electronics": "الإلكترونيات",
       "fashion": "الموضة والملابس",
       "home": "المنزل والحديقة",
@@ -92,6 +93,78 @@
   },
   "home": {
     "metaDescription": "تسوق أفضل المنتجات - إلكترونيات، أزياء، منتجات المنزل والمزيد"
+  },
+  "catchHeader": {
+    "announcement": "خصم 20% على طلبك الأول باستخدام الكود NEW20",
+    "brandNameAr": "كاتش بيوتي",
+    "brandNameEn": "CATCH BEAUTY",
+    "searchPlaceholder": "ماذا تبحث عنه ؟",
+    "awardBadge": "أفضل موقع مكياج في السعودية",
+    "deliverTo": "التوصيل إلى",
+    "profile": "حسابي",
+    "language": "اللغة",
+    "categories": "التصنيفات",
+    "allProducts": "كل المنتجات",
+    "cart": "السلة"
+  },
+  "catchHome": {
+    "viewAll": "عرض الكل",
+    "addToCart": "أضف إلى السلة",
+    "addToWishlist": "أضف إلى المفضلة",
+    "inWishlist": "في المفضلة",
+    "outOfStock": "غير متوفر",
+    "selectOptions": "اختر الخيارات",
+    "lowStock": "بقي {count} فقط",
+    "flashSale": "عرض سريع",
+    "copyCode": "نسخ كود القسيمة",
+    "help": {
+      "title": "هل تحتاج مساعدة ؟",
+      "subtitle": "يمكنك الحصول على المساعدة من خلال اختيار أي من هذه الخيارات",
+      "helpingCenter": "مركز المساعدة",
+      "email": "البريد الإلكتروني",
+      "whatsapp": "واتساب",
+      "chatWithUs": "تحدث معنا",
+      "callUs": "اتصل بنا"
+    }
+  },
+  "catchFooter": {
+    "popularCategories": "التصنيفات الشائعة",
+    "companyTitle": "كاتش بيوتي",
+    "profileTitle": "حسابي",
+    "stayConnected": "ابق على تواصل",
+    "downloadApps": "حمل تطبيقاتنا",
+    "categories": {
+      "makeup": "مكياج",
+      "perfume": "عطور",
+      "care": "عناية",
+      "nails": "أظافر",
+      "accessories": "إكسسوارات",
+      "lenses": "عدسات"
+    },
+    "company": {
+      "blogs": "المدونة",
+      "companyWebsite": "موقع الشركة",
+      "careers": "الوظائف",
+      "terms": "الشروط والأحكام",
+      "returnRefund": "سياسة الإرجاع والاسترداد",
+      "privacy": "الخصوصية"
+    },
+    "profileLinks": {
+      "profile": "الملف الشخصي",
+      "orders": "طلباتي",
+      "favourites": "المفضلة",
+      "affiliate": "برنامج التسويق بالعمولة",
+      "vendor": "انضم إلينا كتاجر",
+      "contentCreator": "سجل كصانع محتوى"
+    },
+    "apps": {
+      "getTag": "احصل عليه من",
+      "googlePlay": "Google Play",
+      "downloadOn": "حمّل من",
+      "appStore": "App Store"
+    },
+    "copyright": "حقوق النشر © 2026 كاتش بيوتي. جميع الحقوق محفوظة",
+    "crVat": "السجل التجاري: 0000000000 — الرقم الضريبي: 00000000000000"
   },
   "auth": {
     "metaTitle": "تسجيل الدخول والتسجيل",
@@ -289,6 +362,34 @@
     "increaseQuantity": "زيادة الكمية",
     "decreaseQuantity": "تقليل الكمية",
     "removeItem": "إزالة العنصر"
+  },
+  "niceOnePdp": {
+    "vatIncluded": "شامل ضريبة القيمة المضافة.",
+    "installmentsTitle": "تريد الدفع على أقساط؟",
+    "addToBag": "أضف إلى السلة",
+    "totalPrice": "السعر الإجمالي",
+    "viewAll": "عرض الكل",
+    "authenticProducts": "منتجات أصلية 100%",
+    "description": "الوصف",
+    "howToUse": "طريقة الاستخدام",
+    "aboutBrand": "عن العلامة التجارية",
+    "specifications": "المواصفات",
+    "size": "المقاس",
+    "usuallyBoughtTogether": "يُشترى عادةً معًا",
+    "recommendedProducts": "منتجات موصى بها",
+    "seeMore": "شاهد المزيد",
+    "reviewsTitle": "تقييمات العملاء ({count})",
+    "addReview": "أضف مراجعة",
+    "recentlyAdded": "الأحدث إضافةً أولاً",
+    "highestRating": "الأعلى تقييمًا",
+    "lowestRating": "الأدنى تقييمًا",
+    "helpful": "مفيد ({count})",
+    "reply": "رد",
+    "endsIn": "ينتهي خلال {time}",
+    "endsInLabel": "ينتهي خلال",
+    "flashDeal": "عرض فلاش",
+    "previousSlide": "السابق",
+    "nextSlide": "التالي"
   },
   "categories": {
     "metaTitle": "التصنيفات",
