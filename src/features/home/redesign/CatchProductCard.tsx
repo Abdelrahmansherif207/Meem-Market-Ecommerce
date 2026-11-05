@@ -100,26 +100,26 @@ export default function CatchProductCard({
     <Link
       href={productHref}
       aria-label={item.title}
-      className="group relative block min-w-[160px] max-w-[450px] rounded-[4px] bg-white"
+      className="group relative block h-full min-w-[160px] max-w-[450px] rounded-[4px] bg-white"
     >
-      <article className="flex flex-col p-2.5">
+      <article className="flex h-full flex-col p-2.5">
         {/* Top region: badges, heart, image, rating slot */}
         <div className="relative">
           {/* Badge (start) + heart (end) */}
           <div className="absolute inset-x-0 top-0 z-10 flex items-start justify-between">
             <div className="min-w-0 overflow-hidden">
               {item.flashSaleActive ? (
-                <span className="flex h-4 max-w-full items-center overflow-hidden rounded-full bg-discount px-2 text-[10px] text-white">
-                  <span className="me-1 whitespace-nowrap">{tPdp("endsInLabel")}</span>
+                <span className="flex h-4 max-w-full min-w-0 items-center overflow-hidden rounded-full bg-discount px-1.5 text-[10px] leading-none text-white">
                   <NiceOneCountdown
                     endDate={item.flashEndDate ?? null}
                     alwaysShow
                     fallbackText={tPdp("flashDeal")}
-                    className="h-4 gap-1 rounded-none bg-transparent px-0 py-0 text-[10px] font-semibold"
+                    prefix={tPdp("endsInLabel")}
+                    className="h-4 gap-1 whitespace-nowrap rounded-none bg-transparent px-0 py-0 text-[9px] font-semibold leading-none sm:text-[10px]"
                   />
                 </span>
               ) : badge ? (
-                <span className="flex h-4 max-w-full items-center overflow-hidden rounded-full bg-primary px-2 text-[10px] text-white">
+                <span className="flex h-4 max-w-full items-center overflow-hidden rounded-full bg-primary px-2 text-[10px] leading-none text-white">
                   <span className="truncate">{badge}</span>
                 </span>
               ) : null}
@@ -249,7 +249,7 @@ export default function CatchProductCard({
         )}
 
         {/* Prices — reserved block keeps rows aligned */}
-        <div className="flex items-end min-h-11">
+        <div className="mt-auto flex items-end min-h-11">
           <div>
             {pricesLoading ? (
               <div className="h-9 w-24 animate-pulse rounded bg-neutral-100" aria-hidden />

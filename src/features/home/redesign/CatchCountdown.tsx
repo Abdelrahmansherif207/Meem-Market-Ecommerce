@@ -11,7 +11,8 @@ interface CatchCountdownProps {
  * flash-sale shelves. Reuses the existing useCountdown hook.
  */
 export default function CatchCountdown({ endsAt }: CatchCountdownProps) {
-  const { days, hours, minutes, seconds, isExpired } = useCountdown(endsAt);
+  const { days, hours, minutes, seconds, isExpired, isReady } =
+    useCountdown(endsAt);
 
   if (isExpired) return null;
 
@@ -28,7 +29,7 @@ export default function CatchCountdown({ endsAt }: CatchCountdownProps) {
         <span key={cell.label} className="flex items-center gap-1">
           <span className="flex min-w-8 flex-col items-center rounded-lg bg-neutral-100 px-1.5 py-1 leading-none">
             <span className="text-sm font-bold tabular-nums text-neutral-900">
-              {String(cell.value).padStart(2, "0")}
+              {isReady ? String(cell.value).padStart(2, "0") : "--"}
             </span>
             <span className="mt-0.5 text-[9px] font-semibold text-neutral-400">
               {cell.label}

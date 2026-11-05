@@ -6,19 +6,23 @@ import { cn } from "@/shared/utils/cn";
 /**
  * Flash-deal countdown pill ("18 : 22 : 05") from the Stitch PDP screens.
  *
- * Rendered ONLY when the payload carries a real offer end date (`end_date`
- * with an active flash sale / discount). Lands hidden on the server
- * (mount-gated) so the server HTML and the hydrated state agree, and
- * disappears the instant the deal expires.
+ * Renders a timer only when the payload carries a real offer end date
+ * (`end_date` with an active flash sale / discount). The timer is mount-gated
+ * so server HTML and hydrated state agree, then disappears when the deal
+ * expires.
  *
  * `alwaysShow` + `fallbackText` support static badges (e.g. product-card
  * pills from listing payloads that carry `flash_sale_active` without dates):
  * without a date the component renders the fallback text instead of a timer.
+ *
+ * `prefix` (e.g. "Ends in") is rendered only while a live timer is visible,
+ * never beside the static fallback.
  */
 export function NiceOneCountdown({
   endDate,
   alwaysShow = false,
   fallbackText = null,
+  prefix = null,
   className,
 }: {
   endDate?: string | null;
@@ -26,52 +30,41 @@ export function NiceOneCountdown({
   alwaysShow?: boolean;
   /** Text rendered in static mode (no real date available). */
   fallbackText?: string | null;
+  /** Label rendered before the timer only while a real countdown is active. */
+  prefix?: string | null;
   className?: string;
 }) {
-  const [staticMode, setStaticMode] = useState(false);
-  const [remainingMs, setRemainingMs] = useState<number | null>(null);
+  const [now, setNow] = useState<number | null>(null);
+
+  const target = endDate ? new Date(endDate).getTime() : NaN;
+  const hasValidTarget = !Number.isNaN(target);
 
   useEffect(() => {
-    if (!endDate && !alwaysShow) return;
+    if (!hasValidTarget) return;
 
-    const target = endDate ? new Date(endDate).getTime() : NaN;
-    if (Number.isNaN(target)) {
-      // No usable date — static fallback.
-      if (alwaysShow && fallbackText) setStaticMode(true);
-      return;
-    }
-
-    const tick = () => {
-      const diff = target - Date.now();
-      if (diff <= 0) {
-        // Expired with a real date: hide unless a fallback exists.
-        if (alwaysShow && fallbackText) setStaticMode(true);
-        setRemainingMs(null);
-      } else {
-        setRemainingMs(diff);
-      }
-    };
-
+    const tick = () => setNow(Date.now());
     tick();
     const id = setInterval(tick, 1000);
     return () => clearInterval(id);
-  }, [endDate, alwaysShow, fallbackText]);
+  }, [hasValidTarget]);
 
-  if (staticMode) {
-    if (!fallbackText) return null;
-    return (
+  const staticFallback =
+    alwaysShow && fallbackText ? (
       <span
         className={cn(
-          "inline-flex items-center justify-center text-2xs font-bold text-white tabular-nums",
+          "inline-flex items-center justify-center whitespace-nowrap text-2xs font-bold text-white tabular-nums",
           className,
         )}
       >
         {fallbackText}
       </span>
-    );
-  }
+    ) : null;
 
-  if (remainingMs === null) return null;
+  if (!hasValidTarget) return staticFallback;
+  if (now === null) return null;
+
+  const remainingMs = Math.max(0, target - now);
+  if (remainingMs <= 0) return staticFallback;
 
   const totalSeconds = Math.floor(remainingMs / 1000);
   const hours = Math.floor(totalSeconds / 3600);
@@ -80,20 +73,25 @@ export function NiceOneCountdown({
   const pad = (n: number) => String(n).padStart(2, "0");
 
   return (
-    <div
-      role="timer"
-      aria-label="Deal countdown"
-      dir="ltr"
+    <span
       className={cn(
-        "inline-flex items-center gap-1.5 rounded-md bg-discount px-3 py-1 text-2xs font-bold text-white tabular-nums",
+        "inline-flex items-center gap-1.5 rounded-md bg-discount px-3 py-1 text-2xs font-bold text-white tabular-nums whitespace-nowrap",
         className,
       )}
     >
-      {pad(hours)}
-      <span>:</span>
-      {pad(minutes)}
-      <span>:</span>
-      {pad(seconds)}
-    </div>
+      {prefix ? <span className="shrink-0">{prefix}</span> : null}
+      <span
+        role="timer"
+        aria-label="Deal countdown"
+        dir="ltr"
+        className="inline-flex shrink-0 items-center gap-1 tabular-nums"
+      >
+        {pad(hours)}
+        <span>:</span>
+        {pad(minutes)}
+        <span>:</span>
+        {pad(seconds)}
+      </span>
+    </span>
   );
 }

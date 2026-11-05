@@ -67,7 +67,7 @@ export default function ProductSlider({
         className="w-full"
       >
         {safeItems.map((product) => (
-          <SwiperSlide key={product.id}>
+          <SwiperSlide key={product.id} className="!h-auto">
             <CatchProductCard
               item={product}
               badgeText={badgeText}

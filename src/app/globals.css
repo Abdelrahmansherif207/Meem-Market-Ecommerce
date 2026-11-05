@@ -37,9 +37,11 @@ button {
   --color-border-subtle: #f5eeed;
   --color-discount: #b81d24;
 
-  /* Stitch screen typography: Plus Jakarta Sans (Latin) + Tajawal (Arabic) */
-  --font-family-body: var(--font-jakarta), var(--font-tajawal), sans-serif;
-  --font-family-heading: var(--font-jakarta), var(--font-tajawal), sans-serif;
+  /* IBM Plex Sans Arabic across both locales (Arabic and Latin glyphs) */
+  --font-sans: var(--font-ibm-arabic), "IBM Plex Sans Arabic", sans-serif;
+  --default-font-family: var(--font-ibm-arabic), "IBM Plex Sans Arabic", sans-serif;
+  --font-family-body: var(--font-ibm-arabic), "IBM Plex Sans Arabic", sans-serif;
+  --font-family-heading: var(--font-ibm-arabic), "IBM Plex Sans Arabic", sans-serif;
 
   /* Nice One screen recreation tokens — pink #E90276 mapped to Catch crimson */
   --color-ink: #1a1a1a;            /* screen dark */
@@ -89,11 +91,7 @@ button {
     -webkit-font-smoothing: antialiased;
   }
 
-  /* Arabic locale: Tajawal leads, Jakarta covers Latin glyphs */
-  html[dir="rtl"] body {
-    font-family: var(--font-tajawal), var(--font-jakarta), sans-serif;
-  }
-
+  /* Headings use the same IBM family in both locales */
   h1, h2, h3, h4 {
     font-family: var(--font-family-heading);
     text-wrap: balance;

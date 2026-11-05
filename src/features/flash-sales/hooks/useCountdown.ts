@@ -9,19 +9,21 @@ interface CountdownResult {
   seconds: number;
   isExpired: boolean;
   totalSeconds: number;
+  isReady: boolean;
 }
 
 export function useCountdown(targetDate: string | Date): CountdownResult {
-  const [now, setNow] = useState(Date.now);
+  const [now, setNow] = useState<number | null>(null);
 
   useEffect(() => {
     const tick = () => setNow(Date.now());
+    tick();
     const id = setInterval(tick, 1000);
     return () => clearInterval(id);
   }, []);
 
   const target = new Date(targetDate).getTime();
-  const diff = Math.max(0, target - now);
+  const diff = now === null ? 0 : Math.max(0, target - now);
   const totalSeconds = Math.floor(diff / 1000);
 
   return {
@@ -29,7 +31,8 @@ export function useCountdown(targetDate: string | Date): CountdownResult {
     hours: Math.floor((totalSeconds % 86400) / 3600),
     minutes: Math.floor((totalSeconds % 3600) / 60),
     seconds: totalSeconds % 60,
-    isExpired: diff <= 0,
+    isExpired: now !== null && diff <= 0,
     totalSeconds,
+    isReady: now !== null,
   };
 }

@@ -47,13 +47,13 @@
   --color-text-secondary: #73716e;
   --color-text-muted: #9e9c98;
 
-  /* UI copy: Plus Jakarta Sans; Arabic script inherits the Plex fallback */
-  font-family: var(--font-jakarta), var(--font-ibm-arabic), sans-serif;
+  /* UI copy: IBM Plex Sans Arabic (Arabic + Latin) */
+  font-family: var(--font-ibm-arabic), "IBM Plex Sans Arabic", sans-serif;
 }
 
 /* Editorial serif headline — Bodoni Moda for Latin, Plex Arabic fallback */
 .home-display {
-  font-family: var(--font-bodoni), var(--font-ibm-arabic), serif;
+  font-family: var(--font-bodoni), var(--font-ibm-arabic), "IBM Plex Sans Arabic", serif;
   letter-spacing: -0.02em;
 }
 

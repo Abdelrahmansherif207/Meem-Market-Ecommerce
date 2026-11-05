@@ -9,26 +9,28 @@ interface CountdownTimerProps {
 }
 
 export default function CountdownTimer({ targetDate, className = "" }: CountdownTimerProps) {
-  const { days, hours, minutes, seconds, isExpired } = useCountdown(targetDate);
+  const { days, hours, minutes, seconds, isExpired, isReady } = useCountdown(targetDate);
 
   if (isExpired) {
     return <span className={`text-error font-bold ${className}`}>Sale Ended</span>;
   }
+
+  const pad = (n: number) => (isReady ? String(n).padStart(2, "0") : "--");
 
   return (
     <div className={`flex items-center gap-1 font-mono ${className}`}>
       {days > 0 && <span className="bg-black/60 text-white px-1.5 py-0.5 rounded text-sm font-bold">{days}d</span>}
       {days > 0 && <span className="text-white/80">:</span>}
       <span className="bg-black/60 text-white px-1.5 py-0.5 rounded text-sm font-bold tabular-nums">
-        {String(hours).padStart(2, "0")}
+        {pad(hours)}
       </span>
       <span className="text-white/80">:</span>
       <span className="bg-black/60 text-white px-1.5 py-0.5 rounded text-sm font-bold tabular-nums">
-        {String(minutes).padStart(2, "0")}
+        {pad(minutes)}
       </span>
       <span className="text-white/80">:</span>
       <span className="bg-black/60 text-white px-1.5 py-0.5 rounded text-sm font-bold tabular-nums">
-        {String(seconds).padStart(2, "0")}
+        {pad(seconds)}
       </span>
     </div>
   );

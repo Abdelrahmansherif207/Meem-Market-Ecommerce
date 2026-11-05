@@ -133,7 +133,7 @@ export default function CatchShelfIsland({
           {visible.map((product) => (
             <SwiperSlide
               key={product.id}
-              className="shrink-0"
+              className="shrink-0 !h-auto"
               style={{ width: SLIDE_WIDTH }}
             >
               <CatchProductCard

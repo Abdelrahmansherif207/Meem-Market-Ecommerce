@@ -26,7 +26,10 @@ export async function ProductDetailsPage({ slug, locale }: ProductDetailsPagePro
   const t = await getTranslations({ locale, namespace: "product" });
   const te = await getTranslations({ locale, namespace: "error" });
 
-  const result = await guardLoad(() => productService.getProductBySlug(slug, locale));
+  const result = await guardLoad(
+    () => productService.getProductBySlug(slug, locale),
+    { retries: 3 },
+  );
 
   if (!result.ok) {
     if (result.kind === "not-found") {

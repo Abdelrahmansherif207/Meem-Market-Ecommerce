@@ -18,7 +18,7 @@ import {
   NotificationRealtimeProvider,
   NotificationToast,
 } from "@/features/notifications";
-import { IBM_Plex_Sans_Arabic, Plus_Jakarta_Sans, Tajawal } from "next/font/google";
+import { IBM_Plex_Sans_Arabic } from "next/font/google";
 import { cn } from "@/shared/utils/cn";
 import { getSiteMeta } from "@/features/settings/lib/metadata";
 import { getCachedSettings } from "@/features/settings/services/settingsService";
@@ -31,20 +31,8 @@ export const revalidate = 60;
 
 const ibmPlexSansArabic = IBM_Plex_Sans_Arabic({
   weight: ["300", "400", "500", "600", "700"],
-  subsets: ["arabic"],
-  variable: "--font-ibm-arabic",
-});
-
-const plusJakartaSans = Plus_Jakarta_Sans({
-  weight: ["400", "500", "600", "700", "800"],
-  subsets: ["latin"],
-  variable: "--font-jakarta",
-});
-
-const tajawal = Tajawal({
-  weight: ["400", "500", "700", "800"],
   subsets: ["arabic", "latin"],
-  variable: "--font-tajawal",
+  variable: "--font-ibm-arabic",
 });
 
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
@@ -129,13 +117,12 @@ export default async function RootLayout({
   }
   
   return (
-      <html lang={locale} dir={dir} className="overflow-x-clip">
-      <body className={cn(
-        "flex min-h-dvh flex-col overflow-x-clip",
-        ibmPlexSansArabic.variable,
-        plusJakartaSans.variable,
-        tajawal.variable,
-      )}>
+      <html
+        lang={locale}
+        dir={dir}
+        className={cn("overflow-x-clip", ibmPlexSansArabic.variable)}
+      >
+      <body className="flex min-h-dvh flex-col overflow-x-clip">
         <link rel="preconnect" href={process.env.NEXT_PUBLIC_API_URL} />
         <NextIntlClientProvider locale={locale} messages={messages}>
           <div className="hidden lg:block">
