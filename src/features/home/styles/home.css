@@ -1,0 +1,219 @@
+/*
+ * Sovereign Rose — scoped design system for the Catch Beauty homepage.
+ * Tokens extracted from the Stitch design "Catch Beauty Store Homepage"
+ * (projects/6326555564353219150, screen 9c6a3dde1a984cfeb74a3c6a39bf0c78).
+ *
+ * Every token remap lives exclusively inside `.home-theme`, which is applied
+ * on the homepage `<main>` only. Because Tailwind v4 color utilities emit
+ * `var(--color-*)` references, a scoped declaration re-tones every utility
+ * inside the subtree WITHOUT touching the app-wide theme — no other page
+ * changes appearance. Design-only colors use the `--home-*` namespace and
+ * are consumed via arbitrary values (`bg-(--home-gold)`).
+ *
+ * Painted over the app:
+ *   primary   #b81d24 → #121214 (charcoal CTAs/structure)
+ *   discount  #b81d24 → #c93b2b (vermilion urgency)
+ *   surface   #faf6f5 → #faf9f7 (warm alabaster canvas)
+ *   border    #ede4e2 → #eceae5 (warm hairline)
+ *   accent    #e0b0b0 → #d88b97 (blush rose highlight)
+ *   text-secondary/muted → design's warm neutrals
+ */
+
+.home-theme {
+  /* Sovereign Rose design-only tokens */
+  --home-rose: #d88b97;
+  --home-rose-deep: #793c47;
+  --home-rose-tint: rgba(216, 139, 151, 0.08);
+  --home-gold: #c5a880;
+  --home-vermilion: #c93b2b;
+  --home-jade: #2e7d32;
+  --home-canvas-deep: #f4f3f1;
+  --home-stroke: #eceae5;
+  --home-ink: #1a1c1b;
+  --home-ink-muted: #73716e;
+  --home-strike: #9e9c98;
+
+  /* Scoped remap of the app's semantic tokens (homepage subtree only) */
+  --color-primary: #121214;
+  --color-primary-active: #2a2a2e;
+  --color-primary-dark: #2a2a2e;
+  --color-accent: #d88b97;
+  --color-discount: #c93b2b;
+  --color-surface: #faf9f7;
+  --color-background: #faf9f7;
+  --color-border: #eceae5;
+  --color-border-light: #f0edea;
+  --color-border-subtle: #f6f4f1;
+  --color-text-secondary: #73716e;
+  --color-text-muted: #9e9c98;
+
+  /* UI copy: IBM Plex Sans Arabic (Arabic + Latin) */
+  font-family: var(--font-ibm-arabic), "IBM Plex Sans Arabic", sans-serif;
+}
+
+/* Editorial serif headline — Bodoni Moda for Latin, Plex Arabic fallback */
+.home-display {
+  font-family: var(--font-bodoni), var(--font-ibm-arabic), "IBM Plex Sans Arabic", serif;
+  letter-spacing: -0.02em;
+}
+
+/* 1440px editorial container. The page lives inside the app layout's
+ * `container px-4`, so the inner gutter is token-adjusted to land the
+ * content on the design's 20px gutter (12px-ish on mobile). */
+.home-container {
+  margin-inline: auto;
+  width: 100%;
+  max-width: 1440px;
+  padding-inline: 0.25rem;
+}
+
+@media (max-width: 767.98px) {
+  .home-container {
+    padding-inline: 0;
+  }
+}
+
+/* ── Repeated surface recipes (design elevation scale) ─────────────────── */
+
+/* Level 1 card: crisp white, warm hairline, ambient lift on hover */
+.home-card {
+  background: #ffffff;
+  border: 1px solid var(--home-stroke);
+  border-radius: 0.5rem;
+  transition: box-shadow 0.25s ease, transform 0.25s ease;
+}
+
+.home-card:hover {
+  box-shadow: 0 12px 32px -8px rgba(18, 18, 20, 0.06);
+  transform: translateY(-2px);
+}
+
+/* Level 2 floating surface (mega panels, drawers, flash frame) */
+.home-shadow-float {
+  box-shadow:
+    0 4px 16px 0 rgba(0, 0, 0, 0.04),
+    0 24px 48px -12px rgba(18, 18, 20, 0.12);
+}
+
+/* Level 3 frosted surface */
+.home-glass {
+  background: rgba(255, 255, 255, 0.88);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+}
+
+/* Gold embellishment radiance */
+.home-gold-glow {
+  box-shadow: 0 2px 8px rgba(197, 168, 128, 0.25);
+}
+
+/* Rose-tinted flash-deal frame (L2) */
+.home-flash-frame {
+  background: var(--home-rose-tint);
+  border: 1px solid rgba(216, 139, 151, 0.45);
+  border-radius: 0.75rem;
+  padding: 1rem;
+}
+
+@media (min-width: 1024px) {
+  .home-flash-frame {
+    padding: 1.5rem;
+  }
+}
+
+/* Circular ring for categories & brands (gold → canvas → rose sweep) */
+.home-ring {
+  padding: 3px;
+  border-radius: 9999px;
+  background: linear-gradient(
+    to top right,
+    var(--home-gold),
+    var(--home-canvas-deep) 55%,
+    var(--home-rose)
+  );
+}
+
+/* Tabular numerals for countdowns / meters */
+.home-numeric {
+  font-variant-numeric: tabular-nums;
+}
+
+/* ── Stitch screen recipes (9c6a3dde… fully re-derived) ──────────────── */
+
+/* ── Stock-state meter (real quantity → state level; no invented ratios) ── */
+.home-stock-track {
+  width: 100%;
+  height: 6px;
+  border-radius: 9999px;
+  background: var(--home-canvas-deep);
+  overflow: hidden;
+}
+
+.home-stock-fill {
+  height: 100%;
+  border-radius: 9999px;
+}
+.home-stock-fill.healthy {
+  background: var(--home-rose);
+}
+.home-stock-fill.low {
+  background: linear-gradient(to left, var(--home-vermilion), var(--home-rose));
+}
+.home-stock-fill.out {
+  background: var(--home-strike);
+}
+
+/* ── Brand tile (Stitch "Iconic Global & Niche Brands" grid) ─────────── */
+.home-brand-tile {
+  background: #ffffff;
+  border: 1px solid var(--home-stroke);
+  border-radius: 0.5rem;
+  transition: box-shadow 0.25s ease, transform 0.25s ease;
+}
+.home-brand-tile:hover {
+  box-shadow: 0 12px 32px -8px rgba(18, 18, 20, 0.06);
+  transform: translateY(-2px);
+}
+
+/* ── Perks / value-prop tile chip ────────────────────────────────────── */
+.home-perk-chip {
+  width: 3rem;
+  height: 3rem;
+  flex-shrink: 0;
+  border-radius: 9999px;
+  background: var(--home-canvas-deep);
+  color: var(--home-ink);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* ── Static editorial card (hero side promos / journal) ──────────────── */
+.home-editorial {
+  position: relative;
+  overflow: hidden;
+  border-radius: 0.75rem;
+}
+.home-editorial::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: var(--home-editorial-image);
+  background-size: cover;
+  background-position: center;
+  transition: transform 0.7s ease;
+}
+.home-editorial:hover::before {
+  transform: scale(1.05);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .home-editorial::before,
+  .home-card,
+  .home-brand-tile {
+    transition: none;
+  }
+  .home-editorial:hover::before {
+    transform: none;
+  }
+}

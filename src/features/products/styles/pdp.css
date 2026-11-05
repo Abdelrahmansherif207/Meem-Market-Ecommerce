@@ -1,0 +1,64 @@
+/*
+ * Nice One product-details redesign (PDP) — scoped, design-only tokens.
+ *
+ * Layout / geometry come from the Stitch screens
+ * (`stitch-src/details-desktop.html`, `stitch-src/details-mobile.html`).
+ * First-party colors (price red, CTA ink, borders, page gray, ...) are
+ * re-mapped onto the app's existing `@theme` tokens — see
+ * `docs/product-details/section-mapping.md`.
+ *
+ * Only values with no Catch-token equivalent live here: the cross-sell
+ * band (kept at its exact Stitch values — `#f0f6fc` / blue-100 — per
+ * explicit request after the Catch-mapped tint) and the third-party
+ * BNPL (Tabby / Tamara) brand badges, which keep their official colors
+ * by design.
+ */
+.pdp-scope {
+  /* "Usually bought together" band — exact Stitch values. */
+  --pdp-band: #f0f6fc;
+  --pdp-band-border: #dbeafe;
+
+  /* Third-party BNPL badges — official brand colors, static widget. */
+  --pdp-tabby-bg: color-mix(in srgb, #3efebe 28%, white);
+  --pdp-tabby-fg: #04412e;
+  --pdp-tabby-border: #a7f3d0;
+  --pdp-tamara-bg: #fcdcd0;
+  --pdp-tamara-fg: #71370b;
+  --pdp-tamara-border: #fed7aa;
+}
+
+/* ── Bundle band carousel: cards are translated by pointer drag (transform
+      + transition live in the component); the old per-item remount animation
+      was removed. ── */
+
+/* ── Gallery image-swap transition: the selected image slides in from the
+      inline end (right→left visually in LTR, flipped in Arabic RTL) ── */
+@keyframes pdp-img-in {
+  from {
+    transform: translateX(28px);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes pdp-img-in-rtl {
+  from {
+    transform: translateX(-28px);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+.pdp-scope .pdp-img-in {
+  animation: pdp-img-in 0.35s cubic-bezier(0.22, 0.61, 0.36, 1) both;
+}
+
+[dir="rtl"] .pdp-scope .pdp-img-in {
+  animation-name: pdp-img-in-rtl;
+}

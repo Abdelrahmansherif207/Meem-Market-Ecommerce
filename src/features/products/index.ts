@@ -1,4 +1,5 @@
 ﻿export { ProductDetailsPage } from "./components/ProductDetailsPage";
+export { NiceOneCountdown } from "./components/niceone/NiceOneCountdown";
 export {
   getDisplayPrice,
   getOriginalPrice,

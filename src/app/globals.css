@@ -23,7 +23,7 @@ button {
   --color-error: #c0392b;
   --color-error-surface: #fbeeed;
 
-  --color-background: #ffffff;
+  --color-background: #f8f8f8;
   /* Creamy, warm cosmetic powder surface */
   --color-surface: #faf6f5;
 
@@ -37,8 +37,25 @@ button {
   --color-border-subtle: #f5eeed;
   --color-discount: #b81d24;
 
-  --font-family-body: var(--font-ibm-arabic), sans-serif;
-  --font-family-heading: var(--font-ibm-arabic), sans-serif;
+  /* IBM Plex Sans Arabic across both locales (Arabic and Latin glyphs) */
+  --font-sans: var(--font-ibm-arabic), "IBM Plex Sans Arabic", sans-serif;
+  --default-font-family: var(--font-ibm-arabic), "IBM Plex Sans Arabic", sans-serif;
+  --font-family-body: var(--font-ibm-arabic), "IBM Plex Sans Arabic", sans-serif;
+  --font-family-heading: var(--font-ibm-arabic), "IBM Plex Sans Arabic", sans-serif;
+
+  /* Nice One screen recreation tokens — pink #E90276 mapped to Catch crimson */
+  --color-ink: #1a1a1a;            /* screen dark */
+  --color-page-gray: #f8f9fa;      /* screen grayBg */
+  --color-line: #efefef;           /* screen border #EFEFEF */
+  --color-neutral: #71717a;        /* screen muted */
+  --color-primary-tint: #fbf1f2;   /* screen pinkLight #FDF2F7, crimson-mapped */
+  --color-brand-badge: #c2185b;    /* screen pinkBadge #FF2E93, crimson-mapped */
+  --color-violet-banner: #9674cc;  /* screen help banner purple */
+
+  /* Nice One quantity stepper (cards / PDP): count ink + light pill surface.
+     Values from the niceonesa.com DOM (count = rgb(55,46,76), pill = #f2f2f2). */
+  --color-qty-ink: #372e4c;
+  --color-qty-surface: #f2f2f2;
 
   /* Elevation scale — canonical shadows; prefer these over ad-hoc shadow values */
   --shadow-elev-1: 0 1px 3px 0 rgba(28, 26, 26, 0.04), 0 1px 2px -1px rgba(28, 26, 26, 0.06);
@@ -74,6 +91,7 @@ button {
     -webkit-font-smoothing: antialiased;
   }
 
+  /* Headings use the same IBM family in both locales */
   h1, h2, h3, h4 {
     font-family: var(--font-family-heading);
     text-wrap: balance;

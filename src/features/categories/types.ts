@@ -44,6 +44,8 @@ export interface CategoryProduct {
   ratings: number;
   in_stock?: boolean;
   in_wishlist?: boolean;
+  /** True when a flash sale covers the item (listing payload, no dates). */
+  flash_sale_active?: boolean;
   image: CategoryProductImage;
   tags?: ProductTag[];
   currency?: ProductCurrency;

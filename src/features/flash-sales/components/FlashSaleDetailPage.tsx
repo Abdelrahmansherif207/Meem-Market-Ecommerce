@@ -103,6 +103,7 @@ export default async function FlashSaleDetailPage({ slug, locale }: FlashSaleDet
           locale={locale}
           initialProducts={products}
           initialCurrency={products[0]?.currency?.code}
+          flashEndAt={end_date}
         />
       )}
     </div>

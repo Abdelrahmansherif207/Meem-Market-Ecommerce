@@ -3,7 +3,7 @@
 import { useState, useMemo } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { cn } from "@/shared/utils/cn";
-import ProductCard from "./ProductCard";
+import CatchProductCard from "@/features/home/redesign/CatchProductCard";
 import type { ProductTag } from "@/shared/types";
 import type { ProductCurrency } from "@/features/currencies";
 
@@ -70,31 +70,28 @@ export default function PaginatedProductGrid({
 
   return (
     <div className="flex flex-col">
-      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-1">
-        {visibleProducts.map((product) => {
-          const discountPercent =
-            product.discount_active && product.current_price < product.price
-              ? Math.round((1 - product.current_price / product.price) * 100)
-              : 0;
-          return (
-            <ProductCard
-              key={product.id}
-              productId={product.id}
-              image={product.image.thumbnail}
-              title={product.name}
-              price={product.current_price}
-              originalPrice={product.price}
-              currency={product.currency}
-              discountPercent={discountPercent}
-              slug={product.slug}
-              hasVariants={product.has_variants}
-              isInStock={product.in_stock ?? product.quantity > 0}
-              inWishlist={product.in_wishlist}
-              tags={product.tags}
-              pricesLoading={pricesLoading}
-            />
-          );
-        })}
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 md:grid-cols-4 lg:grid-cols-6">
+        {visibleProducts.map((product) => (
+          <CatchProductCard
+            key={product.id}
+            item={{
+              id: product.id,
+              title: product.name,
+              image: product.image?.thumbnail ?? "",
+              price: product.current_price,
+              originalPrice: product.price,
+              slug: product.slug,
+              currency: product.currency,
+              stockQuantity: product.quantity ?? 0,
+              isInStock: product.in_stock ?? (product.quantity ?? 0) > 0,
+              hasVariants: product.has_variants,
+              inWishlist: product.in_wishlist,
+              flashSaleActive: product.flash_sale_active ?? false,
+              tags: product.tags,
+            }}
+            pricesLoading={pricesLoading}
+          />
+        ))}
       </div>
 
       {totalPages > 1 && (

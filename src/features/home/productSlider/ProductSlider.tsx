@@ -1,5 +1,5 @@
 "use client";
-import ProductCard from "@/components/ui/ProductCard";
+import CatchProductCard from "@/features/home/redesign/CatchProductCard";
 import SectionTitle from "@/components/ui/SectionTitle";
 import { BannerArrows } from "../components/banner";
 import { useLocale } from "next-intl";
@@ -66,26 +66,11 @@ export default function ProductSlider({
         }}
         className="w-full"
       >
-        {safeItems.map((product, index) => (
-          <SwiperSlide key={product.id}>
-            <ProductCard
-              theme={theme}
-              image={product.image}
-              title={product.title}
-              price={product.price}
-              originalPrice={product.originalPrice}
-              currency={product.currency}
-              productId={product.id}
-              slug={product.slug}
-              sku={product.sku}
-              inStock={product.inStock}
-              stockQuantity={product.stockQuantity}
-              priority={index < Math.round(cols)}
-              hasVariants={product.hasVariants}
+        {safeItems.map((product) => (
+          <SwiperSlide key={product.id} className="!h-auto">
+            <CatchProductCard
+              item={product}
               badgeText={badgeText}
-              isInStock={product.isInStock}
-              inWishlist={product.inWishlist}
-              tags={product.tags}
               pricesLoading={pricesLoading}
             />
           </SwiperSlide>

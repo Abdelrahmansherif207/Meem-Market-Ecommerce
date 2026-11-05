@@ -4,10 +4,10 @@ import type { ReactNode } from "react";
 import { NextIntlClientProvider } from "next-intl";
 import { routing } from "@/i18n/routing";
 import { getMessages, setRequestLocale } from "next-intl/server";
-import Header from "@/features/navigation/components/header/Header";
-import MobileHeader from "@/features/navigation/components/mobile/MobileHeader";
+import CatchHeader from "@/features/navigation/components/catch/CatchHeader";
+import CatchMobileHeader from "@/features/navigation/components/catch/CatchMobileHeader";
 import MobileBottomNav from "@/features/navigation/components/mobile/MobileBottomNav";
-import Footer from "@/features/navigation/components/footer/Footer";
+import CatchFooter from "@/features/navigation/components/catch/CatchFooter";
 import ScrollToTopButton from "@/components/ui/ScrollToTopButton";
 import { AuthModal, AuthSyncHandler } from "@/features/auth";
 import { ProfileSyncHandler } from "@/features/profile";
@@ -31,7 +31,7 @@ export const revalidate = 60;
 
 const ibmPlexSansArabic = IBM_Plex_Sans_Arabic({
   weight: ["300", "400", "500", "600", "700"],
-  subsets: ["arabic"],
+  subsets: ["arabic", "latin"],
   variable: "--font-ibm-arabic",
 });
 
@@ -117,15 +117,19 @@ export default async function RootLayout({
   }
   
   return (
-      <html lang={locale} dir={dir} className="overflow-x-clip">
-      <body className={cn("flex min-h-dvh flex-col overflow-x-clip", ibmPlexSansArabic.variable)}>
+      <html
+        lang={locale}
+        dir={dir}
+        className={cn("overflow-x-clip", ibmPlexSansArabic.variable)}
+      >
+      <body className="flex min-h-dvh flex-col overflow-x-clip">
         <link rel="preconnect" href={process.env.NEXT_PUBLIC_API_URL} />
         <NextIntlClientProvider locale={locale} messages={messages}>
-          <div className="hidden lg:block sticky top-0 z-50">
-            <Header params={params} settingsLogo={settingsLogo} currencyEnabled={currencyEnabled} />
+          <div className="hidden lg:block">
+            <CatchHeader params={params} settingsLogo={settingsLogo} currencyEnabled={currencyEnabled} />
           </div>
-          <div className="block lg:hidden sticky top-0 z-50">
-            <MobileHeader currencyEnabled={currencyEnabled} />
+          <div className="lg:hidden">
+            <CatchMobileHeader />
           </div>
           <MobileBottomNav />
           <AuthSyncHandler />
@@ -137,7 +141,7 @@ export default async function RootLayout({
               <div className="container mx-auto flex flex-1 flex-col px-4 pb-[56px] lg:pb-0">
                 {children}
               </div>
-              <Footer params={params} />
+              <CatchFooter params={params} />
             </div>
           </CartSyncProvider>
           <WishlistSyncProvider />

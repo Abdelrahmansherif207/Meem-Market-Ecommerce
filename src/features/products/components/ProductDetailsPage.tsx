@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 import { getTranslations } from "next-intl/server";
-import Breadcrumb from "@/components/ui/Breadcrumb";
+import NiceOneBreadcrumb from "./niceone/NiceOneBreadcrumb";
 import ErrorState from "@/components/ui/ErrorState";
 import RetryButton from "@/components/ui/RetryButton";
 import type { ProductCategory } from "../types";
@@ -26,7 +26,10 @@ export async function ProductDetailsPage({ slug, locale }: ProductDetailsPagePro
   const t = await getTranslations({ locale, namespace: "product" });
   const te = await getTranslations({ locale, namespace: "error" });
 
-  const result = await guardLoad(() => productService.getProductBySlug(slug, locale));
+  const result = await guardLoad(
+    () => productService.getProductBySlug(slug, locale),
+    { retries: 3 },
+  );
 
   if (!result.ok) {
     if (result.kind === "not-found") {
@@ -48,7 +51,7 @@ export async function ProductDetailsPage({ slug, locale }: ProductDetailsPagePro
 
   return (
     <div className="py-6">
-      <Breadcrumb
+      <NiceOneBreadcrumb
         items={[
           { label: t("home"), href: "/" },
           ...buildCategoryBreadcrumbs(product.categories),

@@ -18,6 +18,7 @@
     "categoryNav": {
       "allCategories": "All Categories",
       "all": "All",
+      "allProducts": "All Products",
       "electronics": "Electronics",
       "fashion": "Fashion",
       "home": "Home & Garden",
@@ -92,6 +93,78 @@
   },
   "home": {
     "metaDescription": "Shop the best products — electronics, fashion, home goods, and more."
+  },
+  "catchHeader": {
+    "announcement": "20% OFF YOUR FIRST ORDER WITH CODE NEW20",
+    "brandNameAr": "كاتش بيوتي",
+    "brandNameEn": "CATCH BEAUTY",
+    "searchPlaceholder": "What are you looking for ?",
+    "awardBadge": "Best Makeup website in Saudi Arabia",
+    "deliverTo": "Deliver to",
+    "profile": "Profile",
+    "language": "Language",
+    "categories": "Categories",
+    "allProducts": "All Products",
+    "cart": "Cart"
+  },
+  "catchHome": {
+    "viewAll": "View all",
+    "addToCart": "Add to cart",
+    "addToWishlist": "Add to wishlist",
+    "inWishlist": "In wishlist",
+    "outOfStock": "Out of stock",
+    "selectOptions": "Select options",
+    "lowStock": "Only {count} left",
+    "flashSale": "Flash Sale",
+    "copyCode": "Copy coupon code",
+    "help": {
+      "title": "Do you need help ?",
+      "subtitle": "You can get help by choosing from any of these options",
+      "helpingCenter": "Helping Center",
+      "email": "Email",
+      "whatsapp": "WhatsApp",
+      "chatWithUs": "Chat with us",
+      "callUs": "Call us"
+    }
+  },
+  "catchFooter": {
+    "popularCategories": "Popular Categories",
+    "companyTitle": "Catch Beauty",
+    "profileTitle": "Profile",
+    "stayConnected": "Stay connected",
+    "downloadApps": "Download our apps",
+    "categories": {
+      "makeup": "Makeup",
+      "perfume": "Perfume",
+      "care": "Care",
+      "nails": "Nails",
+      "accessories": "Accessories",
+      "lenses": "Lenses"
+    },
+    "company": {
+      "blogs": "Blogs",
+      "companyWebsite": "Company Website",
+      "careers": "Careers",
+      "terms": "Terms and conditions",
+      "returnRefund": "Return and refund policy",
+      "privacy": "Privacy"
+    },
+    "profileLinks": {
+      "profile": "Profile",
+      "orders": "Orders",
+      "favourites": "Favourites",
+      "affiliate": "Affiliate Program",
+      "vendor": "Join us as a vendor",
+      "contentCreator": "Register as a Content Creator"
+    },
+    "apps": {
+      "getTag": "GET IT ON",
+      "googlePlay": "Google Play",
+      "downloadOn": "Download on the",
+      "appStore": "App Store"
+    },
+    "copyright": "Copyright © 2026 Catch Beauty. All rights reserved",
+    "crVat": "CR No. 0000000000 — VAT No. 00000000000000"
   },
   "auth": {
     "metaTitle": "Sign In & Register",
@@ -289,6 +362,34 @@
     "increaseQuantity": "Increase quantity",
     "decreaseQuantity": "Decrease quantity",
     "removeItem": "Remove item"
+  },
+  "niceOnePdp": {
+    "vatIncluded": "VAT included.",
+    "installmentsTitle": "Want to pay in installments?",
+    "addToBag": "Add To Bag",
+    "totalPrice": "Total Price",
+    "viewAll": "View all",
+    "authenticProducts": "100% Authentic products",
+    "description": "Description",
+    "howToUse": "How to use",
+    "aboutBrand": "About the brand",
+    "specifications": "Specifications",
+    "size": "Size",
+    "usuallyBoughtTogether": "Usually bought together",
+    "recommendedProducts": "Recommended Products",
+    "seeMore": "See more",
+    "reviewsTitle": "Customer Reviews ({count})",
+    "addReview": "Add Review",
+    "recentlyAdded": "Recently added first",
+    "highestRating": "Highest rating",
+    "lowestRating": "Lowest rating",
+    "helpful": "Helpful ({count})",
+    "reply": "Reply",
+    "endsIn": "Ends in {time}",
+    "endsInLabel": "Ends in",
+    "flashDeal": "Flash deal",
+    "previousSlide": "Previous",
+    "nextSlide": "Next"
   },
   "categories": {
     "metaTitle": "Categories",

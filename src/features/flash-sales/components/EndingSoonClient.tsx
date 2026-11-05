@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback } from "react";
-import ProductCard from "@/components/ui/ProductCard";
+import CatchProductCard from "@/features/home/redesign/CatchProductCard";
 import SectionTitle from "@/components/ui/SectionTitle";
 import { getEndingSoonAction } from "../actions/flashSaleCurrencyActions";
 import { useCurrencyRefetch } from "@/features/currencies";
@@ -28,32 +28,29 @@ export default function EndingSoonClient({ products: initialProducts, period, lo
   return (
     <section className="w-full" aria-label={title}>
       <SectionTitle title={title} />
-      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
-        {products.map((product) => {
-          const discountPercent =
-            product.flash_sale_active && product.current_price < product.price
-              ? Math.round((1 - product.current_price / product.price) * 100)
-              : 0;
-          return (
-            <ProductCard
-              key={product.id}
-              productId={product.id}
-              image={product.image.thumbnail}
-              title={product.name}
-              price={product.current_price}
-              originalPrice={product.price}
-              currency={product.currency}
-              discountPercent={discountPercent}
-              slug={product.slug}
-              hasVariants={product.has_variants}
-              isInStock={product.in_stock ?? product.quantity > 0}
-              flashSaleActive={product.flash_sale_active}
-                inWishlist={product.in_wishlist}
-                tags={product.tags}
-                pricesLoading={isRefreshing}
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 md:grid-cols-4 lg:grid-cols-6">
+        {products.map((product) => (
+          <CatchProductCard
+            key={product.id}
+            item={{
+              id: product.id,
+              title: product.name,
+              image: product.image?.thumbnail ?? "",
+              price: product.current_price,
+              originalPrice: product.price,
+              slug: product.slug,
+              currency: product.currency,
+              stockQuantity: product.quantity ?? 0,
+              isInStock: product.in_stock ?? (product.quantity ?? 0) > 0,
+              hasVariants: product.has_variants,
+              inWishlist: product.in_wishlist,
+              flashSaleActive: product.flash_sale_active ?? true,
+              ratings: product.ratings,
+              tags: product.tags,
+            }}
+            pricesLoading={isRefreshing}
           />
-        );
-      })}
+        ))}
       </div>
     </section>
   );

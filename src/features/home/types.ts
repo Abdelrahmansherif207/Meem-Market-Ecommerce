@@ -83,9 +83,15 @@ export interface ProductItem {
   hasVariants?: boolean;
   isInStock?: boolean;
   flashSaleActive?: boolean;
+  /** Flash/deal end date (ISO) — enables the live "Ends in" countdown on the card. */
+  flashEndDate?: string | null;
   inWishlist?: boolean;
   tags?: ProductTag[];
   currency?: ProductCurrency;
+  /** Average rating from the API when provided (`ApiProduct.ratings`). */
+  ratings?: number;
+  /** Reviews count when the API provides it (renders the `(n)` suffix). */
+  reviewsCount?: number;
 }
 
 export interface BannerProps {
