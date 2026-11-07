@@ -233,7 +233,7 @@ function NiceOneBundleCard({
   const tPdp = useTranslations("niceOnePdp");
   const tProduct = useTranslations("product");
   const locale = useLocale();
-  const { code: currencyCode, decimalPlaces } = useDisplayCurrency(item.currency);
+  const { symbol: currencySymbol, decimalPlaces } = useDisplayCurrency(item.currency);
   const { quantity: cartQuantity, isPending, addItem, increment, decrement } = useCartActions(item.id);
   const inStock = item.quantity > 0;
 
@@ -288,7 +288,7 @@ function NiceOneBundleCard({
             ) : (
               <>
                 <span className="text-xs font-bold text-discount">
-                  {formatPrice(displayPrice)} <span className="text-[9px]">{currencyCode}</span>
+                  {formatPrice(displayPrice)} <span className="text-[9px]">{currencySymbol}</span>
                 </span>
                 {originalPrice > displayPrice && (
                   <span className="text-[10px] text-text-muted line-through">

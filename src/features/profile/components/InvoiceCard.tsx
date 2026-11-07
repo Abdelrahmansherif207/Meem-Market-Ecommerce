@@ -3,6 +3,7 @@
 import { useTranslations } from "next-intl";
 import { FileText, ChevronDown, ChevronUp, ExternalLink } from "lucide-react";
 import { useState } from "react";
+import { Price } from "@/components/ui/Price";
 import type { InvoiceListItem } from "../types";
 
 interface InvoiceCardProps {
@@ -42,9 +43,11 @@ export function InvoiceCard({ invoice, onViewDetails }: InvoiceCardProps) {
           <span className={`text-[11px] font-semibold px-2.5 py-1 rounded-full capitalize ${statusClass}`}>
             {t(`status.${invoice.status}`, { defaultValue: invoice.status })}
           </span>
-          <span className="text-sm font-bold text-text-primary">
-            {invoice.total} {invoice.currency}
-          </span>
+          <Price
+            amount={invoice.total}
+            currency={invoice.currency}
+            className="text-sm font-bold text-text-primary"
+          />
           {expanded ? (
             <ChevronUp className="h-4 w-4 text-text-secondary" />
           ) : (
@@ -58,31 +61,40 @@ export function InvoiceCard({ invoice, onViewDetails }: InvoiceCardProps) {
           <div className="space-y-2 text-sm">
             <div className="flex justify-between">
               <span className="text-text-secondary">{t("subtotal")}</span>
-              <span className="font-medium text-text-primary">
-                {invoice.subtotal} {invoice.currency}
-              </span>
+              <Price
+                amount={invoice.subtotal}
+                currency={invoice.currency}
+                className="font-medium text-text-primary"
+              />
             </div>
             {invoice.shipping_price > 0 && (
               <div className="flex justify-between">
                 <span className="text-text-secondary">{t("shipping")}</span>
-                <span className="font-medium text-text-primary">
-                  {invoice.shipping_price} {invoice.currency}
-                </span>
+                <Price
+                  amount={invoice.shipping_price}
+                  currency={invoice.currency}
+                  className="font-medium text-text-primary"
+                />
               </div>
             )}
             {invoice.total_discount > 0 && (
               <div className="flex justify-between">
                 <span className="text-text-secondary">{t("discount")}</span>
-                <span className="font-medium text-green-600">
-                  -{invoice.total_discount} {invoice.currency}
-                </span>
+                <Price
+                  amount={invoice.total_discount}
+                  currency={invoice.currency}
+                  prefix="-"
+                  className="font-medium text-green-600"
+                />
               </div>
             )}
             <div className="flex justify-between border-t border-border pt-2">
               <span className="font-semibold text-text-primary">{t("total")}</span>
-              <span className="font-bold text-text-primary">
-                {invoice.total} {invoice.currency}
-              </span>
+              <Price
+                amount={invoice.total}
+                currency={invoice.currency}
+                className="font-bold text-text-primary"
+              />
             </div>
           </div>
 

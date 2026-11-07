@@ -37,7 +37,7 @@ export function NiceOneHeroInfo({ product, selectedVariant, pricesLoading = fals
   const t = useTranslations("product");
   const tPdp = useTranslations("niceOnePdp");
   const locale = useLocale();
-  const { code: currencyCode, decimalPlaces } = useDisplayCurrency(product.currency);
+  const { symbol: currencySymbol, decimalPlaces } = useDisplayCurrency(product.currency);
   const formatPrice = (v: number) => formatNumber(v, locale, decimalPlaces);
 
   const avgRating = getAverageRating(product.reviews);
@@ -114,12 +114,12 @@ export function NiceOneHeroInfo({ product, selectedVariant, pricesLoading = fals
           <>
             <div className="text-2xl font-extrabold text-discount">
               {formatPrice(displayPrice)}
-              <span className="ms-1 text-sm font-bold">{currencyCode}</span>
+              <span className="ms-1 text-sm font-bold">{currencySymbol}</span>
             </div>
             {hasDiscount && (
               <>
                 <span className="text-xs font-medium text-text-muted line-through">
-                  {formatPrice(originalPrice)} {currencyCode}
+                  {formatPrice(originalPrice)} {currencySymbol}
                 </span>
                 {discountPercent != null && (
                   <span className="rounded-full border border-discount/20 bg-primary-tint px-2 py-0.5 text-xs font-bold text-discount">
@@ -132,18 +132,18 @@ export function NiceOneHeroInfo({ product, selectedVariant, pricesLoading = fals
         ) : range!.min === range!.max ? (
           <div className="text-2xl font-extrabold text-discount">
             {formatPrice(range!.min)}
-            <span className="ms-1 text-sm font-bold">{currencyCode}</span>
+            <span className="ms-1 text-sm font-bold">{currencySymbol}</span>
           </div>
         ) : (
           <div
             className="text-2xl font-extrabold text-discount"
             aria-label={t("fromPrice", {
-              min: `${formatPrice(range!.min)} ${currencyCode}`,
-              max: `${formatPrice(range!.max)} ${currencyCode}`,
+              min: `${formatPrice(range!.min)} ${currencySymbol}`,
+              max: `${formatPrice(range!.max)} ${currencySymbol}`,
             })}
           >
             {formatPrice(range!.min)} – {formatPrice(range!.max)}
-            <span className="ms-1 text-sm font-bold">{currencyCode}</span>
+            <span className="ms-1 text-sm font-bold">{currencySymbol}</span>
           </div>
         )}
       </div>

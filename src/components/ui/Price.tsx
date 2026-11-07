@@ -1,7 +1,7 @@
 "use client";
 
-import { useLocale } from "next-intl";
 import { cn } from "@/shared/utils/cn";
+import { formatNumber } from "@/shared/utils/formatMoney";
 import {
   useDisplayCurrency,
   type ProductCurrency,
@@ -29,8 +29,9 @@ interface PriceProps {
 
 /**
  * Canonical price display — use everywhere instead of manual
- * `toFixed(2) + currency` concatenation. Locale-aware (digits, grouping,
- * currency label), always horizontal and never wraps mid-price.
+ * `toFixed(2) + currency` concatenation. Always English: Latin digits,
+ * English grouping/separators and currency label, in every locale.
+ * Always horizontal and never wraps mid-price.
  */
 export function Price({
   amount,
@@ -40,7 +41,6 @@ export function Price({
   currency,
   decimals,
 }: PriceProps) {
-  const locale = useLocale();
   const display = useDisplayCurrency(
     typeof currency === "object"
       ? currency
@@ -49,14 +49,7 @@ export function Price({
         : undefined,
   );
   const fractionDigits = decimals ?? display.decimalPlaces;
-  const safe = Number.isFinite(amount) ? (amount as number) : 0;
-  const formatted = safe.toLocaleString(locale === "ar" ? "ar-KW" : "en-KW", {
-    minimumFractionDigits: fractionDigits,
-    maximumFractionDigits: fractionDigits,
-    // Explicit Eastern Arabic digits (٠١٢٣) in Arabic locale so all
-    // browsers match Safari's default `ar-*` rendering.
-    numberingSystem: locale === "ar" ? "arab" : "latn",
-  });
+  const formatted = formatNumber(amount, "en", fractionDigits);
   const text = `${formatted} ${display.symbol}`;
 
   return (

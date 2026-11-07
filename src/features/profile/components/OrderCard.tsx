@@ -4,6 +4,7 @@ import { useTranslations } from "next-intl";
 import Image from "next/image";
 import { Package, ChevronDown, ChevronUp, Truck, Store, ExternalLink } from "lucide-react";
 import { useState } from "react";
+import { Price } from "@/components/ui/Price";
 import type { Order } from "../types";
 import { OrderStatusBadge } from "./OrderStatusBadge";
 
@@ -42,7 +43,11 @@ export function OrderCard({ order, onViewDetails }: OrderCardProps) {
 
         <div className="flex items-center gap-3">
           <OrderStatusBadge order={order} />
-          <span className="text-sm font-bold text-text-primary">{order.total} {order.currency}</span>
+          <Price
+            amount={order.total}
+            currency={order.currency}
+            className="text-sm font-bold text-text-primary"
+          />
           {expanded ? <ChevronUp className="h-4 w-4 text-text-secondary" /> : <ChevronDown className="h-4 w-4 text-text-secondary" />}
         </div>
       </button>
@@ -65,21 +70,34 @@ export function OrderCard({ order, onViewDetails }: OrderCardProps) {
               <div className="min-w-0 flex-1">
                 <p className="text-sm font-semibold text-text-primary truncate">{item.product.name}</p>
                 <p className="text-xs text-text-secondary">
-                  {item.quantity} x {item.unit_price} {order.currency}
+                  {item.quantity} x <Price amount={item.unit_price} currency={order.currency} />
                 </p>
               </div>
-              <p className="text-sm font-bold text-text-primary shrink-0">{item.total_price} {order.currency}</p>
+              <Price
+                amount={item.total_price}
+                currency={order.currency}
+                className="text-sm font-bold text-text-primary shrink-0"
+              />
             </div>
           ))}
 
           <div className="flex justify-between border-t border-border pt-2 text-sm">
             <span className="font-semibold text-text-primary">{t("total")}</span>
-            <span className="font-bold text-text-primary">{order.total} {order.currency}</span>
+            <Price
+              amount={order.total}
+              currency={order.currency}
+              className="font-bold text-text-primary"
+            />
           </div>
           {order.discount > 0 && (
             <div className="flex justify-between text-xs">
               <span className="text-text-secondary">{t("discount")}</span>
-              <span className="text-green-600">-{order.discount} {order.currency}</span>
+              <Price
+                amount={order.discount}
+                currency={order.currency}
+                prefix="-"
+                className="text-green-600"
+              />
             </div>
           )}
 

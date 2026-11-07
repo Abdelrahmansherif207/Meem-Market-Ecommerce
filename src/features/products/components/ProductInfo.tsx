@@ -26,7 +26,7 @@ interface ProductInfoProps {
 export function ProductInfo({ product, selectedVariant, pricesLoading = false }: ProductInfoProps) {
   const t = useTranslations("product");
   const locale = useLocale();
-  const { code: currencyCode, decimalPlaces } = useDisplayCurrency(
+  const { symbol: currencySymbol, decimalPlaces } = useDisplayCurrency(
     product.currency,
   );
   const avgRating = getAverageRating(product.reviews);
@@ -95,12 +95,12 @@ export function ProductInfo({ product, selectedVariant, pricesLoading = false }:
         ) : selectedVariant || !hasVariants ? (
           <>
             <span className="text-3xl font-bold text-text-primary">
-              {formatNumber(displayPrice, locale, decimalPlaces)} {currencyCode}
+              {formatNumber(displayPrice, locale, decimalPlaces)} {currencySymbol}
             </span>
             {hasDiscount && (
               <>
                 <span className="text-lg text-text-secondary line-through">
-                  {formatNumber(originalPrice, locale, decimalPlaces)} {currencyCode}
+                  {formatNumber(originalPrice, locale, decimalPlaces)} {currencySymbol}
                 </span>
                 {discountPercent && (
                   <span className="rounded-md bg-discount px-2 py-0.5 text-xs font-bold text-white">
@@ -112,13 +112,13 @@ export function ProductInfo({ product, selectedVariant, pricesLoading = false }:
           </>
         ) : range!.min === range!.max ? (
           <span className="text-3xl font-bold text-text-primary">
-            {formatNumber(range!.min, locale, decimalPlaces)} {currencyCode}
+            {formatNumber(range!.min, locale, decimalPlaces)} {currencySymbol}
           </span>
         ) : (
           <span className="text-3xl font-bold text-text-primary">
             {t("fromPrice", {
-              min: `${formatNumber(range!.min, locale, decimalPlaces)} ${currencyCode}`,
-              max: `${formatNumber(range!.max, locale, decimalPlaces)} ${currencyCode}`,
+              min: `${formatNumber(range!.min, locale, decimalPlaces)} ${currencySymbol}`,
+              max: `${formatNumber(range!.max, locale, decimalPlaces)} ${currencySymbol}`,
             })}
           </span>
         )}

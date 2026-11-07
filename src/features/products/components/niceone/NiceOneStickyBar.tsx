@@ -31,7 +31,7 @@ export function NiceOneStickyBar({ product, selectedVariant, pricesLoading = fal
   const t = useTranslations("niceOnePdp");
   const tProduct = useTranslations("product");
   const locale = useLocale();
-  const { code: currencyCode, decimalPlaces } = useDisplayCurrency(product.currency);
+  const { symbol: currencySymbol, decimalPlaces } = useDisplayCurrency(product.currency);
   const formatPrice = (v: number) => formatNumber(v, locale, decimalPlaces);
 
   const stock = selectedVariant
@@ -71,7 +71,7 @@ export function NiceOneStickyBar({ product, selectedVariant, pricesLoading = fal
             <span className="text-lg font-extrabold leading-none text-discount">
               {formatPrice(price)}
             </span>
-            <span className="text-xs font-bold text-text-primary">{currencyCode}</span>
+            <span className="text-xs font-bold text-text-primary">{currencySymbol}</span>
           </div>
         )}
       </div>

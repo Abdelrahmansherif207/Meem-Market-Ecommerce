@@ -34,7 +34,7 @@ export function NiceOneVariantSelector({
 }: NiceOneVariantSelectorProps) {
   const t = useTranslations("product");
   const locale = useLocale();
-  const { code: currencyCode, decimalPlaces } = useDisplayCurrency(currency);
+  const { symbol: currencySymbol, decimalPlaces } = useDisplayCurrency(currency);
 
   if (variants.length === 0) return null;
 
@@ -70,7 +70,7 @@ export function NiceOneVariantSelector({
                 <Skeleton className="h-3 w-14" />
               ) : (
                 <span className="text-[11px] font-bold text-text-primary">
-                  {formatNumber(variant.current_price, locale, decimalPlaces)} {currencyCode}
+                  {formatNumber(variant.current_price, locale, decimalPlaces)} {currencySymbol}
                 </span>
               )}
               <span className={cn("text-[10px]", inStock ? "text-success" : "text-error")}>

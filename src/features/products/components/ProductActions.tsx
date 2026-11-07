@@ -23,7 +23,7 @@ interface ProductActionsProps {
 export function ProductActions({ product, selectedVariant, pricesLoading = false }: ProductActionsProps) {
   const t = useTranslations("product");
   const locale = useLocale();
-  const { code: currencyCode, decimalPlaces } = useDisplayCurrency(
+  const { symbol: currencySymbol, decimalPlaces } = useDisplayCurrency(
     product.currency,
   );
   const variant = selectedVariant;
@@ -79,7 +79,7 @@ export function ProductActions({ product, selectedVariant, pricesLoading = false
           <Skeleton className="h-7 w-32" />
         ) : (
           <span className="text-lg font-bold text-text-primary">
-            {formatNumber(price * selectedQuantity, locale, decimalPlaces)} {currencyCode}
+            {formatNumber(price * selectedQuantity, locale, decimalPlaces)} {currencySymbol}
           </span>
         )}
       </div>

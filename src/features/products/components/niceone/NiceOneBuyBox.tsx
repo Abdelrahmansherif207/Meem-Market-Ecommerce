@@ -33,7 +33,7 @@ export function NiceOneBuyBox({ product, selectedVariant, pricesLoading = false 
   const t = useTranslations("product");
   const tPdp = useTranslations("niceOnePdp");
   const locale = useLocale();
-  const { code: currencyCode, decimalPlaces } = useDisplayCurrency(product.currency);
+  const { symbol: currencySymbol, decimalPlaces } = useDisplayCurrency(product.currency);
 
   const stock = selectedVariant
     ? { inStock: product.in_stock && selectedVariant.quantity > 0, remaining: selectedVariant.quantity }
@@ -105,7 +105,7 @@ export function NiceOneBuyBox({ product, selectedVariant, pricesLoading = false 
         ) : (
           <>
             <span className="font-semibold text-text-primary">
-              {formatNumber(price * Math.max(cartQuantity, 1), locale, decimalPlaces)} {currencyCode}
+              {formatNumber(price * Math.max(cartQuantity, 1), locale, decimalPlaces)} {currencySymbol}
             </span>
             <span className={stock.inStock ? "text-success" : "text-error"}>
               {stock.inStock ? t("inStock", { count: stock.remaining }) : t("outOfStock")}

@@ -7,6 +7,7 @@ import { cn } from "@/shared/utils/cn";
 import { useClickOutside } from "@/shared/hooks/useClickOutside";
 import { SESSION_HINT_COOKIE_NAME } from "@/shared/constants/sessionCookies";
 import { normalizeCurrencyCode } from "@/shared/lib/currency";
+import { currencySymbolFor } from "@/shared/utils/formatMoney";
 import { currencyService } from "../services/currencyService";
 import { useCurrencyStore } from "../store/useCurrencyStore";
 import { resolveLocalized, type Currency } from "../types";
@@ -127,7 +128,10 @@ export function CurrencySwitcher({ className }: CurrencySwitcherProps) {
                     {resolveLocalized(currency.name, locale, currency.code)}
                   </span>
                   <span className="text-xs text-text-muted" dir="ltr">
-                    {resolveLocalized(currency.symbol, locale, "")}
+                    {currencySymbolFor(
+                      currency.code,
+                      resolveLocalized(currency.symbol, "en", ""),
+                    )}
                   </span>
                   {isPending ? (
                     <Loader2 className="h-3.5 w-3.5 animate-spin" aria-hidden />

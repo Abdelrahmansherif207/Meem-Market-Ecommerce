@@ -1,6 +1,6 @@
 "use client";
 
-import { useLocale } from "next-intl";
+import { currencySymbolFor } from "@/shared/utils/formatMoney";
 import { useCurrencyStore } from "../store/useCurrencyStore";
 import {
   resolveLocalized,
@@ -8,34 +8,31 @@ import {
   type ProductCurrency,
 } from "../types";
 
-/** Legacy labels used until the currencies list seeds the store. */
-const LEGACY_SYMBOL: Record<string, string> = {
-  en: "K.D",
-  ar: "د.ك",
-};
-
 /**
  * Resolve the currency to display. Priority:
  * 1. per-product currency from the API (matched against the seeded list for
  *    `decimal_places`, which product payloads don't carry),
  * 2. the user's selected currency from the store,
- * 3. legacy locale default (K.D / د.ك, 2 decimals — preserves old rendering).
+ * 3. English KWD default ("K.D", 2 decimals).
+ *
+ * Prices are always shown in English: symbols resolve through the `en`
+ * locale and any Arabic-localized symbol falls back to `K.D`/the currency
+ * code, in every locale.
  */
 export function useDisplayCurrency(
   productCurrency?: ProductCurrency | null,
 ): DisplayCurrency {
-  const locale = useLocale();
   const selectedCode = useCurrencyStore((s) => s.selectedCode);
   const byCode = useCurrencyStore((s) => s.byCode);
 
   const code = productCurrency?.code || selectedCode || "KWD";
   const known = byCode[code];
 
-  const symbol =
-    resolveLocalized(productCurrency?.symbol, locale, "") ||
-    known?.symbol ||
-    LEGACY_SYMBOL[locale] ||
-    LEGACY_SYMBOL.en;
+  const symbol = currencySymbolFor(
+    code,
+    resolveLocalized(productCurrency?.symbol, "en", "") ||
+      known?.symbol,
+  );
 
   return {
     code,

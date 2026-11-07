@@ -3,6 +3,7 @@
 import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
 import { CURRENCY_STORAGE_KEY } from "@/shared/constants/storageKeys";
+import { currencySymbolFor } from "@/shared/utils/formatMoney";
 import { resolveLocalized, type Currency } from "../types";
 
 interface CurrencyMeta {
@@ -24,7 +25,11 @@ interface CurrencyState {
 function metaOf(currency: Currency, locale = "en"): CurrencyMeta {
   const rate = Number(currency.effective_rate);
   return {
-    symbol: resolveLocalized(currency.symbol, locale, currency.code),
+    // Prices always show English symbols, even if the API returns Arabic.
+    symbol: currencySymbolFor(
+      currency.code,
+      resolveLocalized(currency.symbol, locale, ""),
+    ),
     decimalPlaces: Number.isFinite(currency.decimal_places)
       ? currency.decimal_places
       : 2,

@@ -69,7 +69,7 @@ function NiceOneRecommendedCard({
   const tProduct = useTranslations("product");
   const tPdp = useTranslations("niceOnePdp");
   const locale = useLocale();
-  const { code: currencyCode, decimalPlaces } = useDisplayCurrency(item.currency);
+  const { symbol: currencySymbol, decimalPlaces } = useDisplayCurrency(item.currency);
   const formatPrice = (v: number) => formatNumber(v, locale, decimalPlaces);
 
   const displayPrice = getDisplayPrice(item);
@@ -156,7 +156,7 @@ function NiceOneRecommendedCard({
               )}
               <span className="flex flex-wrap items-center gap-1">
                 <span className="text-xs font-bold text-discount">
-                  {formatPrice(displayPrice)} <span className="text-[9px]">{currencyCode}</span>
+                  {formatPrice(displayPrice)} <span className="text-[9px]">{currencySymbol}</span>
                 </span>
                 {discountPercent != null && (
                   <span className="rounded bg-primary-tint px-1 text-[10px] font-bold text-discount">

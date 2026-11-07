@@ -26,7 +26,7 @@ export function ProductVariants({
 }: ProductVariantsProps) {
   const t = useTranslations("product");
   const locale = useLocale();
-  const { code: currencyCode, decimalPlaces } =
+  const { symbol: currencySymbol, decimalPlaces } =
     useDisplayCurrency(currency);
 
   if (variants.length === 0) return null;
@@ -79,7 +79,7 @@ export function ProductVariants({
                 <Skeleton className="h-4 w-16" />
               ) : (
                 <span className="text-sm font-bold text-text-primary">
-                  {formatNumber(variant.current_price, locale, decimalPlaces)} {currencyCode}
+                  {formatNumber(variant.current_price, locale, decimalPlaces)} {currencySymbol}
                 </span>
               )}
               <span

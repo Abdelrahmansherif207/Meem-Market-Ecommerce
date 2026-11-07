@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import type { ReactNode } from "react";
 import { Gift, Star, ShoppingCart, Car, ShoppingBag, ChevronRight } from "lucide-react";
 import { cn } from "@/shared/utils/cn";
-import { formatMoney, formatNumber } from "@/shared/utils/formatMoney";
+import { formatMoney } from "@/shared/utils/formatMoney";
 import { Button } from "@/components/ui/Button";
 import { useAuthStore } from "@/features/auth";
 import type { CartLineIdentity, HydratedCartItem } from "../types";
@@ -84,7 +84,7 @@ export function CartSection({
             <span>
               {freeShippingEligible
                 ? t("freeShippingAchieved")
-                : t("freeShippingProgress", { amount: formatNumber(freeShipRemaining, locale, 0) })}
+                : t("freeShippingProgress", { amount: formatMoney(freeShipRemaining, locale, { decimalPlaces: 0 }) })}
             </span>
           </div>
 
@@ -191,7 +191,7 @@ export function CartSection({
 
       {!checkoutEnabled && (
         <p className="text-center text-[11px] text-text-secondary">
-          {t("minimumOrder", { amount: minimumOrderAmount })}
+          {t("minimumOrder", { amount: formatMoney(minimumOrderAmount, locale) })}
         </p>
       )}
     </div>

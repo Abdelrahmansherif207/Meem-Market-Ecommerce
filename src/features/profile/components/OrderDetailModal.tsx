@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { X, Package, MapPin, CreditCard, Truck, Store, ExternalLink } from "lucide-react";
+import { Price } from "@/components/ui/Price";
 import { orderService } from "../services/orderService";
 import type { Order, OrderDetail } from "../types";
 import { OrderDetailSkeleton } from "./OrderDetailSkeleton";
@@ -123,12 +124,14 @@ export function OrderDetailModal({ order, open, onClose, onViewInvoice }: OrderD
                     <div className="min-w-0 flex-1">
                       <p className="text-sm font-semibold text-text-primary truncate">{item.product.name}</p>
                       <p className="text-xs text-text-secondary">
-                        {item.quantity} x {item.unit_price} {detail.currency}
+                        {item.quantity} x <Price amount={item.unit_price} currency={detail.currency} />
                       </p>
                     </div>
-                    <p className="text-sm font-bold text-text-primary shrink-0">
-                      {item.total_price} {detail.currency}
-                    </p>
+                    <Price
+                      amount={item.total_price}
+                      currency={detail.currency}
+                      className="text-sm font-bold text-text-primary shrink-0"
+                    />
                   </div>
                 ))}
               </div>
@@ -138,35 +141,61 @@ export function OrderDetailModal({ order, open, onClose, onViewInvoice }: OrderD
               <div className="space-y-2 text-sm">
                 <div className="flex justify-between">
                   <span className="text-text-secondary">{t("subtotal")}</span>
-                  <span className="font-medium text-text-primary">{detail.subtotal} {detail.currency}</span>
+                  <Price
+                    amount={detail.subtotal}
+                    currency={detail.currency}
+                    className="font-medium text-text-primary"
+                  />
                 </div>
                 {detail.shipping_price > 0 && (
                   <div className="flex justify-between">
                     <span className="text-text-secondary">{t("shipping")}</span>
-                    <span className="font-medium text-text-primary">{detail.shipping_price} {detail.currency}</span>
+                    <Price
+                      amount={detail.shipping_price}
+                      currency={detail.currency}
+                      className="font-medium text-text-primary"
+                    />
                   </div>
                 )}
                 {detail.fast_shipping_fee > 0 && (
                   <div className="flex justify-between">
                     <span className="text-text-secondary">{t("fastShipping")}</span>
-                    <span className="font-medium text-text-primary">{detail.fast_shipping_fee} {detail.currency}</span>
+                    <Price
+                      amount={detail.fast_shipping_fee}
+                      currency={detail.currency}
+                      className="font-medium text-text-primary"
+                    />
                   </div>
                 )}
                 {detail.promotion_discount > 0 && (
                   <div className="flex justify-between">
                     <span className="text-text-secondary">{t("promotionDiscount")}</span>
-                    <span className="font-medium text-green-600">-{detail.promotion_discount} {detail.currency}</span>
+                    <Price
+                      amount={detail.promotion_discount}
+                      currency={detail.currency}
+                      prefix="-"
+                      className="font-medium text-green-600"
+                    />
                   </div>
                 )}
                 {detail.coupon_discount != null && detail.coupon_discount > 0 && (
                   <div className="flex justify-between">
                     <span className="text-text-secondary">{t("couponDiscount")}</span>
-                    <span className="font-medium text-green-600">-{detail.coupon_discount} {detail.currency}</span>
+                    <Price
+                      amount={detail.coupon_discount}
+                      currency={detail.currency}
+                      prefix="-"
+                      className="font-medium text-green-600"
+                    />
                   </div>
                 )}
                 <div className="flex justify-between border-t border-border pt-2">
                   <span className="font-semibold text-text-primary">{t("total")}</span>
-                  <span className="font-bold text-text-primary">{detail.total} {detail.currency}</span>
+                  <Price
+                    amount={detail.total}
+                    currency={detail.currency}
+                    className="font-bold text-text-primary"
+                  />
                 </div>
               </div>
             </div>

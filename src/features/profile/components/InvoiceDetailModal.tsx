@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
 import { X, ExternalLink, Package, MapPin, CreditCard, Receipt } from "lucide-react";
+import { Price } from "@/components/ui/Price";
 import { invoiceService } from "../services/invoiceService";
 import type { InvoiceListItem, InvoiceDetail } from "../types";
 import { InvoiceDetailSkeleton } from "./InvoiceDetailSkeleton";
@@ -47,6 +48,7 @@ export function InvoiceDetailModal({ invoice, open, onClose }: InvoiceDetailModa
   if (!open) return null;
 
   const snapshot = detail?.snapshot;
+  const currency = snapshot?.pricing_breakdown.currency;
 
   return (
     <div
@@ -95,29 +97,51 @@ export function InvoiceDetailModal({ invoice, open, onClose }: InvoiceDetailModa
               <div className="space-y-2 text-sm">
                 <div className="flex justify-between">
                   <span className="text-text-secondary">{t("subtotal")}</span>
-                  <span className="font-medium text-text-primary">{snapshot.pricing_breakdown.subtotal} {snapshot.pricing_breakdown.currency}</span>
+                  <Price
+                    amount={snapshot.pricing_breakdown.subtotal}
+                    currency={currency}
+                    className="font-medium text-text-primary"
+                  />
                 </div>
                 {snapshot.pricing_breakdown.shipping_price > 0 && (
                   <div className="flex justify-between">
                     <span className="text-text-secondary">{t("shipping")}</span>
-                    <span className="font-medium text-text-primary">{snapshot.pricing_breakdown.shipping_price} {snapshot.pricing_breakdown.currency}</span>
+                    <Price
+                      amount={snapshot.pricing_breakdown.shipping_price}
+                      currency={currency}
+                      className="font-medium text-text-primary"
+                    />
                   </div>
                 )}
                 {snapshot.pricing_breakdown.promotion_discount > 0 && (
                   <div className="flex justify-between">
                     <span className="text-text-secondary">{t("discount")}</span>
-                    <span className="font-medium text-green-600">-{snapshot.pricing_breakdown.promotion_discount} {snapshot.pricing_breakdown.currency}</span>
+                    <Price
+                      amount={snapshot.pricing_breakdown.promotion_discount}
+                      currency={currency}
+                      prefix="-"
+                      className="font-medium text-green-600"
+                    />
                   </div>
                 )}
                 {snapshot.pricing_breakdown.coupon_discount > 0 && (
                   <div className="flex justify-between">
                     <span className="text-text-secondary">{t("discount")}</span>
-                    <span className="font-medium text-green-600">-{snapshot.pricing_breakdown.coupon_discount} {snapshot.pricing_breakdown.currency}</span>
+                    <Price
+                      amount={snapshot.pricing_breakdown.coupon_discount}
+                      currency={currency}
+                      prefix="-"
+                      className="font-medium text-green-600"
+                    />
                   </div>
                 )}
                 <div className="flex justify-between border-t border-border pt-2">
                   <span className="font-semibold text-text-primary">{t("total")}</span>
-                  <span className="font-bold text-text-primary">{snapshot.pricing_breakdown.total} {snapshot.pricing_breakdown.currency}</span>
+                  <Price
+                    amount={snapshot.pricing_breakdown.total}
+                    currency={currency}
+                    className="font-bold text-text-primary"
+                  />
                 </div>
               </div>
             </div>
@@ -133,12 +157,15 @@ export function InvoiceDetailModal({ invoice, open, onClose }: InvoiceDetailModa
                     <div className="min-w-0 flex-1">
                       <p className="font-medium text-text-primary truncate">{item.product_name}</p>
                       <p className="text-xs text-text-secondary">
-                        {item.product_sku} &middot; {item.quantity} x {item.unit_price} {snapshot.pricing_breakdown.currency}
+                        {item.product_sku} &middot; {item.quantity} x{" "}
+                        <Price amount={item.unit_price} currency={currency} />
                       </p>
                     </div>
-                    <p className="font-semibold text-text-primary shrink-0 ml-3">
-                      {item.total_price} {snapshot.pricing_breakdown.currency}
-                    </p>
+                    <Price
+                      amount={item.total_price}
+                      currency={currency}
+                      className="font-semibold text-text-primary shrink-0 ml-3"
+                    />
                   </div>
                 ))}
               </div>
