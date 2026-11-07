@@ -5,6 +5,11 @@ const withNextIntl = createNextIntlPlugin("./src/i18n/request.ts");
 
 const nextConfig: NextConfig = {
   reactCompiler: true,
+  experimental: {
+    // Vercel reused a stale compiled globals.css after the homepage redesign,
+    // serving new markup with old CSS. Always recompile CSS for builds.
+    turbopackFileSystemCacheForBuild: false,
+  },
   env: {
     NEXT_PUBLIC_XHR_LOGS: process.env.NEXT_PUBLIC_XHR_LOGS ?? "false",
   },
