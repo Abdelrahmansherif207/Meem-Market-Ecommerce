@@ -1,6 +1,8 @@
-import Image from "next/image";
-import { ChevronRight } from "lucide-react";
+import type { CSSProperties } from "react";
 import { getTranslations } from "next-intl/server";
+import { Link } from "@/i18n/navigation";
+import { CampaignImage } from "@/components/ui/CampaignImage";
+import { SectionHeader } from "@/components/ui/SectionHeader";
 import { homePageService } from "../services/homePageService";
 import { normalizeList } from "./normalize";
 import type { SectionFrontSetting, HomeCategory } from "../types";
@@ -13,8 +15,9 @@ interface CatchCategoriesSectionProps {
 }
 
 /**
- * Screen-matched category section. `layout: "list"` renders horizontal
- * cards (parent categories); otherwise centered circular tiles in a grid.
+ * CMS-ordered category rail: every category the CMS returns, 4 visible on
+ * mobile and `columns_count` (max 8) on desktop, with a real "View all"
+ * destination. The rail scrolls horizontally instead of dropping items.
  */
 export default async function CatchCategoriesSection({
   title,
@@ -28,7 +31,9 @@ export default async function CatchCategoriesSection({
   let categories: HomeCategory[] = [];
   try {
     categories = normalizeList(
-      await homePageService.fetchSectionData<HomeCategory[] | { data: HomeCategory[] }>(endpoint, locale),
+      await homePageService.fetchSectionData<
+        HomeCategory[] | { data: HomeCategory[] }
+      >(endpoint, locale),
     );
   } catch (error) {
     console.error("[CatchCategoriesSection] Failed to fetch categories:", error);
@@ -37,75 +42,62 @@ export default async function CatchCategoriesSection({
 
   if (!categories || categories.length === 0) return null;
 
-  const header = title ? (
-    <div className="flex items-center justify-between">
-      <h2 className="text-lg font-bold tracking-tight text-neutral-900">{title}</h2>
-      <a
-        href="#"
-        className="text-xs font-semibold text-neutral-700 underline underline-offset-4 transition-colors hover:text-black"
-      >
-        {t("viewAll")}
-      </a>
-    </div>
-  ) : null;
-
-  if (setting?.layout === "list") {
-    return (
-      <section className="space-y-4">
-        {header}
-        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
-          {categories.map((cat) => (
-            <a
-              key={cat.id}
-              href={`/${locale}/category/${cat.slug}`}
-              className="group flex items-center justify-between rounded-2xl border border-neutral-100 bg-white p-4 transition-shadow hover:shadow-md"
-            >
-              <div className="flex items-center gap-4">
-                {cat.image?.desktop && (
-                  <Image
-                    src={cat.image.desktop}
-                    alt={cat.name}
-                    width={56}
-                    height={56}
-                    className="h-14 w-14 rounded-full border border-neutral-100 object-cover"
-                  />
-                )}
-                <span className="text-sm font-semibold text-neutral-900 transition-colors group-hover:text-primary">
-                  {cat.name}
-                </span>
-              </div>
-              <ChevronRight className="h-4 w-4 text-neutral-400 rtl:rotate-180" />
-            </a>
-          ))}
-        </div>
-      </section>
-    );
-  }
+  const desktopColumns = Math.max(
+    4,
+    Math.min(8, Math.round(setting?.columns_count ?? 8)),
+  );
 
   return (
-    <section className="space-y-4">
-      {header}
-      <div className="grid grid-cols-3 gap-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8">
-        {categories.map((cat) => (
-          <a
-            key={cat.id}
-            href={`/${locale}/category/${cat.slug}`}
-            className="group flex flex-col items-center gap-2 rounded-2xl border border-neutral-100 bg-white p-3 text-center transition-shadow hover:shadow-md"
-          >
-            {cat.image?.desktop && (
-              <Image
-                src={cat.image.desktop}
-                alt={cat.name}
-                width={72}
-                height={72}
-                className="h-16 w-16 rounded-full border border-neutral-100 object-cover transition-transform group-hover:scale-105"
-              />
-            )}
-            <span className="line-clamp-2 text-xs font-semibold text-neutral-800 transition-colors group-hover:text-primary">
-              {cat.name}
-            </span>
-          </a>
-        ))}
+    <section className="w-full space-y-4">
+      {title ? (
+        <SectionHeader
+          title={title}
+          actionLabel={t("viewAll")}
+          actionHref="/categories"
+        />
+      ) : null}
+
+      <div
+        className="catch-category-rail"
+        style={{ "--cat-cols": desktopColumns } as CSSProperties}
+      >
+        {categories.map((cat) => {
+          const image = cat.image?.desktop || cat.image?.mobile;
+          return (
+            <Link
+              key={cat.id}
+              href={`/category/${cat.slug}`}
+              className="group flex min-w-0 flex-col gap-2 rounded-2xl border border-catch-border-soft bg-white p-1.5 transition-[box-shadow,transform] duration-200 hover:-translate-y-0.5 hover:shadow-elev-2 sm:p-2"
+            >
+              <div className="relative aspect-square w-full overflow-hidden rounded-xl bg-catch-blush">
+                {image ? (
+                  <CampaignImage
+                    desktop={cat.image.desktop || cat.image.mobile}
+                    mobile={cat.image.mobile}
+                    alt={cat.name}
+                    width={320}
+                    height={320}
+                    mobileWidth={320}
+                    mobileHeight={320}
+                    sizes="(max-width: 1023px) 25vw, 12.5vw"
+                    fill
+                    className="object-cover transition-transform duration-300 group-hover:scale-[1.04]"
+                  />
+                ) : (
+                  <span
+                    className="flex h-full w-full items-center justify-center text-lg font-bold text-catch-rose"
+                    aria-hidden
+                  >
+                    {cat.name.charAt(0)}
+                  </span>
+                )}
+              </div>
+              <span className="line-clamp-2 text-center text-[10px] font-semibold leading-tight text-catch-charcoal transition-colors group-hover:text-primary sm:text-xs">
+                {cat.name}
+              </span>
+            </Link>
+          );
+        })}
       </div>
     </section>
   );

@@ -1,10 +1,11 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useMemo, useState } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { cn } from "@/shared/utils/cn";
-import CatchProductCard from "@/features/home/redesign/CatchProductCard";
-import type { ProductTag } from "@/shared/types";
+import ProductCard from "./ProductCard";
+import type { ProductTag, ProductBrand } from "@/shared/types";
 import type { ProductCurrency } from "@/features/currencies";
 
 export interface PaginatedProductItem {
@@ -16,6 +17,8 @@ export interface PaginatedProductItem {
   has_variants: boolean;
   quantity: number;
   in_stock?: boolean;
+  ratings?: number;
+  ratings_count?: number;
   image: {
     thumbnail: string;
     original: Record<string, string>;
@@ -23,6 +26,7 @@ export interface PaginatedProductItem {
   discount_active?: boolean;
   flash_sale_active?: boolean;
   tags?: ProductTag[];
+  brands?: ProductBrand[];
   in_wishlist?: boolean;
   currency?: ProductCurrency;
 }
@@ -50,11 +54,17 @@ function getPageNumbers(current: number, total: number): (number | "...")[] {
   return pages;
 }
 
+/**
+ * Client-side paginated product grid used by banner/slider detail pages.
+ * Product mapping and the card itself are shared with every other listing
+ * surface, so behavior stays identical across pages.
+ */
 export default function PaginatedProductGrid({
   products,
   itemsPerPage = 12,
   pricesLoading = false,
 }: PaginatedProductGridProps) {
+  const t = useTranslations("catchHome");
   const [currentPage, setCurrentPage] = useState(1);
   const totalPages = Math.ceil(products.length / itemsPerPage);
 
@@ -72,7 +82,7 @@ export default function PaginatedProductGrid({
     <div className="flex flex-col">
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 md:grid-cols-4 lg:grid-cols-6">
         {visibleProducts.map((product) => (
-          <CatchProductCard
+          <ProductCard
             key={product.id}
             item={{
               id: product.id,
@@ -88,43 +98,51 @@ export default function PaginatedProductGrid({
               inWishlist: product.in_wishlist,
               flashSaleActive: product.flash_sale_active ?? false,
               tags: product.tags,
+              brands: product.brands,
+              ratings: product.ratings,
+              reviewsCount: product.ratings_count,
             }}
             pricesLoading={pricesLoading}
           />
         ))}
       </div>
 
-      {totalPages > 1 && (
+      {totalPages > 1 ? (
         <nav
-          className="flex items-center justify-center gap-1 mt-6 select-none"
-          aria-label="Product pagination"
+          className="mt-6 flex select-none items-center justify-center gap-1"
+          aria-label={t("pagination.label")}
         >
           <button
+            type="button"
             onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
             disabled={currentPage === 1}
-            className="flex items-center justify-center w-9 h-9 rounded-lg text-text-secondary hover:bg-surface transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
-            aria-label="Previous page"
+            className="flex h-9 w-9 items-center justify-center rounded-lg text-text-secondary transition-colors hover:bg-surface disabled:cursor-not-allowed disabled:opacity-30"
+            aria-label={t("pagination.previous")}
           >
-            <ChevronLeft className="size-4" />
+            <ChevronLeft className="size-4 rtl:rotate-180" />
           </button>
 
           {pageNumbers.map((page, i) =>
             page === "..." ? (
-              <span key={`ellipsis-${i}`} className="flex items-center justify-center w-9 h-9 text-sm text-text-secondary">
+              <span
+                key={`ellipsis-${i}`}
+                className="flex h-9 w-9 items-center justify-center text-sm text-text-secondary"
+              >
                 ...
               </span>
             ) : (
               <button
                 key={page}
+                type="button"
                 onClick={() => setCurrentPage(page)}
                 className={cn(
-                  "flex items-center justify-center w-9 h-9 rounded-lg text-sm font-medium transition-colors",
+                  "flex h-9 w-9 items-center justify-center rounded-lg text-sm font-medium transition-colors",
                   page === currentPage
                     ? "bg-primary text-white shadow-sm"
                     : "text-text-primary hover:bg-surface",
                 )}
                 aria-current={page === currentPage ? "page" : undefined}
-                aria-label={`Page ${page}`}
+                aria-label={t("pagination.page", { page })}
               >
                 {page}
               </button>
@@ -132,15 +150,16 @@ export default function PaginatedProductGrid({
           )}
 
           <button
+            type="button"
             onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
             disabled={currentPage === totalPages}
-            className="flex items-center justify-center w-9 h-9 rounded-lg text-text-secondary hover:bg-surface transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
-            aria-label="Next page"
+            className="flex h-9 w-9 items-center justify-center rounded-lg text-text-secondary transition-colors hover:bg-surface disabled:cursor-not-allowed disabled:opacity-30"
+            aria-label={t("pagination.next")}
           >
-            <ChevronRight className="size-4" />
+            <ChevronRight className="size-4 rtl:rotate-180" />
           </button>
         </nav>
-      )}
+      ) : null}
     </div>
   );
 }

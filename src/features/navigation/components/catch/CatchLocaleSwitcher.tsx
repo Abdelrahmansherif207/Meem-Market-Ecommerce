@@ -25,11 +25,11 @@ export default function CatchLocaleSwitcher() {
       type="button"
       onClick={switchLocale}
       aria-label={t("language")}
-      className="flex cursor-pointer items-center gap-1 transition-colors hover:text-black"
+      className="flex cursor-pointer items-center gap-1 transition-colors hover:text-catch-primary"
     >
-      <Globe className="h-4 w-4 text-neutral-600" />
+      <Globe className="h-4 w-4 text-catch-muted" />
       <span>{locale.toUpperCase()}</span>
-      <ChevronDown className="h-3 w-3 text-neutral-500" />
+      <ChevronDown className="h-3 w-3 text-catch-muted-soft" />
     </button>
   );
 }

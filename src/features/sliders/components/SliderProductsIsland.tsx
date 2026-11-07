@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback } from "react";
-import PaginatedProductGrid from "@/components/ui/PaginatedProductGrid";
+import PaginatedProductGrid from "@/features/products/components/PaginatedProductGrid";
 import { getSliderProductsAction } from "../actions/sliderCurrencyActions";
 import { useCurrencyRefetch } from "@/features/currencies";
 import type { SliderProduct } from "../types";

@@ -3,19 +3,26 @@
 import { useCallback, useRef } from "react";
 import { Search } from "lucide-react";
 import { useRouter } from "@/i18n/navigation";
+import { cn } from "@/shared/utils/cn";
 import { SearchAutocompleteDropdown } from "../header/SearchAutocompleteDropdown";
 import { useSearchAutocomplete } from "../../hooks/useSearchAutocomplete";
 
 interface CatchSearchBarProps {
   placeholder: string;
+  compact?: boolean;
 }
 
 /**
- * Screen-styled search pill (`rounded-full bg-[#F5F5F7]` with a start-aligned
- * icon). Reuses the existing autocomplete hook + dropdown so search behavior,
- * API calls and routing stay untouched.
+ * Screen-styled search field (start-aligned icon, square corners). Reuses
+ * the existing autocomplete hook + dropdown so search behavior, API calls
+ * and routing stay untouched.
+ *
+ * `compact` renders the shorter rounded variant used by the sticky header.
  */
-export default function CatchSearchBar({ placeholder }: CatchSearchBarProps) {
+export default function CatchSearchBar({
+  placeholder,
+  compact = false,
+}: CatchSearchBarProps) {
   const router = useRouter();
   const {
     query,
@@ -58,9 +65,14 @@ export default function CatchSearchBar({ placeholder }: CatchSearchBarProps) {
   );
 
   return (
-    <div className="relative">
+    <div className="relative w-full">
       <form onSubmit={handleSubmit} className="relative flex items-center">
-        <Search className="pointer-events-none absolute start-4 h-4 w-4 text-neutral-400" />
+        <Search
+          className={cn(
+            "pointer-events-none absolute h-4 w-4 text-catch-muted-soft",
+            compact ? "start-3" : "start-4",
+          )}
+        />
         <input
           type="text"
           value={query}
@@ -68,7 +80,12 @@ export default function CatchSearchBar({ placeholder }: CatchSearchBarProps) {
           onBlur={handleBlur}
           onFocus={handleFocus}
           placeholder={placeholder}
-          className="h-[38px] w-full rounded-full border-0 bg-[#f5f5f7] ps-11 pe-4 text-xs text-neutral-700 placeholder:text-neutral-400 focus:outline-none focus:ring-1 focus:ring-neutral-300"
+          className={cn(
+            "w-full border-none bg-catch-blush text-xs text-catch-charcoal shadow-none placeholder:text-catch-muted-soft focus:bg-white focus:outline-none focus:ring-0",
+            compact
+              ? "h-10 rounded-lg ps-9 pe-3"
+              : "h-11 rounded-none ps-11 pe-4",
+          )}
         />
       </form>
       <SearchAutocompleteDropdown

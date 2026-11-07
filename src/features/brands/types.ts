@@ -1,4 +1,4 @@
-import type { ProductTag } from "@/shared/types";
+import type { ProductBrand, ProductTag } from "@/shared/types";
 import type { ProductCurrency } from "@/features/currencies";
 
 export interface BrandImage {
@@ -21,6 +21,8 @@ export interface BrandProduct {
   price: number;
   price_after_discount: number;
   rating: number;
+  ratings_count?: number;
+  brands?: ProductBrand[];
   in_wishlist?: boolean;
   image: {
     thumbnail: string;

@@ -57,6 +57,24 @@ button {
   --color-qty-ink: #372e4c;
   --color-qty-surface: #f2f2f2;
 
+  /* Catch Beauty supporting palette — additive only.
+     The primary brand crimson (#b81d24) remains the single primary token. */
+  --color-catch-primary: #b81d24;
+  --color-catch-primary-active: #9d151b;
+  --color-catch-berry: #6e0d1f;
+  --color-catch-berry-deep: #4a0a16;
+  --color-catch-ivory: #fbf7f4;
+  --color-catch-surface: #f6efea;
+  --color-catch-surface-deep: #f2e9e5;
+  --color-catch-blush: #fbf1ee;
+  --color-catch-charcoal: #241c1c;
+  --color-catch-muted: #6f605d;
+  --color-catch-muted-soft: #9a8a86;
+  --color-catch-rose: #d8a7a0;
+  --color-catch-rose-soft: #f3ddd8;
+  --color-catch-border: #e9ddd7;
+  --color-catch-border-soft: #f2e9e5;
+
   /* Elevation scale — canonical shadows; prefer these over ad-hoc shadow values */
   --shadow-elev-1: 0 1px 3px 0 rgba(28, 26, 26, 0.04), 0 1px 2px -1px rgba(28, 26, 26, 0.06);
   --shadow-elev-2: 0 4px 12px -2px rgba(28, 26, 26, 0.08), 0 2px 4px -2px rgba(28, 26, 26, 0.05);
@@ -112,6 +130,139 @@ button {
 :root {
   --header-gradient-start: rgb(245, 235, 235);
   --header-gradient-end: rgb(255, 255, 255);
+}
+
+/*
+ * Catch Beauty homepage scope.
+ *
+ * Applied explicitly on the homepage shell (never via `body:has(...)`) so
+ * only this page re-tones the shared Tailwind utilities. Primary/discount
+ * stay the validated brand crimson; supporting surfaces and text move to
+ * the warm berry/ivory palette.
+ */
+.catch-surface {
+  --color-background: #fbf7f4;
+  --color-surface: #f6efea;
+  --color-border: #e9ddd7;
+  --color-border-light: #f2e9e5;
+  --color-border-subtle: #f2e9e5;
+  --color-text-primary: #241c1c;
+  --color-text-secondary: #6f605d;
+  --color-text-muted: #9a8a86;
+  --color-accent: #d8a7a0;
+  --color-primary-tint: #fbf1ee;
+  --color-page-gray: #fbf7f4;
+  --color-line: #f2e9e5;
+  background-color: var(--color-catch-ivory);
+  color: var(--color-catch-charcoal);
+}
+
+.catch-surface ::selection {
+  background: color-mix(in srgb, var(--color-primary) 16%, transparent);
+}
+
+/* Hero carousel pagination — white pills over campaign artwork. */
+.catch-hero-swiper .swiper-pagination {
+  bottom: 14px !important;
+}
+
+.catch-hero-swiper .swiper-pagination-bullet {
+  width: 7px;
+  height: 7px;
+  margin: 0 3px !important;
+  background: rgb(255 255 255 / 55%);
+  opacity: 1;
+  transition:
+    width 0.25s ease,
+    background-color 0.25s ease;
+}
+
+.catch-hero-swiper .swiper-pagination-bullet-active {
+  width: 22px;
+  border-radius: 999px;
+  background: #fff;
+}
+
+.catch-shelf-swiper .swiper-slide {
+  height: auto;
+}
+
+/* Layout-reserving media well for art-directed CMS artwork. */
+.catch-media-well {
+  position: relative;
+  width: 100%;
+  aspect-ratio: var(--media-aspect, 16 / 9);
+  overflow: hidden;
+}
+
+@media (max-width: 767px) {
+  .catch-media-well {
+    aspect-ratio: var(--media-aspect-mobile, var(--media-aspect, 16 / 9));
+  }
+}
+
+/* CMS-driven grid used by brands/coupons: 2 mobile, 4 tablet, N desktop. */
+.catch-cms-grid {
+  display: grid;
+  grid-template-columns: repeat(var(--cms-cols-mobile, 2), minmax(0, 1fr));
+  gap: var(--cms-gap, 0.75rem);
+}
+
+@media (min-width: 768px) {
+  .catch-cms-grid {
+    grid-template-columns: repeat(
+      var(--cms-cols-tablet, var(--cms-cols-mobile, 2)),
+      minmax(0, 1fr)
+    );
+  }
+}
+
+@media (min-width: 1024px) {
+  .catch-cms-grid {
+    grid-template-columns: repeat(
+      var(--cms-cols-desktop, 4),
+      minmax(0, 1fr)
+    );
+    gap: var(--cms-gap-desktop, 1rem);
+  }
+}
+
+/* CMS-ordered category rail: 4 visible mobile, N visible desktop. */
+.catch-category-rail {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: calc(
+    (100% - (var(--cat-cols-mobile, 4) - 1) * 0.75rem) /
+      var(--cat-cols-mobile, 4)
+  );
+  gap: 0.75rem;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: none;
+  padding-bottom: 0.25rem;
+}
+
+.catch-category-rail::-webkit-scrollbar {
+  display: none;
+}
+
+.catch-category-rail > * {
+  scroll-snap-align: start;
+}
+
+@media (min-width: 1024px) {
+  .catch-category-rail {
+    grid-auto-columns: calc(
+      (100% - (var(--cat-cols, 8) - 1) * 1rem) / var(--cat-cols, 8)
+    );
+    gap: 1rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .catch-hero-swiper .swiper-pagination-bullet {
+    transition: none;
+  }
 }
 
 @layer utilities {

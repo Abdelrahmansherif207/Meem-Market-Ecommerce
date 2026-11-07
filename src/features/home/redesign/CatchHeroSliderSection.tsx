@@ -1,10 +1,17 @@
-import Image from "next/image";
+import type { CSSProperties } from "react";
+import { Link } from "@/i18n/navigation";
+import { CampaignImage } from "@/components/ui/CampaignImage";
 import { homePageService } from "../services/homePageService";
 import { normalizeList } from "./normalize";
 import CatchHeroSlider from "./CatchHeroSlider";
 import CatchShelfIsland from "./CatchShelfIsland";
 import type { SectionFrontSetting, ProductItem } from "../types";
 import type { Slider, SliderDetail, SliderProduct } from "@/features/sliders/types";
+
+const SLIDER_MEDIA_STYLE = {
+  "--media-aspect": "1150 / 368",
+  "--media-aspect-mobile": "1150 / 368",
+} as CSSProperties;
 
 interface CatchHeroSliderSectionProps {
   locale: string;
@@ -26,6 +33,8 @@ function sliderProductToProductItem(p: SliderProduct): ProductItem {
     flashSaleActive: p.flash_sale_active ?? false,
     inWishlist: undefined,
     ratings: p.ratings,
+    reviewsCount: p.ratings_count,
+    brands: p.brands,
     inStock: p.quantity,
     stockQuantity: p.quantity,
     currency: p.currency,
@@ -82,18 +91,25 @@ export default async function CatchHeroSliderSection({
 
   return (
     <section className="w-full space-y-6">
-      <a href={`/${locale}/sliders/${detail.slug}`} className="block w-full">
-        {detail.image.desktop ? (
-          <Image
-            src={detail.image.desktop}
+      <Link
+        href={`/sliders/${detail.slug}`}
+        className="block w-full overflow-hidden rounded-2xl focus-visible:outline-offset-[-2px]"
+      >
+        <div className="catch-media-well" style={SLIDER_MEDIA_STYLE}>
+          <CampaignImage
+            desktop={detail.image.desktop}
+            mobile={detail.image.mobile}
             alt={detail.title}
-            width={1500}
-            height={377}
+            width={1150}
+            height={368}
+            mobileWidth={1150}
+            mobileHeight={368}
             priority
-            className="aspect-auto w-full rounded-xl md:rounded-md"
+            fill
+            sizes="(max-width: 1440px) 100vw, 1440px"
           />
-        ) : null}
-      </a>
+        </div>
+      </Link>
 
       {products.length > 0 && (
         <CatchShelfIsland

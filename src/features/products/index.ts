@@ -1,4 +1,6 @@
 ﻿export { ProductDetailsPage } from "./components/ProductDetailsPage";
+export { default as ProductCard } from "./components/ProductCard";
+export { default as PaginatedProductGrid } from "./components/PaginatedProductGrid";
 export { NiceOneCountdown } from "./components/niceone/NiceOneCountdown";
 export {
   getDisplayPrice,
@@ -6,4 +8,11 @@ export {
   getDiscountPercent,
   getVariantPriceRange,
 } from "./utils";
-export type { ProductDetail, ProductVariant, ProductReview, ProductImages, ProductAttribute } from "./types";
+export type {
+  ProductCardItem,
+  ProductDetail,
+  ProductVariant,
+  ProductReview,
+  ProductImages,
+  ProductAttribute,
+} from "./types";

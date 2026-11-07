@@ -9,9 +9,9 @@ interface CatchFooterProps {
 }
 
 /**
- * Screen-matched site footer: white 5-column grid (popular categories,
- * company links, profile links, social circles, app badges) followed by
- * the copyright + payment strip. Social/app data comes from the existing
+ * Site footer: warm sand 5-column grid (popular categories, company
+ * links, profile links, social circles, app badges) followed by the
+ * copyright + payment strip. Social/app data comes from the existing
  * footerService assembly; link columns are static per the screen.
  */
 export default async function CatchFooter({ params }: CatchFooterProps) {
@@ -63,10 +63,10 @@ export default async function CatchFooter({ params }: CatchFooterProps) {
   return (
     <>
       {/* Mobile footer — centered stacked block (mobile screen spec) */}
-      <div className="space-y-5 border-t border-neutral-100 bg-white px-3 pb-8 pt-4 text-center lg:hidden">
+      <div className="space-y-5 border-t border-catch-border bg-catch-surface px-3 pb-8 pt-4 text-center lg:hidden">
         {/* Stay connected */}
         <div className="space-y-2.5">
-          <h3 className="text-xs font-extrabold tracking-tight text-neutral-900">
+          <h3 className="text-xs font-extrabold tracking-tight text-catch-charcoal">
             {t("stayConnected")}
           </h3>
           <div className="flex items-center justify-center space-x-2.5 rtl:space-x-reverse">
@@ -75,7 +75,7 @@ export default async function CatchFooter({ params }: CatchFooterProps) {
                 key={s.platform}
                 href={s.url || "#"}
                 aria-label={s.label}
-                className="flex h-8 w-8 items-center justify-center rounded-full bg-neutral-100 text-xs font-bold text-neutral-800 transition-colors hover:bg-black hover:text-white"
+                className="flex h-8 w-8 items-center justify-center rounded-full bg-catch-ivory text-xs font-bold text-catch-charcoal transition-colors hover:bg-catch-primary hover:text-white"
               >
                 <SocialIcon platform={s.platform} className="h-3.5 w-3.5" />
               </a>
@@ -85,12 +85,12 @@ export default async function CatchFooter({ params }: CatchFooterProps) {
 
         {/* Download apps */}
         <div className="space-y-2.5">
-          <h3 className="text-xs font-extrabold tracking-tight text-neutral-900">
+          <h3 className="text-xs font-extrabold tracking-tight text-catch-charcoal">
             {t("downloadApps")}
           </h3>
           <div className="flex items-center justify-center gap-2.5">
             <a href={googlePlayUrl} className="transition-opacity hover:opacity-90">
-              <span className="flex items-center gap-2 rounded-lg bg-black px-3 py-1.5 text-white">
+              <span className="flex items-center gap-2 rounded-lg bg-catch-charcoal px-3 py-1.5 text-white">
                 <FaGooglePlay className="h-4 w-4" />
                 <span className="text-[9px] leading-tight">
                   <span className="block">{t("apps.getTag")}</span>
@@ -99,7 +99,7 @@ export default async function CatchFooter({ params }: CatchFooterProps) {
               </span>
             </a>
             <a href={appStoreUrl} className="transition-opacity hover:opacity-90">
-              <span className="flex items-center gap-2 rounded-lg bg-black px-3 py-1.5 text-white">
+              <span className="flex items-center gap-2 rounded-lg bg-catch-charcoal px-3 py-1.5 text-white">
                 <FaApple className="h-4 w-4" />
                 <span className="text-[9px] leading-tight">
                   <span className="block">{t("apps.downloadOn")}</span>
@@ -123,22 +123,22 @@ export default async function CatchFooter({ params }: CatchFooterProps) {
         </div>
 
         {/* Copyright */}
-        <div className="text-[10px] text-neutral-500">
+        <div className="text-[10px] text-catch-muted">
           <div>{copyright || t("copyright")}</div>
           <div>{t("crVat")}</div>
         </div>
       </div>
 
-      <footer className="hidden border-b border-neutral-100 bg-white px-4 py-12 lg:block lg:px-8">
+      <footer className="hidden border-b border-catch-border bg-catch-surface px-4 py-12 lg:block lg:px-8">
         <div className="mx-auto grid max-w-[1440px] grid-cols-2 gap-8 md:grid-cols-5">
           {/* Column 1: Popular Categories */}
           <div className="space-y-3">
-            <h4 className="text-xs font-bold tracking-wider text-neutral-900">
+            <h4 className="text-xs font-bold tracking-wider text-catch-charcoal">
               {t("popularCategories")}
             </h4>
-            <div className="flex flex-wrap gap-x-3 gap-y-2 text-xs text-neutral-600">
+            <div className="flex flex-wrap gap-x-3 gap-y-2 text-xs text-catch-muted">
               {popularCategories.map((label) => (
-                <a key={label} href="#" className="transition-colors hover:text-black">
+                <a key={label} href="#" className="transition-colors hover:text-catch-primary">
                   {label}
                 </a>
               ))}
@@ -147,13 +147,13 @@ export default async function CatchFooter({ params }: CatchFooterProps) {
 
           {/* Column 2: Company */}
           <div className="space-y-3">
-            <h4 className="text-xs font-bold tracking-wider text-neutral-900">
+            <h4 className="text-xs font-bold tracking-wider text-catch-charcoal">
               {t("companyTitle")}
             </h4>
-            <ul className="space-y-2 text-xs text-neutral-600">
+            <ul className="space-y-2 text-xs text-catch-muted">
               {companyLinks.map((link) => (
                 <li key={link.label}>
-                  <a href={link.href} className="transition-colors hover:text-black">
+                  <a href={link.href} className="transition-colors hover:text-catch-primary">
                     {link.label}
                   </a>
                 </li>
@@ -163,13 +163,13 @@ export default async function CatchFooter({ params }: CatchFooterProps) {
 
           {/* Column 3: Profile */}
           <div className="space-y-3">
-            <h4 className="text-xs font-bold tracking-wider text-neutral-900">
+            <h4 className="text-xs font-bold tracking-wider text-catch-charcoal">
               {t("profileTitle")}
             </h4>
-            <ul className="space-y-2 text-xs text-neutral-600">
+            <ul className="space-y-2 text-xs text-catch-muted">
               {profileLinks.map((link) => (
                 <li key={link.label}>
-                  <a href={link.href} className="transition-colors hover:text-black">
+                  <a href={link.href} className="transition-colors hover:text-catch-primary">
                     {link.label}
                   </a>
                 </li>
@@ -179,7 +179,7 @@ export default async function CatchFooter({ params }: CatchFooterProps) {
 
           {/* Column 4: Stay connected */}
           <div className="space-y-3">
-            <h4 className="text-xs font-bold tracking-wider text-neutral-900">
+            <h4 className="text-xs font-bold tracking-wider text-catch-charcoal">
               {t("stayConnected")}
             </h4>
             <div className="grid w-fit grid-cols-4 gap-2">
@@ -188,7 +188,7 @@ export default async function CatchFooter({ params }: CatchFooterProps) {
                   key={s.platform}
                   href={s.url || "#"}
                   aria-label={s.label}
-                  className="flex h-8 w-8 items-center justify-center rounded-full bg-black text-white transition-opacity hover:opacity-80"
+                  className="flex h-8 w-8 items-center justify-center rounded-full bg-catch-charcoal text-white transition-colors hover:bg-catch-primary"
                 >
                   <SocialIcon platform={s.platform} className="h-3.5 w-3.5" />
                 </a>
@@ -198,12 +198,12 @@ export default async function CatchFooter({ params }: CatchFooterProps) {
 
           {/* Column 5: Download apps */}
           <div className="space-y-3">
-            <h4 className="text-xs font-bold tracking-wider text-neutral-900">
+            <h4 className="text-xs font-bold tracking-wider text-catch-charcoal">
               {t("downloadApps")}
             </h4>
             <div className="space-y-2">
               <a href={googlePlayUrl} className="inline-block transition-opacity hover:opacity-90">
-                <span className="flex w-36 items-center gap-2 rounded-lg bg-black px-3 py-1.5 text-white">
+                <span className="flex w-36 items-center gap-2 rounded-lg bg-catch-charcoal px-3 py-1.5 text-white">
                   <FaGooglePlay className="h-5 w-5" />
                   <span className="text-[9px] leading-tight">
                     <span className="block">{t("apps.getTag")}</span>
@@ -212,7 +212,7 @@ export default async function CatchFooter({ params }: CatchFooterProps) {
                 </span>
               </a>
               <a href={appStoreUrl} className="block transition-opacity hover:opacity-90">
-                <span className="flex w-36 items-center gap-2 rounded-lg bg-black px-3 py-1.5 text-white">
+                <span className="flex w-36 items-center gap-2 rounded-lg bg-catch-charcoal px-3 py-1.5 text-white">
                   <FaApple className="h-5 w-5" />
                   <span className="text-[9px] leading-tight">
                     <span className="block">{t("apps.downloadOn")}</span>

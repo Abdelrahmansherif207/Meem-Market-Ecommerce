@@ -1,5 +1,5 @@
 "use client";
-import CatchProductCard from "@/features/home/redesign/CatchProductCard";
+import ProductCard from "@/features/products/components/ProductCard";
 import SectionTitle from "@/components/ui/SectionTitle";
 import { BannerArrows } from "../components/banner";
 import { useLocale } from "next-intl";
@@ -68,7 +68,7 @@ export default function ProductSlider({
       >
         {safeItems.map((product) => (
           <SwiperSlide key={product.id} className="!h-auto">
-            <CatchProductCard
+            <ProductCard
               item={product}
               badgeText={badgeText}
               pricesLoading={pricesLoading}

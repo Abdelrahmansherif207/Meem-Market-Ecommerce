@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback } from "react";
-import CatchProductCard from "@/features/home/redesign/CatchProductCard";
+import ProductCard from "@/features/products/components/ProductCard";
 import { getCategoryPageDataAction } from "@/features/categories/actions/categoryPageData";
 import { useCurrencyRefetch } from "@/features/currencies";
 import type { CategoryProduct } from "@/features/categories/types";
@@ -41,7 +41,7 @@ export function TagProductsIsland({
   return (
     <div className="grid grid-cols-2 gap-3 sm:gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6">
       {products.map((product) => (
-        <CatchProductCard
+        <ProductCard
           key={product.id}
           item={{
             id: product.id,
@@ -54,6 +54,9 @@ export function TagProductsIsland({
             originalPrice: product.price,
             slug: product.slug,
             currency: product.currency,
+            ratings: product.ratings,
+            reviewsCount: product.ratings_count,
+            brands: product.brands,
             stockQuantity: product.quantity ?? 0,
             isInStock: product.in_stock ?? (product.quantity ?? 0) > 0,
             hasVariants: product.has_variants,

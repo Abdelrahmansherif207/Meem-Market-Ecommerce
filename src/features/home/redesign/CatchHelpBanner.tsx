@@ -3,9 +3,9 @@ import { TriangleAlert, Mail, Phone, MessageCircle } from "lucide-react";
 import { getCachedSettings } from "@/features/settings/services/settingsService";
 
 /**
- * Screen "Do you need help?" banner — purple strip with 4 contact
- * options. Static content (no API): email/phone reuse site settings
- * when available; help center + WhatsApp are constants.
+ * Catch Beauty "Do you need help?" banner — deep berry strip with the four
+ * existing contact options. Static content (no API): email/phone reuse site
+ * settings when available; help center + WhatsApp are constants.
  */
 export default async function CatchHelpBanner({ locale }: { locale: string }) {
   const t = await getTranslations("catchHome");
@@ -21,28 +21,55 @@ export default async function CatchHelpBanner({ locale }: { locale: string }) {
   }
 
   const options = [
-    { icon: TriangleAlert, label: t("help.helpingCenter"), value: "help.catchbeauty.com", href: "#" },
+    {
+      icon: TriangleAlert,
+      label: t("help.helpingCenter"),
+      value: "help.catchbeauty.com",
+      href: "#",
+    },
     { icon: Mail, label: t("help.email"), value: email, href: `mailto:${email}` },
-    { icon: MessageCircle, label: t("help.whatsapp"), value: t("help.chatWithUs"), href: "https://wa.me/97496367199" },
-    { icon: Phone, label: t("help.callUs"), value: phone, href: `tel:${phone.replace(/\s/g, "")}` },
+    {
+      icon: MessageCircle,
+      label: t("help.whatsapp"),
+      value: t("help.chatWithUs"),
+      href: "https://wa.me/97496367199",
+    },
+    {
+      icon: Phone,
+      label: t("help.callUs"),
+      value: phone,
+      href: `tel:${phone.replace(/\s/g, "")}`,
+    },
   ];
 
   return (
-    <section className="mx-3 mt-12 space-y-4 rounded-2xl bg-violet-banner p-4 text-white lg:mx-0 lg:rounded-none lg:p-8 lg:px-4 xl:px-8">
-      <div className="mx-auto max-w-[1440px]">
-        <div className="mb-5">
-          <h3 className="text-sm font-extrabold lg:text-base lg:font-bold">{t("help.title")}</h3>
-          <p className="text-[10px] text-white/80 lg:text-xs">{t("help.subtitle")}</p>
+    <section className="mx-3 mt-12 sm:mx-4 lg:mx-8 lg:mt-16">
+      <div className="mx-auto max-w-[1440px] rounded-2xl bg-catch-berry p-5 text-white shadow-elev-2 sm:p-6 lg:p-8">
+        <div>
+          <h3 className="text-sm font-extrabold tracking-tight lg:text-base">
+            {t("help.title")}
+          </h3>
+          <p className="mt-1 text-[10px] text-white/75 lg:text-xs">
+            {t("help.subtitle")}
+          </p>
         </div>
-        <div className="grid grid-cols-1 gap-3.5 lg:grid-cols-4 lg:gap-6 lg:pt-2">
+        <div className="mt-5 grid grid-cols-1 gap-2.5 sm:grid-cols-2 lg:grid-cols-4 lg:gap-4">
           {options.map((opt) => (
-            <a key={opt.label} href={opt.href} className="flex items-center gap-3.5 transition-opacity hover:opacity-90">
-              <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-white/20">
-                <opt.icon className="h-5 w-5 text-white" />
+            <a
+              key={opt.label}
+              href={opt.href}
+              className="flex items-center gap-3.5 rounded-xl bg-white/5 p-3 transition-colors hover:bg-white/10"
+            >
+              <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-catch-rose/20">
+                <opt.icon className="h-5 w-5 text-catch-rose-soft" />
               </span>
-              <span>
-                <span className="block text-xs text-white/80">{opt.label}</span>
-                <span className="block text-xs font-semibold">{opt.value}</span>
+              <span className="min-w-0">
+                <span className="block text-[10px] text-white/70 lg:text-xs">
+                  {opt.label}
+                </span>
+                <span className="block truncate text-xs font-semibold">
+                  {opt.value}
+                </span>
               </span>
             </a>
           ))}

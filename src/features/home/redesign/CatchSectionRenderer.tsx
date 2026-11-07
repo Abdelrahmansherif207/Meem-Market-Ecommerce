@@ -1,20 +1,23 @@
 import { Suspense } from "react";
 import type { HomePageSection, SectionFrontSetting } from "../types";
 import { SectionErrorBoundary } from "@/features/pages/components/SectionErrorBoundary";
-import CatchHeroSliderSection from "./CatchHeroSliderSection";
+// CMS hero carousel is temporarily replaced by CatchHeroVideoSection.
+// import CatchHeroSliderSection from "./CatchHeroSliderSection";
 import CatchBannerSection from "./CatchBannerSection";
 import CatchProductShelfSection from "./CatchProductShelfSection";
 import CatchFlashSaleSection from "./CatchFlashSaleSection";
-// import CatchCategoriesSection from "./CatchCategoriesSection";
+import CatchCategoriesSection from "./CatchCategoriesSection";
 import CatchPromotionsSection from "./CatchPromotionsSection";
+// Tags section stays disabled by request — CMS "tags" sections render nothing.
 // import CatchTagsSection from "./CatchTagsSection";
 import CatchBrandsSection from "./CatchBrandsSection";
 import CatchCouponsSection from "./CatchCouponsSection";
 import {
-  CatchHeroSkeleton,
   CatchShelfSkeleton,
   CatchBannerSkeleton,
-  // CatchCategoriesSkeleton,
+  CatchCategoriesSkeleton,
+  CatchBrandsSkeleton,
+  CatchPromotionsSkeleton,
   CatchCouponsSkeleton,
 } from "./skeletons";
 
@@ -30,16 +33,16 @@ function CatchSectionBlock({
 
   switch (type) {
     case "sliders":
-      return <CatchHeroSliderSection locale={locale} title={title} setting={setting} endpoint={endpoint} />;
+      // Temporarily replaced by CatchHeroVideoSection in HomePage.
+      return null;
     case "banners":
       return <CatchBannerSection endpoint={endpoint} locale={locale} title={title} setting={setting} />;
     case "products":
       return <CatchProductShelfSection title={title} locale={locale} setting={setting} endpoint={endpoint} />;
     case "flash-sales":
       return <CatchFlashSaleSection title={title} type={type} locale={locale} setting={setting} endpoint={endpoint} />;
-    // Categories section disabled by request — CMS "categories" sections render nothing.
-    // case "categories":
-    //   return <CatchCategoriesSection title={title} locale={locale} setting={setting} endpoint={endpoint} />;
+    case "categories":
+      return <CatchCategoriesSection title={title} locale={locale} setting={setting} endpoint={endpoint} />;
     case "promotions":
       return <CatchPromotionsSection title={title} locale={locale} setting={setting} endpoint={endpoint} />;
     // Tags section disabled by request — CMS "tags" sections render nothing.
@@ -50,8 +53,8 @@ function CatchSectionBlock({
     case "coupons":
       return <CatchCouponsSection title={title} locale={locale} setting={setting} endpoint={endpoint} />;
     default:
-      // "categories" and "tags" are intentionally disabled (commented above).
-      if (type !== "categories" && type !== "tags") {
+      // "tags" is intentionally disabled (commented above).
+      if (type !== "tags") {
         console.warn(`[CatchSectionRenderer] Unknown section type: ${type}`);
       }
       return null;
@@ -61,15 +64,19 @@ function CatchSectionBlock({
 function getSectionSkeleton(type: string, setting?: SectionFrontSetting): React.ReactNode {
   switch (type) {
     case "sliders":
-      return <CatchHeroSkeleton />;
+      // No skeleton: the sliders case renders nothing while the video hero is active.
+      return null;
     case "banners":
       return <CatchBannerSkeleton />;
     case "products":
     case "flash-sales":
       return <CatchShelfSkeleton setting={setting} />;
-    // Categories section disabled by request.
-    // case "categories":
-    //   return <CatchCategoriesSkeleton />;
+    case "categories":
+      return <CatchCategoriesSkeleton />;
+    case "brands":
+      return <CatchBrandsSkeleton />;
+    case "promotions":
+      return <CatchPromotionsSkeleton />;
     case "coupons":
       return <CatchCouponsSkeleton />;
     default:

@@ -1,5 +1,36 @@
-﻿import type { ProductTag } from "@/shared/types";
+﻿import type { ProductBrand, ProductTag } from "@/shared/types";
 import type { ProductCurrency } from "@/features/currencies";
+
+/**
+ * Canonical card model shared by every listing surface (home shelves,
+ * category/brand/tag/promotion/flash grids, search, banners, sliders).
+ * Adapters map API payloads into this shape; the card owns presentation.
+ */
+export interface ProductCardItem {
+  id: number;
+  image: string;
+  title: string;
+  price: number;
+  originalPrice: number;
+  slug?: string;
+  sku?: string;
+  inStock?: number;
+  stockQuantity?: number;
+  hasVariants?: boolean;
+  isInStock?: boolean;
+  flashSaleActive?: boolean;
+  /** Flash/deal end date (ISO) — enables the live "Ends in" countdown. */
+  flashEndDate?: string | null;
+  inWishlist?: boolean;
+  tags?: ProductTag[];
+  currency?: ProductCurrency;
+  /** Average rating from the API when provided. */
+  ratings?: number;
+  /** Review count when the API provides `ratings_count`. */
+  reviewsCount?: number;
+  /** Real brand(s) from the API; falls back to the title's first word. */
+  brands?: ProductBrand[];
+}
 
 export interface ProductAttribute {
   attribute_name: string;

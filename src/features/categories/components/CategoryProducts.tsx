@@ -1,4 +1,4 @@
-import { CatchProductCard } from "@/features/home";
+import ProductCard from "@/features/products/components/ProductCard";
 import EmptyCategory from "./EmptyCategory";
 import { ProductsGridSkeletonRow } from "./skeletons/ProductsGridSkeletonRow";
 import type { CategoryProduct } from "../types";
@@ -12,9 +12,9 @@ interface CategoryProductsProps {
 }
 
 /**
- * Nice One-style category product grid — the same `CatchProductCard` used
- * on the home sections (whole card links to the PDP; floating add / heart
- * / stepper keep working via the card's control layer). Mapping is
+ * Category product grid — the canonical `ProductCard` used on every listing
+ * surface (whole card links to the PDP; floating add / heart / stepper keep
+ * working via the card's control layer). Mapping is
  * presentational only: the display price prefers the discounted/flash
  * price coming from the API, with the base price as the strike-through.
  */
@@ -38,7 +38,7 @@ export default function CategoryProducts({
           const basePrice = product.price ?? 0;
 
           return (
-            <CatchProductCard
+            <ProductCard
               key={product.id}
               item={{
                 id: product.id,
@@ -49,6 +49,8 @@ export default function CategoryProducts({
                 slug: product.slug,
                 currency: product.currency,
                 ratings: product.ratings,
+                reviewsCount: product.ratings_count,
+                brands: product.brands,
                 stockQuantity: product.quantity ?? 0,
                 isInStock: product.in_stock ?? (product.quantity ?? 0) > 0,
                 hasVariants: product.has_variants,
