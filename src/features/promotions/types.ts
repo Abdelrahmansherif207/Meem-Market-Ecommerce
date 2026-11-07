@@ -1,4 +1,4 @@
-import type { ProductTag } from "@/shared/types";
+import type { ProductBrand, ProductTag } from "@/shared/types";
 import type { ProductCurrency } from "@/features/currencies";
 
 export interface PromotionImage {
@@ -28,6 +28,8 @@ export interface PromotionProduct {
   quantity: number;
   in_stock?: boolean;
   ratings: number;
+  ratings_count?: number;
+  brands?: ProductBrand[];
   in_wishlist?: boolean;
   image: {
     thumbnail: string;

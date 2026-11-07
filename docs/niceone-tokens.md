@@ -3,6 +3,43 @@
 Source mirrors in `niceone-src/` (gitignored): `home-en.html`, `home-ar.html`, `css/*.css`, digests in `niceone-src/digest/`.
 These are the exact values extracted from niceonesa.com (SSR HTML + compiled Tailwind v3 bundles) and how each maps into our `@theme` tokens in `src/app/globals.css`.
 
+## 0. Catch Beauty supporting palette (Phase 4)
+
+The Catch homepage keeps the original primary crimson and adds an **additive**
+supporting palette. Legacy Nice One tokens below are unchanged.
+
+| Token | Value | Role |
+|---|---|---|
+| `--color-primary` | `#b81d24` | Single brand primary — unchanged |
+| `--color-catch-primary` | `#b81d24` | Explicit alias for Catch-scoped surfaces |
+| `--color-catch-primary-active` | `#9d151b` | Pressed/hover primary |
+| `--color-catch-berry` | `#6e0d1f` | Deep berry bands (help banner) |
+| `--color-catch-berry-deep` | `#4a0a16` | Darkest berry accents |
+| `--color-catch-ivory` | `#fbf7f4` | Homepage page background |
+| `--color-catch-surface` | `#f6efea` | Warm section surface / wells |
+| `--color-catch-blush` | `#fbf1ee` | Card image well / soft chips |
+| `--color-catch-charcoal` | `#241c1c` | Primary text on warm surfaces |
+| `--color-catch-muted` | `#6f605d` | Secondary text |
+| `--color-catch-muted-soft` | `#9a8a86` | Tertiary text / struck prices |
+| `--color-catch-rose` | `#d8a7a0` | Rose accent / star fill |
+| `--color-catch-rose-soft` | `#f3ddd8` | Soft rose backgrounds |
+| `--color-catch-border` | `#e9ddd7` | Standard warm border |
+| `--color-catch-border-soft` | `#f2e9e5` | Subtle card/rail border |
+
+### Scoped surface
+
+`.catch-surface` on the homepage wrapper remaps the existing semantic tokens
+(`--color-background`, `--color-surface`, `--color-border`,
+`--color-text-primary`, etc.) to the warm palette and sets the ivory page
+background. It is **not** applied with `body:has(...)`, so other pages keep
+their current appearance. The header and footer are outside this wrapper and
+are intentionally unchanged in this phase.
+
+### Elevation
+
+`--shadow-elev-1/2/3` are the canonical warm-neutral shadows; prefer them over
+ad-hoc `shadow-*` values on Catch surfaces.
+
 ## 1. Typography
 
 | Nice One | Value | Our mapping |

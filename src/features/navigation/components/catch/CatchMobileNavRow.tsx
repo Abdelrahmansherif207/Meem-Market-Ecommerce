@@ -58,7 +58,7 @@ export default function CatchMobileNavRow({
   };
 
   return (
-    <div className="relative border-b border-neutral-100 bg-white">
+    <div className="relative border-b border-catch-border bg-catch-ivory">
       <div className="flex items-center justify-between px-3 py-2">
         {/* Categories pill */}
         <button
@@ -67,19 +67,19 @@ export default function CatchMobileNavRow({
           aria-expanded={panelOpen}
           onClick={() => setPanelOpen((v) => !v)}
           className={cn(
-            "flex cursor-pointer items-center gap-1.5 text-[13px] font-semibold text-neutral-900 transition-colors",
+            "flex cursor-pointer items-center gap-1.5 text-[13px] font-semibold text-catch-charcoal transition-colors",
             panelOpen && "text-primary",
           )}
         >
           <Menu className="h-4 w-4" />
           {categoriesLabel}
           <ChevronDown
-            className={cn("h-3.5 w-3.5 text-neutral-500 transition-transform", panelOpen && "rotate-180")}
+            className={cn("h-3.5 w-3.5 text-catch-muted-soft transition-transform", panelOpen && "rotate-180")}
           />
         </button>
 
         {/* Action icons */}
-        <div className="flex items-center gap-4 text-neutral-700">
+        <div className="flex items-center gap-4 text-catch-charcoal">
           <button
             type="button"
             onClick={switchLocale}
@@ -87,7 +87,7 @@ export default function CatchMobileNavRow({
             className="flex cursor-pointer items-center gap-0.5"
           >
             <Globe className="h-[18px] w-[18px]" />
-            <ChevronDown className="h-3 w-3 text-neutral-500" />
+            <ChevronDown className="h-3 w-3 text-catch-muted-soft" />
           </button>
 
           <button
@@ -97,7 +97,7 @@ export default function CatchMobileNavRow({
             className="flex cursor-pointer items-center gap-0.5"
           >
             <User className="h-[18px] w-[18px]" />
-            <ChevronDown className="h-3 w-3 text-neutral-500" />
+            <ChevronDown className="h-3 w-3 text-catch-muted-soft" />
           </button>
 
           <Link href="/notifications" aria-label="Notifications">

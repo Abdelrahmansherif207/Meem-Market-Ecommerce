@@ -1,9 +1,44 @@
-import Image from "next/image";
+import type { CSSProperties } from "react";
+import { Link } from "@/i18n/navigation";
+import { CampaignImage } from "@/components/ui/CampaignImage";
 import { homePageService } from "../services/homePageService";
 import CatchShelfIsland from "./CatchShelfIsland";
 import type { SectionFrontSetting } from "../types";
 import type { BannerDetail } from "@/features/banners/types";
 import type { ProductItem } from "../types";
+
+const BANNER_MEDIA_STYLE = {
+  "--media-aspect": "1500 / 377",
+  "--media-aspect-mobile": "1500 / 377",
+} as CSSProperties;
+
+/**
+ * Temporary artwork normalization: the CMS serves these campaigns at 1150×368,
+ * so they letterbox narrower than the 1380×260 Summer/Back-to-School strips.
+ * Local 1380×260 re-exports keep the artwork full-width until the CMS uploads
+ * are replaced; remove this map and the matching files in `public/banners/`
+ * afterwards.
+ */
+const BANNER_ART_OVERRIDES: Record<
+  string,
+  { src: string; width: number; height: number }
+> = {
+  "valentines-day-s2": {
+    src: "/banners/valentines-day-s2-1380x260.jpg",
+    width: 1380,
+    height: 260,
+  },
+  "black-friday-deals-s2": {
+    src: "/banners/black-friday-deals-s2-1380x260.jpg",
+    width: 1380,
+    height: 260,
+  },
+  "cyber-monday-s2": {
+    src: "/banners/cyber-monday-s2-1380x260.jpg",
+    width: 1380,
+    height: 260,
+  },
+};
 
 interface CatchBannerSectionProps {
   endpoint?: string;
@@ -13,10 +48,9 @@ interface CatchBannerSectionProps {
 }
 
 /**
- * Wide banner — real-site style: flat image, natural height, `rounded-md`,
- * rendered with the next/image component. When the CMS requests products
- * (`with_products=1`), the screen's recurring "banner + shelf" pattern is
- * rendered below the image.
+ * Catch Beauty wide banner: a layout-reserving media well with art-directed
+ * mobile artwork. When the CMS requests products (`with_products=1`), the
+ * recurring "banner + shelf" pattern renders below the image.
  */
 export default async function CatchBannerSection({
   endpoint,
@@ -38,6 +72,11 @@ export default async function CatchBannerSection({
   if (!banner) return null;
 
   const { title: bannerTitle, image, products } = banner;
+  const artOverride = BANNER_ART_OVERRIDES[banner.slug];
+  const desktopArt = artOverride?.src ?? image.desktop;
+  const mobileArt = artOverride?.src ?? image.mobile;
+  const artWidth = artOverride?.width ?? 1500;
+  const artHeight = artOverride?.height ?? 377;
 
   const productItems: ProductItem[] = (products ?? []).map((p) => ({
     id: p.id,
@@ -51,6 +90,8 @@ export default async function CatchBannerSection({
     flashSaleActive: p.flash_sale_active ?? false,
     inWishlist: p.in_wishlist,
     ratings: p.ratings,
+    reviewsCount: p.ratings_count,
+    brands: p.brands,
     inStock: p.quantity,
     stockQuantity: p.quantity,
     tags: p.tags,
@@ -59,20 +100,24 @@ export default async function CatchBannerSection({
 
   return (
     <section className="w-full space-y-6">
-      {/* Wide banner image — real-site style: flat, natural height, 6px radius */}
-      <a
-        href={`/${locale}/banners/${banner.slug}`}
-        className="block w-full"
+      <Link
+        href={`/banners/${banner.slug}`}
+        className="block w-full overflow-hidden rounded-2xl focus-visible:outline-offset-[-2px]"
       >
-        <Image
-          src={image.desktop}
-          alt={bannerTitle}
-          width={1500}
-          height={282}
-          loading="lazy"
-          className="aspect-auto w-full rounded-xl md:rounded-md"
-        />
-      </a>
+        <div className="catch-media-well" style={BANNER_MEDIA_STYLE}>
+          <CampaignImage
+            desktop={desktopArt}
+            mobile={mobileArt}
+            alt={bannerTitle}
+            width={artWidth}
+            height={artHeight}
+            mobileWidth={artWidth}
+            mobileHeight={artHeight}
+            sizes="(max-width: 1440px) 100vw, 1440px"
+            fill
+          />
+        </div>
+      </Link>
 
       {productItems.length > 0 && (
         <CatchShelfIsland

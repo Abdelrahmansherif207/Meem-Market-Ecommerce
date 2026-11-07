@@ -52,15 +52,15 @@ export default function CatchLocationDisplay() {
       <button
         type="button"
         onClick={() => setSidebarOpen(true)}
-        className="hidden cursor-pointer items-center gap-1 transition-colors hover:text-black md:flex"
+        className="hidden cursor-pointer items-center gap-1 transition-colors hover:text-catch-primary md:flex"
       >
         <MapPin
-          className={`h-4 w-4 ${deliveryCoords ? "fill-current" : ""} text-neutral-600`}
+          className={`h-4 w-4 ${deliveryCoords ? "fill-current" : ""} text-catch-muted`}
         />
         <span className="whitespace-nowrap">
           {t("deliverTo")} <strong className="font-semibold">{label}</strong>
         </span>
-        <ChevronDown className="h-3 w-3 text-neutral-500" />
+        <ChevronDown className="h-3 w-3 text-catch-muted-soft" />
       </button>
       <DeliveryLocationSidebar
         isOpen={sidebarOpen}

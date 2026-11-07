@@ -42,7 +42,7 @@ export default function CatchCategoriesPanel({
   return (
     <div
       className={cn(
-        "absolute inset-x-0 top-full z-50 border-t border-neutral-100 bg-white shadow-lg",
+        "absolute inset-x-0 top-full z-50 border-t border-catch-border bg-catch-ivory shadow-lg",
         !isDesktop && "max-h-[75dvh] overflow-y-auto",
       )}
     >
@@ -61,10 +61,10 @@ export default function CatchCategoriesPanel({
                   <Link
                     href={`/category/${category?.slug}`}
                     onClick={onClose}
-                    className="flex items-center gap-1 text-[13px] font-bold text-neutral-900 transition-colors hover:text-primary"
+                    className="flex items-center gap-1 text-[13px] font-bold text-catch-charcoal transition-colors hover:text-primary"
                   >
                     {t("allProducts")}
-                    <ChevronRight className="h-3 w-3 text-neutral-400 rtl:rotate-180" />
+                    <ChevronRight className="h-3 w-3 text-catch-muted-soft rtl:rotate-180" />
                   </Link>
                 </div>
 
@@ -73,10 +73,10 @@ export default function CatchCategoriesPanel({
                     <Link
                       href={`/category/${group.slug}`}
                       onClick={onClose}
-                      className="flex items-center gap-1 text-[13px] font-bold text-neutral-900 transition-colors hover:text-primary"
+                      className="flex items-center gap-1 text-[13px] font-bold text-catch-charcoal transition-colors hover:text-primary"
                     >
                       {group.name}
-                      <ChevronRight className="h-3 w-3 text-neutral-400 rtl:rotate-180" />
+                      <ChevronRight className="h-3 w-3 text-catch-muted-soft rtl:rotate-180" />
                     </Link>
                     {group.children?.length > 0 && (
                       <ul className="mt-2 space-y-1.5">
@@ -85,7 +85,7 @@ export default function CatchCategoriesPanel({
                             <Link
                               href={`/category/${child.slug}`}
                               onClick={onClose}
-                              className="text-[13px] text-neutral-500 transition-colors hover:text-primary"
+                              className="text-[13px] text-catch-muted transition-colors hover:text-primary"
                             >
                               {child.name}
                             </Link>
@@ -116,17 +116,17 @@ export default function CatchCategoriesPanel({
         ) : (
           <>
             {/* Mobile: vertical category list */}
-            <ul className="divide-y divide-neutral-100">
+            <ul className="divide-y divide-catch-border">
               {(categories ?? []).map((cat) => (
                 <li key={cat.id}>
                   <button
                     type="button"
                     onClick={() => onSelectCategory?.(cat)}
                     className={cn(
-                      "flex w-full cursor-pointer items-center gap-3 px-3 py-3 text-start text-[13px] transition-colors hover:bg-neutral-50",
+                      "flex w-full cursor-pointer items-center gap-3 px-3 py-3 text-start text-[13px] transition-colors hover:bg-catch-blush",
                       category?.id === cat.id
-                        ? "font-bold text-neutral-900"
-                        : "font-medium text-neutral-700",
+                        ? "font-bold text-catch-charcoal"
+                        : "font-medium text-catch-muted",
                     )}
                   >
                     {cat.image?.desktop && (
@@ -146,16 +146,16 @@ export default function CatchCategoriesPanel({
 
             {/* Mobile: tapped category's subcategory columns */}
             {category ? (
-              <div className="border-t border-neutral-100 p-3">
+              <div className="border-t border-catch-border p-3">
                 <div className="grid grid-cols-2 gap-x-4 gap-y-4">
                   <div>
                     <Link
                       href={`/category/${category.slug}`}
                       onClick={onClose}
-                      className="flex items-center gap-1 text-[13px] font-bold text-neutral-900"
+                      className="flex items-center gap-1 text-[13px] font-bold text-catch-charcoal"
                     >
                       {t("allProducts")}
-                      <ChevronRight className="h-3 w-3 text-neutral-400 rtl:rotate-180" />
+                      <ChevronRight className="h-3 w-3 text-catch-muted-soft rtl:rotate-180" />
                     </Link>
                   </div>
                   {category.children?.map((group) => (
@@ -163,10 +163,10 @@ export default function CatchCategoriesPanel({
                       <Link
                         href={`/category/${group.slug}`}
                         onClick={onClose}
-                        className="flex items-center gap-1 text-[13px] font-bold text-neutral-900"
+                        className="flex items-center gap-1 text-[13px] font-bold text-catch-charcoal"
                       >
                         {group.name}
-                        <ChevronRight className="h-3 w-3 text-neutral-400 rtl:rotate-180" />
+                        <ChevronRight className="h-3 w-3 text-catch-muted-soft rtl:rotate-180" />
                       </Link>
                       {group.children?.length > 0 && (
                         <ul className="mt-2 space-y-1.5">
@@ -175,7 +175,7 @@ export default function CatchCategoriesPanel({
                               <Link
                                 href={`/category/${child.slug}`}
                                 onClick={onClose}
-                                className="text-[13px] text-neutral-500"
+                                className="text-[13px] text-catch-muted"
                               >
                                 {child.name}
                               </Link>

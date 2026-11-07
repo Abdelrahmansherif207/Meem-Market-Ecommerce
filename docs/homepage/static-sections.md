@@ -1,26 +1,34 @@
-# Static Sections on the New Homepage
+# Homepage — Static & Layout-Owned Surfaces
 
-Per the product decision ("same as Stitch; if the backend doesn't support it,
-static is fine"), the following sections render **static content** because the
-existing backend provides no equivalent data. All of them live in
-`src/features/home/components/static/` and are fully translated (en/ar).
+The Catch Beauty homepage is CMS-driven. All commerce sections come from
+`GET /general/content-pages/home`; the surfaces below are the only non-CMS
+parts of the page shell.
 
-| Static section | File | Why static | Notes |
+| Surface | File | Type | Notes |
 |---|---|---|---|
-| Ribbon ticker (National Beauty Week, code CATCH) | `AnnouncementTicker.tsx` | Marketing copy; no Announcements API | "Explore Deals" links to the real `/categories` page |
-| Hero editorial side cards (K-Beauty / Makeup) | `HeroEditorialCards.tsx` | CMS `sliders` returns only the hero creative; there is no "editorial promo" entity | Visuals copied from the approved Stitch design; links go to real pages (`/tags`, `/categories`) |
-| Perks strip (Genuine, Express Delivery, Flexible Payments, 14-Day Returns) | `PerksStrip.tsx` | Trust/value-prop copy; no API | "Tabby & Tamara" from the mock is generalized to "Flexible Payments" because the backend reports BNPL disabled — no misleading claims; payment-specific rows appear automatically if BNPL is later enabled in settings (product-card installments) |
-| Catch Beauty Journal (3 editorial cards) | `BeautyJournal.tsx` | No blog/articles API exists | Cards intentionally have **no** dead CTA links since no real article destination exists |
-| Journal/hero imagery | (same files) | Design-shipped Google-CDN images | Fall back to the section background color asset URLs from the Stitch screen |
-| Footer newsletter band | `features/navigation/components/footer/Footer.tsx` | No subscribe endpoint exists | Input + button render disabled with an "Available soon" title — no fake success behavior |
-| Footer payments strip | (same file) | Real gateway array is behind `/general/settings`; the visual trust row is decorative | Tabby/Tamara chips appear only when settings enable them |
-| Footer app badges | (same file) | No store links configured in settings | Decorative store tiles |
-| Header "Download App" chip + authenticity line | `TopUtilityBar.tsx` | Marketing labels | Non-interactive decorative chips |
+| Header (desktop + mobile) | `src/features/navigation/components/catch/*` | Layout-owned, dynamic | Search, category menu, currency/auth/wishlist/cart chrome. **Header WIP files were not touched in Phase 4.** |
+| Mobile bottom navigation | `src/features/navigation/components/mobile/MobileBottomNav.tsx` | Layout-owned, static routes | Categories / Home / Profile / Cart; real cart count |
+| “Do you need help?” banner | `src/features/home/redesign/CatchHelpBanner.tsx` | Static content + settings | Berry strip after the CMS sections. Email/phone read site settings; WhatsApp uses the existing constant; the help-center destination remains the existing `#` placeholder |
+| Footer | `src/features/navigation/components/catch/CatchFooter.tsx` + `CatchPaymentStrip.tsx` | Mostly dynamic | Visual redesign **deferred**; content, links, socials and payments keep current behavior |
+| Route loading | `src/app/[locale]/loading.tsx` | Static skeleton | Shows the page shell while the CMS manifest streams |
+| Section skeletons | `src/features/home/redesign/skeletons.tsx` | Static skeletons | One fallback per CMS section type, using the same reserved ratios as the real sections |
+| Section error fallback | `src/features/pages/components/SectionErrorBoundary.tsx` | Shared UI | Compact `ErrorState` with retry; a failed section does not take down the page |
+| Global error | `src/features/home/HomePage.tsx` + `ErrorState` | Shared UI | Shown when the homepage manifest cannot load after retries |
+| Scroll-to-top | `src/components/ui/ScrollToTopButton.tsx` | Layout-owned | Existing behavior |
+
+## Legacy Stitch static sections
+
+The earlier Stitch implementation used fixed static sections (ribbon ticker,
+hero editorial cards, perks strip, beauty journal). They are **not rendered by
+the current Catch homepage**. The CMS sections plus the help banner replace
+them. If a future phase reintroduces any of them, keep the rules below.
 
 ## Static content rules
 
 - Static sections never invent **commerce data** (products, prices, stock,
   discounts). They carry only marketing text/design visuals.
-- All static copy ships in both `messages/en.json` and `messages/ar.json`
-  (namespaces `home.ticker`, `home.heroEditorial`, `home.perks`,
-  `home.journal`, `footer.*`, `header.utility`).
+- All static copy ships in both `messages/en.json` and `messages/ar.json`.
+- Static links must point at real destinations; when no destination exists,
+  keep the existing placeholder rather than inventing a URL.
+- The footer’s newsletter/app badges remain decorative until a real endpoint
+  or store link is configured.

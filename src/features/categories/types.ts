@@ -1,4 +1,4 @@
-import type { ProductTag } from "@/shared/types";
+import type { ProductBrand, ProductTag } from "@/shared/types";
 import type { ProductCurrency } from "@/features/currencies";
 
 export interface CategoryImage {
@@ -42,6 +42,8 @@ export interface CategoryProduct {
   quantity: number;
   discount_valid: boolean;
   ratings: number;
+  ratings_count?: number;
+  brands?: ProductBrand[];
   in_stock?: boolean;
   in_wishlist?: boolean;
   /** True when a flash sale covers the item (listing payload, no dates). */

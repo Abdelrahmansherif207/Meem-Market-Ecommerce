@@ -104,6 +104,7 @@
     "profile": "Profile",
     "language": "Language",
     "categories": "Categories",
+    "brands": "Brands",
     "allProducts": "All Products",
     "cart": "Cart"
   },
@@ -117,6 +118,34 @@
     "lowStock": "Only {count} left",
     "flashSale": "Flash Sale",
     "copyCode": "Copy coupon code",
+    "copied": "Copied",
+    "hero": {
+      "eyebrow": "Catch Beauty",
+      "title": "New Collection",
+      "cta": "Shop the collection"
+    },
+    "carousel": {
+      "label": "Featured collections",
+      "previous": "Previous slide",
+      "next": "Next slide"
+    },
+    "shelf": {
+      "previous": "Previous products",
+      "next": "Next products"
+    },
+    "countdown": {
+      "label": "Countdown",
+      "days": "D",
+      "hours": "H",
+      "minutes": "M",
+      "seconds": "S"
+    },
+    "pagination": {
+      "label": "Product pages",
+      "previous": "Previous page",
+      "next": "Next page",
+      "page": "Page {page}"
+    },
     "help": {
       "title": "Do you need help ?",
       "subtitle": "You can get help by choosing from any of these options",

@@ -10,8 +10,9 @@ interface CatchHeaderProps {
 }
 
 /**
- * Screen-matched site header: black announcement strip (scrolls away) +
- * sticky white header with search and category nav rows.
+ * Site header: berry announcement strip + ivory header with search and
+ * category nav rows. Warm paper frame, no shadow. The compact fixed
+ * header that appears on scroll lives in CatchStickyHeader.
  */
 export default function CatchHeader({
   params,
@@ -21,10 +22,10 @@ export default function CatchHeader({
   return (
     <>
       <CatchAnnouncementBar />
-      <header className="sticky top-0 z-50 border-b border-neutral-100 bg-white shadow-sm">
-        <CatchTopRow settingsLogo={settingsLogo} currencyEnabled={currencyEnabled} />
+      <header className="relative z-40 border-b border-catch-border bg-catch-ivory">
+        <CatchTopRow settingsLogo={settingsLogo} />
         <Suspense fallback={null}>
-          <CatchCategoryNav params={params} />
+          <CatchCategoryNav params={params} currencyEnabled={currencyEnabled} />
         </Suspense>
       </header>
     </>

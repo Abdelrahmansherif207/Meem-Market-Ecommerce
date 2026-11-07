@@ -1,5 +1,6 @@
-﻿import type { ProductTag } from "@/shared/types";
+﻿import type { ProductBrand, ProductTag } from "@/shared/types";
 import type { ProductCurrency } from "@/features/currencies";
+import type { ProductCardItem } from "@/features/products";
 
 export interface BannerItem {
   id: string;
@@ -60,6 +61,8 @@ export interface ApiProduct {
   quantity: number;
   discount_valid: boolean;
   ratings: number;
+  ratings_count?: number;
+  brands?: ProductBrand[];
   in_stock?: boolean;
   in_wishlist?: boolean;
   tags?: ProductTag[];
@@ -70,29 +73,11 @@ export interface ApiProduct {
   };
 }
 
-export interface ProductItem {
-  id: number;
-  image: string;
-  title: string;
-  price: number;
-  originalPrice: number;
-  slug?: string;
-  sku?: string;
-  inStock?: number;
-  stockQuantity?: number;
-  hasVariants?: boolean;
-  isInStock?: boolean;
-  flashSaleActive?: boolean;
-  /** Flash/deal end date (ISO) — enables the live "Ends in" countdown on the card. */
-  flashEndDate?: string | null;
-  inWishlist?: boolean;
-  tags?: ProductTag[];
-  currency?: ProductCurrency;
-  /** Average rating from the API when provided (`ApiProduct.ratings`). */
-  ratings?: number;
-  /** Reviews count when the API provides it (renders the `(n)` suffix). */
-  reviewsCount?: number;
-}
+/**
+ * Home adapters keep the historical `ProductItem` name while the canonical
+ * card model lives in `features/products`. One shape, one card.
+ */
+export type ProductItem = ProductCardItem;
 
 export interface BannerProps {
   type?: string;

@@ -8,7 +8,7 @@ const OUTER_HEART =
 /**
  * Heart icon from `public/favourite.svg` (same path data), inlined so the
  * active state can restyle it via props:
- * - outline: dark hollow heart, identical to the SVG file
+ * - outline: hollow charcoal heart, identical to the SVG file
  * - filled: solid crimson heart (wishlist active)
  */
 export default function FavouriteHeartIcon({
@@ -41,7 +41,7 @@ export default function FavouriteHeartIcon({
       viewBox="0 0 20 18"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
-      className={cn("text-[#0C070F]", className)}
+      className={cn("text-catch-charcoal", className)}
       aria-hidden
     >
       <path

@@ -1,19 +1,21 @@
 "use client";
 
+import type { ReactNode } from "react";
 import { useCallback, useState } from "react";
-import Image from "next/image";
 import { useLocale, useTranslations } from "next-intl";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useCurrencyRefetch } from "@/features/currencies";
 import { Swiper, SwiperSlide } from "swiper/react";
 import type { Swiper as SwiperType } from "swiper/types";
 import "swiper/css";
+import { SectionHeader } from "@/components/ui/SectionHeader";
+import ProductCard from "@/features/products/components/ProductCard";
 import {
   getBannerSectionItemsAction,
   getFlashSaleHomeItemsAction,
   getProductSliderItemsAction,
 } from "../actions/homeCurrencyActions";
 import type { ProductItem } from "../types";
-import CatchProductCard from "./CatchProductCard";
 import CatchCountdown from "./CatchCountdown";
 
 interface CatchShelfIslandProps {
@@ -24,25 +26,17 @@ interface CatchShelfIslandProps {
   initialItems: ProductItem[];
   columnsCount?: number;
   badgeText?: string;
-  /** Static extra node rendered above the slider (e.g. banner image). */
-  headerSlot?: React.ReactNode;
-  /** CMS timer setting — renders a countdown chip above the slider. */
+  /** Extra header action (e.g. a countdown) rendered on the end side. */
+  headerAction?: ReactNode;
+  /** CMS timer setting — renders a countdown chip in the header. */
   showTimer?: boolean;
   timerEndAt?: string;
-  showViewAll?: boolean;
 }
 
-/** Slide width matches the card's real `min-w-[160px]` so the card never
- * overflows into the 16px `spaceBetween` gap — the card pitch (card + gap)
- * then matches the real site's `margin-right: 16px` slides. */
-const SLIDE_WIDTH = 160;
-
 /**
- * Screen-style product shelf (real Nice One anatomy): a swipeable Swiper
- * with fixed 145px slides and 16px gaps rendering every product, with
- * white circular arrows (hidden when all slides fit). Also owns the
- * currency-driven refetches for products / flash-sales / banner
- * sections — same island mechanism as before, presentation only.
+ * Catch Beauty product shelf: a fluid Swiper (2 mobile / 3 tablet / 5 desktop)
+ * rendering every CMS product, with currency-driven refetches and optional
+ * CMS countdown. Presentation only — all card behavior lives in ProductCard.
  */
 export default function CatchShelfIsland({
   fetchKind,
@@ -50,12 +44,10 @@ export default function CatchShelfIsland({
   locale,
   title,
   initialItems,
-  columnsCount,
   badgeText,
-  headerSlot,
+  headerAction,
   showTimer,
   timerEndAt,
-  showViewAll = true,
 }: CatchShelfIslandProps) {
   const t = useTranslations("catchHome");
   const locale_ = useLocale();
@@ -85,58 +77,42 @@ export default function CatchShelfIsland({
   const safeItems = Array.isArray(items) ? items : [];
   if (safeItems.length === 0) return null;
 
-  // CMS `columns_count` still caps how many slides render per shelf.
-  const visible = columnsCount
-    ? safeItems.slice(0, Math.max(1, Math.min(20, Math.round(columnsCount) + 3)))
-    : safeItems;
+  const action =
+    headerAction ??
+    (showTimer && timerEndAt ? <CatchCountdown endsAt={timerEndAt} /> : null);
 
   return (
-    <section className="w-full">
+    <section className="w-full" aria-label={title}>
       {title ? (
-        <div className="mb-2.5 flex items-center justify-between md:mb-4">
-          <h2 className="text-sm font-bold tracking-tight text-neutral-900 md:text-lg">{title}</h2>
-          {showViewAll && (
-            <a
-              href="#"
-              className="text-xs font-semibold text-neutral-700 underline underline-offset-4 transition-colors hover:text-black"
-            >
-              {t("viewAll")}
-            </a>
-          )}
-        </div>
+        <SectionHeader title={title} action={action} className="mb-4" />
+      ) : action ? (
+        <div className="mb-4 flex justify-end">{action}</div>
       ) : null}
 
-      {headerSlot}
-
-      {showTimer && timerEndAt ? (
-        <div className="flex justify-start">
-          <CatchCountdown endsAt={timerEndAt} />
-        </div>
-      ) : null}
-
-      <div className="relative w-full">
+      <div className="relative">
         <Swiper
           key={locale_}
           dir={isRtl ? "rtl" : "ltr"}
-          slidesPerView="auto"
-          spaceBetween={16}
+          slidesPerView={2}
+          spaceBetween={12}
+          breakpoints={{
+            768: { slidesPerView: 3, spaceBetween: 14 },
+            1280: { slidesPerView: 5, spaceBetween: 16 },
+          }}
           grabCursor
           watchOverflow
+          keyboard
           onSwiper={(s) => {
             setSwiper(s);
             setIsLocked(s.isLocked);
           }}
           onLock={() => setIsLocked(true)}
           onUnlock={() => setIsLocked(false)}
-          className="w-full"
+          className="catch-shelf-swiper w-full"
         >
-          {visible.map((product) => (
-            <SwiperSlide
-              key={product.id}
-              className="shrink-0 !h-auto"
-              style={{ width: SLIDE_WIDTH }}
-            >
-              <CatchProductCard
+          {safeItems.map((product) => (
+            <SwiperSlide key={product.id} className="!h-auto">
+              <ProductCard
                 item={product}
                 badgeText={badgeText}
                 pricesLoading={isRefreshing}
@@ -149,31 +125,19 @@ export default function CatchShelfIsland({
           <>
             <button
               type="button"
-              aria-label="Previous"
+              aria-label={t("shelf.previous")}
               onClick={() => swiper?.slidePrev()}
-              className="absolute start-0 top-1/2 z-20 -translate-y-1/2 cursor-pointer transition-opacity hover:opacity-80"
+              className="absolute -start-2 top-[36%] z-20 hidden h-9 w-9 -translate-y-1/2 cursor-pointer items-center justify-center rounded-full border border-catch-border-soft bg-white/95 text-catch-charcoal shadow-elev-2 transition-all hover:bg-white active:scale-95 md:flex"
             >
-              <Image
-                src="/product-nav-left.svg"
-                alt=""
-                width={32}
-                height={32}
-                className="rtl:rotate-180"
-              />
+              <ChevronLeft className="h-4 w-4 rtl:rotate-180" strokeWidth={2.5} />
             </button>
             <button
               type="button"
-              aria-label="Next"
+              aria-label={t("shelf.next")}
               onClick={() => swiper?.slideNext()}
-              className="absolute end-0 top-1/2 z-20 -translate-y-1/2 cursor-pointer transition-opacity hover:opacity-80"
+              className="absolute -end-2 top-[36%] z-20 hidden h-9 w-9 -translate-y-1/2 cursor-pointer items-center justify-center rounded-full border border-catch-border-soft bg-white/95 text-catch-charcoal shadow-elev-2 transition-all hover:bg-white active:scale-95 md:flex"
             >
-              <Image
-                src="/product-nav-right.svg"
-                alt=""
-                width={32}
-                height={32}
-                className="rtl:rotate-180"
-              />
+              <ChevronRight className="h-4 w-4 rtl:rotate-180" strokeWidth={2.5} />
             </button>
           </>
         )}

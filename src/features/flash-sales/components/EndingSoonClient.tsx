@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback } from "react";
-import CatchProductCard from "@/features/home/redesign/CatchProductCard";
+import ProductCard from "@/features/products/components/ProductCard";
 import SectionTitle from "@/components/ui/SectionTitle";
 import { getEndingSoonAction } from "../actions/flashSaleCurrencyActions";
 import { useCurrencyRefetch } from "@/features/currencies";
@@ -30,7 +30,7 @@ export default function EndingSoonClient({ products: initialProducts, period, lo
       <SectionTitle title={title} />
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 md:grid-cols-4 lg:grid-cols-6">
         {products.map((product) => (
-          <CatchProductCard
+          <ProductCard
             key={product.id}
             item={{
               id: product.id,
@@ -46,6 +46,8 @@ export default function EndingSoonClient({ products: initialProducts, period, lo
               inWishlist: product.in_wishlist,
               flashSaleActive: product.flash_sale_active ?? true,
               ratings: product.ratings,
+              reviewsCount: product.ratings_count,
+              brands: product.brands,
               tags: product.tags,
             }}
             pricesLoading={isRefreshing}

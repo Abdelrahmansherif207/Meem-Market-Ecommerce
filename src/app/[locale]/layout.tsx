@@ -6,9 +6,9 @@ import { routing } from "@/i18n/routing";
 import { getMessages, setRequestLocale } from "next-intl/server";
 import CatchHeader from "@/features/navigation/components/catch/CatchHeader";
 import CatchMobileHeader from "@/features/navigation/components/catch/CatchMobileHeader";
+import CatchStickyHeader from "@/features/navigation/components/catch/CatchStickyHeader";
 import MobileBottomNav from "@/features/navigation/components/mobile/MobileBottomNav";
 import CatchFooter from "@/features/navigation/components/catch/CatchFooter";
-import ScrollToTopButton from "@/components/ui/ScrollToTopButton";
 import { AuthModal, AuthSyncHandler } from "@/features/auth";
 import { ProfileSyncHandler } from "@/features/profile";
 import { CartSyncProvider } from "@/features/cart/components/CartSyncProvider";
@@ -125,11 +125,12 @@ export default async function RootLayout({
       <body className="flex min-h-dvh flex-col overflow-x-clip">
         <link rel="preconnect" href={process.env.NEXT_PUBLIC_API_URL} />
         <NextIntlClientProvider locale={locale} messages={messages}>
+          <CatchStickyHeader />
           <div className="hidden lg:block">
             <CatchHeader params={params} settingsLogo={settingsLogo} currencyEnabled={currencyEnabled} />
           </div>
           <div className="lg:hidden">
-            <CatchMobileHeader />
+            <CatchMobileHeader settingsLogo={settingsLogo} />
           </div>
           <MobileBottomNav />
           <AuthSyncHandler />
@@ -145,7 +146,6 @@ export default async function RootLayout({
             </div>
           </CartSyncProvider>
           <WishlistSyncProvider />
-          <ScrollToTopButton />
           <AuthModal logo={settingsLogo} />
           <NotificationToast />
         </NextIntlClientProvider>

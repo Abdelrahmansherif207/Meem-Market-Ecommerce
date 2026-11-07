@@ -4,6 +4,23 @@ export interface ProductTag {
   slug: string;
 }
 
+export interface ProductBrandImage {
+  desktop: string;
+  mobile: string;
+}
+
+/**
+ * Brand summary embedded in product payloads. Optional on listing
+ * responses: some nested endpoints (flash sales, sliders) do not hydrate it.
+ */
+export interface ProductBrand {
+  id: number;
+  name: string;
+  slug: string;
+  image?: ProductBrandImage;
+  status?: boolean;
+}
+
 export interface ApiResponse<T> {
   status: number;
   message: string;

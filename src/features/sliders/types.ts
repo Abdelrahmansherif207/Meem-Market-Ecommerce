@@ -1,3 +1,4 @@
+import type { ProductBrand } from "@/shared/types";
 import type { ProductCurrency } from "@/features/currencies";
 
 export interface SliderImage {
@@ -22,6 +23,9 @@ export interface SliderProduct {
   quantity: number;
   in_stock?: boolean;
   ratings: number;
+  ratings_count?: number;
+  brands?: ProductBrand[];
+  in_wishlist?: boolean;
   image: {
     thumbnail: string;
     original: Record<string, string>;

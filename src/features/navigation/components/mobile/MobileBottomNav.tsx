@@ -51,7 +51,7 @@ export default function MobileBottomNav() {
   const cartCount = isAuthenticated ? serverCartCount : guestCartCount;
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-50 w-full border-t border-border bg-background lg:hidden">
+    <nav className="fixed bottom-0 left-0 right-0 z-50 w-full border-t border-catch-border bg-catch-ivory lg:hidden">
       <div className="flex items-center justify-around py-1">
         {navItems.map((item) => (
           <Link

@@ -19,6 +19,8 @@ function flashProductToProductItem(p: FlashSaleProduct): ProductItem {
     flashSaleActive: p.flash_sale_active ?? false,
     inWishlist: p.in_wishlist,
     ratings: p.ratings,
+    reviewsCount: p.ratings_count,
+    brands: p.brands,
     inStock: p.quantity,
     stockQuantity: p.quantity,
     tags: p.tags,
@@ -73,11 +75,9 @@ export default async function CatchFlashSaleSection({
 
   if (!products.length) return null;
 
-  const headerSlot =
+  const headerAction =
     setting?.show_timer && setting?.timer_end_at ? (
-      <div className="flex justify-start">
-        <CatchCountdown endsAt={setting.timer_end_at} />
-      </div>
+      <CatchCountdown endsAt={setting.timer_end_at} />
     ) : undefined;
 
   return (
@@ -90,7 +90,7 @@ export default async function CatchFlashSaleSection({
       initialItems={products}
       columnsCount={setting?.columns_count}
       badgeText={setting?.badge_text}
-      headerSlot={headerSlot}
+      headerAction={headerAction}
     />
   );
 }
