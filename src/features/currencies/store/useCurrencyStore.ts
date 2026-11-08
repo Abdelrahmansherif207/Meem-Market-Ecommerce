@@ -14,11 +14,20 @@ interface CurrencyMeta {
 }
 
 interface CurrencyState {
-  /** Currently selected currency code (e.g. "USD"). */
+  /** Currently selected currency code — empty until seeded from backend data. */
   selectedCode: string;
   /** Currency metadata by code, seeded from the list endpoint. */
   byCode: Record<string, CurrencyMeta>;
-  seedFromList: (list: Currency[], baseCode?: string) => void;
+  /**
+   * Seed from `GET /general/currencies`. When `selectionEnabled` is false the
+   * backend base currency is forced — any stale persisted selection (e.g.
+   * `SAR`/`KWD` from a previous store configuration) is ignored/overwritten.
+   */
+  seedFromList: (
+    list: Currency[],
+    baseCode?: string,
+    selectionEnabled?: boolean,
+  ) => void;
   select: (currency: Currency) => void;
 }
 
@@ -37,14 +46,12 @@ function metaOf(currency: Currency, locale = "en"): CurrencyMeta {
   };
 }
 
-const DEFAULT_CODE = "KWD";
-
 export const useCurrencyStore = create<CurrencyState>()(
   persist(
     (set) => ({
-      selectedCode: DEFAULT_CODE,
+      selectedCode: "",
       byCode: {},
-      seedFromList: (list, baseCode) =>
+      seedFromList: (list, baseCode, selectionEnabled = true) =>
         set((state) => {
           if (list.length === 0) return state;
           const byCode: Record<string, CurrencyMeta> = {};
@@ -58,9 +65,12 @@ export const useCurrencyStore = create<CurrencyState>()(
             list[0].code;
           return {
             byCode,
-            selectedCode: codes.has(state.selectedCode)
-              ? state.selectedCode
-              : base,
+            // Selection is honored only while the store allows it; otherwise
+            // the backend base currency always wins over stale saved codes.
+            selectedCode:
+              selectionEnabled && codes.has(state.selectedCode)
+                ? state.selectedCode
+                : base,
           };
         }),
       select: (currency) =>

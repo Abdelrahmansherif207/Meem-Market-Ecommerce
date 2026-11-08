@@ -10,7 +10,7 @@ interface CartPageProps {
 export async function CartPage({ locale }: CartPageProps) {
   const t = await getTranslations({ locale, namespace: "cartPage" });
   const tb = await getTranslations({ locale, namespace: "header.breadcrumb" });
-  const settings = await getCachedSettings(locale).catch(() => ({ minimumOrderAmount: 0 }));
+  const settings = await getCachedSettings(locale);
 
   return (
     <div className="py-6">
@@ -22,7 +22,11 @@ export async function CartPage({ locale }: CartPageProps) {
       />
 
       <div className="mt-6">
-        <CartPageContent minimumOrderAmount={settings.minimumOrderAmount} />
+        <CartPageContent
+          minimumOrderAmount={settings.minimumOrderAmount}
+          taxEnabled={settings.order_tax_enabled}
+          taxRate={settings.order_tax_rate}
+        />
       </div>
     </div>
   );

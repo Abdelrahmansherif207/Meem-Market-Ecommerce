@@ -2,31 +2,31 @@
  * Canonical money formatting. Use everywhere prices are displayed instead of
  * manual toFixed + currency string concatenation (RTL/decimal correctness).
  *
- * Prices are always rendered in English regardless of the active locale:
- * Latin digits (0-9) and the English currency label ("K.D"). This keeps
- * prices readable and consistent on Arabic and English pages alike.
+ * Money is always rendered in English regardless of the active locale:
+ * Latin digits, grouping and separators. Currency labels never come from
+ * here — the display currency is resolved from backend data
+ * (`/general/settings` + `/general/currencies`, or a payload's own
+ * `currency` metadata) and passed in by the caller.
  */
-const CURRENCY = "KWD";
-export const CURRENCY_SYMBOL = "K.D";
 
 /** Arabic-script characters — used to reject localized symbols from the API. */
 const ARABIC_SCRIPT = /[\u0600-\u06FF]/;
 
 export interface FormatMoneyOptions {
-  /** Symbol override (e.g. "$"). Defaults to the English KWD label. */
+  /** Display symbol, resolved by the caller from backend currency data. */
   symbol?: string;
-  /** Fraction digits override (e.g. 3 for KWD). Defaults to 2. */
+  /** Fraction digits override. Defaults to 2. */
   decimalPlaces?: number;
 }
 
 /**
  * Force a display symbol to English. Backend payloads sometimes carry the
  * localized Arabic symbol (e.g. "د.ك") even when English is requested; those
- * fall back to the provided label (currency code or "K.D").
+ * fall back to the provided label (the English list symbol or the code).
  */
 export function englishCurrencySymbol(
   symbol: string | null | undefined,
-  fallback: string = CURRENCY_SYMBOL,
+  fallback: string = "",
 ): string {
   const value = symbol?.trim();
   if (!value || ARABIC_SCRIPT.test(value)) return fallback;
@@ -34,20 +34,16 @@ export function englishCurrencySymbol(
 }
 
 /**
- * English display symbol for a currency code. KWD always uses the English
- * "K.D" label; other currencies fall back to their code when the API only
- * returns an Arabic-localized symbol.
+ * English display symbol for a currency code. When the API symbol is missing
+ * or Arabic-localized, the (uppercased) code itself is used — the label is
+ * always backend-defined, never a frontend default.
  */
 export function currencySymbolFor(
   code: string | null | undefined,
   symbol?: string | null,
 ): string {
-  const codeText = code?.trim();
-  const fallback = englishCurrencySymbol(
-    codeText?.toUpperCase() === CURRENCY ? CURRENCY_SYMBOL : codeText,
-    CURRENCY_SYMBOL,
-  );
-  return englishCurrencySymbol(symbol, fallback);
+  const codeText = code?.trim().toUpperCase();
+  return englishCurrencySymbol(symbol, codeText ?? "");
 }
 
 export function formatNumber(
@@ -72,10 +68,9 @@ export function formatMoney(
 ): string {
   const decimals = opts?.decimalPlaces ?? 2;
   const formatted = formatNumber(amount, locale, decimals);
-  return `${formatted} ${opts?.symbol ?? CURRENCY_SYMBOL}`;
+  const symbol = opts?.symbol?.trim();
+  return symbol ? `${formatted} ${symbol}` : formatted;
 }
-
-export const CURRENCY_CODE = CURRENCY;
 
 /** Currency label for split int/decimal price layouts (e.g. ProductCard). */
 export function currencyLabel(locale = "en", symbol?: string): string {

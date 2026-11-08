@@ -2,6 +2,17 @@
 import type { ProductCurrency } from "@/features/currencies";
 import type { ProductCardItem } from "@/features/products";
 
+/**
+ * CMS front settings carry merchant-editable copy as a locale map. Plain
+ * strings remain supported so existing sections keep working unchanged.
+ */
+export type LocalizedText =
+  | string
+  | {
+      en?: string;
+      ar?: string;
+    };
+
 export interface BannerItem {
   id: string;
   imageSrc: string;
@@ -43,6 +54,7 @@ export interface HomeCategory {
     desktop: string;
     mobile: string;
   };
+  products_count?: number;
 }
 
 
@@ -166,8 +178,38 @@ export interface SectionFrontSetting {
   show_timer?: boolean;
   timer_end_at?: string;
   theme?: "dark" | "light";
-  badge_text?: string;
+  badge_text?: LocalizedText;
   layout?: "grid" | "slider" | "list";
+
+  /* Tier One shared header/link settings */
+  subtitle?: LocalizedText;
+  show_title?: boolean;
+  show_view_all?: boolean;
+  action_label?: LocalizedText;
+  action_href?: string;
+  show_product_count?: boolean;
+
+  /* Tags */
+  show_hashtag?: boolean;
+  tone?: "default" | "light" | "dark" | "berry";
+
+  /* Hero */
+  media_type?: "video" | "image";
+  video_desktop?: string;
+  video_mobile?: string;
+  poster?: string;
+  image_desktop?: string;
+  image_mobile?: string;
+  eyebrow?: LocalizedText;
+  heading?: LocalizedText;
+  cta_label?: LocalizedText;
+  cta_href?: string;
+  show_cta?: boolean;
+  show_overlay?: boolean;
+  content_align?: "start" | "center" | "end";
+  content_position?: "center" | "bottom";
+  height?: "compact" | "standard" | "tall";
+  show_mobile_content?: boolean;
 }
 
 export interface SectionSetting {

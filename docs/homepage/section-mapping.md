@@ -2,6 +2,11 @@
 
 **Status:** Phase 4 implemented (Catch Beauty visual identity on the homepage).
 
+> **Update (2026-11-08):** See
+> [`cms-verification-report.md`](./cms-verification-report.md) for the current
+> CMS contract, fixes, and verification. Statements below about 19 sections,
+> disabled tags, and the permanently replaced slider hero are outdated.
+
 **Visual source:** approved Phase 2 Catch Beauty specification + live CMS
 artwork. No new Stitch screens were generated for this phase.
 

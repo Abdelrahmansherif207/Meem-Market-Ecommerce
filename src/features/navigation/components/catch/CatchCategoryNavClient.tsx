@@ -11,7 +11,6 @@ import CatchHeaderActions from "./CatchHeaderActions";
 interface CatchCategoryNavClientProps {
   allCategoriesLabel: string;
   categories: CategoryMenuItem[];
-  currencyEnabled?: boolean;
 }
 
 /**
@@ -25,7 +24,6 @@ interface CatchCategoryNavClientProps {
 export default function CatchCategoryNavClient({
   allCategoriesLabel,
   categories,
-  currencyEnabled = false,
 }: CatchCategoryNavClientProps) {
   const [activeSlug, setActiveSlug] = useState<string | null>(null);
   const active = categories.find((c) => c.slug === activeSlug) ?? null;
@@ -76,7 +74,7 @@ export default function CatchCategoryNavClient({
           })}
         </div>
 
-        <CatchHeaderActions currencyEnabled={currencyEnabled} className="shrink-0" />
+        <CatchHeaderActions className="shrink-0" />
       </div>
 
       {/* Mega panel for the hovered category */}

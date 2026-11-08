@@ -7,6 +7,7 @@ import CatchSearchBar from "./CatchSearchBar";
 
 interface CatchTopRowProps {
   settingsLogo?: string | null;
+  siteName?: string;
 }
 
 /**
@@ -14,17 +15,18 @@ interface CatchTopRowProps {
  * Location, language, profile, notifications and cart live in the
  * categories row (see CatchHeaderActions).
  */
-export default function CatchTopRow({ settingsLogo }: CatchTopRowProps) {
+export default function CatchTopRow({ settingsLogo, siteName }: CatchTopRowProps) {
   const t = useTranslations("catchHeader");
+  const brandName = siteName || "Catch Beauty";
 
   return (
     <div className="mx-auto flex w-full max-w-[1440px] items-center justify-between px-4 pt-4 pb-0 lg:px-8">
       <div className="flex w-full items-center gap-6">
         {/* Brand */}
-        <Link href="/" className="flex shrink-0 items-center" aria-label="Catch Beauty">
+        <Link href="/" className="flex shrink-0 items-center" aria-label={brandName}>
           <Image
             src={settingsLogo || "/catch-logo.png"}
-            alt="Catch Beauty"
+            alt={brandName}
             width={300}
             height={105}
             priority

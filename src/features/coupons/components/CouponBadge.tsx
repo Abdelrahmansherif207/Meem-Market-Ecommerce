@@ -1,7 +1,6 @@
 "use client";
 
-import { useLocale } from "next-intl";
-import { formatMoney } from "@/shared/utils/formatMoney";
+import { Price } from "@/components/ui/Price";
 import type { AppliedCoupon } from "../types";
 
 interface CouponBadgeProps {
@@ -9,8 +8,6 @@ interface CouponBadgeProps {
 }
 
 export default function CouponBadge({ coupon }: CouponBadgeProps) {
-  const locale = useLocale();
-
   return (
     <div className="inline-flex items-center gap-2 rounded-full border border-green-300 bg-success-surface px-4 py-1.5 text-sm">
       <div className="flex flex-col">
@@ -19,13 +16,18 @@ export default function CouponBadge({ coupon }: CouponBadgeProps) {
         )}
         <span className="font-semibold text-success">{coupon.code}</span>
       </div>
-      {coupon.discount_amount > 0 && (
-        <span className="whitespace-nowrap tabular-nums text-success">
-          -{coupon.discount_type === "percentage"
-            ? `${coupon.discount_amount}%`
-            : formatMoney(coupon.discount_amount, locale)}
-        </span>
-      )}
+      {coupon.discount_amount > 0 &&
+        (coupon.discount_type === "percentage" ? (
+          <span className="whitespace-nowrap tabular-nums text-success">
+            -{coupon.discount_amount}%
+          </span>
+        ) : (
+          <Price
+            amount={coupon.discount_amount}
+            prefix="-"
+            className="text-success"
+          />
+        ))}
     </div>
   );
 }

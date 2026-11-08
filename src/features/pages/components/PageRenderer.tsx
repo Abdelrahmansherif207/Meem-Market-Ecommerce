@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import { guardLoad } from "@/shared/lib/guardedFetch";
+import { getInfoPageContent, InfoPageRenderer } from "@/features/info";
 import { pageService } from "../services/pageService";
 import { SectionSuspense } from "./SectionRenderer";
 import ErrorState from "@/components/ui/ErrorState";
@@ -17,10 +18,17 @@ export default async function PageRenderer({ slug, locale }: PageRendererProps) 
   const tese = await getTranslations({ locale, namespace: "emptyState" });
 
   const result = await guardLoad(() => pageService.getBySlug(slug, locale), {
-    retries: 3,
+    retries: 1,
   });
 
   if (!result.ok) {
+    // The CMS pages endpoint is not available on every backend yet (or may be
+    // temporarily down). Fall back to the bundled info pages so footer links
+    // never hit a 404 when we already have local content for the slug.
+    if (getInfoPageContent(slug, locale)) {
+      return <InfoPageRenderer slug={slug} locale={locale} />;
+    }
+
     if (result.kind === "not-found") {
       notFound();
     }

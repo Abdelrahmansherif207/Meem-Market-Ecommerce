@@ -40,9 +40,11 @@ export function SectionHeader({
   return (
     <div className={cn("flex items-end justify-between gap-4", className)}>
       <div className="min-w-0">
-        <h2 className="text-lg font-bold tracking-tight text-catch-charcoal sm:text-xl">
-          {title}
-        </h2>
+        {title ? (
+          <h2 className="text-lg font-bold tracking-tight text-catch-charcoal sm:text-xl">
+            {title}
+          </h2>
+        ) : null}
         {subtitle ? (
           <p className="mt-1 text-xs text-catch-muted">{subtitle}</p>
         ) : null}

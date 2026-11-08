@@ -3,7 +3,9 @@ import { getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 import { CampaignImage } from "@/components/ui/CampaignImage";
 import { SectionHeader } from "@/components/ui/SectionHeader";
+import { cn } from "@/shared/utils/cn";
 import { homePageService } from "../services/homePageService";
+import { resolveLocalizedText } from "../utils";
 import { normalizeList } from "./normalize";
 import type { SectionFrontSetting, HomeCategory } from "../types";
 
@@ -47,13 +49,26 @@ export default async function CatchCategoriesSection({
     Math.min(8, Math.round(setting?.columns_count ?? 8)),
   );
 
+  const showTitle = setting?.show_title !== false;
+  const subtitle = resolveLocalizedText(setting?.subtitle, locale);
+  const showViewAll = setting?.show_view_all !== false;
+  const actionLabel = resolveLocalizedText(
+    setting?.action_label,
+    locale,
+    t("viewAll"),
+  );
+  const actionHref = setting?.action_href?.trim() || "/categories";
+  const showProductCount = setting?.show_product_count === true;
+  const isCircle = setting?.shape === "circle";
+
   return (
     <section className="w-full space-y-4">
-      {title ? (
+      {showTitle ? (
         <SectionHeader
           title={title}
-          actionLabel={t("viewAll")}
-          actionHref="/categories"
+          subtitle={subtitle}
+          actionLabel={showViewAll ? actionLabel : undefined}
+          actionHref={showViewAll ? actionHref : undefined}
         />
       ) : null}
 
@@ -69,7 +84,12 @@ export default async function CatchCategoriesSection({
               href={`/category/${cat.slug}`}
               className="group flex min-w-0 flex-col gap-2 rounded-2xl border border-catch-border-soft bg-white p-1.5 transition-[box-shadow,transform] duration-200 hover:-translate-y-0.5 hover:shadow-elev-2 sm:p-2"
             >
-              <div className="relative aspect-square w-full overflow-hidden rounded-xl bg-catch-blush">
+              <div
+                className={cn(
+                  "relative aspect-square w-full overflow-hidden bg-catch-blush",
+                  isCircle ? "rounded-full" : "rounded-xl",
+                )}
+              >
                 {image ? (
                   <CampaignImage
                     desktop={cat.image.desktop || cat.image.mobile}
@@ -95,6 +115,11 @@ export default async function CatchCategoriesSection({
               <span className="line-clamp-2 text-center text-[10px] font-semibold leading-tight text-catch-charcoal transition-colors group-hover:text-primary sm:text-xs">
                 {cat.name}
               </span>
+              {showProductCount && typeof cat.products_count === "number" ? (
+                <span className="text-center text-[10px] text-catch-muted">
+                  {t("productCount", { count: cat.products_count })}
+                </span>
+              ) : null}
             </Link>
           );
         })}

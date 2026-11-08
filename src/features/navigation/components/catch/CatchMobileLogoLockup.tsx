@@ -1,10 +1,11 @@
 import Image from "next/image";
 import { Link } from "@/i18n/navigation";
-import { DEFAULT_LOGO } from "@/features/settings/lib/metadata";
+import { DEFAULT_LOGO } from "@/features/settings/constants";
 
 interface CatchMobileLogoLockupProps {
   /** CMS/settings logo. When absent or the default stacked logo, the compact Catch lockup is used. */
   src?: string | null;
+  siteName?: string;
 }
 
 /**
@@ -15,13 +16,15 @@ interface CatchMobileLogoLockupProps {
  */
 export default function CatchMobileLogoLockup({
   src,
+  siteName,
 }: CatchMobileLogoLockupProps) {
+  const brandName = siteName || "Catch Beauty";
   // The settings default is the stacked logo, which is too tall for the
   // search row; keep the emblem + wordmark lockup in that case.
   return (
     <Link
       href="/"
-      aria-label="Catch Beauty"
+      aria-label={brandName}
       className="flex shrink-0 items-center gap-2"
     >
       {src && src !== DEFAULT_LOGO ? (

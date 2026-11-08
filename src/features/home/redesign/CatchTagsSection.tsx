@@ -20,7 +20,6 @@ export default async function CatchTagsSection({
   endpoint,
 }: CatchTagsSectionProps) {
   void locale;
-  void setting;
 
   let tags;
   try {
@@ -34,10 +33,40 @@ export default async function CatchTagsSection({
 
   if (!tags || tags.length === 0) return null;
 
+  const showTitle = setting?.show_title !== false;
+  const showHashtag = setting?.show_hashtag !== false;
+  const tone = setting?.tone ?? "dark";
+
+  const toneClasses =
+    tone === "light"
+      ? {
+          section: "bg-catch-surface ring-1 ring-catch-border-soft",
+          title: "text-catch-muted",
+          pill: "border-catch-border-soft text-catch-charcoal hover:border-catch-charcoal hover:bg-catch-charcoal hover:text-white",
+          hash: "text-catch-muted-soft",
+        }
+      : tone === "berry"
+        ? {
+            section: "bg-catch-berry",
+            title: "text-white/70",
+            pill: "border-white/25 text-white hover:border-white hover:bg-white hover:text-catch-berry",
+            hash: "text-white/50",
+          }
+        : {
+            section: "bg-black",
+            title: "text-white/60",
+            pill: "border-white/20 text-white hover:border-white hover:bg-white hover:text-black",
+            hash: "text-white/50",
+          };
+
   return (
-    <section className="w-full overflow-hidden rounded-2xl bg-black py-3">
-      {title ? (
-        <span className="mx-4 text-xs font-bold uppercase tracking-wider text-white/60">
+    <section
+      className={`w-full overflow-hidden rounded-2xl py-3 ${toneClasses.section}`}
+    >
+      {showTitle ? (
+        <span
+          className={`mx-4 text-xs font-bold uppercase tracking-wider ${toneClasses.title}`}
+        >
           {title}
         </span>
       ) : null}
@@ -46,9 +75,12 @@ export default async function CatchTagsSection({
           <Link
             key={tag.id}
             href={`/tags/${tag.slug}`}
-            className="shrink-0 rounded-full border border-white/20 px-3 py-1 text-xs font-semibold text-white transition-colors hover:border-white hover:bg-white hover:text-black"
+            className={`shrink-0 rounded-full border px-3 py-1 text-xs font-semibold transition-colors ${toneClasses.pill}`}
           >
-            <span className="text-white/50">#</span> {tag.name}
+            {showHashtag ? (
+              <span className={toneClasses.hash}># </span>
+            ) : null}
+            {tag.name}
           </Link>
         ))}
       </div>

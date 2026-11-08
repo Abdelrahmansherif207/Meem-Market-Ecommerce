@@ -1,4 +1,5 @@
 import PageRenderer from "@/features/pages/components/PageRenderer";
+import { getInfoPageContent } from "@/features/info";
 import { pageService } from "@/features/pages/services/pageService";
 import { getTranslations } from "next-intl/server";
 import type { Metadata } from "next";
@@ -19,7 +20,15 @@ export async function generateMetadata({
       };
     }
   } catch {
-    // fall back to generic page metadata below
+    // fall back to local content / generic page metadata below
+  }
+
+  const localPage = getInfoPageContent(slug, locale);
+  if (localPage?.title) {
+    return {
+      title: localPage.title,
+      description: localPage.title,
+    };
   }
 
   const t = await getTranslations({ locale, namespace: "meta.page" });

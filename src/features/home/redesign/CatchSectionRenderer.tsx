@@ -1,18 +1,20 @@
 import { Suspense } from "react";
+import type { PromotionVideo } from "@/features/settings";
 import type { HomePageSection, SectionFrontSetting } from "../types";
 import { SectionErrorBoundary } from "@/features/pages/components/SectionErrorBoundary";
-// CMS hero carousel is temporarily replaced by CatchHeroVideoSection.
-// import CatchHeroSliderSection from "./CatchHeroSliderSection";
+import CatchHeroSection from "./CatchHeroSection";
+import CatchHeroSliderSection from "./CatchHeroSliderSection";
 import CatchBannerSection from "./CatchBannerSection";
 import CatchProductShelfSection from "./CatchProductShelfSection";
 import CatchFlashSaleSection from "./CatchFlashSaleSection";
 import CatchCategoriesSection from "./CatchCategoriesSection";
 import CatchPromotionsSection from "./CatchPromotionsSection";
-// Tags section stays disabled by request — CMS "tags" sections render nothing.
-// import CatchTagsSection from "./CatchTagsSection";
+import CatchTagsSection from "./CatchTagsSection";
 import CatchBrandsSection from "./CatchBrandsSection";
 import CatchCouponsSection from "./CatchCouponsSection";
 import {
+  CatchHeroSkeleton,
+  CatchTagsSkeleton,
   CatchShelfSkeleton,
   CatchBannerSkeleton,
   CatchCategoriesSkeleton,
@@ -24,17 +26,30 @@ import {
 function CatchSectionBlock({
   section,
   locale,
+  promotionVideo,
 }: {
   section: HomePageSection;
   locale: string;
+  promotionVideo?: PromotionVideo | null;
 }) {
   const { type, title, endpoint } = section;
-  const setting = section.setting?.front;
+  // Older CMS rows can store `front` as an empty array; treat that as no settings.
+  const setting = Array.isArray(section.setting?.front)
+    ? undefined
+    : section.setting?.front;
 
   switch (type) {
+    case "hero":
+      return (
+        <CatchHeroSection
+          locale={locale}
+          title={title}
+          setting={setting}
+          promotionVideo={promotionVideo}
+        />
+      );
     case "sliders":
-      // Temporarily replaced by CatchHeroVideoSection in HomePage.
-      return null;
+      return <CatchHeroSliderSection title={title} locale={locale} setting={setting} endpoint={endpoint} />;
     case "banners":
       return <CatchBannerSection endpoint={endpoint} locale={locale} title={title} setting={setting} />;
     case "products":
@@ -45,27 +60,26 @@ function CatchSectionBlock({
       return <CatchCategoriesSection title={title} locale={locale} setting={setting} endpoint={endpoint} />;
     case "promotions":
       return <CatchPromotionsSection title={title} locale={locale} setting={setting} endpoint={endpoint} />;
-    // Tags section disabled by request — CMS "tags" sections render nothing.
-    // case "tags":
-    //   return <CatchTagsSection title={title} locale={locale} setting={setting} endpoint={endpoint} />;
+    case "tags":
+      return <CatchTagsSection title={title} locale={locale} setting={setting} endpoint={endpoint} />;
     case "brands":
       return <CatchBrandsSection title={title} locale={locale} setting={setting} endpoint={endpoint} />;
     case "coupons":
       return <CatchCouponsSection title={title} locale={locale} setting={setting} endpoint={endpoint} />;
     default:
-      // "tags" is intentionally disabled (commented above).
-      if (type !== "tags") {
-        console.warn(`[CatchSectionRenderer] Unknown section type: ${type}`);
-      }
+      console.warn(`[CatchSectionRenderer] Unknown section type: ${type}`);
       return null;
   }
 }
 
 function getSectionSkeleton(type: string, setting?: SectionFrontSetting): React.ReactNode {
   switch (type) {
+    case "hero":
+      return <CatchHeroSkeleton />;
     case "sliders":
-      // No skeleton: the sliders case renders nothing while the video hero is active.
-      return null;
+      return <CatchHeroSkeleton variant="sliders" />;
+    case "tags":
+      return <CatchTagsSkeleton />;
     case "banners":
       return <CatchBannerSkeleton />;
     case "products":
@@ -91,14 +105,20 @@ function getSectionSkeleton(type: string, setting?: SectionFrontSetting): React.
 export function CatchSectionSuspense({
   section,
   locale,
+  promotionVideo,
 }: {
   section: HomePageSection;
   locale: string;
+  promotionVideo?: PromotionVideo | null;
 }) {
   return (
     <Suspense key={section.id} fallback={getSectionSkeleton(section.type, section.setting?.front)}>
       <SectionErrorBoundary>
-        <CatchSectionBlock section={section} locale={locale} />
+        <CatchSectionBlock
+          section={section}
+          locale={locale}
+          promotionVideo={promotionVideo}
+        />
       </SectionErrorBoundary>
     </Suspense>
   );

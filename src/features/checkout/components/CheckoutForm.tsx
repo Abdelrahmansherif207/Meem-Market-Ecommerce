@@ -6,7 +6,8 @@ import { useLocale, useTranslations } from "next-intl";
 import { ChevronLeft, ChevronRight, CreditCard, Loader2, Store, WifiOff } from "lucide-react";
 import { useShallow } from "zustand/react/shallow";
 import { useAuthStore } from "@/features/auth";
-import { useCurrencyStore } from "@/features/currencies";
+import { useCurrencyStore, useCurrencySnapshot, useDisplayCurrency } from "@/features/currencies";
+import type { PaymentGatewayState } from "@/features/settings";
 import { usePickupLocationStore } from "@/features/pickup-location";
 import { MapPickerModal, useLocationStore } from "@/features/location";
 import type { PickedAddress } from "@/features/location";
@@ -65,16 +66,31 @@ function stepOfFieldErrors(errors: FieldError[]): StepId {
   return "delivery";
 }
 
-export function CheckoutForm() {
+interface CheckoutFormProps {
+  /** Site settings: `order_tax_enabled` / `order_tax_rate`. */
+  orderTaxEnabled?: boolean;
+  orderTaxRate?: number | null;
+  /** Settings gateway flags, used only when the gateway endpoint omits them. */
+  gatewaySettings?: Record<string, PaymentGatewayState>;
+}
+
+export function CheckoutForm({
+  orderTaxEnabled = false,
+  orderTaxRate = null,
+  gatewaySettings,
+}: CheckoutFormProps) {
   const t = useTranslations("checkout");
   const locationT = useTranslations("locationPicker");
   const router = useRouter();
   const intlRouter = useIntlRouter();
   const locale = useLocale();
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
-  // Re-fetch cart totals when the currency changes (client `apiFetch`
-  // already attaches `X-Currency`).
-  const selectedCurrency = useCurrencyStore((s) => s.selectedCode);
+  // Effective display currency (backend-driven). The checkout island
+  // re-fetches cart totals when it changes; client `apiFetch` attaches the
+  // matching `X-Currency` header.
+  const displayCurrency = useDisplayCurrency();
+  const displayCode = displayCurrency.code;
+  const snapshot = useCurrencySnapshot();
   const user = useAuthStore(
     useShallow((s) => ({ name: s.name, email: s.email, phone: s.phoneNumber })),
   );
@@ -140,10 +156,11 @@ export function CheckoutForm() {
   // ---- Shared data ----------------------------------------------------------
   const data = useCheckoutData({
     locale,
-    currency: selectedCurrency,
+    currency: displayCode,
     hydrated,
     isAuthenticated,
     shippingType: form.shipping_type,
+    gatewaySettings,
     onShippingTypeUnsupported: (type) => {
       if (form.shipping_type !== type) return;
       const remaining = SHIPPING_TYPE_CODES.filter((st) => st !== type);
@@ -284,9 +301,19 @@ export function CheckoutForm() {
   }, [form.governorate_id, governorates, governoratesLoading, controller.selectedAddressId, savedAddresses]);
   const selectedGovernorateId = form.governorate_id ?? autoGovernorateId;
 
-  const selectedCurrencyRate = useCurrencyStore(
-    (s) => s.byCode[s.selectedCode]?.effectiveRate ?? null,
-  );
+  // Governorate values are served in the backend base currency. Convert them
+  // to the display currency by the backend rates' ratio (per-anchor rates
+  // from `/general/currencies`). When the display IS the base (or rates are
+  // unknown) no conversion applies — matches the live single-currency store.
+  const selectedCurrencyRate = useCurrencyStore((s) => {
+    if (!displayCode || !snapshot || displayCode === snapshot.baseCode) {
+      return null;
+    }
+    const displayRate = s.byCode[displayCode]?.effectiveRate;
+    const baseRate = s.byCode[snapshot.baseCode]?.effectiveRate;
+    if (!displayRate || !baseRate || baseRate <= 0) return null;
+    return displayRate / baseRate;
+  });
   const shippingQuote = useMemo(
     () =>
       resolveShippingQuote({
@@ -764,6 +791,8 @@ export function CheckoutForm() {
               pickupLocationName={controller.pickupLocationName || undefined}
               appliedCoupon={cartData?.appliedCoupon}
               onCouponApplied={handleCouponApplied}
+              taxEnabled={orderTaxEnabled}
+              taxRate={orderTaxRate}
             />
             <p className="hidden items-center justify-center gap-2 text-xs text-text-secondary lg:flex">
               <CreditCard className="size-3.5" aria-hidden="true" />

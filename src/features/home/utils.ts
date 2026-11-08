@@ -1,4 +1,22 @@
-import type { ApiProduct, ProductItem } from "./types";
+import type { ApiProduct, LocalizedText, ProductItem } from "./types";
+
+/**
+ * Resolve CMS front-setting copy for the active locale. Falls back to the
+ * other locale, then to the provided static message. Plain strings are
+ * returned as-is for backwards compatibility with older section settings.
+ */
+export function resolveLocalizedText(
+  value: LocalizedText | null | undefined,
+  locale: string,
+  fallback = "",
+): string {
+  if (!value) return fallback;
+  if (typeof value === "string") return value.trim() || fallback;
+
+  const direct = locale === "ar" ? value.ar : value.en;
+  const alternate = locale === "ar" ? value.en : value.ar;
+  return direct?.trim() || alternate?.trim() || fallback;
+}
 
 function slugify(name: string): string {
   return name

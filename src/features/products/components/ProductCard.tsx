@@ -24,6 +24,12 @@ interface ProductCardProps {
   /** When true, price numbers render as skeleton bars while converted prices load. */
   pricesLoading?: boolean;
   className?: string;
+  /**
+   * `grid` (default) is the portrait card used by shelves and listings.
+   * `list` keeps the same behavior but lays the media beside the details for
+   * CMS sections that request a list layout.
+   */
+  variant?: "grid" | "list";
 }
 
 /** Low stock threshold for the automatic "Only X left" chip. */
@@ -48,7 +54,9 @@ export default function ProductCard({
   badgeText,
   pricesLoading = false,
   className,
+  variant = "grid",
 }: ProductCardProps) {
+  const isList = variant === "list";
   const t = useTranslations("catchHome");
   const tPdp = useTranslations("niceOnePdp");
   const { quantity, isPending, addItem, increment, decrement } =
@@ -71,13 +79,14 @@ export default function ProductCard({
 
   const rating = item.ratings ?? 0;
   const safeStock = item.stockQuantity ?? item.inStock ?? 0;
+  const explicitBadge = badgeText?.trim() || null;
   const isLowStock =
-    !badgeText &&
+    !explicitBadge &&
     !item.flashSaleActive &&
     safeStock > 0 &&
     safeStock <= LOW_STOCK_THRESHOLD;
   const badge =
-    badgeText ?? (isLowStock ? t("lowStock", { count: safeStock }) : null);
+    explicitBadge ?? (isLowStock ? t("lowStock", { count: safeStock }) : null);
   const brandName = item.brands?.[0]?.name?.trim() || titleBrand(item.title);
 
   /** Whole-card navigation target (fallback builds the PDP slug). */
@@ -111,7 +120,10 @@ export default function ProductCard({
   return (
     <article
       className={cn(
-        "group relative flex h-full flex-col overflow-hidden rounded-2xl border border-catch-border-soft bg-white transition-[box-shadow,transform] duration-200 hover:-translate-y-0.5 hover:shadow-elev-2",
+        "group relative h-full overflow-hidden rounded-2xl border border-catch-border-soft bg-white transition-[box-shadow,transform] duration-200 hover:-translate-y-0.5 hover:shadow-elev-2",
+        isList
+          ? "grid grid-cols-[6.5rem_minmax(0,1fr)] sm:grid-cols-[8rem_minmax(0,1fr)]"
+          : "flex flex-col",
         className,
       )}
     >
@@ -122,9 +134,14 @@ export default function ProductCard({
         className="absolute inset-0 z-10 rounded-2xl focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-primary"
       />
 
-      <div className="flex items-start justify-between gap-2 p-3 pb-0">
+      <div
+        className={cn(
+          "flex items-start justify-between gap-2",
+          isList ? "col-start-2 row-start-1 p-3 pb-0" : "p-3 pb-0",
+        )}
+      >
         <div className="min-w-0 overflow-hidden pt-0.5">
-          {item.flashSaleActive ? (
+          {!explicitBadge && item.flashSaleActive ? (
             <span className="inline-flex h-5 max-w-full min-w-0 items-center overflow-hidden rounded-full bg-primary px-2 text-[10px] leading-none text-white">
               <NiceOneCountdown
                 endDate={item.flashEndDate ?? null}
@@ -164,7 +181,14 @@ export default function ProductCard({
         </button>
       </div>
 
-      <div className="relative mx-3 mt-2 overflow-hidden rounded-xl bg-catch-blush">
+      <div
+        className={cn(
+          "relative overflow-hidden rounded-xl bg-catch-blush",
+          isList
+            ? "col-start-1 row-span-2 row-start-1 m-2 me-0 self-center"
+            : "mx-3 mt-2",
+        )}
+      >
         <div className="relative aspect-square w-full">
           {item.image ? (
             <Image
@@ -236,7 +260,12 @@ export default function ProductCard({
         </div>
       </div>
 
-      <div className="flex flex-1 flex-col gap-1.5 p-3 pt-2.5">
+      <div
+        className={cn(
+          "flex flex-1 flex-col gap-1.5 p-3 pt-2.5",
+          isList && "col-start-2 row-start-2 pt-1",
+        )}
+      >
         <div className="flex min-h-4 items-center justify-between gap-2">
           <span className="truncate text-[10px] font-bold uppercase tracking-[0.08em] text-catch-muted">
             {brandName}

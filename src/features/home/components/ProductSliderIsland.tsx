@@ -9,7 +9,8 @@ import {
   getFlashSaleHomeItemsAction,
   getProductSliderItemsAction,
 } from "../actions/homeCurrencyActions";
-import type { ProductItem } from "../types";
+import { resolveLocalizedText } from "../utils";
+import type { LocalizedText, ProductItem } from "../types";
 
 interface ProductSliderIslandProps {
   fetchKind: "products" | "flash-sales" | "banner";
@@ -18,7 +19,7 @@ interface ProductSliderIslandProps {
   title?: string;
   initialItems: ProductItem[];
   columnsCount?: number;
-  badgeText?: string;
+  badgeText?: LocalizedText;
   showTimer?: boolean;
   timerEndAt?: string;
   theme?: "light" | "dark";
@@ -64,6 +65,8 @@ export default function ProductSliderIsland({
     initialItems[0]?.currency?.code,
   );
 
+  const resolvedBadgeText = resolveLocalizedText(badgeText, locale) || undefined;
+
   if (fetchKind === "flash-sales") {
     return (
       <section className="w-full bg-gradient-to-b from-black via-[#1a1a1a] to-[#2a2a2a] text-white">
@@ -72,7 +75,7 @@ export default function ProductSliderIsland({
           <ProductSlider
             items={items}
             columnsCount={columnsCount}
-            badgeText={badgeText}
+            badgeText={resolvedBadgeText}
             theme="dark"
             pricesLoading={isRefreshing}
           />
@@ -86,7 +89,7 @@ export default function ProductSliderIsland({
       title={title}
       items={items}
       columnsCount={columnsCount}
-      badgeText={badgeText}
+      badgeText={resolvedBadgeText}
       showTimer={showTimer}
       timerEndAt={timerEndAt}
       theme={theme}

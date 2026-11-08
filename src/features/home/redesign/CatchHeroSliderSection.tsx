@@ -121,6 +121,7 @@ export default async function CatchHeroSliderSection({
           title={title}
           initialItems={products}
           columnsCount={setting?.columns_count}
+          layout={setting?.layout}
         />
       )}
     </section>

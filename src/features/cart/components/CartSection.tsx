@@ -1,17 +1,18 @@
 "use client";
 
-import { useTranslations, useLocale } from "next-intl";
+import { useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
 import type { ReactNode } from "react";
-import { Gift, Star, ShoppingCart, Car, ShoppingBag, ChevronRight } from "lucide-react";
+import { Car, Truck, ShoppingBag, ChevronRight } from "lucide-react";
 import { cn } from "@/shared/utils/cn";
 import { formatMoney } from "@/shared/utils/formatMoney";
 import { Button } from "@/components/ui/Button";
 import { useAuthStore } from "@/features/auth";
+import { useDisplayCurrency } from "@/features/currencies";
 import type { CartLineIdentity, HydratedCartItem } from "../types";
 import { getCartLineKey } from "../types";
 import { ProductCartItem } from "./ProductCartItem";
-import { calcSubtotal, isFreeShipping, canCheckout } from "../utils";
+import { calcSubtotal, canCheckout } from "../utils";
 
 interface CartSectionProps {
   items: HydratedCartItem[];
@@ -32,9 +33,14 @@ export function CartSection({
   couponSlot,
 }: CartSectionProps) {
   const t = useTranslations("cartPage");
-  const locale = useLocale();
   const router = useRouter();
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
+  // Display currency comes from the backend (settings + currencies list).
+  const displayCurrency = useDisplayCurrency();
+  const minimumText = formatMoney(minimumOrderAmount, "en", {
+    symbol: displayCurrency.symbol,
+    decimalPlaces: displayCurrency.decimalPlaces,
+  });
 
   const subtotal = calcSubtotal(
     items.map((i) => ({ price: i.current_price, quantity: i.quantity })),
@@ -53,21 +59,6 @@ export function CartSection({
     ? "/payment"
     : `/auth?redirect=/payment`;
 
-  // Free shipping progress
-  const freeShippingThreshold = 300;
-  const freeShippingEligible = isFreeShipping(subtotal, freeShippingThreshold);
-  const freeShipPercent = Math.min(100, (subtotal / freeShippingThreshold) * 100);
-  const freeShipRemaining = Math.max(0, freeShippingThreshold - subtotal);
-  const fillGradient = "from-primary to-primary-dark";
-  const activeColor = "border-primary bg-primary";
-  const activeText = "text-primary";
-  const milestonePos = (minimumOrderAmount / freeShippingThreshold) * 100;
-  const milestones = [
-    { label: t("milestoneStart"), sub: null, pos: 0, Icon: Star },
-    { label: formatMoney(minimumOrderAmount, locale), sub: t("milestoneMinimum"), pos: milestonePos, Icon: ShoppingCart },
-    { label: formatMoney(freeShippingThreshold, locale), sub: t("milestoneFreeShipping"), pos: 100, Icon: Car },
-  ];
-
   return (
     <div className="rounded-2xl border-2 border-border p-4 sm:p-6 lg:p-10 space-y-6">
       <div className="flex flex-wrap items-center gap-2 sm:gap-3">
@@ -78,84 +69,10 @@ export function CartSection({
         <span className="text-sm text-text-secondary">{eta}</span>
       </div>
 
-      <div className="space-y-2">
-        <div className="flex items-center gap-2 text-xs text-text-secondary">
-          <Gift className={cn("h-4 w-4 shrink-0", "text-primary")} />
-            <span>
-              {freeShippingEligible
-                ? t("freeShippingAchieved")
-                : t("freeShippingProgress", { amount: formatMoney(freeShipRemaining, locale, { decimalPlaces: 0 }) })}
-            </span>
-          </div>
-
-          <div className="relative py-6">
-            <div className="relative h-2 w-full rounded-full bg-border-subtle">
-              <div
-                className={cn("h-full rounded-full transition-all duration-700 ease-out bg-gradient-to-r", fillGradient)}
-                style={{ width: Math.min(100, freeShipPercent) + "%" }}
-              >
-                <div className="absolute inset-0 rounded-full bg-[repeating-linear-gradient(135deg,transparent,transparent_6px,rgba(255,255,255,0.25)_6px,rgba(255,255,255,0.25)_12px)]" />
-              </div>
-            </div>
-
-            {milestones.map((m) => {
-              const reached = freeShipPercent >= m.pos;
-              const edge = m.pos === 0 ? "start" : m.pos === 100 ? "end" : "center";
-              return (
-                <div
-                  key={m.pos}
-                  className="absolute"
-                  style={{
-                    left: m.pos + "%",
-                    top: "50%",
-                    transform:
-                      edge === "start"
-                        ? "translate(0,-50%)"
-                        : edge === "end"
-                          ? "translate(-100%,-50%)"
-                          : "translate(-50%,-50%)",
-                  }}
-                >
-                  <div
-                    className={cn(
-                      "flex h-8 w-8 items-center justify-center rounded-full border-[3px] transition-all duration-300",
-                      reached
-                        ? activeColor + " shadow-md"
-                        : "border-border bg-white",
-                    )}
-                  >
-                    <m.Icon className={cn("h-4 w-4", reached ? "text-white" : "text-text-secondary")} />
-                  </div>
-                  <div
-                    className={cn(
-                      "absolute mt-1 text-center",
-                      edge === "start" && "left-0 text-start",
-                      edge === "end" && "right-0 text-end",
-                      edge === "center" && "left-1/2 -translate-x-1/2",
-                    )}
-                    style={{ top: "100%" }}
-                  >
-                    <div className={cn("text-xs font-bold whitespace-nowrap", reached ? activeText : "text-text-secondary")}>
-                      {m.label}
-                    </div>
-                    {m.sub && (
-                      <div className={cn("text-[10px] leading-tight whitespace-nowrap mt-px", reached ? "text-text-secondary" : "text-text-secondary/70")}>
-                        {m.sub}
-                      </div>
-                    )}
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-
-          {freeShippingEligible && (
-            <div className="flex items-center justify-center gap-1.5 text-xs font-medium text-success">
-              <Gift className="h-3.5 w-3.5" />
-              {t("freeShippingAchieved")}
-            </div>
-          )}
-        </div>
+      <div className="flex items-center gap-2 text-xs text-text-secondary">
+        <Truck className="h-4 w-4 shrink-0 text-primary" />
+        <span>{t("freeShippingNote")}</span>
+      </div>
 
       <div className="space-y-4">
         {items.map((item) => (
@@ -191,7 +108,7 @@ export function CartSection({
 
       {!checkoutEnabled && (
         <p className="text-center text-[11px] text-text-secondary">
-          {t("minimumOrder", { amount: formatMoney(minimumOrderAmount, locale) })}
+          {t("minimumOrder", { amount: minimumText })}
         </p>
       )}
     </div>

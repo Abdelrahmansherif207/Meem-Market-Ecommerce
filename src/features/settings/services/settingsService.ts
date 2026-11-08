@@ -2,20 +2,41 @@ import { cache } from "react";
 import { apiFetch } from "@/shared/lib/api";
 import { CACHE_TTL } from "@/shared/constants/cache";
 import type { ApiResponse } from "@/shared/types";
-import type { SiteSettings } from "../types";
+import { SETTINGS_CACHE_TAG } from "../constants";
+import { normalizeSiteSettings } from "../lib/normalize";
+import type { RawSiteSettings, SiteSettings } from "../types";
 
+/**
+ * `GET /general/settings` — the single source for storefront identity,
+ * contact/social links and commerce flags.
+ *
+ * The payload is normalized over locale-aware Catch Beauty defaults, and a
+ * failed request returns those defaults instead of throwing so the layout
+ * can render without extra fallback logic. Concurrent calls within one
+ * request are deduplicated by React `cache()`.
+ */
 async function fetchSettings(locale: string): Promise<SiteSettings> {
-  const response = await apiFetch<ApiResponse<SiteSettings>>(
-    "/general/settings",
-    { headers: { lang: locale }, next: { revalidate: CACHE_TTL.STANDARD } },
-  );
-  const data = response.data;
-  return {
-    ...data,
-    // Backend serializes this as a string (e.g. "50.00") — coerce to number
-    // so numeric comparisons (minimum-order gates, progress bars) behave.
-    minimumOrderAmount: Number(data.minimumOrderAmount) || 0,
-  };
+  try {
+    const response = await apiFetch<ApiResponse<RawSiteSettings>>(
+      "/general/settings",
+      {
+        lang: locale,
+        next: {
+          revalidate: CACHE_TTL.STANDARD,
+          tags: [SETTINGS_CACHE_TAG],
+        },
+      },
+    );
+
+    if (!response || response.success === false || !response.data) {
+      return normalizeSiteSettings(null, locale);
+    }
+
+    return normalizeSiteSettings(response.data, locale);
+  } catch (error) {
+    console.warn("[settings] Falling back to Catch Beauty defaults", error);
+    return normalizeSiteSettings(null, locale);
+  }
 }
 
 export const getCachedSettings = cache(fetchSettings);

@@ -13,10 +13,10 @@ interface CatchCountdownProps {
  */
 export default function CatchCountdown({ endsAt }: CatchCountdownProps) {
   const t = useTranslations("catchHome");
-  const { days, hours, minutes, seconds, isExpired, isReady } =
+  const { days, hours, minutes, seconds, isExpired, isReady, hasValidTarget } =
     useCountdown(endsAt);
 
-  if (isExpired) return null;
+  if (!hasValidTarget || isExpired) return null;
 
   const cells = [
     { value: days, label: t("countdown.days") },

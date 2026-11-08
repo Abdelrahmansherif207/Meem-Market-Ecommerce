@@ -1,17 +1,21 @@
 "use client";
 
-import { Truck, Minus } from "lucide-react";
+import { Truck, Minus, Percent } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { Price } from "@/components/ui/Price";
 import { useAuthStore } from "@/features/auth";
 import CouponInput from "@/features/coupons/components/CouponInput";
 import type { AppliedCoupon } from "@/features/coupons/types";
+import { calcTaxAmount } from "../utils";
 
 interface CartSummaryProps {
   subtotal: number;
   quantity: number;
   appliedCoupon?: AppliedCoupon | null;
   couponDiscount?: number;
+  /** Site settings: `order_tax_enabled` / `order_tax_rate`. */
+  taxEnabled?: boolean;
+  taxRate?: number | null;
   onCouponApplied?: () => void;
 }
 
@@ -20,13 +24,17 @@ export function CartSummary({
   quantity,
   appliedCoupon,
   couponDiscount = 0,
+  taxEnabled = false,
+  taxRate = null,
   onCouponApplied,
 }: CartSummaryProps) {
   const t = useTranslations("cartPage");
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
 
   const totalQty = quantity;
-  const total = subtotal - couponDiscount;
+  const discountedSubtotal = Math.max(0, subtotal - couponDiscount);
+  const taxAmount = calcTaxAmount(discountedSubtotal, taxEnabled, taxRate);
+  const total = discountedSubtotal + taxAmount;
 
   return (
     <div className="rounded-2xl border-2 border-border bg-white p-5 space-y-5">
@@ -66,6 +74,20 @@ export function CartSummary({
             )}
           </div>
           <Price amount={couponDiscount} prefix="-" className="shrink-0 text-sm font-semibold text-success" />
+        </div>
+      )}
+
+      {taxAmount > 0 && (
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Percent className="h-3.5 w-3.5 text-text-secondary shrink-0" />
+            <span className="text-sm text-text-secondary">
+              {taxRate && taxRate > 0
+                ? t("taxWithRate", { rate: taxRate })
+                : t("tax")}
+            </span>
+          </div>
+          <Price amount={taxAmount} className="text-sm font-semibold text-text-primary" />
         </div>
       )}
 

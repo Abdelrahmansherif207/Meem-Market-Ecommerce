@@ -1,20 +1,6 @@
 import { HomePage } from "@/features/home/HomePage";
-import { getTranslations } from "next-intl/server";
-import type { Metadata } from "next";
 
 export const dynamic = "force-dynamic";
-
-export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
-  const { locale } = await params;
-  const t = await getTranslations({ locale, namespace: "home" });
-
-  return {
-    description: t("metaDescription"),
-    openGraph: {
-      description: t("metaDescription"),
-    },
-  };
-}
 
 export default async function Page({
   params,

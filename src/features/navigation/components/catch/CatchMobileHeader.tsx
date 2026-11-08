@@ -8,6 +8,7 @@ import CatchMobileNavRow from "./CatchMobileNavRow";
 
 interface CatchMobileHeaderProps {
   settingsLogo?: string | null;
+  siteName?: string;
 }
 
 /**
@@ -19,6 +20,7 @@ interface CatchMobileHeaderProps {
  */
 export default async function CatchMobileHeader({
   settingsLogo,
+  siteName,
 }: CatchMobileHeaderProps) {
   const t = await getTranslations("catchHeader");
   const locale = await getLocale();
@@ -35,7 +37,7 @@ export default async function CatchMobileHeader({
       <CatchAnnouncementBar />
       <CatchMobileSearchBar
         placeholder={t("searchPlaceholder")}
-        leading={<CatchMobileLogoLockup src={settingsLogo} />}
+        leading={<CatchMobileLogoLockup src={settingsLogo} siteName={siteName} />}
       />
       <CatchMobileNavRow categoriesLabel={t("categories")} categories={categories} />
     </header>

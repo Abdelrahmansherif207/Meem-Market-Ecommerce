@@ -3,18 +3,43 @@ import type { SectionFrontSetting } from "../types";
 
 const shimmer = "animate-pulse rounded-xl bg-catch-border-soft";
 
-/** Hero placeholder: the same reserved media well as the real carousel. */
-export function CatchHeroSkeleton() {
+/** Hero placeholder: the same reserved media well as the real hero/slider. */
+export function CatchHeroSkeleton({
+  variant = "hero",
+}: {
+  variant?: "hero" | "sliders";
+}) {
+  const isSliders = variant === "sliders";
   return (
     <div
       className={`catch-media-well rounded-2xl ${shimmer}`}
       style={
         {
-          "--media-aspect": "1150 / 368",
-          "--media-aspect-mobile": "1150 / 368",
+          "--media-aspect": isSliders ? "1150 / 368" : "2.2 / 1",
+          "--media-aspect-mobile": isSliders ? "1150 / 368" : "9 / 16",
         } as CSSProperties
       }
     />
+  );
+}
+
+/** Dark hashtag strip placeholder. */
+export function CatchTagsSkeleton() {
+  return (
+    <section
+      className="w-full overflow-hidden rounded-2xl bg-black py-3"
+      aria-hidden
+    >
+      <div className="mx-4 h-3 w-24 animate-pulse rounded bg-white/20" />
+      <div className="mt-2 flex gap-2 px-4">
+        {Array.from({ length: 6 }).map((_, i) => (
+          <div
+            key={i}
+            className="h-7 w-24 shrink-0 animate-pulse rounded-full bg-white/10"
+          />
+        ))}
+      </div>
+    </section>
   );
 }
 

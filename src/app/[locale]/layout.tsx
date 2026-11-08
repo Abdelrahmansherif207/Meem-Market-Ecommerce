@@ -22,6 +22,7 @@ import { IBM_Plex_Sans_Arabic } from "next/font/google";
 import { cn } from "@/shared/utils/cn";
 import { getSiteMeta } from "@/features/settings/lib/metadata";
 import { getCachedSettings } from "@/features/settings/services/settingsService";
+import { CurrencyProvider, currencyService } from "@/features/currencies";
 
 export function generateStaticParams() {
   return routing.locales.map((locale) => ({ locale }));
@@ -99,23 +100,23 @@ export default async function RootLayout({
 
   const messages = await getMessages();
 
-  let settingsLogo: string | null = null;
-  let currencyEnabled = false;
-  try {
-    const meta = await getSiteMeta(locale);
-    settingsLogo = meta.logo;
-  } catch {
-    // Use default
-  }
-  try {
-    const settings = await getCachedSettings(locale);
-    currencyEnabled =
-      settings.currency_selection_enabled === true ||
-      settings.options?.currency_selection_enabled === true;
-  } catch {
-    // Currency selector stays hidden when settings are unavailable
-  }
-  
+  // Normalized settings already contain locale-aware branding defaults and
+  // never throw, so every consumer can share one resolved snapshot.
+  const settings = await getCachedSettings(locale);
+  const settingsLogo = settings.logo;
+  const siteName = settings.site_name;
+
+  // Backend-driven currency: settings own the base/catalog code, the
+  // currencies endpoint owns the display metadata (symbol, decimals). The
+  // provider mounts both so every `<Price>` renders the backend currency —
+  // stale persisted selections are ignored while selection is disabled.
+  const [currencySelectionEnabled, siteCurrencyCode, currencies] =
+    await Promise.all([
+      settings.currency_selection_enabled,
+      settings.options.base_currency_code ?? settings.options.currency ?? "",
+      currencyService.getCurrencies(locale).catch(() => []),
+    ]);
+
   return (
       <html
         lang={locale}
@@ -125,12 +126,24 @@ export default async function RootLayout({
       <body className="flex min-h-dvh flex-col overflow-x-clip">
         <link rel="preconnect" href={process.env.NEXT_PUBLIC_API_URL} />
         <NextIntlClientProvider locale={locale} messages={messages}>
-          <CatchStickyHeader />
+          <CurrencyProvider
+            currencies={currencies}
+            baseCode={siteCurrencyCode}
+            selectionEnabled={currencySelectionEnabled}
+          >
+          <CatchStickyHeader
+            settingsLogo={settingsLogo}
+            siteName={siteName}
+          />
           <div className="hidden lg:block">
-            <CatchHeader params={params} settingsLogo={settingsLogo} currencyEnabled={currencyEnabled} />
+            <CatchHeader
+              params={params}
+              settingsLogo={settingsLogo}
+              siteName={siteName}
+            />
           </div>
           <div className="lg:hidden">
-            <CatchMobileHeader settingsLogo={settingsLogo} />
+            <CatchMobileHeader settingsLogo={settingsLogo} siteName={siteName} />
           </div>
           <MobileBottomNav />
           <AuthSyncHandler />
@@ -146,8 +159,9 @@ export default async function RootLayout({
             </div>
           </CartSyncProvider>
           <WishlistSyncProvider />
-          <AuthModal logo={settingsLogo} />
+          <AuthModal logo={settingsLogo} siteName={siteName} />
           <NotificationToast />
+          </CurrencyProvider>
         </NextIntlClientProvider>
       </body>
     </html>

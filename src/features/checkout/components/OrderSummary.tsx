@@ -1,9 +1,10 @@
 "use client";
 import { useTranslations } from "next-intl";
-import { Truck, Minus, Tag, ShoppingBag } from "lucide-react";
+import { Truck, Minus, Tag, ShoppingBag, Percent } from "lucide-react";
 import CouponInput from "@/features/coupons/components/CouponInput";
 import CouponBadge from "@/features/coupons/components/CouponBadge";
 import { Price } from "@/components/ui/Price";
+import { calcTaxAmount } from "@/features/cart/utils";
 import type { AppliedCoupon } from "@/features/coupons/types";
 import type { ShippingQuote } from "../utils/shippingFee";
 
@@ -16,6 +17,9 @@ interface OrderSummaryProps {
   pickupLocationName?: string;
   appliedCoupon?: AppliedCoupon | null;
   onCouponApplied?: () => void;
+  /** Site settings: `order_tax_enabled` / `order_tax_rate`. */
+  taxEnabled?: boolean;
+  taxRate?: number | null;
 }
 
 export function OrderSummary({
@@ -27,10 +31,17 @@ export function OrderSummary({
   pickupLocationName,
   appliedCoupon,
   onCouponApplied,
+  taxEnabled = false,
+  taxRate = null,
 }: OrderSummaryProps) {
   const t = useTranslations("checkout");
   const shippingFee = pickupLocationName ? 0 : shipping?.fee ?? 0;
-  const total = subtotal - promotionDiscount - couponDiscount + shippingFee;
+  const discountedSubtotal = Math.max(
+    0,
+    subtotal - promotionDiscount - couponDiscount,
+  );
+  const taxAmount = calcTaxAmount(discountedSubtotal, taxEnabled, taxRate);
+  const total = discountedSubtotal + shippingFee + taxAmount;
   const estimatedDays = pickupLocationName ? null : shipping?.estimatedDays ?? null;
 
   return (
@@ -109,6 +120,20 @@ export function OrderSummary({
             </div>
           )
         ) : null}
+
+        {taxAmount > 0 && (
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Percent className="h-3.5 w-3.5 text-text-secondary shrink-0" />
+              <span className="text-sm text-text-secondary">
+                {taxRate && taxRate > 0
+                  ? t("taxWithRate", { rate: taxRate })
+                  : t("tax")}
+              </span>
+            </div>
+            <Price amount={taxAmount} className="text-sm font-semibold text-text-primary" />
+          </div>
+        )}
       </div>
 
       <CouponInput onApplied={onCouponApplied} isAuthenticated={true} />
