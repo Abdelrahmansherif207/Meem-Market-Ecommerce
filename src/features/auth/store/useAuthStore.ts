@@ -14,7 +14,6 @@ type AuthState = {
   id: number | null;
   permissions: string[];
   role: string[];
-  emailVerified: boolean;
   isAuthenticated: boolean;
   email: string | null;
   phoneNumber: string | null;
@@ -30,7 +29,6 @@ type AuthState = {
   setSessionChecked: (checked: boolean) => void;
   setProfile: (id: number | null, name: string | null, image: string | null) => void;
   setEmail: (email: string | null) => void;
-  setEmailVerified: (verified: boolean) => void;
   clearAuth: () => void;
   logout: () => Promise<void>;
 };
@@ -45,7 +43,6 @@ const initialState = {
   id: null as number | null,
   permissions: [],
   role: [],
-  emailVerified: false,
   isAuthenticated: false,
   email: null as string | null,
   phoneNumber: null as string | null,
@@ -78,7 +75,6 @@ export const useAuthStore = create<AuthState>()(
           id: snapshot.id ?? null,
           permissions: snapshot.permissions ?? [],
           role: snapshot.role ?? [],
-          emailVerified: snapshot.email_verified ?? false,
           email: snapshot.email ?? null,
           phoneNumber: snapshot.phone_number ?? null,
           isAuthenticated: true,
@@ -93,9 +89,6 @@ export const useAuthStore = create<AuthState>()(
       },
       setEmail: (email) => {
         set({ email });
-      },
-      setEmailVerified: (verified) => {
-        set({ emailVerified: verified });
       },
       clearAuth: () => {
         clearLegacyTokenStorage();
@@ -118,7 +111,6 @@ export const useAuthStore = create<AuthState>()(
         id: state.id,
         permissions: state.permissions,
         role: state.role,
-        emailVerified: state.emailVerified,
         isAuthenticated: state.isAuthenticated,
         email: state.email,
         phoneNumber: state.phoneNumber,

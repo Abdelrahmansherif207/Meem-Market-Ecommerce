@@ -229,8 +229,6 @@
     "continueWithGoogle": "Continue with Google",
     "redirecting": "Redirecting...",
     "googleError": "Unable to start Google login. Please try again.",
-    "verifyEmailHeading": "Verify your email",
-    "verifyEmailDesc": "Enter the verification code sent to your email.",
     "createAccountHeading": "Create your account",
     "loginSubtitle": "Please enter your login details below to continue.",
     "registerSubtitle": "Use your details below to create a new account.",
@@ -247,7 +245,6 @@
       "firstNameMin": "First name must be at least 2 characters.",
       "lastNameMin": "Last name must be at least 2 characters.",
       "policyRequired": "You must agree to the terms & conditions.",
-      "codeExact6": "Code must be exactly 6 digits.",
       "otpExact6": "OTP must be exactly 6 digits."
     },
     "action": {
@@ -256,11 +253,7 @@
       "invalidSessionExpiry": "The server returned an invalid session expiration date.",
       "loginSuccess": "Login successful.",
       "registerSuccess": "Account created successfully.",
-      "otpSent": "OTP code sent successfully!",
-      "otpVerified": "Email verified successfully!",
-      "verificationFailed": "Verification failed.",
       "enterValidCode": "Please enter a valid 6-digit code.",
-      "contactRequired": "Email or phone is required.",
       "checkInbox": "Check your inbox for the OTP code.",
       "invalidOtp": "Invalid or expired OTP. Please try again.",
       "otpVerifiedFp": "OTP verified successfully.",

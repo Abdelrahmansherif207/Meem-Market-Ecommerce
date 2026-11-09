@@ -12,7 +12,6 @@ import { profileService } from "../services/profileService";
 export function ProfileSyncHandler() {
   const locale = useLocale();
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
-  const setEmailVerified = useAuthStore((s) => s.setEmailVerified);
   const setProfile = useAuthStore((s) => s.setProfile);
   const setEmail = useAuthStore((s) => s.setEmail);
 
@@ -25,7 +24,6 @@ export function ProfileSyncHandler() {
       .getProfile(locale)
       .then((profile) => {
         if (cancelled) return;
-        setEmailVerified(Boolean(profile.email_verified_at));
         setProfile(profile.id, profile.name, profile.image);
         if (profile.email) setEmail(profile.email);
       })
@@ -36,7 +34,7 @@ export function ProfileSyncHandler() {
     return () => {
       cancelled = true;
     };
-  }, [isAuthenticated, locale, setEmailVerified, setProfile, setEmail]);
+  }, [isAuthenticated, locale, setProfile, setEmail]);
 
   return null;
 }

@@ -194,7 +194,7 @@ function handleOverlayClick(e: React.MouseEvent<HTMLDivElement>) {
               type="button"
               onClick={() => {
                 close();
-                router.push("/auth");
+                router.push("/auth?mode=forgot-password");
               }}
               className="font-medium text-amber-600 hover:text-amber-700 hover:underline"
             >
@@ -208,7 +208,7 @@ function handleOverlayClick(e: React.MouseEvent<HTMLDivElement>) {
               type="button"
               onClick={() => {
                 close();
-                router.push("/auth");
+                router.push("/auth?mode=register");
               }}
               className="font-medium text-primary hover:underline"
             >
