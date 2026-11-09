@@ -3,6 +3,7 @@
 
 import { Mail, User } from "lucide-react";
 import { useTranslations } from "next-intl";
+import { Link } from "@/i18n/navigation";
 import { PhoneInputWithCountry } from "./PhoneInputWithCountry";
 import { PasswordInput } from "./PasswordInput";
 import { ProfileImageUpload } from "./ProfileImageUpload";
@@ -128,13 +129,13 @@ export function RegisterForm({
         />
         <span>
           {t("agreeTo")}{" "}
-          <a href="#" className="text-primary underline hover:text-primary-dark">
+          <Link href="/terms" className="text-primary underline hover:text-primary-dark">
             {t("terms")}
-          </a>{" "}
-          and{" "}
-          <a href="#" className="text-primary underline hover:text-primary-dark">
+          </Link>{" "}
+          {t("and")}{" "}
+          <Link href="/privacy" className="text-primary underline hover:text-primary-dark">
             {t("privacy")}
-          </a>
+          </Link>
         </span>
       </label>
       <ErrorMsg message={fieldErrors.policy} />

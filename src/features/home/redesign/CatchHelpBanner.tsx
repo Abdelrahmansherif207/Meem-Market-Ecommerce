@@ -1,38 +1,55 @@
 import { getTranslations } from "next-intl/server";
 import { TriangleAlert, Mail, Phone, MessageCircle } from "lucide-react";
+import type { ReactNode } from "react";
+import { Link } from "@/i18n/navigation";
 import { getCachedSettings } from "@/features/settings/services/settingsService";
+import { buildWhatsAppUrl } from "@/features/settings/lib/normalize";
+
+function HelpOptionLink({ href, children }: { href: string; children: ReactNode }) {
+  const className =
+    "flex items-center gap-3.5 rounded-xl bg-white/5 p-3 transition-colors hover:bg-white/10";
+
+  if (href.startsWith("/")) {
+    return (
+      <Link href={href} className={className}>
+        {children}
+      </Link>
+    );
+  }
+
+  return (
+    <a href={href} className={className}>
+      {children}
+    </a>
+  );
+}
 
 /**
  * Catch Beauty "Do you need help?" banner — deep berry strip with the four
- * existing contact options. Static content (no API): email/phone reuse site
- * settings when available; help center + WhatsApp are constants.
+ * existing contact options. Email, phone and WhatsApp all come from the
+ * normalized site settings (with Catch Beauty fallbacks).
  */
 export default async function CatchHelpBanner({ locale }: { locale: string }) {
   const t = await getTranslations("catchHome");
+  const settings = await getCachedSettings(locale);
 
-  let email = "cs@catchbeauty.com";
-  let phone = "+974 9636 7199";
-  try {
-    const settings = await getCachedSettings(locale);
-    email = settings.email_support || settings.site_email || email;
-    phone = settings.phone || phone;
-  } catch {
-    // defaults
-  }
+  const email = settings.email_support || settings.site_email;
+  const phone = settings.phone;
+  const whatsappUrl = buildWhatsAppUrl(phone);
 
   const options = [
     {
       icon: TriangleAlert,
       label: t("help.helpingCenter"),
-      value: "help.catchbeauty.com",
-      href: "#",
+      value: t("help.helpCenterCta"),
+      href: "/faq",
     },
     { icon: Mail, label: t("help.email"), value: email, href: `mailto:${email}` },
     {
       icon: MessageCircle,
       label: t("help.whatsapp"),
       value: t("help.chatWithUs"),
-      href: "https://wa.me/97496367199",
+      href: whatsappUrl,
     },
     {
       icon: Phone,
@@ -55,11 +72,7 @@ export default async function CatchHelpBanner({ locale }: { locale: string }) {
         </div>
         <div className="mt-5 grid grid-cols-1 gap-2.5 sm:grid-cols-2 lg:grid-cols-4 lg:gap-4">
           {options.map((opt) => (
-            <a
-              key={opt.label}
-              href={opt.href}
-              className="flex items-center gap-3.5 rounded-xl bg-white/5 p-3 transition-colors hover:bg-white/10"
-            >
+            <HelpOptionLink key={opt.label} href={opt.href}>
               <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-catch-rose/20">
                 <opt.icon className="h-5 w-5 text-catch-rose-soft" />
               </span>
@@ -71,7 +84,7 @@ export default async function CatchHelpBanner({ locale }: { locale: string }) {
                   {opt.value}
                 </span>
               </span>
-            </a>
+            </HelpOptionLink>
           ))}
         </div>
       </div>

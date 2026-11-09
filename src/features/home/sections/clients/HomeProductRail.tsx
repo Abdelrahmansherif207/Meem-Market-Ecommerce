@@ -16,8 +16,9 @@ import {
   getFlashSaleHomeItemsAction,
   getProductSliderItemsAction,
 } from "../../actions/homeCurrencyActions";
+import { resolveLocalizedText } from "../../utils";
 import HomeProductCard from "./HomeProductCard";
-import type { ProductItem } from "../../types";
+import type { LocalizedText, ProductItem } from "../../types";
 
 interface HomeProductRailProps {
   items: ProductItem[];
@@ -33,7 +34,7 @@ interface HomeProductRailProps {
   initialCurrency?: string;
   /** Admin front setting `columns_count` (large-screen columns). */
   columnsCount?: number;
-  badgeText?: string;
+  badgeText?: LocalizedText;
   autoplay?: boolean;
   sliderSpeed?: number;
 }
@@ -63,6 +64,7 @@ export default function HomeProductRail({
   const [swiper, setSwiper] = useState<SwiperType | null>(null);
   const [isLocked, setIsLocked] = useState(true);
   const cols = clampCols(columnsCount);
+  const resolvedBadgeText = resolveLocalizedText(badgeText, locale) || undefined;
 
   const staticRefetch = useCallback(
     async () => items,
@@ -148,7 +150,7 @@ export default function HomeProductRail({
             <SwiperSlide key={product.id} className="h-auto">
               <HomeProductCard
                 item={product}
-                badgeText={badgeText}
+                badgeText={resolvedBadgeText}
                 priority={index < cols}
                 pricesLoading={pricesLoading}
               />

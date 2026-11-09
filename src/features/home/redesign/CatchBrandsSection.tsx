@@ -3,7 +3,9 @@ import { getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 import { CampaignImage } from "@/components/ui/CampaignImage";
 import { SectionHeader } from "@/components/ui/SectionHeader";
+import { cn } from "@/shared/utils/cn";
 import { homePageService } from "../services/homePageService";
+import { resolveLocalizedText } from "../utils";
 import { normalizeList } from "./normalize";
 import type { SectionFrontSetting, ApiBrandWithProducts } from "../types";
 
@@ -49,33 +51,59 @@ export default async function CatchBrandsSection({
     Math.min(8, Math.round(setting?.columns_count ?? 6), valid.length),
   );
 
+  const showTitle = setting?.show_title !== false;
+  const subtitle = resolveLocalizedText(setting?.subtitle, locale);
+  const showViewAll = setting?.show_view_all !== false;
+  const actionLabel = resolveLocalizedText(
+    setting?.action_label,
+    locale,
+    t("viewAll"),
+  );
+  const actionHref = setting?.action_href?.trim() || "/brands";
+  const isList = setting?.layout === "list";
+
   return (
     <section className="w-full space-y-4">
-      {title ? (
+      {showTitle ? (
         <SectionHeader
           title={title}
-          actionLabel={t("viewAll")}
-          actionHref="/brands"
+          subtitle={subtitle}
+          actionLabel={showViewAll ? actionLabel : undefined}
+          actionHref={showViewAll ? actionHref : undefined}
         />
       ) : null}
 
       <div
-        className="catch-cms-grid"
+        className={cn(
+          isList ? "grid grid-cols-1 gap-2 sm:grid-cols-2" : "catch-cms-grid",
+        )}
         style={
-          {
-            "--cms-cols-mobile": 2,
-            "--cms-cols-tablet": 4,
-            "--cms-cols-desktop": desktopColumns,
-          } as CSSProperties
+          isList
+            ? undefined
+            : ({
+                "--cms-cols-mobile": 2,
+                "--cms-cols-tablet": 4,
+                "--cms-cols-desktop": desktopColumns,
+              } as CSSProperties)
         }
       >
         {valid.map((brand) => (
           <Link
             key={brand.id}
             href={`/brands/${brand.slug}`}
-            className="group flex flex-col items-center justify-center gap-2 rounded-2xl border border-catch-border-soft bg-white p-3 transition-[box-shadow,transform] duration-200 hover:-translate-y-0.5 hover:shadow-elev-2 sm:p-4"
+            className={cn(
+              "group flex items-center rounded-2xl border border-catch-border-soft bg-white p-3 transition-[box-shadow,transform] duration-200 hover:-translate-y-0.5 hover:shadow-elev-2 sm:p-4",
+              isList
+                ? "flex-row justify-start gap-3 text-start"
+                : "flex-col justify-center gap-2",
+            )}
           >
-            <div className="relative aspect-[4/3] w-full">
+            <div
+              className={cn(
+                "relative shrink-0",
+                isList ? "h-12 w-12" : "aspect-[4/3] w-full",
+              )}
+            >
               <CampaignImage
                 desktop={brand.image.desktop || brand.image.mobile}
                 mobile={brand.image.mobile}
@@ -84,12 +112,24 @@ export default async function CatchBrandsSection({
                 height={240}
                 mobileWidth={320}
                 mobileHeight={240}
-                sizes="(max-width: 767px) 50vw, (max-width: 1023px) 25vw, 12.5vw"
+                sizes={
+                  isList
+                    ? "48px"
+                    : "(max-width: 767px) 50vw, (max-width: 1023px) 25vw, 12.5vw"
+                }
                 fill
-                className="object-contain p-2 transition-transform duration-300 group-hover:scale-[1.04] sm:p-3"
+                className={cn(
+                  "object-contain transition-transform duration-300 group-hover:scale-[1.04]",
+                  isList ? "p-0" : "p-2 sm:p-3",
+                )}
               />
             </div>
-            <span className="line-clamp-1 text-center text-[10px] font-bold uppercase tracking-[0.08em] text-catch-charcoal transition-colors group-hover:text-primary sm:text-xs">
+            <span
+              className={cn(
+                "line-clamp-1 text-[10px] font-bold uppercase tracking-[0.08em] text-catch-charcoal transition-colors group-hover:text-primary sm:text-xs",
+                isList ? "text-start" : "text-center",
+              )}
+            >
               {brand.name}
             </span>
           </Link>

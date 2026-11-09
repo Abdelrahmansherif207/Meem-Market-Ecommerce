@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
 import RetryButton from "@/components/ui/RetryButton";
-import { useCurrencyRefetch, useCurrencyStore } from "@/features/currencies";
+import { useCurrencyRefetch, useDisplayCurrency } from "@/features/currencies";
 import { getCategoryPageDataAction } from "../actions/categoryPageData";
 import ActiveFilterChips from "./ActiveFilterChips";
 import CategoryProducts from "./CategoryProducts";
@@ -108,7 +108,8 @@ export default function ProductsGridIsland({
     [data, appendedItems],
   );
 
-  const selectedCurrency = useCurrencyStore((s) => s.selectedCode);
+  // Effective display currency (backend-driven) for scroll-load requests.
+  const displayCurrency = useDisplayCurrency();
 
   const inflightRef = useRef(false);
 
@@ -126,7 +127,7 @@ export default function ProductsGridIsland({
         locale,
         params,
         filterKey,
-        selectedCurrency,
+        displayCurrency.code,
         cursor,
       );
       const seen = new Set(
@@ -156,7 +157,7 @@ export default function ProductsGridIsland({
     slug,
     locale,
     filterKey,
-    selectedCurrency,
+    displayCurrency.code,
     data,
     appendedItems,
   ]);

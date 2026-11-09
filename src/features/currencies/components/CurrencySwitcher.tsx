@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useRef, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { Check, ChevronDown, Loader2 } from "lucide-react";
 import { cn } from "@/shared/utils/cn";
@@ -10,50 +10,35 @@ import { normalizeCurrencyCode } from "@/shared/lib/currency";
 import { currencySymbolFor } from "@/shared/utils/formatMoney";
 import { currencyService } from "../services/currencyService";
 import { useCurrencyStore } from "../store/useCurrencyStore";
+import { useCurrencySnapshot } from "./CurrencyProvider";
 import { resolveLocalized, type Currency } from "../types";
 
 interface CurrencySwitcherProps {
   className?: string;
 }
 
-function hasClientSession(): boolean {
-  if (typeof window === "undefined") return false;
-  return window.document.cookie.includes(`${SESSION_HINT_COOKIE_NAME}=`);
-}
-
+/**
+ * Currency picker. The list and the default are server-resolved by the
+ * layout-level `CurrencyProvider`; seeding happens there too. Rendered only
+ * while `currency_selection_enabled` is true.
+ */
 export function CurrencySwitcher({ className }: CurrencySwitcherProps) {
   const locale = useLocale();
   const t = useTranslations("header.common");
+  const snapshot = useCurrencySnapshot();
   const selectedCode = useCurrencyStore((s) => s.selectedCode);
-  const seedFromList = useCurrencyStore((s) => s.seedFromList);
   const select = useCurrencyStore((s) => s.select);
 
-  const [currencies, setCurrencies] = useState<Currency[]>([]);
   const [open, setOpen] = useState(false);
   const [pendingCode, setPendingCode] = useState<string | null>(null);
-  const [failed, setFailed] = useState(false);
   const rootRef = useRef<HTMLDivElement | null>(null);
 
   useClickOutside(rootRef, useCallback(() => setOpen(false), []), open);
 
-  useEffect(() => {
-    let cancelled = false;
-    currencyService
-      .getCurrencies(locale)
-      .then((list) => {
-        if (cancelled) return;
-        setCurrencies(list);
-        seedFromList(list);
-      })
-      .catch(() => {
-        if (!cancelled) setFailed(true);
-      });
-    return () => {
-      cancelled = true;
-    };
-  }, [locale, seedFromList]);
+  const currencies = snapshot?.currencies ?? [];
 
-  if (failed || currencies.length === 0) return null;
+  // The settings switch decides visibility; also guard the backend list.
+  if (!snapshot?.selectionEnabled || currencies.length === 0) return null;
 
   const selected =
     currencies.find((c) => c.code === selectedCode) ?? currencies[0];
@@ -148,4 +133,9 @@ export function CurrencySwitcher({ className }: CurrencySwitcherProps) {
       )}
     </div>
   );
+}
+
+function hasClientSession(): boolean {
+  if (typeof window === "undefined") return false;
+  return window.document.cookie.includes(`${SESSION_HINT_COOKIE_NAME}=`);
 }

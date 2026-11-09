@@ -1,5 +1,5 @@
 import { homePageService } from "../services/homePageService";
-import { toProductItem } from "../utils";
+import { resolveLocalizedText, toProductItem } from "../utils";
 import CatchShelfIsland from "./CatchShelfIsland";
 import type { SectionFrontSetting, ApiProduct } from "../types";
 
@@ -49,11 +49,14 @@ export default async function CatchProductShelfSection({
       endpoint={endpoint}
       locale={locale}
       title={title}
+      subtitle={resolveLocalizedText(setting?.subtitle, locale)}
+      showTitle={setting?.show_title}
       initialItems={items}
       columnsCount={setting?.columns_count}
       badgeText={setting?.badge_text}
       showTimer={setting?.show_timer}
       timerEndAt={setting?.timer_end_at}
+      layout={setting?.layout}
     />
   );
 }

@@ -1,8 +1,9 @@
 "use client";
-import { useLocale, useTranslations } from "next-intl";
+import { useTranslations } from "next-intl";
 import { Percent, Tag } from "lucide-react";
 import Skeleton from "@/components/ui/Skeleton";
 import { formatMoney } from "@/shared/utils/formatMoney";
+import { useDisplayCurrency } from "@/features/currencies";
 import { SectionHeader } from "./steps/stepStyles";
 import type { EligiblePromotion } from "../types";
 
@@ -23,7 +24,7 @@ export function PromotionsPanel({
   onSelect,
 }: PromotionsPanelProps) {
   const t = useTranslations("checkout");
-  const locale = useLocale();
+  const displayCurrency = useDisplayCurrency();
   const loading = promotions === null && !error;
 
   if (loading) {
@@ -115,7 +116,10 @@ export function PromotionsPanel({
             </span>
             <span className="text-2xs text-success">
               {t("saveAmount", {
-                amount: formatMoney(p.discount, locale),
+                amount: formatMoney(p.discount, "en", {
+                  symbol: displayCurrency.symbol,
+                  decimalPlaces: displayCurrency.decimalPlaces,
+                }),
               })}
               {p.gift_items.length > 0 && ` + ${p.gift_items.length}`}
             </span>

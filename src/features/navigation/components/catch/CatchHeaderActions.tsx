@@ -14,7 +14,6 @@ import CatchLocaleSwitcher from "./CatchLocaleSwitcher";
 import CatchLocationDisplay from "./CatchLocationDisplay";
 
 interface CatchHeaderActionsProps {
-  currencyEnabled?: boolean;
   className?: string;
   compact?: boolean;
 }
@@ -28,7 +27,6 @@ interface CatchHeaderActionsProps {
  * currency controls so the row stays narrow.
  */
 export default function CatchHeaderActions({
-  currencyEnabled = false,
   className,
   compact = false,
 }: CatchHeaderActionsProps) {
@@ -55,11 +53,7 @@ export default function CatchHeaderActions({
       {!compact && <CatchLocationDisplay />}
       <CatchLocaleSwitcher />
 
-      {!compact && currencyEnabled && (
-        <div className="hidden lg:block">
-          <CurrencySwitcher />
-        </div>
-      )}
+      {!compact && <CurrencySwitcher className="hidden lg:inline-flex" />}
 
       {/* Profile */}
       {isAuthenticated ? (

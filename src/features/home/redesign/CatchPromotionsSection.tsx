@@ -4,6 +4,7 @@ import { CampaignImage } from "@/components/ui/CampaignImage";
 import { SectionHeader } from "@/components/ui/SectionHeader";
 import { cn } from "@/shared/utils/cn";
 import { homePageService } from "../services/homePageService";
+import { resolveLocalizedText } from "../utils";
 import { normalizeList } from "./normalize";
 import type { SectionFrontSetting, Promotion } from "../types";
 
@@ -31,8 +32,6 @@ export default async function CatchPromotionsSection({
   setting,
   endpoint,
 }: CatchPromotionsSectionProps) {
-  void setting;
-
   let promotions: Promotion[] = [];
   try {
     promotions = endpoint
@@ -52,10 +51,14 @@ export default async function CatchPromotionsSection({
 
   const lastIndex = valid.length - 1;
   const lastSpansBoth = valid.length % 2 === 1;
+  const showTitle = setting?.show_title !== false;
+  const subtitle = resolveLocalizedText(setting?.subtitle, locale);
 
   return (
     <section className="w-full space-y-4">
-      {title ? <SectionHeader title={title} /> : null}
+      {showTitle ? (
+        <SectionHeader title={title} subtitle={subtitle} />
+      ) : null}
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         {valid.map((promo, index) => {

@@ -5,7 +5,7 @@ import { useLocale, useTranslations } from "next-intl";
 import { AlertTriangle, Loader2, RefreshCw, ShoppingBag } from "lucide-react";
 import { Link } from "@/i18n/navigation";
 import { useAuthModalStore, useAuthStore } from "@/features/auth";
-import { useCurrencyStore } from "@/features/currencies";
+import { useDisplayCurrency } from "@/features/currencies";
 import EmptyState from "@/components/ui/EmptyState";
 import RetryButton from "@/components/ui/RetryButton";
 import { wishlistService } from "../services/wishlistService";
@@ -92,9 +92,9 @@ function wishlistReducer(state: WishlistState, action: WishlistAction): Wishlist
 export function WishlistPageContent() {
   const t = useTranslations("wishlist");
   const locale = useLocale();
-  // Re-load wishlist prices when the currency changes (client `apiFetch`
-  // already attaches `X-Currency`).
-  const selectedCurrency = useCurrencyStore((s) => s.selectedCode);
+  // Re-load wishlist prices when the effective (backend-driven) display
+  // currency changes (client `apiFetch` already attaches `X-Currency`).
+  const displayCurrency = useDisplayCurrency();
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
   const openAuth = useAuthModalStore((s) => s.open);
 
@@ -145,7 +145,7 @@ export function WishlistPageContent() {
       return;
     }
     loadPage(state.currentPage);
-  }, [isAuthenticated, state.currentPage, loadPage, selectedCurrency]);
+  }, [isAuthenticated, state.currentPage, loadPage, displayCurrency.code]);
 
   const handlePageChange = useCallback((page: number) => {
     dispatch({ type: "SET_PAGE", page });

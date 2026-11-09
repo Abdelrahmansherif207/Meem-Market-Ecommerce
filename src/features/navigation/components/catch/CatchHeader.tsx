@@ -6,7 +6,8 @@ import CatchCategoryNav from "./CatchCategoryNav";
 interface CatchHeaderProps {
   params: Promise<{ locale: string }>;
   settingsLogo?: string | null;
-  currencyEnabled?: boolean;
+  /** Resolved `site_name` from `/general/settings`. */
+  siteName?: string;
 }
 
 /**
@@ -17,15 +18,15 @@ interface CatchHeaderProps {
 export default function CatchHeader({
   params,
   settingsLogo,
-  currencyEnabled = false,
+  siteName,
 }: CatchHeaderProps) {
   return (
     <>
       <CatchAnnouncementBar />
       <header className="relative z-40 border-b border-catch-border bg-catch-ivory">
-        <CatchTopRow settingsLogo={settingsLogo} />
+        <CatchTopRow settingsLogo={settingsLogo} siteName={siteName} />
         <Suspense fallback={null}>
-          <CatchCategoryNav params={params} currencyEnabled={currencyEnabled} />
+          <CatchCategoryNav params={params} />
         </Suspense>
       </header>
     </>

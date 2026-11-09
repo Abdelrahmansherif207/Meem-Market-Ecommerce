@@ -1,5 +1,10 @@
 import { getCachedSettings } from "@/features/settings/services/settingsService";
-import type { FooterData, SocialLink } from "../types";
+import { buildWhatsAppUrl } from "@/features/settings/lib/normalize";
+import {
+  DEFAULT_FOOTER_LOGO,
+  DEFAULT_LOGO,
+} from "@/features/settings/constants";
+import type { ContactInfo, FooterData, SocialLink } from "../types";
 
 export interface AssembledFooterContent {
   data: FooterData;
@@ -8,58 +13,71 @@ export interface AssembledFooterContent {
   siteName: string;
   copyright: string;
   mergedSocialLinks: SocialLink[];
+  contactInfo: ContactInfo;
+  /** `fast_shipping_page_publish` from site settings. */
+  fastShippingPageEnabled: boolean;
 }
 
 export async function assembleFooterContent(locale: string): Promise<AssembledFooterContent> {
   const data = await footerService.getFooter(locale);
+  const settings = await getCachedSettings(locale);
 
-  let logoSrc = "/catch-footer-logo.jpeg";
-  let mainLogoSrc = "/catch-logo.png";
-  let siteName = "";
-  let copyright = "";
+  const mainLogoSrc = settings.logo || DEFAULT_LOGO;
+  const logoSrc = settings.footer_logo || mainLogoSrc || DEFAULT_FOOTER_LOGO;
+  const siteName = settings.site_name;
+  const copyright = settings.site_copy_right;
+
   const settingsSocial: { platform: string; url: string }[] = [];
-
-  try {
-    const settings = await getCachedSettings(locale);
-    mainLogoSrc = settings.logo || mainLogoSrc;
-    logoSrc = settings.footer_logo || settings.logo || logoSrc;
-    siteName = settings.site_name || siteName;
-    copyright = settings.site_copy_right || "";
-
-    const platformMap: Record<string, string> = {
-      facebook: settings.facebook,
-      instagram: settings.instagram,
-      linkedin: settings.linkedin,
-      youtube: settings.youtube,
-      tiktok: settings.tiktok,
-      snapchat: settings.snapchat,
-    };
-    for (const [platform, url] of Object.entries(platformMap)) {
-      if (url) settingsSocial.push({ platform, url });
-    }
-  } catch {
-    // use defaults
+  const platformMap: Record<string, string> = {
+    facebook: settings.facebook,
+    instagram: settings.instagram,
+    linkedin: settings.linkedin,
+    youtube: settings.youtube,
+    tiktok: settings.tiktok,
+    snapchat: settings.snapchat,
+  };
+  for (const [platform, url] of Object.entries(platformMap)) {
+    if (url) settingsSocial.push({ platform, url });
   }
 
   const baseLinks: SocialLink[] = data.socialLinks;
 
-  const mergedSocialLinks: SocialLink[] = settingsSocial.length > 0
-    ? (() => {
-        const map = new Map<string, SocialLink>(
-          baseLinks.map((l) => [l.platform, l])
-        );
-        for (const s of settingsSocial) {
-          map.set(s.platform, {
-            platform: s.platform as SocialLink["platform"],
-            url: s.url,
-            label: s.platform.charAt(0).toUpperCase() + s.platform.slice(1),
-          });
-        }
-        return Array.from(map.values());
-      })()
-    : baseLinks;
+  const mergedSocialLinks: SocialLink[] = (
+    settingsSocial.length > 0
+      ? (() => {
+          const map = new Map<string, SocialLink>(
+            baseLinks.map((l) => [l.platform, l])
+          );
+          for (const s of settingsSocial) {
+            map.set(s.platform, {
+              platform: s.platform as SocialLink["platform"],
+              url: s.url,
+              label: s.platform.charAt(0).toUpperCase() + s.platform.slice(1),
+            });
+          }
+          return Array.from(map.values());
+        })()
+      : baseLinks
+  ).filter((link) => Boolean(link.url) && link.url !== "#");
 
-  return { data, logoSrc, mainLogoSrc, siteName, copyright, mergedSocialLinks };
+  const contactInfo: ContactInfo = {
+    ...data.contactInfo,
+    phoneNumber: settings.phone || data.contactInfo.phoneNumber,
+    whatsappUrl: settings.phone
+      ? buildWhatsAppUrl(settings.phone)
+      : data.contactInfo.whatsappUrl,
+  };
+
+  return {
+    data,
+    logoSrc,
+    mainLogoSrc,
+    siteName,
+    copyright,
+    mergedSocialLinks,
+    contactInfo,
+    fastShippingPageEnabled: settings.fast_shipping_page_publish,
+  };
 }
 
 // ---------------------------------------------------------------------------
@@ -132,14 +150,9 @@ function getMockFooterData(lang: string): FooterData {
         ],
       },
     ],
-    socialLinks: [
-      { platform: "facebook", url: "#", label: "Facebook" },
-      { platform: "twitter", url: "#", label: "Twitter" },
-      { platform: "instagram", url: "#", label: "Instagram" },
-      { platform: "youtube", url: "#", label: "YouTube" },
-      { platform: "tiktok", url: "#", label: "TikTok" },
-      { platform: "snapchat", url: "#", label: "Snapchat" },
-    ],
+    // Real social accounts are not configured yet. Empty by design so the
+    // footer hides the "Stay connected" column instead of linking to "#".
+    socialLinks: [],
     contactInfo: {
       stayInTouchText: isAr ? "ابق على تواصل معنا" : "Stay in touch with us",
       whatsappUrl: "https://wa.me/97496367199",
@@ -152,13 +165,13 @@ function getMockFooterData(lang: string): FooterData {
       appStore: {
         platform: "ios",
         imageSrc: "/images/badges/app-store.svg",
-        url: "#",
+        url: "",
         alt: "App Store",
       },
       googlePlay: {
         platform: "android",
         imageSrc: "/images/badges/play-store.svg",
-        url: "#",
+        url: "",
         alt: "Google Play",
       },
     },

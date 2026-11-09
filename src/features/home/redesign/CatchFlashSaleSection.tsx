@@ -1,5 +1,6 @@
 import { homePageService } from "../services/homePageService";
 import { flashSaleService } from "@/features/flash-sales/services/flashSaleService";
+import { resolveLocalizedText } from "../utils";
 import { normalizeList } from "./normalize";
 import CatchShelfIsland from "./CatchShelfIsland";
 import CatchCountdown from "./CatchCountdown";
@@ -26,6 +27,37 @@ function flashProductToProductItem(p: FlashSaleProduct): ProductItem {
     tags: p.tags,
     currency: p.currency,
   };
+}
+
+/**
+ * The CMS can list several sales (including expired ones). Show the active
+ * sale that matches the configured countdown day; otherwise the first active
+ * sale in CMS order. Never surface an expired sale's products.
+ */
+function selectActiveFlashSale(
+  sales: ApiFlashSale[],
+  timerEndAt?: string,
+): ApiFlashSale | undefined {
+  const now = Date.now();
+  const activeSales = sales.filter((sale) => {
+    const end = Date.parse(sale.end_date);
+    return Number.isFinite(end) && end > now;
+  });
+  const timerEnd = Date.parse(timerEndAt ?? "");
+  const timerDate = Number.isFinite(timerEnd) ? new Date(timerEnd) : null;
+  const isSameDay = (date: Date) =>
+    timerDate !== null &&
+    date.getFullYear() === timerDate.getFullYear() &&
+    date.getMonth() === timerDate.getMonth() &&
+    date.getDate() === timerDate.getDate();
+  return (
+    (timerDate
+      ? activeSales.find((sale) => {
+          const end = Date.parse(sale.end_date);
+          return Number.isFinite(end) && isSameDay(new Date(end));
+        })
+      : undefined) ?? activeSales[0]
+  );
 }
 
 interface CatchFlashSaleSectionProps {
@@ -60,14 +92,14 @@ export default async function CatchFlashSaleSection({
 
   if (!flashSales.length) return null;
 
+  const selectedSale = selectActiveFlashSale(flashSales, setting?.timer_end_at);
+  if (!selectedSale?.slug) return null;
+
   let products: ProductItem[] = [];
   try {
-    const firstSlug = flashSales[0].slug;
-    if (firstSlug) {
-      const detail = await flashSaleService.getFlashSale(firstSlug, locale);
-      if (detail.products?.length > 0) {
-        products = detail.products.map(flashProductToProductItem);
-      }
+    const detail = await flashSaleService.getFlashSale(selectedSale.slug, locale);
+    if (detail.products?.length > 0) {
+      products = detail.products.map(flashProductToProductItem);
     }
   } catch (e) {
     console.warn("[CatchFlashSaleSection] Failed to fetch flash sale products:", e);
@@ -87,9 +119,12 @@ export default async function CatchFlashSaleSection({
       endpoint={endpoint}
       locale={locale}
       title={title}
+      subtitle={resolveLocalizedText(setting?.subtitle, locale)}
+      showTitle={setting?.show_title}
       initialItems={products}
       columnsCount={setting?.columns_count}
       badgeText={setting?.badge_text}
+      layout={setting?.layout}
       headerAction={headerAction}
     />
   );

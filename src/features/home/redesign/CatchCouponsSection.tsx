@@ -1,6 +1,8 @@
 import { couponService } from "@/features/coupons/services/couponService";
 import type { Coupon } from "@/features/coupons/types";
+import { SectionHeader } from "@/components/ui/SectionHeader";
 import type { SectionFrontSetting } from "../types";
+import { resolveLocalizedText } from "../utils";
 import CatchCouponBanner from "./CatchCouponBanner";
 
 interface CatchCouponsSectionProps {
@@ -60,8 +62,6 @@ export default async function CatchCouponsSection({
   setting,
   endpoint,
 }: CatchCouponsSectionProps) {
-  void setting;
-
   let coupons: Coupon[] = [];
   try {
     coupons = await couponService.getCoupons(locale, endpoint || "/general/coupons");
@@ -73,11 +73,13 @@ export default async function CatchCouponsSection({
   if (!coupons.length) return null;
 
   const placements = planLayout(coupons);
+  const showTitle = setting?.show_title !== false;
+  const subtitle = resolveLocalizedText(setting?.subtitle, locale);
 
   return (
     <section className="w-full space-y-4">
-      {title ? (
-        <h2 className="text-lg font-bold tracking-tight text-neutral-900">{title}</h2>
+      {showTitle ? (
+        <SectionHeader title={title} subtitle={subtitle} />
       ) : null}
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
         {placements.map(({ coupon, variant }) => (

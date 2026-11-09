@@ -5,10 +5,8 @@ import CatchCategoryNavClient from "./CatchCategoryNavClient";
 
 export default async function CatchCategoryNav({
   params,
-  currencyEnabled = false,
 }: {
   params: Promise<{ locale: string }>;
-  currencyEnabled?: boolean;
 }) {
   const { locale } = await params;
   const t = await getTranslations("catchHeader");
@@ -24,7 +22,6 @@ export default async function CatchCategoryNav({
     <CatchCategoryNavClient
       allCategoriesLabel={t("categories")}
       categories={categories}
-      currencyEnabled={currencyEnabled}
     />
   );
 }

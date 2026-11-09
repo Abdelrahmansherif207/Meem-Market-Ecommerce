@@ -128,6 +128,7 @@ export default async function CatchBannerSection({
           initialItems={productItems}
           columnsCount={setting?.columns_count}
           badgeText={setting?.badge_text}
+          layout={setting?.layout}
         />
       )}
     </section>

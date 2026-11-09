@@ -1,51 +1,48 @@
 import type { Metadata } from "next";
 import { getCachedSettings } from "../services/settingsService";
+import { DEFAULT_FAVICON, DEFAULT_LOGO } from "../constants";
 
-export const DEFAULT_SITE_NAME: Record<string, string> = {
-  ar: "كاتش بيوتي",
-  en: "Catch Beauty",
-};
-
-export const DEFAULT_SITE_DESCRIPTION: Record<string, string> = {
-  ar: "تسوقي أفضل المنتجات في كاتش بيوتي — الجمال والعناية الشخصية والمزيد في قطر",
-  en: "Shop the best products at Catch Beauty — beauty, personal care, and more in Qatar.",
-};
-
-export const DEFAULT_FAVICON = "/catch-footer-logo.jpeg";
-export const DEFAULT_LOGO = "/catch-logo.png";
-export const DEFAULT_FOOTER_LOGO = "/catch-footer-logo.jpeg";
+// Backwards-compatible exports: several components import the defaults
+// from this module. The canonical values now live in `../constants`.
+export {
+  DEFAULT_FAVICON,
+  DEFAULT_FOOTER_LOGO,
+  DEFAULT_LOGO,
+  DEFAULT_SITE_COPYRIGHT,
+  DEFAULT_SITE_DESCRIPTION,
+  DEFAULT_SITE_NAME,
+} from "../constants";
 
 export interface SiteMeta {
   siteName: string;
   description: string;
   favicon: string;
-  logo: string | null;
+  logo: string;
+  footerLogo: string;
+  copyright: string;
+  siteEmail: string;
+  supportEmail: string;
+  phone: string;
 }
 
+/**
+ * Resolved site identity for metadata, header/footer branding and auth
+ * screens. Settings are already normalized over locale-aware defaults.
+ */
 export async function getSiteMeta(locale: string): Promise<SiteMeta> {
-  const fallbackName = DEFAULT_SITE_NAME[locale] ?? DEFAULT_SITE_NAME.en;
-  const fallbackDescription =
-    DEFAULT_SITE_DESCRIPTION[locale] ?? DEFAULT_SITE_DESCRIPTION.en;
+  const settings = await getCachedSettings(locale);
 
-  const meta: SiteMeta = {
-    siteName: fallbackName,
-    description: fallbackDescription,
-    favicon: DEFAULT_FAVICON,
-    logo: DEFAULT_LOGO,
+  return {
+    siteName: settings.site_name,
+    description: settings.meta_desc || settings.site_desc,
+    favicon: settings.favicon || DEFAULT_FAVICON,
+    logo: settings.logo || DEFAULT_LOGO,
+    footerLogo: settings.footer_logo,
+    copyright: settings.site_copy_right,
+    siteEmail: settings.site_email,
+    supportEmail: settings.email_support,
+    phone: settings.phone,
   };
-
-  try {
-    const settings = await getCachedSettings(locale);
-    if (settings.site_name) meta.siteName = settings.site_name;
-    if (settings.meta_desc) meta.description = settings.meta_desc;
-    else if (settings.site_desc) meta.description = settings.site_desc;
-    if (settings.favicon) meta.favicon = settings.favicon;
-    if (settings.logo) meta.logo = settings.logo;
-  } catch {
-    // settings unavailable — keep locale-aware Catch Beauty defaults
-  }
-
-  return meta;
 }
 
 function getMetadataBase(): URL | undefined {
@@ -92,7 +89,16 @@ export async function buildMetadata({
   const resolvedTitle = title ? `${title} | ${site.siteName}` : site.siteName;
   const resolvedDescription = description || site.description;
 
-  const openGraphImages = images.filter(Boolean).map((url) => ({
+  const suppliedImages = images.filter(Boolean);
+  const fallbackImage = site.logo || site.footerLogo;
+  const socialImages =
+    suppliedImages.length > 0
+      ? suppliedImages
+      : fallbackImage
+        ? [fallbackImage]
+        : [];
+
+  const openGraphImages = socialImages.map((url) => ({
     url,
     width: 800,
     height: 800,
@@ -113,10 +119,10 @@ export async function buildMetadata({
       ...(openGraphImages.length > 0 ? { images: openGraphImages } : {}),
     },
     twitter: {
-      card: images.length > 0 ? "summary_large_image" : "summary",
+      card: suppliedImages.length > 0 ? "summary_large_image" : "summary",
       title: resolvedTitle,
       description: resolvedDescription,
-      ...(images.length > 0 ? { images } : {}),
+      ...(socialImages.length > 0 ? { images: socialImages } : {}),
     },
   };
 }

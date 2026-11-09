@@ -26,12 +26,28 @@ export function normalizeCurrencyCode(value: unknown): string | undefined {
 }
 
 /**
+ * Runtime lock for stores with currency selection disabled. When set, it
+ * replaces any stale persisted picker value for outgoing `X-Currency`
+ * headers, so the backend base currency always wins until selection is
+ * re-enabled. Owned by the layout-level CurrencyProvider.
+ */
+let lockedClientCurrency: string | undefined;
+
+export function setLockedClientCurrency(
+  code: string | null | undefined,
+): void {
+  lockedClientCurrency = normalizeCurrencyCode(code);
+}
+
+/**
  * Client-only read of the picker's persisted UI preference (a plain string,
- * never a second source of truth). Returns `undefined` on the server,
- * when nothing is stored, or when the stored value is invalid.
+ * never a second source of truth). Returns `undefined` on the server, when
+ * selection is locked to the backend base currency, when nothing is stored,
+ * or when the stored value is invalid.
  */
 export function getStoredClientCurrency(): string | undefined {
   if (typeof window === "undefined") return undefined;
+  if (lockedClientCurrency) return lockedClientCurrency;
   try {
     const raw = window.localStorage.getItem(CURRENCY_STORAGE_KEY);
     if (!raw) return undefined;

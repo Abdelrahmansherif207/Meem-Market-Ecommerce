@@ -26,9 +26,10 @@ type AuthMode = "login" | "register" | "otp" | "forgot-password";
 
 interface AuthGatewayProps {
   logo?: string | null;
+  siteName?: string;
 }
 
-export default function AuthGateway({ logo }: AuthGatewayProps) {
+export default function AuthGateway({ logo, siteName }: AuthGatewayProps) {
   const locale = useLocale();
   const isRtl = locale === "ar";
   const [mode, setMode] = useState<AuthMode>("login");
@@ -230,7 +231,7 @@ export default function AuthGateway({ logo }: AuthGatewayProps) {
 
       <div className="relative z-10 flex min-h-190 items-center justify-center p-2">
         <div className="w-full max-w-120 rounded-xl border border-border/80 bg-white/92 p-4 shadow-[0_16px_38px_rgba(0,74,151,0.15)] backdrop-blur-md sm:p-6">
-          <AuthHeader isLogin={mode === "login"} isOtp={mode === "otp"} logo={logo} />
+          <AuthHeader isLogin={mode === "login"} isOtp={mode === "otp"} logo={logo} siteName={siteName} />
 
           {socialError ? (
             <p className="mx-auto mt-4 max-w-md rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-600">

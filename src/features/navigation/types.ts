@@ -23,7 +23,7 @@ export interface FooterColumn {
 }
 
 export interface SocialLink {
-  platform: "facebook" | "twitter" | "instagram" | "youtube" | "tiktok" | "snapchat";
+  platform: "facebook" | "twitter" | "instagram" | "youtube" | "tiktok" | "snapchat" | "linkedin";
   url: string;
   label: string;
 }

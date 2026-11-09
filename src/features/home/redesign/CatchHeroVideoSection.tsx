@@ -1,6 +1,8 @@
 import { getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
+import type { PromotionVideo } from "@/features/settings";
 import CatchHeroVideoPlayer from "./CatchHeroVideoPlayer";
+import CatchPromotionVideo from "./CatchPromotionVideo";
 
 /** Temporary campaign hero: CMS sliders are disabled until the carousel returns. */
 const HERO_HREF = "/sliders/new-collection-s2";
@@ -12,6 +14,8 @@ interface CatchHeroVideoSectionProps {
   locale: string;
   /** CMS sliders-section title ("New Collection"); translation is the fallback. */
   title?: string;
+  /** `promotion_video_url` from site settings (already validated). */
+  promotionVideo?: PromotionVideo | null;
 }
 
 /**
@@ -23,6 +27,7 @@ interface CatchHeroVideoSectionProps {
 export default async function CatchHeroVideoSection({
   locale,
   title,
+  promotionVideo,
 }: CatchHeroVideoSectionProps) {
   const t = await getTranslations({
     locale,
@@ -33,12 +38,21 @@ export default async function CatchHeroVideoSection({
     <section className="w-full" aria-labelledby="catch-hero-title">
       <div className="relative w-full overflow-hidden rounded-2xl bg-catch-surface ring-1 ring-catch-border/60 md:rounded-[28px]">
         <div className="relative aspect-[9/16] w-full md:aspect-[2.2/1]">
-          <CatchHeroVideoPlayer
-            desktopSrc={DESKTOP_VIDEO_SRC}
-            mobileSrc={MOBILE_VIDEO_SRC}
-            poster={HERO_POSTER_SRC}
-            videoClassName="md:object-[center_40%]"
-          />
+          {promotionVideo ? (
+            <CatchPromotionVideo
+              video={promotionVideo}
+              poster={HERO_POSTER_SRC}
+              title={title || t("title")}
+              videoClassName="md:object-[center_40%]"
+            />
+          ) : (
+            <CatchHeroVideoPlayer
+              desktopSrc={DESKTOP_VIDEO_SRC}
+              mobileSrc={MOBILE_VIDEO_SRC}
+              poster={HERO_POSTER_SRC}
+              videoClassName="md:object-[center_40%]"
+            />
+          )}
 
           {/* Contrast scrim for the white overlay copy (desktop only). */}
           <div

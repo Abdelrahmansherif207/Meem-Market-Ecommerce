@@ -1,6 +1,6 @@
 "use client";
 
-import { FaFacebook, FaInstagram, FaYoutube, FaTiktok, FaSnapchat } from "react-icons/fa6";
+import { FaFacebook, FaInstagram, FaYoutube, FaTiktok, FaSnapchat, FaLinkedin } from "react-icons/fa6";
 import type { IconType } from "react-icons";
 
 const ICON_MAP: Record<string, IconType> = {
@@ -9,6 +9,7 @@ const ICON_MAP: Record<string, IconType> = {
   youtube: FaYoutube,
   tiktok: FaTiktok,
   snapchat: FaSnapchat,
+  linkedin: FaLinkedin,
 };
 
 interface SocialIconProps {

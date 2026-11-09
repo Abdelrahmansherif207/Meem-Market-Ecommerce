@@ -9,22 +9,36 @@ import { AuthTabs } from "./AuthTabs";
 import { AuthFeedback } from "./AuthFeedback";
 import { GoogleLoginButton } from "./GoogleLoginButton";
 import Logo from "@/components/ui/Logo";
-import { DEFAULT_LOGO } from "@/features/settings/lib/metadata";
+import { DEFAULT_LOGO } from "@/features/settings/constants";
 import { useAuthModalStore } from "../store/useAuthModalStore";
 import { useAuthStore } from "../store/useAuthStore";
 import { loginAction } from "../actions";
 import { useRouter } from "@/i18n/navigation";
 type ContactMethod = "email" | "phone";
 
-export function AuthModal({ logo }: { logo?: string | null }) {
+export function AuthModal({
+  logo,
+  siteName,
+}: {
+  logo?: string | null;
+  siteName?: string;
+}) {
   const { isOpen, close } = useAuthModalStore();
 
   if (!isOpen) return null;
 
-  return <AuthModalContent close={close} logo={logo} />;
+  return <AuthModalContent close={close} logo={logo} siteName={siteName} />;
 }
 
-function AuthModalContent({ close, logo }: { close: () => void; logo?: string | null }) {
+function AuthModalContent({
+  close,
+  logo,
+  siteName,
+}: {
+  close: () => void;
+  logo?: string | null;
+  siteName?: string;
+}) {
   const t = useTranslations("auth");
   const [method, setMethod] = useState<ContactMethod>("phone");
   const [state, formAction, pending] = useActionState(loginAction, null);
@@ -102,7 +116,13 @@ function handleOverlayClick(e: React.MouseEvent<HTMLDivElement>) {
         <div className="px-6 pb-7 pt-10">
           {/* Heading */}
           <div className="mb-4 flex justify-center">
-            <Logo src={logo || DEFAULT_LOGO} alt="Catch Beauty" width={180} height={70} className="rounded-lg" />
+            <Logo
+              src={logo || DEFAULT_LOGO}
+              alt={siteName || "Catch Beauty"}
+              width={180}
+              height={70}
+              className="rounded-lg"
+            />
           </div>
           <h2 className="mb-4 text-center text-xl font-bold text-text-primary">
             {t("welcomeHeading")}

@@ -16,11 +16,13 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
 export default async function Page({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;
   let logo: string | null = null;
+  let siteName: string | undefined;
   try {
     const meta = await getSiteMeta(locale);
     logo = meta.logo;
+    siteName = meta.siteName;
   } catch {
     // Use default
   }
-  return <AuthPage logo={logo} />;
+  return <AuthPage logo={logo} siteName={siteName} />;
 }

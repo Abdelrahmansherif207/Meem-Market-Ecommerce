@@ -4,7 +4,7 @@ import { useLocale, useTranslations } from "next-intl";
 import Link from "next/link";
 import { Loader2, AlertTriangle, RefreshCw } from "lucide-react";
 import { useAuthStore } from "@/features/auth";
-import { useCurrencyStore } from "@/features/currencies";
+import { useDisplayCurrency } from "@/features/currencies";
 import { CartPageContentSkeleton } from "./skeletons/CartPageContentSkeleton";
 import { useGuestCartStore } from "../store/useGuestCartStore";
 import { useServerCartStore } from "../store/useServerCartStore";
@@ -120,14 +120,22 @@ function deriveInitialSource(
 // ---------------------------------------------------------------------------
 interface CartPageContentProps {
   minimumOrderAmount: number;
+  taxEnabled?: boolean;
+  taxRate?: number | null;
 }
 
-export function CartPageContent({ minimumOrderAmount }: CartPageContentProps) {
+export function CartPageContent({
+  minimumOrderAmount,
+  taxEnabled = false,
+  taxRate = null,
+}: CartPageContentProps) {
   const t = useTranslations("cartPage");
   const locale = useLocale();
 
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
-  const selectedCurrency = useCurrencyStore((s) => s.selectedCode);
+  // Effective display currency (backend-driven): silent server-cart refetches
+  // key off it, matching the `X-Currency` header client `apiFetch` attaches.
+  const displayCurrency = useDisplayCurrency();
   const guestItems = useGuestCartStore((s) => s.items);
   const guestRemoveItem = useGuestCartStore((s) => s.removeItem);
   const guestUpdateQuantity = useGuestCartStore((s) => s.updateQuantity);
@@ -338,7 +346,7 @@ export function CartPageContent({ minimumOrderAmount }: CartPageContentProps) {
     if (state.source === "server") {
       refreshCart(); // eslint-disable-line react-hooks/set-state-in-effect
     }
-  }, [selectedCurrency, state.source, refreshCart]);
+  }, [displayCurrency.code, state.source, refreshCart]);
 
   // Keep the header badge in sync with whatever items the cart page is showing.
   useEffect(() => {
@@ -559,6 +567,8 @@ export function CartPageContent({ minimumOrderAmount }: CartPageContentProps) {
                 quantity={totalQuantity}
                 appliedCoupon={appliedCoupon}
                 couponDiscount={couponDiscount}
+                taxEnabled={taxEnabled}
+                taxRate={taxRate}
                 onCouponApplied={async () => { await refreshCart(); }}
               />
               <MyAvailableCoupons

@@ -5,6 +5,7 @@ import { checkoutService } from "../services/checkoutService";
 import { governorateService } from "../services/governorateService";
 import { orderFlowService } from "../services/orderFlowService";
 import { addressService } from "@/features/profile/services/addressService";
+import type { PaymentGatewayState } from "@/features/settings";
 import { isGatewayEligible } from "../utils/gatewayEligibility";
 import type { Address } from "@/features/profile/types";
 import type { AppliedCoupon } from "@/features/coupons/types";
@@ -56,6 +57,8 @@ interface UseCheckoutDataArgs {
   hydrated: boolean;
   isAuthenticated: boolean;
   shippingType: ShippingType;
+  /** Settings gateway flags, used only when the gateway endpoint omits them. */
+  gatewaySettings?: Record<string, PaymentGatewayState>;
   /** Called when the API reports the shipping type is unsupported for this store. */
   onShippingTypeUnsupported?: (type: ShippingType) => void;
   /** Called with the first saved address after the address list loads. */
@@ -68,6 +71,7 @@ export function useCheckoutData({
   hydrated,
   isAuthenticated,
   shippingType,
+  gatewaySettings,
   onShippingTypeUnsupported,
   onFirstAddressSelected,
 }: UseCheckoutDataArgs) {
@@ -188,7 +192,18 @@ export function useCheckoutData({
     checkoutService.getPaymentGateways(locale)
       .then((list) => {
         if (cancelled) return;
-        const eligible = list.filter(isGatewayEligible);
+        // `/general/payment-gateways` is authoritative (it carries currency
+        // support). Settings flags only fill in fields the endpoint omits.
+        const merged = list.map((gateway) => {
+          const fallback = gatewaySettings?.[gateway.code.toLowerCase()];
+          if (!fallback) return gateway;
+          return {
+            ...gateway,
+            enabled: gateway.enabled ?? fallback.enabled,
+            available: gateway.available ?? fallback.available,
+          };
+        });
+        const eligible = merged.filter(isGatewayEligible);
         setGateways(eligible);
         setSelectedGateway((prev) =>
           prev && eligible.some((g) => g.code === prev) ? prev : eligible[0]?.code ?? null,
@@ -200,7 +215,7 @@ export function useCheckoutData({
         setGatewaysError(true);
       });
     return () => { cancelled = true; };
-  }, [locale, gatewaysRefreshKey]);
+  }, [locale, gatewaysRefreshKey, gatewaySettings]);
 
   const retryGateways = useCallback(() => {
     setGateways(null);
