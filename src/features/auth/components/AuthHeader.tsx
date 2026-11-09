@@ -6,27 +6,13 @@ import { DEFAULT_LOGO } from "@/features/settings/constants";
 
 interface AuthHeaderProps {
   isLogin: boolean;
-  isOtp?: boolean;
   onToggleMode?: () => void;
   logo?: string | null;
   siteName?: string;
 }
 
-export function AuthHeader({ isLogin, isOtp, logo, siteName }: AuthHeaderProps) {
+export function AuthHeader({ isLogin, logo, siteName }: AuthHeaderProps) {
   const t = useTranslations("auth");
-
-  if (isOtp) {
-    return (
-      <>
-        <h2 className="text-center text-2xl font-semibold text-text-primary sm:text-3xl">
-          {t("verifyEmailHeading")}
-        </h2>
-        <p className="mt-1 text-center text-sm text-text-secondary">
-          {t("verifyEmailDesc")}
-        </p>
-      </>
-    );
-  }
 
   return (
     <>

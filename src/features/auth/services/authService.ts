@@ -4,10 +4,8 @@ import type {
   ChangePasswordPayload,
   ForgetPasswordPayload,
   LoginPayload,
-  OtpLoginPayload,
   RegisterPayload,
   ResetPasswordPayload,
-  SendOtpCodePayload,
   VerifyPasswordPayload,
 } from "../types";
 import type { ApiResponse } from "@/shared/types";
@@ -49,17 +47,6 @@ export const authService = {
     });
   },
 
-  sendOtpCode: async (
-    payload: SendOtpCodePayload,
-    lang?: string,
-  ): Promise<MessageResponse> => {
-    return apiFetch<MessageResponse>("/send-otp-code", {
-      method: "POST",
-      body: JSON.stringify(payload),
-      lang,
-    });
-  },
-
   register: async (
     payload: RegisterPayload,
     lang?: string,
@@ -67,17 +54,6 @@ export const authService = {
     return apiFetch<ApiResponse<AuthLoginData | Record<string, unknown>>>("/register", {
       method: "POST",
       body: toRegisterBody(payload),
-      lang,
-    });
-  },
-
-  otpLogin: async (
-    payload: OtpLoginPayload,
-    lang?: string,
-  ): Promise<AuthResponse> => {
-    return apiFetch<AuthResponse>("/otp-login", {
-      method: "POST",
-      body: JSON.stringify(payload),
       lang,
     });
   },

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState, useActionState, useCallback } from "react";
+import { useEffect, useRef, useState, useActionState } from "react";
 import { useLocale } from "next-intl";
 import { useRouter } from "@/i18n/navigation";
 import { useSearchParams } from "next/navigation";
@@ -9,20 +9,17 @@ import { PatternTiles } from "./PatternTiles";
 import { AuthHeader } from "./AuthHeader";
 import { LoginForm } from "./LoginForm";
 import { RegisterForm } from "./RegisterForm";
-import { OtpForm } from "./OtpForm";
 import { ForgotPasswordForm } from "./ForgotPasswordForm";
 import { AuthFeedback } from "./AuthFeedback";
 import {
   loginAction,
   registerAction,
-  otpAction,
-  sendOtpCodeAction,
   forgotPasswordAction,
 } from "../actions";
 import { useAuthStore } from "../store/useAuthStore";
 import { useSocialLoginError } from "../hooks/useSocialLoginError";
 
-type AuthMode = "login" | "register" | "otp" | "forgot-password";
+type AuthMode = "login" | "register" | "forgot-password";
 
 interface AuthGatewayProps {
   logo?: string | null;
@@ -32,49 +29,30 @@ interface AuthGatewayProps {
 export default function AuthGateway({ logo, siteName }: AuthGatewayProps) {
   const locale = useLocale();
   const isRtl = locale === "ar";
-  const [mode, setMode] = useState<AuthMode>("login");
-  const [loginMethod, setLoginMethod] = useState<"email" | "phone">("phone");
-  const [otpMethod, setOtpMethod] = useState<"email" | "phone">("email");
-  const [profilePreview, setProfilePreview] = useState<string | null>(null);
-  const [profileFileName, setProfileFileName] = useState<string | undefined>();
-  const [otpEmail, setOtpEmail] = useState("");
-  const [otpPhone, setOtpPhone] = useState("");
-  const [otpStatus, setOtpStatus] = useState<string | undefined>();
-
   const router = useRouter();
   const searchParams = useSearchParams();
   const redirectTo = searchParams.get("redirect") || "/";
+
+  /** Honor deep links like /auth?mode=register (e.g. the auth modal's "Sign up"). */
+  const modeParam = searchParams.get("mode");
+  const [mode, setMode] = useState<AuthMode>(
+    modeParam === "register" || modeParam === "forgot-password" ? modeParam : "login",
+  );
+
+  const [loginMethod, setLoginMethod] = useState<"email" | "phone">("phone");
+  const [profilePreview, setProfilePreview] = useState<string | null>(null);
+  const [profileFileName, setProfileFileName] = useState<string | undefined>();
+  /** Success message from a fresh registration, shown once on the login screen. */
+  const [registerNotice, setRegisterNotice] = useState<string | null>(null);
   const setSession = useAuthStore((s) => s.setSession);
   const socialError = useSocialLoginError();
 
   const [loginState, loginFormAction, loginPending] = useActionState(loginAction, null);
   const [registerState, registerFormAction, registerPending] = useActionState(registerAction, null);
-  const [otpState, otpFormAction, otpPending] = useActionState(otpAction, null);
   const [forgotPasswordState, forgotPasswordFormAction, forgotPasswordPending] = useActionState(forgotPasswordAction, null);
-  const [resendState, resendFormAction, resendPending] = useActionState(sendOtpCodeAction, null);
 
   const isLogin = mode === "login";
   const registerHandledRef = useRef(false);
-
-  const handleResend = useCallback(() => {
-    const formData = new FormData();
-    if (otpMethod === "email" && otpEmail) {
-      formData.set("email", otpEmail);
-    } else if (otpPhone) {
-      formData.set("phone", otpPhone);
-    } else {
-      return;
-    }
-    resendFormAction(formData);
-  }, [otpEmail, otpPhone, otpMethod, resendFormAction]);
-
-  const handleAskMeLater = useCallback(() => {
-    router.push("/auth");
-  }, [router]);
-
-  const handleOtpMethodChange = useCallback((newMethod: "email" | "phone") => {
-    setOtpMethod(newMethod);
-  }, []);
 
   useEffect(() => {
     return () => {
@@ -90,28 +68,24 @@ export default function AuthGateway({ logo, siteName }: AuthGatewayProps) {
     }
   }, [mode]);
 
+  /**
+   * Registration no longer requires email verification: after a successful
+   * signup the user is sent straight to the login screen with a notice.
+   */
   useEffect(() => {
     if (!registerState) return;
     const noFieldErrors = !registerState.fieldErrors || Object.keys(registerState.fieldErrors).length === 0;
-    if (noFieldErrors && registerState.payload?.email && !registerHandledRef.current) {
+    if (
+      registerState.success &&
+      noFieldErrors &&
+      registerState.payload?.email &&
+      !registerHandledRef.current
+    ) {
       registerHandledRef.current = true;
-      setOtpEmail(registerState.payload.email);
-      setOtpPhone(registerState.payload.phone || "");
-      setOtpStatus(registerState.payload.otp_status);
-      setOtpMethod("email");
-      setMode("otp");
+      setRegisterNotice(registerState.message ?? null);
+      setMode("login");
     }
   }, [registerState]);
-
-  useEffect(() => {
-    if (
-      otpState?.success &&
-      otpState.data &&
-      setSession(otpState.data)
-    ) {
-      router.push(redirectTo);
-    }
-  }, [otpState, setSession, router, redirectTo]);
 
   useEffect(() => {
     if (
@@ -159,29 +133,6 @@ export default function AuthGateway({ logo, siteName }: AuthGatewayProps) {
             onToggleMode={() => setMode("login")}
           />
         );
-      case "otp":
-        return (
-          <OtpForm
-            action={otpFormAction}
-            pending={otpPending}
-            state={otpState}
-            email={otpEmail}
-            phone={otpPhone}
-            otpStatus={otpStatus}
-            method={otpMethod}
-            notice={
-              registerState?.success
-                ? registerState.message
-                : null
-            }
-            resendPending={resendPending}
-            resendState={resendState}
-            onBack={() => setMode("login")}
-            onAskMeLater={handleAskMeLater}
-            onResend={handleResend}
-            onMethodChange={handleOtpMethodChange}
-          />
-        );
       case "forgot-password":
         return (
           <ForgotPasswordForm
@@ -196,12 +147,6 @@ export default function AuthGateway({ logo, siteName }: AuthGatewayProps) {
   }
 
   function getFeedbackMessage() {
-    if (mode === "otp") {
-      return {
-        error: otpState && !otpState.success ? otpState.message : null,
-        success: otpState?.success ? otpState.message : null,
-      };
-    }
     if (mode === "forgot-password") {
       return {
         error: forgotPasswordState && !forgotPasswordState.success ? forgotPasswordState.message : null,
@@ -211,7 +156,7 @@ export default function AuthGateway({ logo, siteName }: AuthGatewayProps) {
     if (isLogin) {
       return {
         error: loginState && !loginState.success ? loginState.message : null,
-        success: loginState?.success ? loginState.message : null,
+        success: loginState?.success ? loginState.message : registerNotice,
       };
     }
     return {
@@ -231,7 +176,7 @@ export default function AuthGateway({ logo, siteName }: AuthGatewayProps) {
 
       <div className="relative z-10 flex min-h-190 items-center justify-center p-2">
         <div className="w-full max-w-120 rounded-xl border border-border/80 bg-white/92 p-4 shadow-[0_16px_38px_rgba(0,74,151,0.15)] backdrop-blur-md sm:p-6">
-          <AuthHeader isLogin={mode === "login"} isOtp={mode === "otp"} logo={logo} siteName={siteName} />
+          <AuthHeader isLogin={mode === "login"} logo={logo} siteName={siteName} />
 
           {socialError ? (
             <p className="mx-auto mt-4 max-w-md rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-600">

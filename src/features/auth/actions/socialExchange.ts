@@ -29,9 +29,6 @@ export async function exchangeSocialCodeAction(
       id: user?.id,
       permissions: [],
       role: [],
-      email_verified:
-        user?.email_verified === true ||
-        typeof user?.email_verified_at === "string",
       email: user?.email,
       phone_number: user?.phone_number,
       expires_at: expiresAt,

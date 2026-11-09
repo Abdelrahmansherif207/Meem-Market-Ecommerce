@@ -52,7 +52,6 @@ export async function loginAction(
       id: response.data.id,
       permissions: response.data.permissions,
       role: response.data.role,
-      email_verified: response.data.email_verified,
       email: response.data.email,
       phone_number: response.data.phone_number,
       expires_at: response.data.expires_at,

@@ -52,13 +52,10 @@ export async function registerAction(
       ...(avatar && avatar.size > 0 ? { avatar } : {}),
     }, locale);
 
-    const data = response.data as Record<string, unknown>;
-    const otpStatus = data?.otp_status !== undefined ? String(data.otp_status) : "true";
-
     return {
       success: true,
       message: response.message || t("action.registerSuccess"),
-      payload: { email, phone, otp_status: otpStatus },
+      payload: { email, phone },
     };
   } catch (error) {
     const { message, fieldErrors } = mapActionError(

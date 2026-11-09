@@ -2,7 +2,6 @@ import { Suspense } from "react";
 import CategoryNav from "./CategoryNav";
 import MainNav from "./MainNav";
 import { NavSkeleton } from "./NavSkeleton";
-import { VerificationBanner } from "@/features/auth";
 
 export default async function Header({
   params,
@@ -21,7 +20,6 @@ export default async function Header({
           <CategoryNav params={params} />
         </Suspense>
       </div>
-      <VerificationBanner />
     </header>
   );
 }
