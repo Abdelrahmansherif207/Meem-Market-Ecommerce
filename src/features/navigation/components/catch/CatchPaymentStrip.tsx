@@ -1,9 +1,3 @@
-import { getTranslations } from "next-intl/server";
-
-interface CatchPaymentStripProps {
-  copyright?: string;
-}
-
 export const PAYMENT_BADGES = [
   { label: "mada", className: "bg-catch-ivory border-catch-border text-catch-charcoal" },
   { label: "VISA", className: "bg-catch-ivory border-catch-border text-blue-700" },
@@ -20,13 +14,10 @@ export const PAYMENT_BADGES = [
 ] as const;
 
 /**
- * Copyright + payment gateway strip on the deeper sand footer band.
- * Payment badges are static (no API); copyright text comes from site
- * settings when available.
+ * Payment gateway strip on the deeper sand footer band.
+ * Payment badges are static (no API).
  */
-export default async function CatchPaymentStrip({ copyright }: CatchPaymentStripProps) {
-  const t = await getTranslations("catchFooter");
-
+export default function CatchPaymentStrip() {
   return (
     <aside className="hidden w-full bg-catch-surface-deep px-4 py-6 lg:block lg:px-8">
       <div className="mx-auto flex max-w-[1440px] flex-col items-center justify-between gap-6 lg:flex-row">
@@ -40,17 +31,6 @@ export default async function CatchPaymentStrip({ copyright }: CatchPaymentStrip
               {badge.label}
             </span>
           ))}
-        </div>
-
-        {/* Copyright info & trust seal */}
-        <div className="flex items-center gap-4 text-right text-[11px] text-catch-muted">
-          <div>
-            <div>{copyright || t("copyright")}</div>
-            <div className="text-[10px]">{t("crVat")}</div>
-          </div>
-          <div className="flex h-8 w-8 items-center justify-center rounded-full border border-catch-muted-soft text-xs font-bold text-catch-muted">
-            م
-          </div>
         </div>
       </div>
     </aside>

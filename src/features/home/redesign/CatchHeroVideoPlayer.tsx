@@ -15,13 +15,19 @@ interface CatchHeroVideoPlayerProps {
   className?: string;
   /** Extra classes for the `<video>` itself (crop, object-position). */
   videoClassName?: string;
+  /** Start playback automatically when visible (CMS `autoplay`). */
+  autoplay?: boolean;
+  /** Restart the video when it reaches the end (CMS `loop`). */
+  loop?: boolean;
+  /** Play without sound (CMS `muted`). */
+  muted?: boolean;
 }
 
 /**
  * Campaign hero video. The art-directed source is chosen after mount so the
- * server HTML stays identical for both breakpoints. Playback is muted and
- * inline, pauses off-screen or when the tab is hidden, and never autoplays
- * for reduced-motion users (they get the campaign poster instead).
+ * server HTML stays identical for both breakpoints. Playback behavior comes
+ * from the CMS hero settings; it pauses off-screen or when the tab is hidden,
+ * and never autoplays for reduced-motion users (they get the poster instead).
  */
 export default function CatchHeroVideoPlayer({
   desktopSrc,
@@ -29,13 +35,16 @@ export default function CatchHeroVideoPlayer({
   poster,
   className,
   videoClassName,
+  autoplay = true,
+  loop = true,
+  muted = true,
 }: CatchHeroVideoPlayerProps) {
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const isInViewRef = useRef(false);
   const [source, setSource] = useState<string | null>(null);
   const prefersReducedMotion = usePrefersReducedMotion();
 
-  const shouldPlay = !prefersReducedMotion;
+  const shouldPlay = autoplay && !prefersReducedMotion;
 
   useEffect(() => {
     const query = window.matchMedia(MOBILE_MEDIA_QUERY);
@@ -111,8 +120,8 @@ export default function CatchHeroVideoPlayer({
         ref={videoRef}
         src={source ?? undefined}
         poster={poster}
-        muted
-        loop
+        muted={muted}
+        loop={loop}
         playsInline
         preload="auto"
         tabIndex={-1}

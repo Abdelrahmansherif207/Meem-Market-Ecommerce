@@ -195,6 +195,8 @@ export interface SectionFrontSetting {
 
   /* Hero */
   media_type?: "video" | "image";
+  loop?: boolean;
+  muted?: boolean;
   video_desktop?: string;
   video_mobile?: string;
   poster?: string;

@@ -53,6 +53,9 @@ export default async function CatchHeroSection({
   const align = front?.content_align ?? "center";
   const position = front?.content_position ?? "center";
   const height = front?.height ?? "standard";
+  const autoplay = front?.autoplay ?? true;
+  const loop = front?.loop ?? true;
+  const muted = front?.muted ?? true;
 
   const cmsVideoDesktop = front?.video_desktop?.trim();
   const cmsVideoMobile = front?.video_mobile?.trim() || cmsVideoDesktop;
@@ -131,6 +134,9 @@ export default async function CatchHeroSection({
               poster={poster}
               title={heading}
               videoClassName="md:object-[center_40%]"
+              autoplay={autoplay}
+              loop={loop}
+              muted={muted}
             />
           ) : (
             <CatchHeroVideoPlayer
@@ -138,6 +144,9 @@ export default async function CatchHeroSection({
               mobileSrc={videoMobile}
               poster={poster}
               videoClassName="md:object-[center_40%]"
+              autoplay={autoplay}
+              loop={loop}
+              muted={muted}
             />
           )}
 

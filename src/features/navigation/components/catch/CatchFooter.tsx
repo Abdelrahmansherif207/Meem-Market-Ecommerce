@@ -19,7 +19,6 @@ export default async function CatchFooter({ params }: CatchFooterProps) {
   const { locale } = await params;
   const t = await getTranslations("catchFooter");
 
-  let copyright = "";
   let siteName = "";
   let socialLinks: { platform: string; url: string; label: string }[] = [];
   let appStoreUrl = "";
@@ -28,7 +27,6 @@ export default async function CatchFooter({ params }: CatchFooterProps) {
 
   try {
     const assembled = await assembleFooterContent(locale);
-    copyright = assembled.copyright;
     siteName = assembled.siteName;
     socialLinks = assembled.mergedSocialLinks.slice(0, 8);
     appStoreUrl = assembled.data.bottomRow.appStore.url || "";
@@ -163,12 +161,6 @@ export default async function CatchFooter({ params }: CatchFooterProps) {
             </span>
           ))}
         </div>
-
-        {/* Copyright */}
-        <div className="text-[10px] text-catch-muted">
-          <div>{copyright || t("copyright")}</div>
-          <div>{t("crVat")}</div>
-        </div>
       </div>
 
       <footer className="hidden border-b border-catch-border bg-catch-surface px-4 py-12 lg:block lg:px-8">
@@ -291,7 +283,7 @@ export default async function CatchFooter({ params }: CatchFooterProps) {
         </div>
       </footer>
 
-      <CatchPaymentStrip copyright={copyright} />
+      <CatchPaymentStrip />
     </>
   );
 }

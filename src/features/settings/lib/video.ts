@@ -35,25 +35,40 @@ function parseYouTubeId(url: URL): string | null {
   return null;
 }
 
-export function buildYouTubeEmbedUrl(videoId: string): string {
+export interface YouTubeEmbedOptions {
+  autoplay?: boolean;
+  loop?: boolean;
+  muted?: boolean;
+}
+
+export function buildYouTubeEmbedUrl(
+  videoId: string,
+  { autoplay = true, loop = true, muted = true }: YouTubeEmbedOptions = {},
+): string {
   const params = new URLSearchParams({
-    autoplay: "1",
-    mute: "1",
     controls: "0",
-    loop: "1",
-    playlist: videoId,
     playsinline: "1",
     modestbranding: "1",
     rel: "0",
   });
+
+  if (autoplay) params.set("autoplay", "1");
+  if (muted) params.set("mute", "1");
+  if (loop) {
+    params.set("loop", "1");
+    // YouTube only honours `loop` when the video is listed in `playlist`.
+    params.set("playlist", videoId);
+  }
+
   return `https://www.youtube-nocookie.com/embed/${videoId}?${params.toString()}`;
 }
 
 /**
  * Resolve `promotion_video_url` into something the hero can render.
  * Placeholder or unsupported URLs return `null` so the local campaign
- * video stays in place. YouTube videos render as a muted looping iframe;
- * direct video files reuse the existing hero `<video>` player.
+ * video stays in place. YouTube videos render as a background iframe using
+ * the default playback options; direct video files reuse the existing hero
+ * `<video>` player.
  */
 export function resolvePromotionVideo(value?: string | null): PromotionVideo | null {
   const url = cleanSettingsUrl(value);

@@ -194,9 +194,7 @@
       "googlePlay": "Google Play",
       "downloadOn": "Download on the",
       "appStore": "App Store"
-    },
-    "copyright": "Copyright © 2026 Catch Beauty. All rights reserved",
-    "crVat": "CR No. 0000000000 — VAT No. 00000000000000"
+    }
   },
   "auth": {
     "metaTitle": "Sign In & Register",
