@@ -86,7 +86,7 @@ function getSectionSkeleton(type: string, setting?: SectionFrontSetting): React.
     case "flash-sales":
       return <CatchShelfSkeleton setting={setting} />;
     case "categories":
-      return <CatchCategoriesSkeleton />;
+      return <CatchCategoriesSkeleton setting={setting} />;
     case "brands":
       return <CatchBrandsSkeleton />;
     case "promotions":

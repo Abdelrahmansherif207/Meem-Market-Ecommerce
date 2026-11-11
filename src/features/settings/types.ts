@@ -62,6 +62,39 @@ export interface SiteSettingsOptions {
 }
 
 /**
+ * Admin-uploaded storefront font from `GET /public/font`. At most one custom
+ * family is configured at a time; `null` data means the built-in font.
+ */
+export type CustomFontSourceType = "file" | "link";
+
+/** CSS `format()` identifiers accepted for uploaded font files. */
+export type CustomFontFormat = "woff2" | "woff" | "truetype" | "opentype";
+
+export interface RawCustomFont {
+  family?: string | null;
+  source_type?: string | null;
+  url?: string | null;
+  format?: string | null;
+  weight?: string | null;
+  updated_at?: string | null;
+}
+
+interface CustomFontBase {
+  family: string;
+  url: string;
+  weight: string;
+  updated_at: string | null;
+}
+
+/**
+ * Validated font. `format` is only meaningful (and always present) for
+ * uploaded files; link sources are loaded through their stylesheet.
+ */
+export type CustomFont =
+  | (CustomFontBase & { source_type: "file"; format: CustomFontFormat })
+  | (CustomFontBase & { source_type: "link"; format: null });
+
+/**
  * Normalized settings. Branding and contact fields always carry a usable
  * value (locale-aware Catch Beauty defaults when the API omits them or
  * returns placeholder copy); invalid social / video URLs become `""`.
