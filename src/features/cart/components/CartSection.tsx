@@ -9,6 +9,7 @@ import { formatMoney } from "@/shared/utils/formatMoney";
 import { Button } from "@/components/ui/Button";
 import { useAuthStore } from "@/features/auth";
 import { useDisplayCurrency } from "@/features/currencies";
+import { isGuestCheckoutEnabled } from "@/shared/constants/guestCheckout";
 import type { CartLineIdentity, HydratedCartItem } from "../types";
 import { getCartLineKey } from "../types";
 import { ProductCartItem } from "./ProductCartItem";
@@ -57,7 +58,9 @@ export function CartSection({
 
   const checkoutHref = isAuthenticated
     ? "/payment"
-    : `/auth?redirect=/payment`;
+    : isGuestCheckoutEnabled()
+      ? "/guest-checkout"
+      : `/auth?redirect=/payment`;
 
   return (
     <div className="rounded-2xl border-2 border-border p-4 sm:p-6 lg:p-10 space-y-6">

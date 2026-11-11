@@ -13,6 +13,7 @@ import { AuthModal, AuthSyncHandler } from "@/features/auth";
 import { ProfileSyncHandler } from "@/features/profile";
 import { CartSyncProvider } from "@/features/cart/components/CartSyncProvider";
 import { WishlistSyncProvider } from "@/features/wishlist/components/WishlistSyncProvider";
+import { GuestSessionProvider } from "@/features/guest";
 import {
   NotificationSyncHandler,
   NotificationRealtimeProvider,
@@ -201,6 +202,7 @@ export default async function RootLayout({
               <CatchFooter params={params} />
             </div>
           </CartSyncProvider>
+          <GuestSessionProvider />
           <WishlistSyncProvider />
           <AuthModal logo={settingsLogo} siteName={siteName} />
           <NotificationToast />

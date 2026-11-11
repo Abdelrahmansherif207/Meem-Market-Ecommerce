@@ -3,6 +3,10 @@ import { NextResponse, type NextRequest } from "next/server";
 
 import { routing } from "@/i18n/routing";
 import { SESSION_COOKIE_NAME } from "@/features/auth/session/constants";
+import {
+  GUEST_CSRF_COOKIE_CANDIDATES,
+  GUEST_CSRF_HEADER,
+} from "@/shared/constants/guestCheckout";
 
 const intlMiddleware = createMiddleware(routing);
 
@@ -76,14 +80,37 @@ export default function proxy(request: NextRequest) {
 
 function apiBridge(request: NextRequest) {
   const token = request.cookies.get(SESSION_COOKIE_NAME)?.value;
+  // Guest CSRF double-submit: the csrf cookie is scoped to `Path=/api`, so
+  // page JS can never read it — the proxy attaches it as the `X-CSRF-Token`
+  // header for every proxied guest call instead. Names vary by deployment
+  // (catch_* here, meem_* in the contract default).
+  const guestCsrf = GUEST_CSRF_COOKIE_CANDIDATES.find(
+    (name) => name && request.cookies.get(name)?.value,
+  );
+  const guestCsrfValue = guestCsrf ? request.cookies.get(guestCsrf)!.value : undefined;
 
-  if (!token) {
+  // The backend validates the Origin allowlist (403 "Origin not allowed").
+  // Behind the same-origin bridge the browser's Origin is meaningless to it —
+  // present it with the canonical site origin instead.
+  const canonicalOrigin = process.env.NEXT_PUBLIC_SITE_URL;
+  const headers = new Headers(request.headers);
+  if (headers.has("origin")) {
+    if (canonicalOrigin) {
+      headers.set("origin", canonicalOrigin);
+    } else {
+      headers.delete("origin");
+    }
+  }
+
+  if (!token && !guestCsrfValue) {
     return NextResponse.next();
   }
 
-  const headers = new Headers(request.headers);
-  if (!headers.has("Authorization")) {
+  if (token && !headers.has("Authorization")) {
     headers.set("Authorization", `Bearer ${token}`);
+  }
+  if (guestCsrfValue && !headers.has(GUEST_CSRF_HEADER)) {
+    headers.set(GUEST_CSRF_HEADER, guestCsrfValue);
   }
 
   return NextResponse.next({ request: { headers } });
