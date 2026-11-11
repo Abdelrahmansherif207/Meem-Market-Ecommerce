@@ -1,5 +1,9 @@
 import type { CSSProperties } from "react";
 import type { SectionFrontSetting } from "../types";
+import {
+  parseIntegerSetting,
+  resolveCategoryGridConfig,
+} from "./categoryGrid";
 
 const shimmer = "animate-pulse rounded-xl bg-catch-border-soft";
 
@@ -91,25 +95,82 @@ export function CatchBannerSkeleton() {
   );
 }
 
-/** Category rail placeholder: 4 visible mobile / 8 desktop. */
-export function CatchCategoriesSkeleton() {
+/**
+ * Category placeholder: mirrors the resolved grid (columns + tile mode) so
+ * the skeleton occupies the same shape as the real section. The rail layout
+ * keeps the old single-row placeholder.
+ */
+export function CatchCategoriesSkeleton({
+  setting,
+}: {
+  setting?: SectionFrontSetting;
+}) {
+  // Mirror the largest shape the CMS settings can produce so the placeholder
+  // uses the same column count as the real section.
+  const placeholderTotal = Math.max(
+    parseIntegerSetting(setting?.columns_count, 8) *
+      parseIntegerSetting(setting?.rows_count, 1),
+    parseIntegerSetting(setting?.tablet_columns_count, 4) *
+      parseIntegerSetting(setting?.tablet_rows_count, 2),
+    parseIntegerSetting(setting?.mobile_columns_count, 4) *
+      parseIntegerSetting(setting?.mobile_rows_count, 2),
+    8,
+  );
+  const config = resolveCategoryGridConfig(placeholderTotal, setting);
+  const sliderColumns = parseIntegerSetting(setting?.columns_count, 8);
+  const placeholderCount = Math.max(
+    config.mobile.columns * config.mobile.rows,
+    config.tablet.columns * config.tablet.rows,
+    config.desktop.columns * config.desktop.rows,
+    8,
+  );
+
   return (
     <section className="space-y-4" aria-hidden>
       <div className="flex items-center justify-between">
         <div className={`h-6 w-56 ${shimmer}`} />
         <div className={`h-4 w-16 ${shimmer}`} />
       </div>
-      <div className="grid grid-flow-col auto-cols-[calc((100%-2.25rem)/4)] gap-3 overflow-hidden lg:auto-cols-[calc((100%-7rem)/8)] lg:gap-4">
-        {Array.from({ length: 8 }).map((_, i) => (
-          <div
-            key={i}
-            className="flex flex-col gap-2 rounded-2xl border border-catch-border-soft bg-white p-2"
-          >
-            <div className={`aspect-square w-full ${shimmer}`} />
-            <div className={`mx-auto h-3 w-3/4 ${shimmer}`} />
-          </div>
-        ))}
-      </div>
+      {config.layout === "slider" ? (
+        <div
+          className="catch-category-rail"
+          style={{ "--cat-cols": sliderColumns } as CSSProperties}
+        >
+          {Array.from({ length: 8 }).map((_, i) => (
+            <div
+              key={i}
+              className="flex min-w-0 flex-col gap-2 rounded-2xl border border-catch-border-soft bg-white p-2"
+            >
+              <div className={`aspect-square w-full ${shimmer}`} />
+              <div className={`mx-auto h-3 w-3/4 ${shimmer}`} />
+            </div>
+          ))}
+        </div>
+      ) : (
+        <div
+          className="catch-category-grid"
+          data-cat-tile-mobile={config.mobile.tileMode}
+          data-cat-tile-tablet={config.tablet.tileMode}
+          data-cat-tile-desktop={config.desktop.tileMode}
+          style={
+            {
+              "--cat-cols-mobile": config.mobile.columns,
+              "--cat-cols-tablet": config.tablet.columns,
+              "--cat-cols-desktop": config.desktop.columns,
+            } as CSSProperties
+          }
+        >
+          {Array.from({ length: placeholderCount }).map((_, i) => (
+            <div key={i} className="catch-category-tile">
+              <div className="catch-category-tile__image">
+                <div className={`h-full w-full ${shimmer}`} />
+              </div>
+              <div className={`mx-auto h-3 w-3/4 ${shimmer}`} />
+              <div className={`mx-auto h-2.5 w-1/2 ${shimmer}`} />
+            </div>
+          ))}
+        </div>
+      )}
     </section>
   );
 }

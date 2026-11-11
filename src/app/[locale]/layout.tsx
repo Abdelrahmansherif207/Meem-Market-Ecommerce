@@ -1,6 +1,6 @@
 import "../globals.css";
 import type { Metadata, Viewport } from "next";
-import type { ReactNode } from "react";
+import type { CSSProperties, ReactNode } from "react";
 import { NextIntlClientProvider } from "next-intl";
 import { routing } from "@/i18n/routing";
 import { getMessages, setRequestLocale } from "next-intl/server";
@@ -22,6 +22,11 @@ import { IBM_Plex_Sans_Arabic } from "next/font/google";
 import { cn } from "@/shared/utils/cn";
 import { getSiteMeta } from "@/features/settings/lib/metadata";
 import { getCachedSettings } from "@/features/settings/services/settingsService";
+import {
+  buildFontCss,
+  getFont,
+  getFontPreconnectOrigins,
+} from "@/features/settings/lib/font";
 import { CurrencyProvider, currencyService } from "@/features/currencies";
 
 export function generateStaticParams() {
@@ -98,7 +103,13 @@ export default async function RootLayout({
   
   const dir = locale === "ar" ? "rtl" : "ltr";
 
-  const messages = await getMessages();
+  const [messages, font] = await Promise.all([getMessages(), getFont()]);
+
+  // Admin-uploaded font (validated server-side). When absent, the CSS falls
+  // back to the next/font IBM Plex variable and the site looks unchanged.
+  const fontStyle = font
+    ? ({ "--font-custom": `"${font.family}"` } as CSSProperties)
+    : undefined;
 
   // Normalized settings already contain locale-aware branding defaults and
   // never throw, so every consumer can share one resolved snapshot.
@@ -122,9 +133,41 @@ export default async function RootLayout({
         lang={locale}
         dir={dir}
         className={cn("overflow-x-clip", ibmPlexSansArabic.variable)}
+        style={fontStyle}
       >
       <body className="flex min-h-dvh flex-col overflow-x-clip">
         <link rel="preconnect" href={process.env.NEXT_PUBLIC_API_URL} />
+        {font?.source_type === "file" ? (
+          <>
+            <style
+              id="custom-font"
+              href="custom-font"
+              precedence="default"
+            >{buildFontCss(font)}</style>
+            {font.format === "woff2" ? (
+              <link
+                rel="preload"
+                as="font"
+                type="font/woff2"
+                crossOrigin="anonymous"
+                href={font.url}
+              />
+            ) : null}
+          </>
+        ) : null}
+        {font?.source_type === "link" ? (
+          <>
+            {getFontPreconnectOrigins(font).map((origin) => (
+              <link
+                key={origin}
+                rel="preconnect"
+                href={origin}
+                crossOrigin="anonymous"
+              />
+            ))}
+            <link rel="stylesheet" href={font.url} />
+          </>
+        ) : null}
         <NextIntlClientProvider locale={locale} messages={messages}>
           <CurrencyProvider
             currencies={currencies}

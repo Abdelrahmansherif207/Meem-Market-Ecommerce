@@ -8,8 +8,15 @@ export {
   DEFAULT_SITE_EMAIL,
   DEFAULT_SITE_NAME,
   DEFAULT_WHATSAPP_URL,
+  FONT_CACHE_TAG,
   SETTINGS_CACHE_TAG,
 } from "./constants";
+export {
+  buildFontCss,
+  FONT_STYLESHEET_HOSTS,
+  getFont,
+  getFontPreconnectOrigins,
+} from "./lib/font";
 export {
   buildWhatsAppUrl,
   cleanSettingsEmail,
@@ -34,7 +41,11 @@ export {
 } from "./lib/video";
 export { getCachedSettings, settingsService } from "./services/settingsService";
 export type {
+  CustomFont,
+  CustomFontFormat,
+  CustomFontSourceType,
   PaymentGatewayState,
+  RawCustomFont,
   RawSiteSettings,
   RawSiteSettingsOptions,
   SiteSettings,

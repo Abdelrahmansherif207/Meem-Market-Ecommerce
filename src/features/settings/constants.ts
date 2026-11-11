@@ -51,3 +51,6 @@ export const PLACEHOLDER_URL_PATH = /\/example(?:\/|$|[?#])|\bv=example\b/i;
 
 /** Cache tag used for on-demand revalidation of the settings payload. */
 export const SETTINGS_CACHE_TAG = "site-settings";
+
+/** Cache tag used for the storefront font payload (`GET /public/font`). */
+export const FONT_CACHE_TAG = "font";

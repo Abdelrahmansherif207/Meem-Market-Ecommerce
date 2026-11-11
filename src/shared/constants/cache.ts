@@ -11,6 +11,8 @@ export const CACHE_TTL = {
   NONE: 0,
   /** Default content endpoints: settings, static pages, coupons, tags, flash-sale lists. */
   STANDARD: 60,
+  /** Storefront custom font — short TTL so admin changes appear quickly. */
+  FONT: 60,
   /** Featured categories on home. */
   FEATURED: 120,
   /** Navigation-critical data: category menu, currencies, navbar. */

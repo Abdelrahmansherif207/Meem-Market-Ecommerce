@@ -45,13 +45,13 @@ export async function HomePage({ locale }: { locale: string }) {
   return (
     <div className="catch-surface">
       <main className="mx-auto flex w-full max-w-[1440px] flex-col gap-y-10 px-3 py-6 sm:gap-y-12 sm:px-4 lg:gap-y-16 lg:px-8">
-        {!hasHero ? (
+        {/* {!hasHero ? (
           <CatchHeroVideoSection
             locale={locale}
             title={slidersSection?.title}
             promotionVideo={promotionVideo}
           />
-        ) : null}
+        ) : null} */}
         {page.sections.map((section) => (
           <CatchSectionSuspense
             key={section.id}

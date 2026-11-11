@@ -5,6 +5,8 @@ import { cn } from "@/shared/utils/cn";
 interface SectionHeaderProps {
   title: string;
   subtitle?: string;
+  /** Extra classes for the subtitle (e.g. hide it on mobile). */
+  subtitleClassName?: string;
   /** Custom right-hand content (e.g. a countdown). Takes precedence over the link. */
   action?: ReactNode;
   /** Locale-aware "View all" link. Rendered only when `action` is absent. */
@@ -21,6 +23,7 @@ interface SectionHeaderProps {
 export function SectionHeader({
   title,
   subtitle,
+  subtitleClassName,
   action,
   actionLabel,
   actionHref,
@@ -46,7 +49,9 @@ export function SectionHeader({
           </h2>
         ) : null}
         {subtitle ? (
-          <p className="mt-1 text-xs text-catch-muted">{subtitle}</p>
+          <p className={cn("mt-1 text-xs text-catch-muted", subtitleClassName)}>
+            {subtitle}
+          </p>
         ) : null}
       </div>
       {actionNode ? (
