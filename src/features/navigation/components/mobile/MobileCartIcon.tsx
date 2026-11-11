@@ -26,7 +26,7 @@ export default function MobileCartIcon() {
     >
       <ShoppingCart className="h-5 w-5" />
       {mounted && cartCount > 0 && (
-        <span className="absolute -top-1 -end-1 inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-secondary text-white font-bold px-1 text-xs">
+        <span className="absolute -top-1 -end-1 inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-secondary-dark text-white font-bold px-1 text-xs">
           {cartCount}
         </span>
       )}

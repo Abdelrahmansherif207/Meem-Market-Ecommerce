@@ -21,7 +21,7 @@ const PROMO_MEDIA_STYLE = {
 } as CSSProperties;
 
 /**
- * Catch Beauty promotions: every valid CMS promotion in a two-column grid,
+ * Rawd Al-Aseel promotions: every valid CMS promotion in a two-column grid,
  * full-bleed on the warm page canvas with no card chrome. Each tile reserves
  * the artwork aspect so the wide campaign images are never cropped. When the
  * count is odd, the last tile spans both columns.

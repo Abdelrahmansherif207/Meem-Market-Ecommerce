@@ -25,9 +25,9 @@ function HelpOptionLink({ href, children }: { href: string; children: ReactNode 
 }
 
 /**
- * Catch Beauty "Do you need help?" banner — deep berry strip with the four
+ * Rawd Al-Aseel "Do you need help?" banner — deep green strip with the four
  * existing contact options. Email, phone and WhatsApp all come from the
- * normalized site settings (with Catch Beauty fallbacks).
+ * normalized site settings (with Rawd Al-Aseel fallbacks).
  */
 export default async function CatchHelpBanner({ locale }: { locale: string }) {
   const t = await getTranslations("catchHome");

@@ -1,5 +1,5 @@
 /**
- * Locale-aware Catch Beauty fallbacks and placeholder guards for
+ * Locale-aware Rawd Al-Aseel fallbacks and placeholder guards for
  * `GET /general/settings`.
  *
  * The backend currently returns placeholder copy ("Site Name",
@@ -8,27 +8,28 @@
  */
 
 export const DEFAULT_SITE_NAME: Record<string, string> = {
-  ar: "كاتش بيوتي",
-  en: "Catch Beauty",
+  ar: "روض الأصيل",
+  en: "Rawd Al-Aseel",
 };
 
 export const DEFAULT_SITE_DESCRIPTION: Record<string, string> = {
-  ar: "تسوقي أفضل المنتجات في كاتش بيوتي — الجمال والعناية الشخصية والمزيد في قطر",
-  en: "Shop the best products at Catch Beauty — beauty, personal care, and more in Qatar.",
+  ar: "تسوّق أفضل المنتجات من روض الأصيل — جودة مضمونة بمعايير الصناعة السعودية، مع حلول تعبئة وتغليف وإنتاج متكاملة",
+  en: "Shop the best products at Rawd Al-Aseel — quality guaranteed to Saudi industrial standards, backed by integrated packaging and production solutions.",
 };
 
 export const DEFAULT_SITE_COPYRIGHT: Record<string, string> = {
-  ar: "حقوق النشر © 2026 كاتش بيوتي. جميع الحقوق محفوظة",
-  en: "Copyright © 2026 Catch Beauty. All rights reserved",
+  ar: "حقوق النشر © 2026 روض الأصيل. جميع الحقوق محفوظة",
+  en: "Copyright © 2026 Rawd Al-Aseel. All rights reserved",
 };
 
-export const DEFAULT_LOGO = "/catch-logo.png";
-export const DEFAULT_FOOTER_LOGO = "/catch-footer-logo.jpeg";
-export const DEFAULT_FAVICON = "/catch-footer-logo.jpeg";
+export const DEFAULT_LOGO = "/raowdalaseel-logo.png";
+export const DEFAULT_FOOTER_LOGO = "/raowdalaseel-logo.png";
+export const DEFAULT_FAVICON = "/raowdalaseel-logo.png";
 
-export const DEFAULT_SITE_EMAIL = "cs@catchbeauty.com";
-export const DEFAULT_PHONE = "+974 9636 7199";
-export const DEFAULT_WHATSAPP_URL = "https://wa.me/97496367199";
+// TODO: replace with official Rawd Al-Aseel contact details when available.
+export const DEFAULT_SITE_EMAIL = "info@raowdalaseel.com";
+export const DEFAULT_PHONE = "+966 55 000 0000";
+export const DEFAULT_WHATSAPP_URL = "https://wa.me/966550000000";
 
 /** Text values the API uses as placeholders (compared case-insensitively). */
 export const PLACEHOLDER_TEXTS = [

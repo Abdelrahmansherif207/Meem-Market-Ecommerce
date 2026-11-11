@@ -63,7 +63,7 @@ export interface SiteSettingsOptions {
 
 /**
  * Normalized settings. Branding and contact fields always carry a usable
- * value (locale-aware Catch Beauty defaults when the API omits them or
+ * value (locale-aware Rawd Al-Aseel defaults when the API omits them or
  * returns placeholder copy); invalid social / video URLs become `""`.
  */
 export interface SiteSettings {

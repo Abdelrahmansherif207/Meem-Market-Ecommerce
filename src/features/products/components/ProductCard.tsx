@@ -42,7 +42,7 @@ function titleBrand(title: string): string {
 }
 
 /**
- * Canonical Catch Beauty product card.
+ * Canonical Rawd Al-Aseel product card.
  *
  * One card for every listing surface. The whole card navigates through an
  * overlay link; interactive controls are siblings above it, so there are no

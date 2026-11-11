@@ -36,7 +36,7 @@ export function NiceOneBrandCard({ product }: { product: ProductDetail }) {
       </div>
       <Link
         href={`/category/${mainCategory.slug}`}
-        className="shrink-0 rounded-full bg-secondary px-4 py-1.5 text-xs font-semibold text-white transition hover:bg-secondary-dark"
+        className="shrink-0 rounded-full bg-secondary px-4 py-1.5 text-xs font-semibold text-text-primary transition hover:bg-secondary-dark hover:text-white"
       >
         {t("viewAll")}
       </Link>

@@ -15,7 +15,7 @@ import { BannerArrows } from "@/features/home/components/banner";
 import type { Coupon } from "../types";
 import styles from "./CouponsVouchersSwiper.module.css";
 
-const FALLBACK_BORDER_COLOR = "#ede4e2";
+const FALLBACK_BORDER_COLOR = "var(--color-border)";
 
 const IMAGE_SIZES =
   "(max-width: 480px) 75vw, (max-width: 768px) 45vw, (max-width: 1024px) 30vw, 25vw";

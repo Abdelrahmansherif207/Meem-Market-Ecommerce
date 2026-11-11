@@ -44,7 +44,7 @@ interface CatchShelfIslandProps {
 }
 
 /**
- * Catch Beauty product shelf: a fluid Swiper (2 mobile / 3 tablet / 5 desktop)
+ * Rawd Al-Aseel product shelf: a fluid Swiper (2 mobile / 3 tablet / 5 desktop)
  * rendering every CMS product, with currency-driven refetches and optional
  * CMS countdown. Presentation only — all card behavior lives in ProductCard.
  */

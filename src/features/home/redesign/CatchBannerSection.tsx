@@ -48,7 +48,7 @@ interface CatchBannerSectionProps {
 }
 
 /**
- * Catch Beauty wide banner: a layout-reserving media well with art-directed
+ * Rawd Al-Aseel wide banner: a layout-reserving media well with art-directed
  * mobile artwork. When the CMS requests products (`with_products=1`), the
  * recurring "banner + shelf" pattern renders below the image.
  */

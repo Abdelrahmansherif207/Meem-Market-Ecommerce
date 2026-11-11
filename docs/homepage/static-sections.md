@@ -1,6 +1,6 @@
 # Homepage — Static & Layout-Owned Surfaces
 
-The Catch Beauty homepage is CMS-driven. All commerce sections come from
+The Rawd Al-Aseel homepage is CMS-driven. All commerce sections come from
 `GET /general/content-pages/home`; the surfaces below are the only non-CMS
 parts of the page shell.
 
@@ -8,8 +8,8 @@ parts of the page shell.
 |---|---|---|---|
 | Header (desktop + mobile) | `src/features/navigation/components/catch/*` | Layout-owned, dynamic | Search, category menu, currency/auth/wishlist/cart chrome. **Header WIP files were not touched in Phase 4.** |
 | Mobile bottom navigation | `src/features/navigation/components/mobile/MobileBottomNav.tsx` | Layout-owned, static routes | Categories / Home / Profile / Cart; real cart count |
-| “Do you need help?” banner | `src/features/home/redesign/CatchHelpBanner.tsx` | Static content + settings | Berry strip after the CMS sections. Email/phone read site settings; WhatsApp uses the existing constant; the help-center destination remains the existing `#` placeholder |
-| Footer | `src/features/navigation/components/catch/CatchFooter.tsx` + `CatchPaymentStrip.tsx` | Mostly dynamic | Visual redesign **deferred**; content, links, socials and payments keep current behavior |
+| “Do you need help?” banner | `src/features/home/redesign/CatchHelpBanner.tsx` | Static content + settings | Deep-green strip after the CMS sections. Email/phone read site settings; WhatsApp uses the existing constant; the help-center destination remains the existing `#` placeholder |
+| Footer | `src/features/navigation/components/catch/CatchFooter.tsx` + `CatchPaymentStrip.tsx` | Mostly dynamic | Company/profile/social/app links stay static or settings-driven; popular categories come from the nav-data endpoint and hide when unavailable |
 | Route loading | `src/app/[locale]/loading.tsx` | Static skeleton | Shows the page shell while the CMS manifest streams |
 | Section skeletons | `src/features/home/redesign/skeletons.tsx` | Static skeletons | One fallback per CMS section type, using the same reserved ratios as the real sections |
 | Section error fallback | `src/features/pages/components/SectionErrorBoundary.tsx` | Shared UI | Compact `ErrorState` with retry; a failed section does not take down the page |

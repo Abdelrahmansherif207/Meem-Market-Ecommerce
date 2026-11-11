@@ -5,7 +5,7 @@ import CatchHeroVideoPlayer from "./CatchHeroVideoPlayer";
 import CatchPromotionVideo from "./CatchPromotionVideo";
 
 /** Temporary campaign hero: CMS sliders are disabled until the carousel returns. */
-const HERO_HREF = "/sliders/new-collection-s2";
+const HERO_HREF = "/categories";
 const DESKTOP_VIDEO_SRC = "/hero/catch-hero-desktop.mp4";
 const MOBILE_VIDEO_SRC = "/hero/catch-hero-mobile.mp4";
 const HERO_POSTER_SRC = "/hero/catch-hero-poster.jpg";
@@ -21,8 +21,8 @@ interface CatchHeroVideoSectionProps {
 /**
  * Full-width campaign banner. On desktop the video fills the banner and the
  * collection copy sits centred on top; below `md` the 9:16 mobile cut is shown
- * on its own with no overlay. The CMS sliders section still supplies the title
- * and the destination stays the New Collection slider.
+ * on its own with no overlay. The CMS sliders section supplies the title, and
+ * the current campaign video remains the fallback until Rawd artwork lands.
  */
 export default async function CatchHeroVideoSection({
   locale,
@@ -72,7 +72,7 @@ export default async function CatchHeroVideoSection({
             </h1>
             <Link
               href={HERO_HREF}
-              className="pointer-events-auto mt-7 hidden items-center rounded-full bg-white px-7 py-3 text-xs font-semibold text-catch-charcoal shadow-elev-1 transition-colors hover:bg-catch-cream focus-visible:outline-offset-4 md:inline-flex lg:text-sm"
+              className="pointer-events-auto mt-7 hidden items-center rounded-full bg-white px-7 py-3 text-xs font-semibold text-catch-charcoal shadow-elev-1 transition-colors hover:bg-catch-surface focus-visible:outline-offset-4 md:inline-flex lg:text-sm"
             >
               {t("cta")}
             </Link>

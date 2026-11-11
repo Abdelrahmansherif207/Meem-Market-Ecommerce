@@ -27,7 +27,7 @@ const navItems: NavItem[] = [
 function CartBadge({ count }: { count: number }) {
   if (count <= 0) return null;
   return (
-    <span className="absolute -right-1 -top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-secondary text-[9px] font-bold text-white px-1">
+    <span className="absolute -right-1 -top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-secondary-dark text-[9px] font-bold text-white px-1">
       {count > 99 ? "99+" : count}
     </span>
   );

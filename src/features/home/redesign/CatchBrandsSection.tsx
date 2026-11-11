@@ -17,7 +17,7 @@ interface CatchBrandsSectionProps {
 }
 
 /**
- * Catch Beauty brand rail/grid: every brand the CMS returns, using the
+ * Rawd Al-Aseel brand rail/grid: every brand the CMS returns, using the
  * section's `columns_count` on desktop, with a real "View all" destination.
  */
 export default async function CatchBrandsSection({

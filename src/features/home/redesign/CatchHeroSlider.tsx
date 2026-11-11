@@ -27,7 +27,7 @@ const HERO_MEDIA_STYLE = {
 } as CSSProperties;
 
 /**
- * Catch Beauty hero: full-width campaign carousel with a reserved media
+ * Rawd Al-Aseel hero: full-width campaign carousel with a reserved media
  * well, art-directed mobile artwork and white circular arrows/pagination.
  * Autoplay and speed come from the CMS section settings; reduced-motion
  * users get a static first slide.

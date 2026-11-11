@@ -118,9 +118,9 @@ function handleOverlayClick(e: React.MouseEvent<HTMLDivElement>) {
           <div className="mb-4 flex justify-center">
             <Logo
               src={logo || DEFAULT_LOGO}
-              alt={siteName || "Catch Beauty"}
-              width={180}
-              height={70}
+              alt={siteName || "Rawd Al-Aseel"}
+              width={96}
+              height={96}
               className="rounded-lg"
             />
           </div>

@@ -16,6 +16,7 @@ import { useServerCartStore } from "@/features/cart/store/useServerCartStore";
 import { cn } from "@/shared/utils/cn";
 import { Link } from "@/i18n/navigation";
 import { LocationDisplay } from "@/features/location";
+import { DEFAULT_LOGO } from "@/features/settings/constants";
 
 export default function MainNav({ settingsLogo, currencyEnabled = false }: { settingsLogo?: string | null; currencyEnabled?: boolean }) {
   const mounted = useSyncExternalStore(
@@ -36,7 +37,7 @@ export default function MainNav({ settingsLogo, currencyEnabled = false }: { set
   return (
     <div className="grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-3 md:gap-6">
       <div className="flex items-center gap-2 md:gap-3 shrink-0">
-        <Logo src={settingsLogo || "/catch-logo.png"} alt="Logo" priority className="rounded-full" width={60} height={60} />
+        <Logo src={settingsLogo || DEFAULT_LOGO} alt="Rawd Al-Aseel" priority className="rounded-lg" width={60} height={60} />
         <LocationDisplay />
       </div>
 
@@ -97,7 +98,7 @@ export default function MainNav({ settingsLogo, currencyEnabled = false }: { set
 
   {mounted && cartCount > 0 && (
     <span
-      className="absolute -top-1 -right-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-secondary px-1 text-[10px] font-bold leading-none text-white ring-2 ring-background"
+      className="absolute -top-1 -right-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-secondary-dark px-1 text-[10px] font-bold leading-none text-white ring-2 ring-background"
     >
       {cartCount}
     </span>

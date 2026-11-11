@@ -1,13 +1,13 @@
-# Catch Beauty Homepage — Section Mapping
+# Rawd Al-Aseel Homepage — Section Mapping
 
-**Status:** Phase 4 implemented (Catch Beauty visual identity on the homepage).
+**Status:** Phase 4 implemented (Rawd Al-Aseel visual identity on the homepage).
 
 > **Update (2026-11-08):** See
 > [`cms-verification-report.md`](./cms-verification-report.md) for the current
 > CMS contract, fixes, and verification. Statements below about 19 sections,
 > disabled tags, and the permanently replaced slider hero are outdated.
 
-**Visual source:** approved Phase 2 Catch Beauty specification + live CMS
+**Visual source:** approved Phase 2 Rawd Al-Aseel specification + live CMS
 artwork. No new Stitch screens were generated for this phase.
 
 **Live CMS contract:** `GET /general/content-pages/home` currently returns
@@ -18,7 +18,7 @@ uses the existing endpoints and payloads; no new API endpoints were invented.
 
 | # | CMS type | Live title (EN) | Component | Data source | Behavior |
 |---|---|---|---|---|---|
-| 1 | `sliders` | New Collection | `CatchHeroVideoSection` → `CatchHeroVideoPlayer` (temporary) | Static `public/hero/*` campaign assets; CMS sliders section supplies the title | Campaign video hero: desktop full-width overlay banner (≈2.2:1) with centred eyebrow/title/white pill CTA; mobile 9:16 video only; CTA → `/sliders/new-collection-s2`; muted inline loop, pauses off-screen/hidden, reduced-motion poster only; CMS carousel is disabled but kept for restoration |
+| 1 | `sliders` | New Collection | `CatchHeroVideoSection` → `CatchHeroVideoPlayer` (temporary) | Static `public/hero/*` campaign assets; CMS sliders section supplies the title | Campaign video hero: desktop full-width overlay banner (≈2.2:1) with centred eyebrow/title/white pill CTA; mobile 9:16 video only; CTA → `/categories`; muted inline loop, pauses off-screen/hidden, reduced-motion poster only; CMS carousel is disabled but kept for restoration |
 | 2 | `categories` | Shop by Category | `CatchCategoriesSection` | `general/categories?limit=79…` | CMS-ordered horizontal rail; 4 visible mobile, `columns_count` (max 8) desktop; every returned category rendered; tiles → `/category/[slug]`; “View all” → `/categories` |
 | 3 | `tags` | Popular Tags | — (disabled) | `general/tags?…` | Intentionally renders nothing: the live CMS returns one tag (“New Arrivals”) that duplicates the New Arrivals shelf |
 | 4 | `banners` | Valentine's Day | `CatchBannerSection` | `general/banners?slug=…&with_products=1` | Art-directed wide banner in a layout-reserving well; banner → `/banners/[slug]`; optional product shelf below |

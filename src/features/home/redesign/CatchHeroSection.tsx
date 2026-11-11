@@ -8,7 +8,7 @@ import CatchHeroVideoPlayer from "./CatchHeroVideoPlayer";
 import CatchPromotionVideo from "./CatchPromotionVideo";
 import type { SectionFrontSetting } from "../types";
 
-const DEFAULT_CTA_HREF = "/sliders/new-collection-s2";
+const DEFAULT_CTA_HREF = "/categories";
 const DEFAULT_VIDEO_DESKTOP = "/hero/catch-hero-desktop.mp4";
 const DEFAULT_VIDEO_MOBILE = "/hero/catch-hero-mobile.mp4";
 const DEFAULT_POSTER = "/hero/catch-hero-poster.jpg";
@@ -25,8 +25,8 @@ interface CatchHeroSectionProps {
 /**
  * CMS campaign hero. Supports art-directed video or image artwork, a
  * localized eyebrow/heading/subtitle/CTA, token-based tone and overlay
- * controls, and configurable alignment/height. When the CMS has no hero
- * section yet, HomePage keeps the static fallback hero in place.
+ * controls, and configurable alignment/height. The settings promotion video
+ * or the current campaign video remains available as a fallback.
  */
 export default async function CatchHeroSection({
   locale,

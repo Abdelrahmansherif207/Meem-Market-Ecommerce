@@ -96,7 +96,7 @@ export function NiceOneStickyBar({ product, selectedVariant, pricesLoading = fal
           type="button"
           onClick={handleAddToCart}
           disabled={!stock.inStock || isPending}
-          className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-secondary py-3.5 text-xs font-bold tracking-wide text-white shadow-elev-1 transition-colors hover:bg-secondary-dark active:bg-secondary-dark disabled:pointer-events-none disabled:opacity-60"
+          className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-secondary py-3.5 text-xs font-bold tracking-wide text-text-primary shadow-elev-1 transition-colors hover:bg-secondary-dark hover:text-white active:bg-secondary-dark active:text-white disabled:pointer-events-none disabled:opacity-60"
         >
           {isPending ? (
             <Loader2 className="size-4 animate-spin" aria-hidden />

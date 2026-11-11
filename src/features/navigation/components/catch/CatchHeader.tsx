@@ -11,7 +11,7 @@ interface CatchHeaderProps {
 }
 
 /**
- * Site header: berry announcement strip + ivory header with search and
+ * Site header: deep-green announcement strip + white header with search and
  * category nav rows. Warm paper frame, no shadow. The compact fixed
  * header that appears on scroll lives in CatchStickyHeader.
  */

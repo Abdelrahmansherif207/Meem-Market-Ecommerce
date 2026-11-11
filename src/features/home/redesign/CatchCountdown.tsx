@@ -8,7 +8,7 @@ interface CatchCountdownProps {
 }
 
 /**
- * Catch Beauty countdown chip (tabular numerals, warm ivory pill) used on
+ * Rawd Al-Aseel countdown chip (tabular numerals, light pill) used on
  * flash-sale and timed product shelves. Reuses the existing useCountdown hook.
  */
 export default function CatchCountdown({ endsAt }: CatchCountdownProps) {

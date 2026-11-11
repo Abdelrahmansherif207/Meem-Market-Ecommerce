@@ -10,12 +10,12 @@ export function AuthFeedback({ error, success, feedback }: AuthFeedbackProps) {
   return (
     <>
       {error ? (
-        <p className="mx-auto mt-4 max-w-md rounded-lg border border-secondary/30 bg-secondary/10 px-3 py-2 text-sm text-secondary">
+        <p className="mx-auto mt-4 max-w-md rounded-lg border border-secondary-dark/30 bg-secondary/10 px-3 py-2 text-sm text-secondary-dark">
           {error}
         </p>
       ) : null}
       {feedback ? (
-        <p className="mx-auto mt-4 max-w-md rounded-lg border border-secondary/30 bg-secondary/10 px-3 py-2 text-sm text-secondary">
+        <p className="mx-auto mt-4 max-w-md rounded-lg border border-secondary-dark/30 bg-secondary/10 px-3 py-2 text-sm text-secondary-dark">
           {feedback}
         </p>
       ) : null}

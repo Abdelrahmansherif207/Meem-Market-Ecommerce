@@ -59,6 +59,10 @@ const nextConfig: NextConfig = {
         hostname: "mohammedtareq.me",
       },
       {
+        protocol: "https",
+        hostname: "**.mohammedtareq.me",
+      },
+      {
         protocol: "http",
         hostname: "localhost",
         port: "8000",

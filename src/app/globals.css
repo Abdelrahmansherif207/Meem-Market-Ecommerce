@@ -5,37 +5,36 @@ button {
 }
 
 @theme {
-  /* Velvet crimson/berry red */
-  --color-primary: #b81d24;
-  --color-primary-active: #9d151b;
-  --color-primary-dark: #8c1217;
+  /* Rawd Al-Aseel brand greens */
+  --color-primary: #16834b;
+  --color-primary-active: #0e5a34;
+  --color-primary-dark: #0b472a;
 
-  /* Rich onyx black for solid structure */
-  --color-secondary: #1c1a1a;
-  --color-secondary-dark: #0b0a0a;
+  /* Warm orange for secondary actions and highlights */
+  --color-secondary: #f5822a;
+  --color-secondary-dark: #b95412;
 
-  /* Soft, warm rose-nude accent */
-  --color-accent: #e0b0b0;
-  --color-success: #2d7a4d;
+  /* Fresh green accent */
+  --color-accent: #75c65c;
+  --color-success: #237f52;
   --color-success-surface: #edf6f0;
   --color-warning: #a3620a;
   --color-warning-surface: #fdf4e7;
   --color-error: #c0392b;
   --color-error-surface: #fbeeed;
 
-  --color-background: #f8f8f8;
-  /* Creamy, warm cosmetic powder surface */
-  --color-surface: #faf6f5;
+  --color-background: #ffffff;
+  --color-surface: #f7f9f6;
 
-  --color-text-primary: #1c1a1a;
-  --color-text-secondary: #706565;
-  --color-text-muted: #9b8f8f;
+  --color-text-primary: #202820;
+  --color-text-secondary: #606b60;
+  --color-text-muted: #879187;
 
-  /* Warm neutral borders to wrap around product cards */
-  --color-border: #ede4e2;
-  --color-border-light: #e9dedb;
-  --color-border-subtle: #f5eeed;
-  --color-discount: #b81d24;
+  /* Soft green-neutral borders to wrap around product cards */
+  --color-border: #e2e9e0;
+  --color-border-light: #edf1eb;
+  --color-border-subtle: #f3f7f1;
+  --color-discount: #c62828;
 
   /* IBM Plex Sans Arabic across both locales (Arabic and Latin glyphs) */
   --font-sans: var(--font-ibm-arabic), "IBM Plex Sans Arabic", sans-serif;
@@ -43,37 +42,35 @@ button {
   --font-family-body: var(--font-ibm-arabic), "IBM Plex Sans Arabic", sans-serif;
   --font-family-heading: var(--font-ibm-arabic), "IBM Plex Sans Arabic", sans-serif;
 
-  /* Nice One screen recreation tokens — pink #E90276 mapped to Catch crimson */
-  --color-ink: #1a1a1a;            /* screen dark */
-  --color-page-gray: #f8f9fa;      /* screen grayBg */
-  --color-line: #efefef;           /* screen border #EFEFEF */
-  --color-neutral: #71717a;        /* screen muted */
-  --color-primary-tint: #fbf1f2;   /* screen pinkLight #FDF2F7, crimson-mapped */
-  --color-brand-badge: #c2185b;    /* screen pinkBadge #FF2E93, crimson-mapped */
-  --color-violet-banner: #9674cc;  /* screen help banner purple */
+  /* Nice One screen recreation tokens — pink #E90276 mapped to brand green */
+  --color-ink: #202820;            /* screen dark */
+  --color-page-gray: #f7f9f6;      /* screen grayBg */
+  --color-line: #edf1eb;           /* screen border */
+  --color-neutral: #606b60;        /* screen muted */
+  --color-primary-tint: #f0f8ef;   /* screen pinkLight, green-mapped */
+  --color-brand-badge: #f5822a;    /* screen pinkBadge, orange-mapped */
+  --color-violet-banner: #0b472a;  /* screen help banner, deep green */
 
-  /* Nice One quantity stepper (cards / PDP): count ink + light pill surface.
-     Values from the niceonesa.com DOM (count = rgb(55,46,76), pill = #f2f2f2). */
-  --color-qty-ink: #372e4c;
-  --color-qty-surface: #f2f2f2;
+  /* Nice One quantity stepper (cards / PDP): count ink + light pill surface. */
+  --color-qty-ink: #202820;
+  --color-qty-surface: #f0f3ef;
 
-  /* Catch Beauty supporting palette — additive only.
-     The primary brand crimson (#b81d24) remains the single primary token. */
-  --color-catch-primary: #b81d24;
-  --color-catch-primary-active: #9d151b;
-  --color-catch-berry: #6e0d1f;
-  --color-catch-berry-deep: #4a0a16;
-  --color-catch-ivory: #fbf7f4;
-  --color-catch-surface: #f6efea;
-  --color-catch-surface-deep: #f2e9e5;
-  --color-catch-blush: #fbf1ee;
-  --color-catch-charcoal: #241c1c;
-  --color-catch-muted: #6f605d;
-  --color-catch-muted-soft: #9a8a86;
-  --color-catch-rose: #d8a7a0;
-  --color-catch-rose-soft: #f3ddd8;
-  --color-catch-border: #e9ddd7;
-  --color-catch-border-soft: #f2e9e5;
+  /* Rawd Al-Aseel supporting palette — additive only. */
+  --color-catch-primary: #16834b;
+  --color-catch-primary-active: #0e5a34;
+  --color-catch-berry: #0b472a;
+  --color-catch-berry-deep: #202820;
+  --color-catch-ivory: #ffffff;
+  --color-catch-surface: #f7f9f6;
+  --color-catch-surface-deep: #edf1eb;
+  --color-catch-blush: #f0f8ef;
+  --color-catch-charcoal: #202820;
+  --color-catch-muted: #606b60;
+  --color-catch-muted-soft: #879187;
+  --color-catch-rose: #75c65c;
+  --color-catch-rose-soft: #e3f3dd;
+  --color-catch-border: #e2e9e0;
+  --color-catch-border-soft: #edf1eb;
 
   /* Elevation scale — canonical shadows; prefer these over ad-hoc shadow values */
   --shadow-elev-1: 0 1px 3px 0 rgba(28, 26, 26, 0.04), 0 1px 2px -1px rgba(28, 26, 26, 0.06);
@@ -128,31 +125,30 @@ button {
 }
 
 :root {
-  --header-gradient-start: rgb(245, 235, 235);
+  --header-gradient-start: rgb(240, 248, 239);
   --header-gradient-end: rgb(255, 255, 255);
 }
 
 /*
- * Catch Beauty homepage scope.
+ * Rawd Al-Aseel homepage scope.
  *
  * Applied explicitly on the homepage shell (never via `body:has(...)`) so
- * only this page re-tones the shared Tailwind utilities. Primary/discount
- * stay the validated brand crimson; supporting surfaces and text move to
- * the warm berry/ivory palette.
+ * only this page re-tones the shared Tailwind utilities. Primary remains the
+ * brand green; supporting surfaces and text use the fresh green/neutral palette.
  */
 .catch-surface {
-  --color-background: #fbf7f4;
-  --color-surface: #f6efea;
-  --color-border: #e9ddd7;
-  --color-border-light: #f2e9e5;
-  --color-border-subtle: #f2e9e5;
-  --color-text-primary: #241c1c;
-  --color-text-secondary: #6f605d;
-  --color-text-muted: #9a8a86;
-  --color-accent: #d8a7a0;
-  --color-primary-tint: #fbf1ee;
-  --color-page-gray: #fbf7f4;
-  --color-line: #f2e9e5;
+  --color-background: #ffffff;
+  --color-surface: #f7f9f6;
+  --color-border: #e2e9e0;
+  --color-border-light: #edf1eb;
+  --color-border-subtle: #f3f7f1;
+  --color-text-primary: #202820;
+  --color-text-secondary: #606b60;
+  --color-text-muted: #879187;
+  --color-accent: #75c65c;
+  --color-primary-tint: #f0f8ef;
+  --color-page-gray: #f7f9f6;
+  --color-line: #edf1eb;
   background-color: var(--color-catch-ivory);
   color: var(--color-catch-charcoal);
 }

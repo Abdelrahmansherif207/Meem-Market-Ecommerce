@@ -146,10 +146,10 @@ export function getLocaleSettingsDefaults(locale: string): LocaleSettingsDefault
  * - `site_desc`    → locale default
  * - `meta_desc`    → resolved `site_desc` → locale default
  * - `site_copy_right` → locale default
- * - `logo`         → `/catch-logo.png`
- * - `footer_logo`  → raw `logo` → `/catch-footer-logo.jpeg`
- * - `favicon`      → `/catch-footer-logo.jpeg`
- * - contact/social → Catch Beauty contact defaults; invalid URLs become `""`
+ * - `logo`         → `/raowdalaseel-logo.png`
+ * - `footer_logo`  → raw `logo` → `/raowdalaseel-logo.png`
+ * - `favicon`      → `/raowdalaseel-logo.png`
+ * - contact/social → Rawd Al-Aseel contact defaults; invalid URLs become `""`
  */
 export function normalizeSiteSettings(raw: unknown, locale: string): SiteSettings {
   const data: RawSiteSettings =

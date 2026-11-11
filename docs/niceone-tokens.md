@@ -1,43 +1,42 @@
-# Nice One design tokens → Catch Beauty mapping
+# Nice One design tokens → Rawd Al-Aseel mapping
 
 Source mirrors in `niceone-src/` (gitignored): `home-en.html`, `home-ar.html`, `css/*.css`, digests in `niceone-src/digest/`.
 These are the exact values extracted from niceonesa.com (SSR HTML + compiled Tailwind v3 bundles) and how each maps into our `@theme` tokens in `src/app/globals.css`.
 
-## 0. Catch Beauty supporting palette (Phase 4)
+## 0. Rawd Al-Aseel supporting palette
 
-The Catch homepage keeps the original primary crimson and adds an **additive**
-supporting palette. Legacy Nice One tokens below are unchanged.
+The Rawd Al-Aseel homepage uses a green primary with orange and fresh-green
+supporting accents. Legacy Nice One tokens below are unchanged.
 
 | Token | Value | Role |
 |---|---|---|
-| `--color-primary` | `#b81d24` | Single brand primary — unchanged |
-| `--color-catch-primary` | `#b81d24` | Explicit alias for Catch-scoped surfaces |
-| `--color-catch-primary-active` | `#9d151b` | Pressed/hover primary |
-| `--color-catch-berry` | `#6e0d1f` | Deep berry bands (help banner) |
-| `--color-catch-berry-deep` | `#4a0a16` | Darkest berry accents |
-| `--color-catch-ivory` | `#fbf7f4` | Homepage page background |
-| `--color-catch-surface` | `#f6efea` | Warm section surface / wells |
-| `--color-catch-blush` | `#fbf1ee` | Card image well / soft chips |
-| `--color-catch-charcoal` | `#241c1c` | Primary text on warm surfaces |
-| `--color-catch-muted` | `#6f605d` | Secondary text |
-| `--color-catch-muted-soft` | `#9a8a86` | Tertiary text / struck prices |
-| `--color-catch-rose` | `#d8a7a0` | Rose accent / star fill |
-| `--color-catch-rose-soft` | `#f3ddd8` | Soft rose backgrounds |
-| `--color-catch-border` | `#e9ddd7` | Standard warm border |
-| `--color-catch-border-soft` | `#f2e9e5` | Subtle card/rail border |
+| `--color-primary` | `#16834b` | Single brand primary |
+| `--color-catch-primary` | `#16834b` | Explicit alias for Rawd-scoped surfaces |
+| `--color-catch-primary-active` | `#0e5a34` | Pressed/hover primary |
+| `--color-catch-berry` | `#0b472a` | Deep green bands (help banner) |
+| `--color-catch-berry-deep` | `#202820` | Darkest green-neutral accents |
+| `--color-catch-ivory` | `#ffffff` | Homepage page background |
+| `--color-catch-surface` | `#f7f9f6` | Light section surface / wells |
+| `--color-catch-blush` | `#f0f8ef` | Card image well / soft chips |
+| `--color-catch-charcoal` | `#202820` | Primary text on light surfaces |
+| `--color-catch-muted` | `#606b60` | Secondary text |
+| `--color-catch-muted-soft` | `#879187` | Tertiary text / struck prices |
+| `--color-catch-rose` | `#75c65c` | Green accent / star fill |
+| `--color-catch-rose-soft` | `#e3f3dd` | Soft green backgrounds |
+| `--color-catch-border` | `#e2e9e0` | Standard green-neutral border |
+| `--color-catch-border-soft` | `#edf1eb` | Subtle card/rail border |
 
 ### Scoped surface
 
 `.catch-surface` on the homepage wrapper remaps the existing semantic tokens
 (`--color-background`, `--color-surface`, `--color-border`,
-`--color-text-primary`, etc.) to the warm palette and sets the ivory page
-background. It is **not** applied with `body:has(...)`, so other pages keep
-their current appearance. The header and footer are outside this wrapper and
-are intentionally unchanged in this phase.
+`--color-text-primary`, etc.) to the fresh green/neutral palette and sets the
+white page background. It is **not** applied with `body:has(...)`, so other
+pages keep their current appearance.
 
 ### Elevation
 
-`--shadow-elev-1/2/3` are the canonical warm-neutral shadows; prefer them over
+`--shadow-elev-1/2/3` are the canonical green-neutral shadows; prefer them over
 ad-hoc `shadow-*` values on Catch surfaces.
 
 ## 1. Typography
@@ -53,14 +52,14 @@ ad-hoc `shadow-*` values on Catch surfaces.
 
 | Nice One class | Exact value | Our token |
 |---|---|---|
-| `text-primary` | `#222` | `text-primary` #222222 |
+| `text-primary` | `#222` | `text-primary` #202820 |
 | `bg-dark-grey` (mega-menu rail) | `#f9f9f9` | `text-secondary` region / `border-light` family |
-| `soft-grey` borders | `#ededed` | `border` family = #ede4e2 (Catch warm grey, per reference) |
-| `bg-secondary` (footer help band, near-black) | ~`#1c1a1a` | `secondary` #1c1a1a |
-| Deal red / badges | `#ee0a24` (Vant default red) | `discount` — Catch uses its brand red #b81d24 |
-| Rose accents | `#ffedee`, `#FFD3DA`, `#feaebb`, `#e0b0b0` | `primary-surface` #fbeeed, `accent` #e0b0b0 |
+| `soft-grey` borders | `#ededed` | `border` family = #e2e9e0 (green-neutral) |
+| `bg-secondary` (accent actions) | ~`#1c1a1a` | `secondary` #f5822a |
+| Deal red / badges | `#ee0a24` (Vant default red) | `discount` — Rawd Al-Aseel uses #c62828 |
+| Rose accents | `#ffedee`, `#FFD3DA`, `#feaebb`, `#e0b0b0` | `primary-tint` #f0f8ef, `accent` #75c65c |
 | `text-footer` | white @ 85% | `text-inverse` + opacity |
-| Footer footnote | `#ababab` | `text-muted` #9b8f8f |
+| Footer footnote | `#ababab` | `text-muted` #879187 |
 
 ## 3. Structure & spacing (the "pixel" core)
 

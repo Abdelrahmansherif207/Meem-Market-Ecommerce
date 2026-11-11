@@ -8,7 +8,7 @@ export default async function AnnouncementBar() {
   const t = await getTranslations("header.announcement");
 
   return (
-    <div className="bg-secondary text-white">
+    <div className="bg-secondary text-text-primary">
       <div className="container px-3 py-2 text-center text-xs font-medium tracking-wide">
         {t("message")}
       </div>

@@ -81,7 +81,7 @@ export default function AvailableCoupons({ onSelectCoupon }: AvailableCouponsPro
             <SwiperSlide key={coupon.id}>
               <div
                 className="mx-auto w-64 rounded-xl overflow-hidden border-2 cursor-pointer transition-shadow hover:shadow-md"
-                style={{ borderColor: coupon.borderColor || "#ede4e2" }}
+                style={{ borderColor: coupon.borderColor || "var(--color-border)" }}
               >
                 <button
                   type="button"

@@ -11,7 +11,7 @@ interface CatchProductShelfSectionProps {
 }
 
 /**
- * Catch Beauty product shelf: CMS title + a fluid product rail. Data flow is
+ * Rawd Al-Aseel product shelf: CMS title + a fluid product rail. Data flow is
  * identical to the previous ProductSliderSection (fetchSectionData →
  * toProductItem → currency island).
  */

@@ -17,7 +17,7 @@ export function AuthHeader({ isLogin, logo, siteName }: AuthHeaderProps) {
   return (
     <>
       <div className="mb-4 flex justify-center">
-        <Logo src={logo || DEFAULT_LOGO} alt={siteName || "Catch Beauty"} width={100} height={40} className="rounded-lg" />
+        <Logo src={logo || DEFAULT_LOGO} alt={siteName || "Rawd Al-Aseel"} width={96} height={96} className="rounded-lg" />
       </div>
       {!isLogin && (
         <h2 className="text-center text-2xl font-semibold text-text-primary sm:text-3xl">

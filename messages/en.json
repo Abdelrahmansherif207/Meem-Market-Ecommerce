@@ -92,14 +92,14 @@
     }
   },
   "home": {
-    "metaDescription": "Shop the best products — electronics, fashion, home goods, and more."
+    "metaDescription": "Shop the best products at Rawd Al-Aseel — quality guaranteed at competitive prices, with Saudi production and packaging you can trust."
   },
   "catchHeader": {
     "announcement": "20% OFF YOUR FIRST ORDER WITH CODE NEW20",
-    "brandNameAr": "كاتش بيوتي",
-    "brandNameEn": "CATCH BEAUTY",
+    "brandNameAr": "روض الأصيل",
+    "brandNameEn": "RAWD AL-ASEEL",
     "searchPlaceholder": "What are you looking for ?",
-    "awardBadge": "Best Makeup website in Qatar",
+    "awardBadge": "Saudi quality you can trust",
     "deliverTo": "Deliver to",
     "profile": "Profile",
     "language": "Language",
@@ -121,7 +121,7 @@
     "copyCode": "Copy coupon code",
     "copied": "Copied",
     "hero": {
-      "eyebrow": "Catch Beauty",
+      "eyebrow": "Rawd Al-Aseel",
       "title": "New Collection",
       "cta": "Shop the collection"
     },
@@ -160,18 +160,10 @@
   },
   "catchFooter": {
     "popularCategories": "Popular Categories",
-    "companyTitle": "Catch Beauty",
+    "companyTitle": "Rawd Al-Aseel",
     "profileTitle": "Profile",
     "stayConnected": "Stay connected",
     "downloadApps": "Download our apps",
-    "categories": {
-      "makeup": "Makeup",
-      "perfume": "Perfume",
-      "care": "Care",
-      "nails": "Nails",
-      "accessories": "Accessories",
-      "lenses": "Lenses"
-    },
     "company": {
       "blogs": "Blogs",
       "companyWebsite": "Company Website",

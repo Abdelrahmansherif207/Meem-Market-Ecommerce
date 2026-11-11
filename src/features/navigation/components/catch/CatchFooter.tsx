@@ -1,6 +1,8 @@
 import { getTranslations } from "next-intl/server";
 import { FaGooglePlay, FaApple } from "react-icons/fa6";
 import { Link } from "@/i18n/navigation";
+import { categoryMenuService } from "@/features/categories";
+import type { CategoryMenuItem } from "@/features/categories";
 import { assembleFooterContent } from "../../services/footerService";
 import { SocialIcon } from "../footer/SocialIcons";
 import CatchPaymentStrip, { PAYMENT_BADGES } from "./CatchPaymentStrip";
@@ -10,10 +12,10 @@ interface CatchFooterProps {
 }
 
 /**
- * Site footer: warm sand 5-column grid (popular categories, company
- * links, profile links, social circles, app badges) followed by the
- * copyright + payment strip. Social/app data comes from the existing
- * footerService assembly; link columns are static per the screen.
+ * Site footer: light surface grid (popular categories, company links,
+ * profile links, social circles, app badges) followed by the copyright +
+ * payment strip. Categories come from the nav-data endpoint; social/app
+ * data comes from the existing footerService assembly.
  */
 export default async function CatchFooter({ params }: CatchFooterProps) {
   const { locale } = await params;
@@ -24,6 +26,7 @@ export default async function CatchFooter({ params }: CatchFooterProps) {
   let appStoreUrl = "";
   let googlePlayUrl = "";
   let fastShippingPageEnabled = false;
+  let categories: CategoryMenuItem[] = [];
 
   try {
     const assembled = await assembleFooterContent(locale);
@@ -36,14 +39,12 @@ export default async function CatchFooter({ params }: CatchFooterProps) {
     console.warn("[CatchFooter] Failed to assemble footer content", e);
   }
 
-  const popularCategories = [
-    { label: t("categories.makeup"), slug: "makeup" },
-    { label: t("categories.perfume"), slug: "perfumes" },
-    { label: t("categories.care"), slug: "care" },
-    { label: t("categories.nails"), slug: "nails" },
-    { label: t("categories.accessories"), slug: "accessories" },
-    { label: t("categories.lenses"), slug: "lenses" },
-  ];
+  try {
+    const menu = await categoryMenuService.getMenu(locale, 1);
+    categories = menu.slice(0, 6);
+  } catch (e) {
+    console.warn("[CatchFooter] Failed to load footer categories", e);
+  }
 
   const companyLinks = [
     { label: t("company.terms"), href: "/terms" },
@@ -70,15 +71,18 @@ export default async function CatchFooter({ params }: CatchFooterProps) {
   const hasGooglePlayUrl = Boolean(googlePlayUrl) && googlePlayUrl !== "#";
   const hasAppStoreUrl = Boolean(appStoreUrl) && appStoreUrl !== "#";
   const hasAppLinks = hasGooglePlayUrl || hasAppStoreUrl;
+  const hasCategories = categories.length > 0;
 
   const desktopColumnCount =
-    3 + (hasSocialLinks ? 1 : 0) + (hasAppLinks ? 1 : 0);
+    2 + (hasCategories ? 1 : 0) + (hasSocialLinks ? 1 : 0) + (hasAppLinks ? 1 : 0);
   const desktopGridClass =
     desktopColumnCount >= 5
       ? "md:grid-cols-5"
       : desktopColumnCount === 4
         ? "md:grid-cols-4"
-        : "md:grid-cols-3";
+        : desktopColumnCount === 3
+          ? "md:grid-cols-3"
+          : "md:grid-cols-2";
 
   return (
     <>
@@ -166,22 +170,24 @@ export default async function CatchFooter({ params }: CatchFooterProps) {
       <footer className="hidden border-b border-catch-border bg-catch-surface px-4 py-12 lg:block lg:px-8">
         <div className={`mx-auto grid max-w-[1440px] grid-cols-2 gap-8 ${desktopGridClass}`}>
           {/* Column 1: Popular Categories */}
-          <div className="space-y-3">
-            <h4 className="text-xs font-bold tracking-wider text-catch-charcoal">
-              {t("popularCategories")}
-            </h4>
-            <div className="flex flex-wrap gap-x-3 gap-y-2 text-xs text-catch-muted">
-              {popularCategories.map((category) => (
-                <Link
-                  key={category.slug}
-                  href={`/category/${category.slug}`}
-                  className="transition-colors hover:text-catch-primary"
-                >
-                  {category.label}
-                </Link>
-              ))}
+          {hasCategories && (
+            <div className="space-y-3">
+              <h4 className="text-xs font-bold tracking-wider text-catch-charcoal">
+                {t("popularCategories")}
+              </h4>
+              <div className="flex flex-wrap gap-x-3 gap-y-2 text-xs text-catch-muted">
+                {categories.map((category) => (
+                  <Link
+                    key={category.id}
+                    href={`/category/${category.slug}`}
+                    className="transition-colors hover:text-catch-primary"
+                  >
+                    {category.name}
+                  </Link>
+                ))}
+              </div>
             </div>
-          </div>
+          )}
 
           {/* Column 2: Company */}
           <div className="space-y-3">

@@ -35,8 +35,8 @@ export async function HomePage({ locale }: { locale: string }) {
   const settings = await getCachedSettings(locale);
   const promotionVideo = resolvePromotionVideo(settings.promotion_video_url);
 
-  // A CMS `hero` section wins. Until the backend registers that type, keep the
-  // existing campaign video as a fallback so the homepage never loses its hero.
+  // A CMS `hero` section wins. Until Rawd campaign artwork is supplied, keep the
+  // existing campaign video as the temporary homepage hero fallback.
   const hasHero = page.sections.some((section) => section.type === "hero");
   const slidersSection = page.sections.find(
     (section) => section.type === "sliders",

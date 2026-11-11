@@ -3,6 +3,8 @@ import { buildWhatsAppUrl } from "@/features/settings/lib/normalize";
 import {
   DEFAULT_FOOTER_LOGO,
   DEFAULT_LOGO,
+  DEFAULT_PHONE,
+  DEFAULT_WHATSAPP_URL,
 } from "@/features/settings/constants";
 import type { ContactInfo, FooterData, SocialLink } from "../types";
 
@@ -122,7 +124,7 @@ function getMockFooterData(lang: string): FooterData {
         id: 3,
         title: isAr ? "معلومات عنا" : "About Us",
         links: [
-          { id: 6, label: isAr ? "عن كاتش بيوتي" : "About Catch Beauty", slug: "/info/about" },
+          { id: 6, label: isAr ? "عن روض الأصيل" : "About Rawd Al-Aseel", slug: "/info/about" },
           { id: 7, label: isAr ? "شركتنا" : "Our Company", slug: "/info/company" },
           { id: 8, label: isAr ? "المسؤولية المجتمعية" : "Community & Society", slug: "/info/community" },
           { id: 9, label: isAr ? "النشرة البريدية" : "Newsletter", slug: "/info/newsletter" },
@@ -155,10 +157,10 @@ function getMockFooterData(lang: string): FooterData {
     socialLinks: [],
     contactInfo: {
       stayInTouchText: isAr ? "ابق على تواصل معنا" : "Stay in touch with us",
-      whatsappUrl: "https://wa.me/97496367199",
+      whatsappUrl: DEFAULT_WHATSAPP_URL,
       assistanceText: isAr ? "تحدث معنا للمساعدة" : "Have a question? We are here to help.",
       callUsText: isAr ? "اتصل بنا للمساعدة" : "Call us for assistance",
-      phoneNumber: "+974 9636 7199",
+      phoneNumber: DEFAULT_PHONE,
     },
     bottomRow: {
       title: isAr ? "حمل تطبيقنا" : "Download Our App",

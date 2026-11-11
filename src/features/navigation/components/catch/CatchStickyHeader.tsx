@@ -29,8 +29,7 @@ export default function CatchStickyHeader({
   const t = useTranslations("catchHeader");
   const pathname = usePathname();
   const isVisible = useScrollState(STICKY_SCROLL_THRESHOLD);
-  const brandName = siteName || "Catch Beauty";
-  const hasCustomLogo = Boolean(settingsLogo && settingsLogo !== DEFAULT_LOGO);
+  const brandName = siteName || "Rawd Al-Aseel";
 
   const categoriesActive = pathname.startsWith("/categories");
   const brandsActive = pathname.startsWith("/brands");
@@ -53,36 +52,15 @@ export default function CatchStickyHeader({
       <div className="mx-auto w-full max-w-[1440px] px-3 lg:px-8">
         <div className="flex h-12 items-center gap-3 lg:h-16 lg:gap-5">
           <Link href="/" aria-label={brandName} className="flex shrink-0 items-center">
-            {hasCustomLogo ? (
-              <Image
-                src={settingsLogo as string}
-                alt=""
-                width={300}
-                height={80}
-                loading="eager"
-                sizes="140px"
-                className="h-8 w-auto max-w-[130px] object-contain lg:h-9"
-              />
-            ) : (
-              <span
-                className={cn(
-                  "relative block h-8 w-[29px] overflow-hidden transition-[opacity,transform] duration-150 ease-out motion-reduce:transition-none lg:h-9 lg:w-[33px]",
-                  isVisible
-                    ? "translate-y-0 opacity-100 delay-[40ms]"
-                    : "-translate-y-0.5 opacity-0",
-                )}
-              >
-                <Image
-                  src="/catch-sticky-logo.jpg"
-                  alt=""
-                  width={976}
-                  height={1084}
-                  loading="eager"
-                  sizes="80px"
-                  className="absolute -left-[20px] -top-[7px] h-[77px] w-auto max-w-none object-contain mix-blend-multiply lg:-left-[22px] lg:-top-[8px] lg:h-[87px]"
-                />
-              </span>
-            )}
+            <Image
+              src={settingsLogo || DEFAULT_LOGO}
+              alt=""
+              width={596}
+              height={590}
+              loading="eager"
+              sizes="44px"
+              className="h-9 w-auto max-w-[40px] object-contain lg:h-10 lg:max-w-[44px]"
+            />
           </Link>
 
           <nav className="hidden items-center gap-1 text-[13px] font-semibold lg:flex">

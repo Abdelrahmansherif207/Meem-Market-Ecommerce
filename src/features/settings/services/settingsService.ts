@@ -10,7 +10,7 @@ import type { RawSiteSettings, SiteSettings } from "../types";
  * `GET /general/settings` — the single source for storefront identity,
  * contact/social links and commerce flags.
  *
- * The payload is normalized over locale-aware Catch Beauty defaults, and a
+ * The payload is normalized over locale-aware Rawd Al-Aseel defaults, and a
  * failed request returns those defaults instead of throwing so the layout
  * can render without extra fallback logic. Concurrent calls within one
  * request are deduplicated by React `cache()`.
@@ -34,7 +34,7 @@ async function fetchSettings(locale: string): Promise<SiteSettings> {
 
     return normalizeSiteSettings(response.data, locale);
   } catch (error) {
-    console.warn("[settings] Falling back to Catch Beauty defaults", error);
+    console.warn("[settings] Falling back to Rawd Al-Aseel defaults", error);
     return normalizeSiteSettings(null, locale);
   }
 }

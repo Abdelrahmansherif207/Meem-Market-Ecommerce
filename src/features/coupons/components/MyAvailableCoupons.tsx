@@ -257,7 +257,7 @@ function ApplyCard({
   return (
     <div
       className="flex w-52 shrink-0 flex-col gap-2 rounded-xl border p-3"
-      style={{ borderColor: "#ede4e2" }}
+      style={{ borderColor: "var(--color-border)" }}
     >
       {coupon.image ? (
         <Image
@@ -348,7 +348,7 @@ function ClaimCard({
   return (
     <div
       className="flex w-52 shrink-0 flex-col gap-2 rounded-xl border p-3"
-      style={{ borderColor: "#ede4e2" }}
+      style={{ borderColor: "var(--color-border)" }}
     >
       {coupon.image ? (
         <Image

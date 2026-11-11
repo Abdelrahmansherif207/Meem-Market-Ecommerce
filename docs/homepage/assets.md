@@ -1,4 +1,4 @@
-# Catch Beauty Homepage — Asset & Art Direction Rules
+# Rawd Al-Aseel Homepage — Asset & Art Direction Rules
 
 This document records the image ratios, rendering behavior and brand-asset
 validation used by the Phase 4 homepage implementation.
@@ -7,13 +7,12 @@ validation used by the Phase 4 homepage implementation.
 
 | Asset | Path | Notes |
 |---|---|---|
-| Header wordmark | `public/catch-logo.png` | Black “CATCH BEAUTY” wordmark; no red in the mark |
-| Footer logo | `public/catch-footer-logo.jpeg` | Uses `#D02020` plus black; decorative only |
-| Primary brand color | `--color-primary` `#B81D24` | **Unchanged.** The berry/ivory/charcoal/rose palette is supporting only |
+| Brand logo / favicon | `public/raowdalaseel-logo.png` | Square transparent mark with Arabic and English Rawd Al-Aseel wordmark |
+| Primary brand color | `--color-primary` `#16834B` | Brand green; supporting surfaces use the fresh green/neutral palette |
+| Temporary hero fallback | `public/hero/catch-*` | Retained only until Rawd Al-Aseel campaign video/artwork is supplied |
 
-The logo/footer inspection confirmed that `#B81D24` is the correct primary;
-the footer’s brighter red is a separate decorative asset and was not promoted
-to a global token.
+The supplied Rawd Al-Aseel mark is used for the header, sticky/mobile lockups,
+auth screens, favicon and social metadata.
 
 ## CMS artwork ratios (live data)
 
@@ -67,5 +66,5 @@ section’s `--media-aspect` value rather than changing the global well.
   provides both.
 - Do not introduce a new image CDN or dependency for art direction; the
   existing Next image stack plus native `<picture>` is sufficient.
-- Do not change `#B81D24` when restyling a section; use the `catch-*`
-  supporting tokens for berry/ivory/charcoal/rose accents.
+- Do not change `#16834B` when restyling a section; use the `catch-*`
+  supporting tokens for green/orange/neutral accents.

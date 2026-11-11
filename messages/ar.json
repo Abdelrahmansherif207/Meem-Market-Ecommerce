@@ -92,14 +92,14 @@
     }
   },
   "home": {
-    "metaDescription": "تسوق أفضل المنتجات - إلكترونيات، أزياء، منتجات المنزل والمزيد"
+    "metaDescription": "تسوّق أفضل المنتجات من روض الأصيل — جودة مضمونة وأسعار تنافسية مع إنتاج وتغليف سعودي موثوق"
   },
   "catchHeader": {
     "announcement": "خصم 20% على طلبك الأول باستخدام الكود NEW20",
-    "brandNameAr": "كاتش بيوتي",
-    "brandNameEn": "CATCH BEAUTY",
+    "brandNameAr": "روض الأصيل",
+    "brandNameEn": "RAWD AL-ASEEL",
     "searchPlaceholder": "ماذا تبحث عنه ؟",
-    "awardBadge": "أفضل موقع مكياج في قطر",
+    "awardBadge": "جودة سعودية تثق بها",
     "deliverTo": "التوصيل إلى",
     "profile": "حسابي",
     "language": "اللغة",
@@ -121,9 +121,9 @@
     "copyCode": "نسخ كود القسيمة",
     "copied": "تم النسخ",
     "hero": {
-      "eyebrow": "كاتش بيوتي",
+      "eyebrow": "روض الأصيل",
       "title": "المجموعة الجديدة",
-      "cta": "تسوقي المجموعة"
+      "cta": "تسوق المجموعة"
     },
     "carousel": {
       "label": "مجموعات مميزة",
@@ -160,18 +160,10 @@
   },
   "catchFooter": {
     "popularCategories": "التصنيفات الشائعة",
-    "companyTitle": "كاتش بيوتي",
+    "companyTitle": "روض الأصيل",
     "profileTitle": "حسابي",
     "stayConnected": "ابق على تواصل",
     "downloadApps": "حمل تطبيقاتنا",
-    "categories": {
-      "makeup": "مكياج",
-      "perfume": "عطور",
-      "care": "عناية",
-      "nails": "أظافر",
-      "accessories": "إكسسوارات",
-      "lenses": "عدسات"
-    },
     "company": {
       "blogs": "المدونة",
       "companyWebsite": "موقع الشركة",

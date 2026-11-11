@@ -3,6 +3,7 @@
 import Image from "next/image";
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
+import { DEFAULT_LOGO } from "@/features/settings/constants";
 import CatchSearchBar from "./CatchSearchBar";
 
 interface CatchTopRowProps {
@@ -17,7 +18,7 @@ interface CatchTopRowProps {
  */
 export default function CatchTopRow({ settingsLogo, siteName }: CatchTopRowProps) {
   const t = useTranslations("catchHeader");
-  const brandName = siteName || "Catch Beauty";
+  const brandName = siteName || "Rawd Al-Aseel";
 
   return (
     <div className="mx-auto flex w-full max-w-[1440px] items-center justify-between px-4 pt-4 pb-0 lg:px-8">
@@ -25,12 +26,12 @@ export default function CatchTopRow({ settingsLogo, siteName }: CatchTopRowProps
         {/* Brand */}
         <Link href="/" className="flex shrink-0 items-center" aria-label={brandName}>
           <Image
-            src={settingsLogo || "/catch-logo.png"}
+            src={settingsLogo || DEFAULT_LOGO}
             alt={brandName}
-            width={300}
-            height={105}
+            width={596}
+            height={590}
             priority
-            className="h-[105px] w-auto max-w-[300px] object-contain"
+            className="h-[92px] w-auto max-w-[100px] object-contain lg:h-[105px] lg:max-w-[112px]"
           />
         </Link>
 
