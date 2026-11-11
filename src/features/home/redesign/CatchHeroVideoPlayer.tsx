@@ -4,14 +4,13 @@ import { useEffect, useRef, useState } from "react";
 import { cn } from "@/shared/utils/cn";
 import { usePrefersReducedMotion } from "@/shared/hooks/usePrefersReducedMotion";
 
-/** Matches the hero's `md` breakpoint: below it the 9:16 mobile cut is used. */
+/** Matches the hero's `md` breakpoint: below it the mobile cut is used. */
 const MOBILE_MEDIA_QUERY = "(max-width: 767px)";
 const VISIBILITY_THRESHOLD = 0.2;
 
 interface CatchHeroVideoPlayerProps {
   desktopSrc: string;
   mobileSrc: string;
-  poster: string;
   className?: string;
   /** Extra classes for the `<video>` itself (crop, object-position). */
   videoClassName?: string;
@@ -24,15 +23,17 @@ interface CatchHeroVideoPlayerProps {
 }
 
 /**
- * Campaign hero video. The art-directed source is chosen after mount so the
- * server HTML stays identical for both breakpoints. Playback behavior comes
- * from the CMS hero settings; it pauses off-screen or when the tab is hidden,
- * and never autoplays for reduced-motion users (they get the poster instead).
+ * Campaign hero video fed exclusively by the home-page section.
+ *
+ * The art-directed source is chosen after mount so the server HTML stays
+ * identical for both breakpoints. There is intentionally no poster or
+ * image fallback. Playback follows the CMS hero settings and starts as soon
+ * as the video is ready; it pauses off-screen or when the tab is hidden, and
+ * never autoplays for reduced-motion users.
  */
 export default function CatchHeroVideoPlayer({
   desktopSrc,
   mobileSrc,
-  poster,
   className,
   videoClassName,
   autoplay = true,
@@ -42,9 +43,14 @@ export default function CatchHeroVideoPlayer({
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const isInViewRef = useRef(false);
   const [source, setSource] = useState<string | null>(null);
+  const [mounted, setMounted] = useState(false);
   const prefersReducedMotion = usePrefersReducedMotion();
 
-  const shouldPlay = autoplay && !prefersReducedMotion;
+  const shouldPlay = mounted && autoplay && !prefersReducedMotion;
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   useEffect(() => {
     const query = window.matchMedia(MOBILE_MEDIA_QUERY);
@@ -119,7 +125,7 @@ export default function CatchHeroVideoPlayer({
       <video
         ref={videoRef}
         src={source ?? undefined}
-        poster={poster}
+        autoPlay={shouldPlay}
         muted={muted}
         loop={loop}
         playsInline

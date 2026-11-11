@@ -1,5 +1,4 @@
 import { Suspense } from "react";
-import type { PromotionVideo } from "@/features/settings";
 import type { HomePageSection, SectionFrontSetting } from "../types";
 import { SectionErrorBoundary } from "@/features/pages/components/SectionErrorBoundary";
 import CatchHeroSection from "./CatchHeroSection";
@@ -26,11 +25,9 @@ import {
 function CatchSectionBlock({
   section,
   locale,
-  promotionVideo,
 }: {
   section: HomePageSection;
   locale: string;
-  promotionVideo?: PromotionVideo | null;
 }) {
   const { type, title, endpoint } = section;
   // Older CMS rows can store `front` as an empty array; treat that as no settings.
@@ -45,7 +42,6 @@ function CatchSectionBlock({
           locale={locale}
           title={title}
           setting={setting}
-          promotionVideo={promotionVideo}
         />
       );
     case "sliders":
@@ -105,20 +101,14 @@ function getSectionSkeleton(type: string, setting?: SectionFrontSetting): React.
 export function CatchSectionSuspense({
   section,
   locale,
-  promotionVideo,
 }: {
   section: HomePageSection;
   locale: string;
-  promotionVideo?: PromotionVideo | null;
 }) {
   return (
     <Suspense key={section.id} fallback={getSectionSkeleton(section.type, section.setting?.front)}>
       <SectionErrorBoundary>
-        <CatchSectionBlock
-          section={section}
-          locale={locale}
-          promotionVideo={promotionVideo}
-        />
+        <CatchSectionBlock section={section} locale={locale} />
       </SectionErrorBoundary>
     </Suspense>
   );

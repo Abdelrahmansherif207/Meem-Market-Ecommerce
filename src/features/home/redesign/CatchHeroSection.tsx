@@ -2,37 +2,28 @@ import { getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 import { CampaignImage } from "@/components/ui/CampaignImage";
 import { cn } from "@/shared/utils/cn";
-import type { PromotionVideo } from "@/features/settings";
 import { resolveLocalizedText } from "../utils";
 import CatchHeroVideoPlayer from "./CatchHeroVideoPlayer";
-import CatchPromotionVideo from "./CatchPromotionVideo";
 import type { SectionFrontSetting } from "../types";
 
 const DEFAULT_CTA_HREF = "/categories";
-const DEFAULT_VIDEO_DESKTOP = "/hero/catch-hero-desktop.mp4";
-const DEFAULT_VIDEO_MOBILE = "/hero/catch-hero-mobile.mp4";
-const DEFAULT_POSTER = "/hero/catch-hero-poster.jpg";
 
 interface CatchHeroSectionProps {
   locale: string;
   /** CMS section title; used when the front setting has no localized heading. */
   title?: string;
   setting?: SectionFrontSetting;
-  /** `promotion_video_url` fallback when the CMS hero has no video. */
-  promotionVideo?: PromotionVideo | null;
 }
 
 /**
- * CMS campaign hero. Supports art-directed video or image artwork, a
- * localized eyebrow/heading/subtitle/CTA, token-based tone and overlay
- * controls, and configurable alignment/height. The settings promotion video
- * or the current campaign video remains available as a fallback.
+ * CMS campaign hero. Renders only the media supplied by the home-page
+ * section: the CMS video (`video_desktop` / `video_mobile`) or CMS image
+ * artwork. There is no local, settings-video, or poster fallback.
  */
 export default async function CatchHeroSection({
   locale,
   title,
   setting,
-  promotionVideo,
 }: CatchHeroSectionProps) {
   const t = await getTranslations({ locale, namespace: "catchHome.hero" });
   const front = setting && !Array.isArray(setting) ? setting : undefined;
@@ -57,19 +48,15 @@ export default async function CatchHeroSection({
   const loop = front?.loop ?? true;
   const muted = front?.muted ?? true;
 
-  const cmsVideoDesktop = front?.video_desktop?.trim();
-  const cmsVideoMobile = front?.video_mobile?.trim() || cmsVideoDesktop;
-  const videoDesktop = cmsVideoDesktop || DEFAULT_VIDEO_DESKTOP;
-  const videoMobile = cmsVideoMobile || DEFAULT_VIDEO_MOBILE;
-  const poster = front?.poster?.trim() || DEFAULT_POSTER;
-  const imageDesktop =
-    front?.image_desktop?.trim() || poster || videoDesktop;
+  const videoDesktop = front?.video_desktop?.trim() || "";
+  const videoMobile = front?.video_mobile?.trim() || videoDesktop;
+  const imageDesktop = front?.image_desktop?.trim() || "";
   const imageMobile = front?.image_mobile?.trim() || imageDesktop;
 
-  const renderImage = front?.media_type === "image";
-  // Priority: CMS artwork → CMS video → settings promotion video → local cut.
-  const renderPromotionVideo =
-    !renderImage && !cmsVideoDesktop && Boolean(promotionVideo);
+  const renderImage = front?.media_type === "image" && Boolean(imageDesktop);
+  const renderVideo = !renderImage && Boolean(videoDesktop);
+
+  if (!renderImage && !renderVideo) return null;
 
   const aspectClass =
     height === "compact"
@@ -128,21 +115,10 @@ export default async function CatchHeroSection({
               fill
               className="object-cover"
             />
-          ) : renderPromotionVideo && promotionVideo ? (
-            <CatchPromotionVideo
-              video={promotionVideo}
-              poster={poster}
-              title={heading}
-              videoClassName="md:object-[center_40%]"
-              autoplay={autoplay}
-              loop={loop}
-              muted={muted}
-            />
           ) : (
             <CatchHeroVideoPlayer
               desktopSrc={videoDesktop}
               mobileSrc={videoMobile}
-              poster={poster}
               videoClassName="md:object-[center_40%]"
               autoplay={autoplay}
               loop={loop}
