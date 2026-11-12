@@ -148,19 +148,19 @@ function getMockFooterData(lang: string): FooterData {
       },
     ],
     socialLinks: [
-      { platform: "facebook", url: "#", label: "Facebook" },
-      { platform: "twitter", url: "#", label: "Twitter" },
-      { platform: "instagram", url: "#", label: "Instagram" },
-      { platform: "youtube", url: "#", label: "YouTube" },
-      { platform: "tiktok", url: "#", label: "TikTok" },
-      { platform: "snapchat", url: "#", label: "Snapchat" },
+      { platform: "facebook", url: "https://www.facebook.com/meemmarketryiadh", label: "Facebook" },
+      { platform: "instagram", url: "https://www.instagram.com/meemmarketryiadh", label: "Instagram" },
+      { platform: "tiktok", url: "https://www.tiktok.com/@meemmarketryiadh", label: "TikTok" },
+      { platform: "snapchat", url: "https://www.snapchat.com/add/meemmarketryiad", label: "Snapchat" },
     ],
     contactInfo: {
       stayInTouchText: isAr ? "ابق على تواصل معنا" : "Stay in touch with us",
-      whatsappUrl: "https://api.whatsapp.com/send?phone=%2B201111185469",
+      // TODO(riyadh): replace with the store's real WhatsApp number before launch.
+      whatsappUrl: "https://wa.me/966550000000",
       assistanceText: isAr ? "تحدث معنا للمساعدة" : "Have a question? We are here to help.",
       callUsText: isAr ? "اتصل بنا للمساعدة" : "Call us for assistance",
-      phoneNumber: "16061",
+      // TODO(riyadh): replace with the store's real phone number before launch.
+      phoneNumber: "+966 55 000 0000",
     },
     bottomRow: {
       title: isAr ? "حمل تطبيقنا" : "Download Our App",

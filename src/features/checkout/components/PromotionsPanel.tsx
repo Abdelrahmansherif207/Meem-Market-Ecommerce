@@ -114,7 +114,7 @@ export function PromotionsPanel({
             </span>
             <span className="text-2xs text-success">
               {t("saveAmount", {
-                amount: p.discount.toLocaleString(locale === "ar" ? "ar-KW" : "en-KW", {
+                amount: p.discount.toLocaleString(locale === "ar" ? "ar-SA" : "en-SA", {
                   minimumFractionDigits: 2,
                   maximumFractionDigits: 2,
                   numberingSystem: locale === "ar" ? "arab" : "latn",

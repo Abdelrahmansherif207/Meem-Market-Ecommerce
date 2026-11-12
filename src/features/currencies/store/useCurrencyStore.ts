@@ -32,7 +32,7 @@ function metaOf(currency: Currency, locale = "en"): CurrencyMeta {
   };
 }
 
-const DEFAULT_CODE = "KWD";
+const DEFAULT_CODE = "SAR";
 
 export const useCurrencyStore = create<CurrencyState>()(
   persist(

@@ -312,7 +312,7 @@ export function CheckoutForm() {
         title: selectedAddress.title,
         coords: selectedAddress.location
           ? { lat: selectedAddress.location.latitude, lng: selectedAddress.location.longitude }
-          : browserCoords ?? { lat: 29.3759, lng: 47.9774 },
+          : browserCoords ?? { lat: 24.7136, lng: 46.6753 },
         formattedAddress: [
           selectedAddress.address.street_address,
           selectedAddress.address.city,

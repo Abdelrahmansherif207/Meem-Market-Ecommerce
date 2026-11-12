@@ -50,7 +50,7 @@ export function Price({
   );
   const fractionDigits = decimals ?? display.decimalPlaces;
   const safe = Number.isFinite(amount) ? (amount as number) : 0;
-  const formatted = safe.toLocaleString(locale === "ar" ? "ar-KW" : "en-KW", {
+  const formatted = safe.toLocaleString(locale === "ar" ? "ar-SA" : "en-SA", {
     minimumFractionDigits: fractionDigits,
     maximumFractionDigits: fractionDigits,
     // Explicit Eastern Arabic digits (٠١٢٣) in Arabic locale so all

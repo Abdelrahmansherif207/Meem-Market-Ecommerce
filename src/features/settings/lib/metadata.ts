@@ -2,13 +2,13 @@ import type { Metadata } from "next";
 import { getCachedSettings } from "../services/settingsService";
 
 export const DEFAULT_SITE_NAME: Record<string, string> = {
-  ar: "ميم ماركت",
-  en: "Meem Market",
+  ar: "سوق ميم الرياض",
+  en: "Meem Market Riyadh",
 };
 
 export const DEFAULT_SITE_DESCRIPTION: Record<string, string> = {
-  ar: "تسوق أفضل المنتجات في ميم ماركت - إلكترونيات، أزياء، منتجات المنزل والمزيد",
-  en: "Shop the best products at Meem Market — electronics, fashion, home goods, and more.",
+  ar: "تسوق أفضل منتجات التجميل والعناية الشخصية والإلكترونيات والأزياء ومنتجات المنزل في الرياض",
+  en: "Shop the best beauty, personal care, electronics, fashion, home goods, and more in Riyadh.",
 };
 
 export const DEFAULT_FAVICON = "/meem-icon.jpeg";
@@ -42,7 +42,7 @@ export async function getSiteMeta(locale: string): Promise<SiteMeta> {
     if (settings.favicon) meta.favicon = settings.favicon;
     if (settings.logo) meta.logo = settings.logo;
   } catch {
-    // settings unavailable — keep locale-aware Meem Market defaults
+    // settings unavailable — keep locale-aware Meem Market Riyadh defaults
   }
 
   return meta;

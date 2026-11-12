@@ -6,7 +6,7 @@ import { useLocale, useTranslations } from "next-intl";
 import { Search, Loader2, MapPin, Navigation } from "lucide-react";
 import type { PickedAddress } from "../types";
 
-const CAIRO_CENTER = { lat: 30.0444, lng: 31.2357 };
+const RIYADH_CENTER = { lat: 24.7136, lng: 46.6753 };
 const mapContainerStyle = { width: "100%", height: "100%" };
 
 interface AutocompletePrediction {
@@ -112,7 +112,7 @@ export function MapPicker({
   const [predictions, setPredictions] = useState<AutocompletePrediction[]>([]);
   const [predictionsLoading, setPredictionsLoading] = useState(false);
   const [selectedCoords, setSelectedCoords] = useState<{ lat: number; lng: number }>(
-    () => initialValue?.coords ?? defaultCenter ?? CAIRO_CENTER,
+    () => initialValue?.coords ?? defaultCenter ?? RIYADH_CENTER,
   );
   const [city, setCity] = useState(() => initialValue?.city ?? "");
   const [streetAddress, setStreetAddress] = useState(() => initialValue?.streetAddress ?? "");

@@ -10,8 +10,8 @@ import {
 
 /** Legacy labels used until the currencies list seeds the store. */
 const LEGACY_SYMBOL: Record<string, string> = {
-  en: "K.D",
-  ar: "د.ك",
+  en: "SAR",
+  ar: "ر.س",
 };
 
 /**
@@ -19,7 +19,7 @@ const LEGACY_SYMBOL: Record<string, string> = {
  * 1. per-product currency from the API (matched against the seeded list for
  *    `decimal_places`, which product payloads don't carry),
  * 2. the user's selected currency from the store,
- * 3. legacy locale default (K.D / د.ك, 2 decimals — preserves old rendering).
+ * 3. legacy locale default (SAR / ر.س, 2 decimals — preserves old rendering).
  */
 export function useDisplayCurrency(
   productCurrency?: ProductCurrency | null,
@@ -28,7 +28,7 @@ export function useDisplayCurrency(
   const selectedCode = useCurrencyStore((s) => s.selectedCode);
   const byCode = useCurrencyStore((s) => s.byCode);
 
-  const code = productCurrency?.code || selectedCode || "KWD";
+  const code = productCurrency?.code || selectedCode || "SAR";
   const known = byCode[code];
 
   const symbol =

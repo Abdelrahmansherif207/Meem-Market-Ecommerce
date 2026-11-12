@@ -105,7 +105,7 @@
     }
   },
   "home": {
-    "metaDescription": "تسوق أفضل المنتجات - إلكترونيات، أزياء، منتجات المنزل والمزيد"
+    "metaDescription": "تسوق منتجات التجميل والعناية الشخصية والإلكترونيات والأزياء ومنتجات المنزل والمزيد في سوق ميم الرياض"
   },
   "auth": {
     "metaTitle": "تسجيل الدخول والتسجيل",
@@ -264,7 +264,7 @@
   },
   "product": {
     "home": "الرئيسية",
-    "currency": "ج.م",
+    "currency": "ر.س",
     "reviews": "تقييم",
     "reviewsTitle": "تقييمات العملاء",
     "noReviews": "لا توجد تقييمات بعد",
@@ -285,7 +285,7 @@
     "deliveryTitle": "التوصيل",
     "deliveryDesc": "التوصيل خلال 2-5 أيام عمل",
     "shippingTitle": "شحن مجاني",
-    "shippingDesc": "شحن مجاني للطلبات فوق 500 ج.م",
+    "shippingDesc": "شحن مجاني للطلبات فوق 500 ر.س",
     "returnsTitle": "إرجاع سهل",
     "returnsDesc": "إرجاع مجاني خلال 14 يوم",
     "options": "الخيارات",
@@ -332,16 +332,16 @@
     "name": "الاسم الكامل",
     "namePlaceholder": "محمد علي",
     "phone": "رقم الهاتف",
-    "phonePlaceholder": "01234567890",
+    "phonePlaceholder": "0512345678",
     "email": "البريد الإلكتروني",
     "emailPlaceholder": "mohammed@example.com",
     "addressTitle": "عنوان الشحن",
     "country": "الدولة",
-    "countryPlaceholder": "مصر",
-    "state": "المنطقة / المحافظة",
-    "statePlaceholder": "القاهرة",
+    "countryPlaceholder": "السعودية",
+    "state": "المنطقة",
+    "statePlaceholder": "منطقة الرياض",
     "city": "المدينة",
-    "cityPlaceholder": "مدينة نصر",
+    "cityPlaceholder": "الرياض",
     "streetAddress": "العنوان بالتفصيل",
     "streetAddressPlaceholder": "شارع 123 الرئيسي",
     "notes": "ملاحظات الطلب",
@@ -567,7 +567,7 @@
     "editOnMap": "تعديل على الخريطة",
     "city": "المدينة",
     "streetAddress": "العنوان",
-    "state": "الولاية / المحافظة",
+    "state": "المنطقة",
     "zip": "الرمز البريدي",
     "addressTitle": "اسم العنوان",
     "addressTitlePlaceholder": "مثال: المنزل، العمل",
@@ -575,7 +575,7 @@
     "saving": "جاري الحفظ...",
     "loginRequired": "يرجى تسجيل الدخول لحفظ الموقع",
     "saveError": "فشل حفظ الموقع. يرجى المحاولة مرة أخرى.",
-    "governorateNotFound": "تعذر تحديد المحافظة لهذا الموقع. يرجى المحاولة بمنطقة قريبة."
+    "governorateNotFound": "تعذر تحديد المنطقة لهذا الموقع. يرجى المحاولة بمنطقة قريبة."
   },
   "checkout": {
     "metaTitle": "إتمام الطلب",
