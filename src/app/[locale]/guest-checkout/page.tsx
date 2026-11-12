@@ -1,4 +1,5 @@
-import { GuestCheckoutPage } from "@/features/guest";
+import { notFound } from "next/navigation";
+import { GuestCheckoutPage, isGuestCheckoutEnabled } from "@/features/guest";
 import { getTranslations } from "next-intl/server";
 import type { Metadata } from "next";
 
@@ -11,6 +12,7 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
   return {
     title: t("metaTitle"),
     description: t("metaDescription"),
+    robots: { index: false, follow: false },
   };
 }
 
@@ -19,6 +21,8 @@ export default async function Page({
 }: {
   params: Promise<{ locale: string }>;
 }) {
+  if (!isGuestCheckoutEnabled()) notFound();
+
   const { locale } = await params;
   return <GuestCheckoutPage locale={locale} />;
 }

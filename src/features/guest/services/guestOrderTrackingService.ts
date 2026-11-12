@@ -4,9 +4,9 @@ import type { GuestCancelResult, GuestTrackResult } from "../types";
 
 /**
  * Public tracking + cancellation (contract §7–§8) — no guest cookie required.
- * Tokens travel in the POST body, never in the URL, to avoid access-log
- * leakage. Invalid / expired / revoked / foreign tokens all return 404 with
- * the same message (no existence oracle).
+ * Tokens travel in the POST body. Shareable links keep them in the URL hash,
+ * which browsers never send to the server. Invalid / expired / revoked /
+ * foreign tokens all return 404 with the same message (no existence oracle).
  */
 export const guestOrderTrackingService = {
   track: (token: string, lang?: string): Promise<GuestTrackResult> =>

@@ -1,9 +1,11 @@
 /**
  * Client-side storage for the raw tracking / cancellation tokens returned
  * once by guest checkout (contract §5). The backend keeps hashes only — these
- * raw values exist solely in this browser, so `sessionStorage` is the right
- * home: they survive page refreshes within the tab but are not shared across
- * devices and never leave the client except in tracking/cancel request bodies.
+ * raw values exist solely in this browser, so `localStorage` is the right
+ * home: they survive page refreshes and closing the tab, stay scoped to this
+ * origin, and are never shared across devices. They leave the client only in
+ * tracking/cancel request bodies, or when the user explicitly copies a
+ * shareable tracking link.
  */
 const PREFIX = "guest-order-tokens";
 const TTL_MS = 30 * 24 * 60 * 60 * 1000; // tracking validity window (+30 days)
@@ -20,12 +22,24 @@ function keyFor(orderId: number): string {
   return `${PREFIX}:${orderId}`;
 }
 
+function readTokens(raw: string | null): GuestOrderTokens | null {
+  if (!raw) return null;
+  try {
+    const parsed = JSON.parse(raw) as GuestOrderTokens;
+    if (!parsed || typeof parsed.savedAt !== "number") return null;
+    if (Date.now() - parsed.savedAt > TTL_MS) return null;
+    return parsed;
+  } catch {
+    return null;
+  }
+}
+
 export function saveGuestOrderTokens(
   tokens: Omit<GuestOrderTokens, "savedAt">,
 ): void {
   if (typeof window === "undefined") return;
   try {
-    window.sessionStorage.setItem(
+    window.localStorage.setItem(
       keyFor(tokens.orderId),
       JSON.stringify({ ...tokens, savedAt: Date.now() }),
     );
@@ -37,12 +51,7 @@ export function getGuestOrderTokens(
 ): GuestOrderTokens | null {
   if (typeof window === "undefined") return null;
   try {
-    const raw = window.sessionStorage.getItem(keyFor(orderId));
-    if (!raw) return null;
-    const parsed = JSON.parse(raw) as GuestOrderTokens;
-    if (!parsed || typeof parsed.savedAt !== "number") return null;
-    if (Date.now() - parsed.savedAt > TTL_MS) return null;
-    return parsed;
+    return readTokens(window.localStorage.getItem(keyFor(orderId)));
   } catch {
     return null;
   }
@@ -54,14 +63,29 @@ export function findGuestOrderTokensByNumber(
 ): GuestOrderTokens | null {
   if (typeof window === "undefined") return null;
   try {
-    for (let i = 0; i < window.sessionStorage.length; i += 1) {
-      const key = window.sessionStorage.key(i);
+    for (let i = 0; i < window.localStorage.length; i += 1) {
+      const key = window.localStorage.key(i);
       if (!key || !key.startsWith(`${PREFIX}:`)) continue;
-      const raw = window.sessionStorage.getItem(key);
-      if (!raw) continue;
-      const parsed = JSON.parse(raw) as GuestOrderTokens;
+      const parsed = readTokens(window.localStorage.getItem(key));
       if (parsed?.orderNumber === orderNumber) return parsed;
     }
+  } catch {}
+  return null;
+}
+
+/** Most recent tracking token, used to prefill the tracking page. */
+export function findLatestGuestTrackingToken(): string | null {
+  if (typeof window === "undefined") return null;
+  try {
+    let latest: GuestOrderTokens | null = null;
+    for (let i = 0; i < window.localStorage.length; i += 1) {
+      const key = window.localStorage.key(i);
+      if (!key || !key.startsWith(`${PREFIX}:`)) continue;
+      const parsed = readTokens(window.localStorage.getItem(key));
+      if (!parsed?.trackingToken) continue;
+      if (!latest || parsed.savedAt > latest.savedAt) latest = parsed;
+    }
+    return latest?.trackingToken ?? null;
   } catch {}
   return null;
 }
@@ -69,6 +93,6 @@ export function findGuestOrderTokensByNumber(
 export function clearGuestOrderTokens(orderId: number): void {
   if (typeof window === "undefined") return;
   try {
-    window.sessionStorage.removeItem(keyFor(orderId));
+    window.localStorage.removeItem(keyFor(orderId));
   } catch {}
 }

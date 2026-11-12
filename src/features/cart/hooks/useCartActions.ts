@@ -7,8 +7,29 @@ import { useGuestCartStore } from "../store/useGuestCartStore";
 import { useServerCartStore } from "../store/useServerCartStore";
 import { cartService } from "../services/cartService";
 import { guestCartService } from "@/features/guest/services/guestCartService";
-import { useGuestSessionStore } from "@/features/guest/store/useGuestSessionStore";
 import { runWithGuestSession } from "@/features/guest/utils/guestErrors";
+
+type ScheduledCartLine = {
+  id: number;
+  product_id: number;
+  quantity: number;
+  product_variant_id?: number | null;
+  shipping_method?: string | null;
+};
+
+/** Finds the scheduled line for a product (guests only use scheduled here). */
+function findScheduledLine(
+  cart: { normal_items?: ScheduledCartLine[] } | null,
+  productId: number,
+): ScheduledCartLine | null {
+  return (
+    cart?.normal_items?.find(
+      (item) =>
+        item.product_id === productId &&
+        (item.shipping_method ?? "").toLowerCase() === "scheduled",
+    ) ?? null
+  );
+}
 
 /**
  * Unified cart-mutation hook (single cart).
@@ -40,6 +61,7 @@ export function useCartActions(productId: number) {
 
   // ── Server store — header badge counter ─────────────────────────────────
   const adjustQuantity = useServerCartStore((s) => s.adjustQuantity);
+  const setTotalQuantity = useServerCartStore((s) => s.setTotalQuantity);
 
   // ── Optimistic quantity (authenticated + guest-server) ───────────────────
   // Each ProductCard instance tracks its own in-session quantity so the UI
@@ -83,7 +105,7 @@ export function useCartActions(productId: number) {
           adjustQuantity(item.quantity);
           setIsPending(true);
           try {
-            await runWithGuestSession(locale, () =>
+            const cart = await runWithGuestSession(locale, () =>
               guestCartService.addItem(
                 {
                   product_id: productId,
@@ -94,6 +116,7 @@ export function useCartActions(productId: number) {
                 locale,
               ),
             );
+            setTotalQuantity(cart.total_quantity);
           } catch {
             rollback(item.quantity);
           } finally {
@@ -136,7 +159,7 @@ export function useCartActions(productId: number) {
         setIsPending(false);
       }
     },
-    [isAuthenticated, guestServerMode, productId, guestAddItem, adjustQuantity, locale, rollback],
+    [isAuthenticated, guestServerMode, productId, guestAddItem, adjustQuantity, setTotalQuantity, locale, rollback],
   );
 
   // ── increment ────────────────────────────────────────────────────────────
@@ -147,12 +170,13 @@ export function useCartActions(productId: number) {
         adjustQuantity(1);
         setIsPending(true);
         try {
-          await runWithGuestSession(locale, () =>
+          const cart = await runWithGuestSession(locale, () =>
             guestCartService.addItem(
               { product_id: productId, quantity: 1, shipping_method: "scheduled" },
               locale,
             ),
           );
+          setTotalQuantity(cart.total_quantity);
         } catch {
           rollback(1);
         } finally {
@@ -185,96 +209,107 @@ export function useCartActions(productId: number) {
     } finally {
       setIsPending(false);
     }
-  }, [isAuthenticated, guestServerMode, productId, guestUpdateQuantity, adjustQuantity, locale, rollback]);
+  }, [isAuthenticated, guestServerMode, productId, guestUpdateQuantity, adjustQuantity, setTotalQuantity, locale, rollback]);
 
   // ── decrement ────────────────────────────────────────────────────────────
-  const decrement = useCallback(
-    async (cartItemId?: number) => {
-      if (!isAuthenticated) {
-        if (guestServerMode) {
-          // Resolve the line from the server cart (cards don't carry line ids).
-          setOptimisticQuantity((q) => Math.max(0, q - 1));
-          adjustQuantity(-1);
-          setIsPending(true);
-          try {
-            await runWithGuestSession(locale, async () => {
-              const cart = await guestCartService.getCart(locale);
-              const line =
-                cart?.normal_items.find(
-                  (i) =>
-                    i.product_id === productId &&
-                    i.shipping_method.toLowerCase() === "scheduled",
-                ) ?? null;
-              if (!line) return;
-              if (line.quantity <= 1) {
-                await guestCartService.removeLine(line.id, locale);
-              } else {
-                await guestCartService.updateItem(
+  const decrement = useCallback(async () => {
+    if (!isAuthenticated) {
+      if (guestServerMode) {
+        // Resolve the line from the server cart (cards don't carry line ids).
+        setOptimisticQuantity((q) => Math.max(0, q - 1));
+        adjustQuantity(-1);
+        setIsPending(true);
+        try {
+          const cart = await runWithGuestSession(locale, async () => {
+            const current = await guestCartService.getCart(locale);
+            const line = findScheduledLine(current, productId);
+            if (!line) throw new Error("Guest cart line not found");
+            // `quantity` is a delta, not the target quantity.
+            return line.quantity <= 1
+              ? guestCartService.removeLine(line.id, locale)
+              : guestCartService.updateItem(
                   {
                     item: {
                       product_id: productId,
-                      quantity: line.quantity,
+                      quantity: 1,
                       operation: "decrement",
-                      product_variant_id: line.product_variant_id ?? undefined,
+                      product_variant_id: line.product_variant_id ?? null,
                       shipping_method: "scheduled",
                     },
                   },
                   locale,
                 );
-              }
-            });
-          } catch {
-            rollback(-1);
-          } finally {
-            setIsPending(false);
-          }
-          return;
+          });
+          setTotalQuantity(cart?.total_quantity ?? 0);
+        } catch {
+          rollback(-1);
+        } finally {
+          setIsPending(false);
         }
-        const target = useGuestCartStore
-          .getState()
-          .items.find((i) => i.product_id === productId);
-        if (!target) return;
-        const line = {
-          productVariantId: target.product_variant_id ?? null,
-        };
-        if (target.quantity <= 1) guestRemoveItem(productId, line);
-        else guestUpdateQuantity(productId, target.quantity - 1, line);
         return;
       }
 
-      const currentQty = optimisticQuantity;
-      const newQty = currentQty - 1;
+      const target = useGuestCartStore
+        .getState()
+        .items.find((i) => i.product_id === productId);
+      if (!target) return;
+      const line = {
+        productVariantId: target.product_variant_id ?? null,
+      };
+      if (target.quantity <= 1) guestRemoveItem(productId, line);
+      else guestUpdateQuantity(productId, target.quantity - 1, line);
+      return;
+    }
 
-      setOptimisticQuantity((q) => Math.max(0, q - 1));
-      adjustQuantity(-1);
+    const currentQty = optimisticQuantity;
+    setOptimisticQuantity((q) => Math.max(0, q - 1));
+    adjustQuantity(-1);
+    setIsPending(true);
 
-      if (newQty <= 0 || cartItemId === undefined) return;
-
-      setIsPending(true);
-      try {
-        if (newQty === 0) {
-          await cartService.removeItem(cartItemId, locale);
-        } else {
-          await cartService.updateItem({ item: { product_id: productId, quantity: currentQty, operation: "decrement", product_variant_id: undefined, shipping_method: "scheduled" } }, locale);
+    try {
+      if (currentQty <= 1) {
+        const cart = await cartService.getCart(locale);
+        const line = findScheduledLine(cart, productId);
+        if (!line) {
+          setTotalQuantity(cart?.total_quantity ?? 0);
+          return;
         }
-      } catch {
-        setOptimisticQuantity((q) => q + 1);
-        adjustQuantity(1);
-      } finally {
-        setIsPending(false);
+        await cartService.removeItem(line.id, locale);
+        setTotalQuantity(
+          Math.max(0, (cart?.total_quantity ?? line.quantity) - line.quantity),
+        );
+      } else {
+        const updatedCart = await cartService.updateItem(
+          {
+            item: {
+              product_id: productId,
+              quantity: 1,
+              operation: "decrement",
+              product_variant_id: undefined,
+              shipping_method: "scheduled",
+            },
+          },
+          locale,
+        );
+        setTotalQuantity(updatedCart.total_quantity);
       }
-    },
-    [
-      isAuthenticated,
-      guestServerMode,
-      productId,
-      optimisticQuantity,
-      locale,
-      guestRemoveItem,
-      guestUpdateQuantity,
-      adjustQuantity,
-    ],
-  );
+    } catch {
+      rollback(-1);
+    } finally {
+      setIsPending(false);
+    }
+  }, [
+    isAuthenticated,
+    guestServerMode,
+    productId,
+    optimisticQuantity,
+    locale,
+    guestRemoveItem,
+    guestUpdateQuantity,
+    adjustQuantity,
+    setTotalQuantity,
+    rollback,
+  ]);
 
   return useMemo(
     () => ({ quantity, isPending, addItem, increment, decrement }),

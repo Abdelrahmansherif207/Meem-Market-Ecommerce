@@ -8,6 +8,7 @@ import { useDisplayCurrency } from "@/features/currencies";
 import { isGuestCheckoutEnabled } from "@/shared/constants/guestCheckout";
 import { guestCartService } from "@/features/guest/services/guestCartService";
 import { useGuestSessionStore } from "@/features/guest/store/useGuestSessionStore";
+import { runWithGuestSession } from "@/features/guest/utils/guestErrors";
 import { CartPageContentSkeleton } from "./skeletons/CartPageContentSkeleton";
 import { useGuestCartStore } from "../store/useGuestCartStore";
 import { useServerCartStore } from "../store/useServerCartStore";
@@ -262,7 +263,7 @@ export function CartPageContent({
   const refreshCart = useCallback(async () => {
     try {
       const cart = guestServerMode
-        ? await guestCartService.getCart(locale)
+        ? await runWithGuestSession(locale, () => guestCartService.getCart(locale))
         : await cartService.getCart(locale);
       if (cart) processCart(cart);
     } catch {
@@ -284,7 +285,9 @@ export function CartPageContent({
       const cart = guestServerMode
         ? await (async () => {
             await useGuestSessionStore.getState().ensureSession(locale);
-            return guestCartService.getCart(locale);
+            return runWithGuestSession(locale, () =>
+              guestCartService.getCart(locale),
+            );
           })()
         : await cartService.getCart(locale);
       if (controller.signal.aborted) return;
@@ -343,7 +346,7 @@ export function CartPageContent({
     }
 
     // Authenticated and sync complete (or no guest items): load from server.
-    loadServerCart(); // eslint-disable-line react-hooks/set-state-in-effect
+    loadServerCart();
   }, [authHydrated, isAuthenticated, guestServerMode, isSyncing, syncError, loadServerCart]);
 
   // Abort any in-flight request on unmount (navigation away).
@@ -392,39 +395,49 @@ export function CartPageContent({
 
       const item = state.serverItems.find((i) => matchesCartLine(i, productId, line));
       if (!item || !item.cartItemId) return;
+      const itemId = item.cartItemId;
       const pendingKey = getCartLineKey(productId, {
         productVariantId: item.product_variant_id ?? null,
       });
       if (state.pendingItemIds.has(pendingKey)) return;
 
       const snapshot = state.serverItems;
+      // The update endpoint treats `quantity` as a delta for both authenticated
+      // and guest carts — send the absolute difference, never the target.
+      const delta = Math.abs(quantity - item.quantity);
+      if (delta === 0) return;
+
       dispatch({ type: "ITEM_PENDING", key: pendingKey });
 
       try {
         if (quantity <= 0) {
           dispatch({ type: "REMOVE_ITEM", productId, line });
           if (guestServerMode) {
-            await guestCartService.removeLine(item.cartItemId, locale);
+            const cart = await runWithGuestSession(locale, () =>
+              guestCartService.removeLine(itemId, locale),
+            );
+            if (cart) processCart(cart);
+            else dispatch({ type: "SET_SERVER", items: [] });
           } else {
-            await cartService.removeItem(item.cartItemId, locale);
+            await cartService.removeItem(itemId, locale);
           }
         } else {
           dispatch({ type: "UPDATE_ITEM", productId, quantity, line });
           const operation = quantity > item.quantity ? "increment" : "decrement";
+          const payload = {
+            item: {
+              product_id: productId,
+              quantity: delta,
+              operation,
+              product_variant_id: item.product_variant_id ?? null,
+              shipping_method: "scheduled",
+            },
+          } as const;
           const updatedCart = guestServerMode
-            ? await guestCartService.updateItem(
-                {
-                  item: {
-                    product_id: productId,
-                    quantity: item.quantity,
-                    operation,
-                    product_variant_id: item.product_variant_id ?? null,
-                    shipping_method: "scheduled",
-                  },
-                },
-                locale,
+            ? await runWithGuestSession(locale, () =>
+                guestCartService.updateItem(payload, locale),
               )
-            : await cartService.updateItem({ item: { product_id: productId, quantity: item.quantity, operation, product_variant_id: item.product_variant_id ?? null, shipping_method: "scheduled" } }, locale);
+            : await cartService.updateItem(payload, locale);
           processCart(updatedCart);
         }
       } catch {

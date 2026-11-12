@@ -3,9 +3,9 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useLocale, useTranslations } from "next-intl";
 import { AlertTriangle, CheckCircle2, Clock, Loader2, Package } from "lucide-react";
-import { useRouter as useIntlRouter } from "@/i18n/navigation";
 import { Button } from "@/components/ui/Button";
 import { Price } from "@/components/ui/Price";
+import { checkoutService, isGatewayEligible } from "@/features/checkout";
 import { ApiError } from "@/shared/lib/api";
 import { guestCheckoutService } from "../services/guestCheckoutService";
 import { guestOrderTrackingService } from "../services/guestOrderTrackingService";
@@ -15,6 +15,12 @@ import {
   saveGuestOrderTokens,
 } from "../store/useGuestOrderTokensStore";
 import { runWithGuestSession } from "../utils/guestErrors";
+import {
+  clearIdempotencyKey,
+  getOrCreateIdempotencyKey,
+} from "../utils/idempotency";
+import { saveGuestPaymentReturnNote } from "../utils/paymentReturn";
+import { CopyTrackingLink } from "./CopyTrackingLink";
 import type { GuestOrder } from "../types";
 
 const POLL_INTERVAL_MS = 4000;
@@ -29,22 +35,32 @@ function statusTone(status: string): string {
 
 interface GuestOrderConfirmationProps {
   orderId: number;
+  /** Set when the checkout form could not start the online payment. */
+  paymentRetry?: boolean;
 }
 
-export function GuestOrderConfirmation({ orderId }: GuestOrderConfirmationProps) {
+export function GuestOrderConfirmation({
+  orderId,
+  paymentRetry = false,
+}: GuestOrderConfirmationProps) {
   const t = useTranslations("guestCheckout.confirmation");
   const tc = useTranslations("checkout");
-  const intlRouter = useIntlRouter();
   const locale = useLocale();
 
   const [order, setOrder] = useState<GuestOrder | null>(null);
   const [canCancel, setCanCancel] = useState(false);
+  const [trackingToken, setTrackingToken] = useState<string | null>(null);
+  const [cancelBlocked, setCancelBlocked] = useState(false);
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
+  const [loadErrorStatus, setLoadErrorStatus] = useState<number | null>(null);
   const [cancelling, setCancelling] = useState(false);
   const [cancelError, setCancelError] = useState<string | null>(null);
   const [confirmingPayment, setConfirmingPayment] = useState(false);
+  const [paying, setPaying] = useState(false);
+  const [paymentError, setPaymentError] = useState<string | null>(null);
   const pollCountRef = useRef(0);
+  const tokensSyncedRef = useRef(false);
 
   const load = useCallback(async () => {
     try {
@@ -52,10 +68,21 @@ export function GuestOrderConfirmation({ orderId }: GuestOrderConfirmationProps)
       setOrder(data.order);
       setCanCancel(data.can_cancel);
       setLoadError(null);
+      setLoadErrorStatus(null);
+      // Pending online payments are polled until the backend confirms them;
+      // an explicit retry request skips that wait.
+      setConfirmingPayment(
+        data.order.status !== "cancelled" &&
+          data.order.payment_method === "online" &&
+          data.order.payment_status === "payment-pending" &&
+          !paymentRetry,
+      );
       return data.order;
     } catch (error) {
+      const status = error instanceof ApiError ? error.status : 0;
+      setLoadErrorStatus(status);
       setLoadError(
-        error instanceof ApiError && error.status === 404
+        status === 401 || status === 403 || status === 404
           ? t("notAccessible")
           : tc("errorProcessing"),
       );
@@ -63,18 +90,24 @@ export function GuestOrderConfirmation({ orderId }: GuestOrderConfirmationProps)
     } finally {
       setLoading(false);
     }
-  }, [orderId, locale, t, tc]);
+  }, [orderId, locale, t, tc, paymentRetry]);
 
   useEffect(() => {
-    load();
+    load(); // eslint-disable-line react-hooks/set-state-in-effect
   }, [load]);
 
   // Unresolved online payments: poll — the return redirect is never proof of
   // payment; only the backend state is authoritative (contract §6).
   useEffect(() => {
     if (!order) return;
+    if (order.status === "cancelled") return;
     if (order.payment_method !== "online") return;
     if (order.payment_status !== "payment-pending") return;
+    // The checkout form already knows the payment was never started.
+    if (paymentRetry) {
+      setConfirmingPayment(false); // eslint-disable-line react-hooks/set-state-in-effect
+      return;
+    }
     if (pollCountRef.current >= MAX_POLLS) {
       setConfirmingPayment(false);
       return;
@@ -88,26 +121,57 @@ export function GuestOrderConfirmation({ orderId }: GuestOrderConfirmationProps)
       }
     }, POLL_INTERVAL_MS);
     return () => clearTimeout(timer);
-  }, [order, load]);
+  }, [order, load, paymentRetry]);
 
-  // Recover public tokens when they were lost (e.g. refresh after redirect).
+  // Keep working track/cancel tokens in this browser. Tokens returned by checkout
+  // are unusable, so a stored token is verified and re-issued when invalid.
   useEffect(() => {
-    if (!order) return;
-    const stored = getGuestOrderTokens(orderId);
-    if (stored?.trackingToken) return;
+    if (!order || order.status === "cancelled") return;
+    if (tokensSyncedRef.current) return;
+
     let cancelled = false;
-    runWithGuestSession(locale, () => guestCheckoutService.issueAccessTokens(orderId, locale))
-      .then((tokens) => {
+
+    const syncTokens = async () => {
+      const stored = getGuestOrderTokens(orderId);
+      if (stored?.trackingToken && stored.cancellationToken) {
+        try {
+          await guestOrderTrackingService.track(stored.trackingToken, locale);
+          tokensSyncedRef.current = true;
+          setTrackingToken(stored.trackingToken);
+          return;
+        } catch (error) {
+          // Only re-issue when the token is definitively invalid.
+          if (!(error instanceof ApiError) || error.status !== 404) {
+            tokensSyncedRef.current = true;
+            setTrackingToken(stored.trackingToken);
+            return;
+          }
+        }
+      }
+
+      try {
+        const tokens = await runWithGuestSession(locale, () =>
+          guestCheckoutService.issueAccessTokens(orderId, locale),
+        );
         if (cancelled) return;
-        if (tokens.tracking_revoked) return;
+        tokensSyncedRef.current = true;
+        const issuedTrackingToken = tokens.tracking_revoked
+          ? null
+          : tokens.tracking_token;
+        setTrackingToken(issuedTrackingToken);
         saveGuestOrderTokens({
           orderId,
           orderNumber: order.order_number,
-          trackingToken: tokens.tracking_token,
+          trackingToken: issuedTrackingToken,
           cancellationToken: tokens.cancellation_token,
         });
-      })
-      .catch(() => {});
+      } catch {
+        // Retried on the next visit; the order itself is unaffected.
+      }
+    };
+
+    void syncTokens();
+
     return () => {
       cancelled = true;
     };
@@ -115,22 +179,54 @@ export function GuestOrderConfirmation({ orderId }: GuestOrderConfirmationProps)
 
   const handleCancel = useCallback(async () => {
     if (!order) return;
-    const stored = getGuestOrderTokens(orderId);
+    let stored = getGuestOrderTokens(orderId);
+
+    // The page may still be issuing tokens (or the stored pair is stale).
     if (!stored?.cancellationToken) {
+      try {
+        const tokens = await runWithGuestSession(locale, () =>
+          guestCheckoutService.issueAccessTokens(orderId, locale),
+        );
+        const issuedTrackingToken = tokens.tracking_revoked
+          ? null
+          : tokens.tracking_token;
+        setTrackingToken(issuedTrackingToken);
+        saveGuestOrderTokens({
+          orderId,
+          orderNumber: order.order_number,
+          trackingToken: issuedTrackingToken,
+          cancellationToken: tokens.cancellation_token,
+        });
+        stored = getGuestOrderTokens(orderId);
+      } catch {
+        // Reported below as missing.
+      }
+    }
+
+    const cancellationToken = stored?.cancellationToken ?? null;
+    if (!cancellationToken) {
       setCancelError(t("tokenMissing"));
       return;
     }
+
     setCancelling(true);
     setCancelError(null);
     try {
-      await guestOrderTrackingService.cancel(stored.cancellationToken, locale);
+      await guestOrderTrackingService.cancel(cancellationToken, locale);
       clearGuestOrderTokens(orderId);
+      setCancelBlocked(true);
       await load();
     } catch (error) {
       if (error instanceof ApiError) {
-        if (error.status === 409) setCancelError(t("cancelBlocked"));
-        else if (error.status === 422) setCancelError(t("cancelUsed"));
-        else setCancelError(tc("errorProcessing"));
+        if (error.status === 409) {
+          setCancelError(t("cancelBlocked"));
+          setCancelBlocked(true);
+        } else if (error.status === 422) {
+          setCancelError(t("cancelUsed"));
+          setCancelBlocked(true);
+        } else {
+          setCancelError(tc("errorProcessing"));
+        }
       } else {
         setCancelError(tc("errors.network"));
       }
@@ -138,6 +234,58 @@ export function GuestOrderConfirmation({ orderId }: GuestOrderConfirmationProps)
       setCancelling(false);
     }
   }, [order, orderId, locale, load, t, tc]);
+
+  // Retry online payment after the initial initiation failed. The order and
+  // cart are already consumed — this never resubmits checkout.
+  const handleCompletePayment = useCallback(async () => {
+    if (paying) return;
+    setPaying(true);
+    setPaymentError(null);
+    try {
+      const gateways = await checkoutService.getPaymentGateways(locale);
+      const gateway = gateways.filter(isGatewayEligible)[0]?.code;
+      if (!gateway) {
+        setPaymentError(tc("errors.gatewayUnavailable"));
+        return;
+      }
+
+      const paymentKey = getOrCreateIdempotencyKey(`payment-${orderId}`);
+      const payment = await runWithGuestSession(locale, () =>
+        guestCheckoutService.initiatePayment(
+          orderId,
+          { payment_method: "online", gateway },
+          paymentKey,
+          locale,
+        ),
+      );
+
+      if (payment.url) {
+        saveGuestPaymentReturnNote(orderId);
+        window.location.href = payment.url;
+        return;
+      }
+
+      clearIdempotencyKey(`payment-${orderId}`);
+      await load();
+    } catch (error) {
+      if (error instanceof ApiError) {
+        if (error.status === 409 || error.status === 422) {
+          // The order is no longer payable (paid or cancelled).
+          await load();
+        } else if (error.status === 429) {
+          setPaymentError(tc("errors.tooManyAttempts"));
+        } else if (error.status === 400) {
+          setPaymentError(tc("errors.cartNotFound"));
+        } else {
+          setPaymentError(tc("errorProcessing"));
+        }
+      } else {
+        setPaymentError(tc("errors.network"));
+      }
+    } finally {
+      setPaying(false);
+    }
+  }, [paying, locale, orderId, load, tc]);
 
   if (loading) {
     return (
@@ -148,10 +296,17 @@ export function GuestOrderConfirmation({ orderId }: GuestOrderConfirmationProps)
   }
 
   if (loadError || !order) {
+    const accessDenied =
+      loadErrorStatus === 401 || loadErrorStatus === 403 || loadErrorStatus === 404;
     return (
       <div className="flex flex-col items-center justify-center py-24 text-center">
         <AlertTriangle className="mb-3 h-10 w-10 text-red-400" />
         <p className="text-sm text-text-secondary">{loadError}</p>
+        {!accessDenied && (
+          <Button type="button" variant="outline" className="mt-4" onClick={load}>
+            {tc("retry")}
+          </Button>
+        )}
         <Link
           href="/"
           className="mt-5 inline-flex items-center gap-2 rounded-xl bg-primary px-8 py-3 text-sm font-bold text-white hover:bg-primary-dark"
@@ -163,6 +318,11 @@ export function GuestOrderConfirmation({ orderId }: GuestOrderConfirmationProps)
   }
 
   const cancelled = order.status === "cancelled";
+  const canRetryPayment =
+    order.payment_method === "online" &&
+    order.payment_status === "payment-pending" &&
+    !cancelled &&
+    !confirmingPayment;
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -171,6 +331,12 @@ export function GuestOrderConfirmation({ orderId }: GuestOrderConfirmationProps)
           <div className="flex items-center gap-2 rounded-xl border border-blue-200 bg-blue-50 px-4 py-3 text-sm text-blue-800">
             <Loader2 className="h-4 w-4 shrink-0 animate-spin" />
             {t("confirmingPayment")}
+          </div>
+        )}
+        {paymentError && (
+          <div className="flex items-center gap-2 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+            <AlertTriangle className="h-4 w-4 shrink-0" />
+            {paymentError}
           </div>
         )}
         {cancelError && (
@@ -275,13 +441,26 @@ export function GuestOrderConfirmation({ orderId }: GuestOrderConfirmationProps)
             <Clock className="h-4 w-4" />
             {t("nextSteps")}
           </h3>
+          {canRetryPayment && (
+            <div className="space-y-2 rounded-xl border border-amber-200 bg-amber-50 p-3">
+              <p className="text-xs text-amber-800">{t("paymentRetryHint")}</p>
+              <Button full onClick={handleCompletePayment} loading={paying}>
+                {t("completePayment")}
+              </Button>
+            </div>
+          )}
           <Link
-            href="/track-order"
+            href={
+              trackingToken
+                ? `/track-order#token=${encodeURIComponent(trackingToken)}`
+                : "/track-order"
+            }
             className="block rounded-xl border border-border px-4 py-3 text-sm font-semibold text-text-primary transition-colors hover:border-primary/40 hover:text-primary"
           >
             {t("trackOrder")}
           </Link>
-          {canCancel && !cancelled && (
+          {trackingToken && <CopyTrackingLink token={trackingToken} />}
+          {canCancel && !cancelled && !cancelBlocked && (
             <Button variant="outline" full onClick={handleCancel} loading={cancelling}>
               {t("cancelOrder")}
             </Button>

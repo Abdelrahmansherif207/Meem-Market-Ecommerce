@@ -1,4 +1,4 @@
-> **Feature Progress:** Cart (Not Yet Completed)
+> **Feature Progress:** Guest Checkout (In Progress — flag-gated by `NEXT_PUBLIC_GUEST_CHECKOUT`)
 # Project Architecture & Constraints Blueprint (Feature-First)
 
 This file is the architectural single source of truth for all AI agents, assistants, and LLMs working on this repository. Follow the folder responsibilities and boundary rules below.
