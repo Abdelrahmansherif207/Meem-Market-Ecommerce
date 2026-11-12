@@ -1,4 +1,3 @@
-import { apiFetch } from "@/shared/lib/api";
 import type { ApiResponse } from "@/shared/types";
 import type {
   GuestCheckoutRequest,
@@ -8,6 +7,7 @@ import type {
   GuestPaymentMethod,
   GuestPaymentResult,
 } from "../types";
+import { guestFetch } from "./guestFetch";
 
 const BASE = "/general/guest";
 
@@ -15,10 +15,10 @@ const BASE = "/general/guest";
  * Guest checkout / order access (contract §5–§6).
  *
  * `checkout` and `initiatePayment` must carry an `Idempotency-Key` — the
- * caller generates/reuses it via `utils/idempotency`. CSRF is injected by
- * `src/proxy.ts`. `getOrder` is cookie-owned (confirmation page); access
- * tokens can be re-issued for the owning browser when the raw tokens were
- * lost after a refresh.
+ * caller generates/reuses it via `utils/idempotency`. CSRF is injected by the
+ * proxy or `guestFetch`. `getOrder` is cookie-owned (confirmation page);
+ * access tokens can be re-issued for the owning browser when the raw tokens
+ * were lost after a refresh.
  */
 export const guestCheckoutService = {
   checkout: (
@@ -26,7 +26,7 @@ export const guestCheckoutService = {
     idempotencyKey: string,
     lang?: string,
   ): Promise<GuestCheckoutResult> =>
-    apiFetch<ApiResponse<GuestCheckoutResult>>(`${BASE}/checkout`, {
+    guestFetch<ApiResponse<GuestCheckoutResult>>(`${BASE}/checkout`, {
       method: "POST",
       body: JSON.stringify(payload),
       headers: { "Idempotency-Key": idempotencyKey },
@@ -39,7 +39,7 @@ export const guestCheckoutService = {
     idempotencyKey: string,
     lang?: string,
   ): Promise<GuestPaymentResult> =>
-    apiFetch<ApiResponse<GuestPaymentResult>>(
+    guestFetch<ApiResponse<GuestPaymentResult>>(
       `${BASE}/orders/${orderId}/payment`,
       {
         method: "POST",
@@ -54,7 +54,7 @@ export const guestCheckoutService = {
     orderId: number,
     lang?: string,
   ): Promise<{ order: GuestOrder; can_cancel: boolean }> =>
-    apiFetch<ApiResponse<{ order: GuestOrder; can_cancel: boolean }>>(
+    guestFetch<ApiResponse<{ order: GuestOrder; can_cancel: boolean }>>(
       `${BASE}/orders/${orderId}`,
       { lang },
     ).then((response) => response.data),
@@ -64,7 +64,7 @@ export const guestCheckoutService = {
     orderId: number,
     lang?: string,
   ): Promise<GuestOrderTokensResult> =>
-    apiFetch<ApiResponse<GuestOrderTokensResult>>(
+    guestFetch<ApiResponse<GuestOrderTokensResult>>(
       `${BASE}/orders/${orderId}/access-tokens`,
       { method: "POST", lang },
     ).then((response) => response.data),

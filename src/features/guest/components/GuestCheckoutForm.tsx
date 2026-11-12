@@ -13,6 +13,7 @@ import {
   resolveShippingQuote,
 } from "@/features/checkout";
 import type { PaymentGatewayOption } from "@/features/checkout";
+import { useServerCartStore } from "@/features/cart";
 import { ApiError } from "@/shared/lib/api";
 import { useOnlineStatus } from "@/shared/hooks/useOnlineStatus";
 import { Button } from "@/components/ui/Button";
@@ -33,6 +34,7 @@ import {
 } from "../utils/paymentReturn";
 import type {
   GuestCart,
+  GuestOrderTokensResult,
   GuestPaymentMethod,
 } from "../types";
 
@@ -47,9 +49,7 @@ interface GuestFormState {
   user_email: string;
   governorate_id: number | null;
   city: string;
-  state: string;
-  country: string;
-  street_address: string;
+  street: string;
   notes: string;
   payment_method: GuestPaymentMethod;
 }
@@ -60,12 +60,16 @@ const INITIAL_FORM: GuestFormState = {
   user_email: "",
   governorate_id: null,
   city: "",
-  state: "",
-  country: "",
-  street_address: "",
+  street: "",
   notes: "",
   payment_method: "online",
 };
+
+const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+/** 8–15 digits with an optional leading `+`. */
+const PHONE_PATTERN = /^\+?\d{8,15}$/;
+/** Cooldown after a 429 (checkout is rate-limited to ~6 requests/minute). */
+const RATE_LIMIT_COOLDOWN_SECONDS = 60;
 
 export function GuestCheckoutForm({ taxEnabled = false, taxRate = null }: GuestCheckoutFormProps) {
   const t = useTranslations("guestCheckout");
@@ -75,6 +79,7 @@ export function GuestCheckoutForm({ taxEnabled = false, taxRate = null }: GuestC
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
   const displayCurrency = useDisplayCurrency();
   const isOnline = useOnlineStatus();
+  const setCartBadge = useServerCartStore((s) => s.setTotalQuantity);
 
   // Authenticated users belong on the main checkout.
   useEffect(() => {
@@ -91,9 +96,11 @@ export function GuestCheckoutForm({ taxEnabled = false, taxRate = null }: GuestC
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [apiError, setApiError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  const [cooldown, setCooldown] = useState(0);
 
   const [cart, setCart] = useState<GuestCart | null>(null);
   const [cartLoading, setCartLoading] = useState(true);
+  const [cartError, setCartError] = useState(false);
   const [governorates, setGovernorates] = useState<Awaited<ReturnType<typeof governorateService.getAll>>>([]);
   const [governoratesLoading, setGovernoratesLoading] = useState(true);
   const [governoratesError, setGovernoratesError] = useState(false);
@@ -101,6 +108,17 @@ export function GuestCheckoutForm({ taxEnabled = false, taxRate = null }: GuestC
   const [gatewaysLoading, setGatewaysLoading] = useState(true);
   const [gatewaysError, setGatewaysError] = useState(false);
   const [gateway, setGateway] = useState<string | null>(null);
+
+  // Tick the 429 cooldown down to zero.
+  const coolingDown = cooldown > 0;
+  useEffect(() => {
+    if (!coolingDown) return;
+    const id = window.setInterval(
+      () => setCooldown((seconds) => Math.max(0, seconds - 1)),
+      1000,
+    );
+    return () => window.clearInterval(id);
+  }, [coolingDown]);
 
   const setField = useCallback((field: keyof GuestFormState, value: string | number | null) => {
     setForm((prev) => ({ ...prev, [field]: value }));
@@ -114,19 +132,23 @@ export function GuestCheckoutForm({ taxEnabled = false, taxRate = null }: GuestC
 
   const loadCart = useCallback(async () => {
     setCartLoading(true);
+    setCartError(false);
     try {
       await useGuestSessionStore.getState().ensureSession(locale);
-      const data = await guestCartService.getCart(locale);
+      const data = await runWithGuestSession(locale, () =>
+        guestCartService.getCart(locale),
+      );
       setCart(data);
     } catch {
       setCart(null);
+      setCartError(true);
     } finally {
       setCartLoading(false);
     }
   }, [locale]);
 
   useEffect(() => {
-    loadCart();
+    loadCart(); // eslint-disable-line react-hooks/set-state-in-effect
   }, [loadCart, displayCurrency.code]);
 
   // Governorates + gateways are public general endpoints.
@@ -222,14 +244,22 @@ export function GuestCheckoutForm({ taxEnabled = false, taxRate = null }: GuestC
   const validate = useCallback((): Record<string, string> => {
     const errors: Record<string, string> = {};
     if (!form.name.trim()) errors.name = tc("validation.nameRequired");
-    if (!form.user_phone.trim()) errors.user_phone = tc("validation.phoneRequired");
-    if (!form.user_email.trim()) errors.user_email = tc("validation.emailRequired");
-    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.user_email.trim()))
+
+    const phone = form.user_phone.trim();
+    if (!phone) errors.user_phone = tc("validation.phoneRequired");
+    else if (!PHONE_PATTERN.test(phone)) errors.user_phone = tc("validation.phoneInvalid");
+
+    // Email is optional — only validate it when the shopper provides one.
+    const email = form.user_email.trim();
+    if (email && !EMAIL_PATTERN.test(email)) {
       errors.user_email = tc("validation.emailInvalid");
-    if (!form.governorate_id) errors.governorate_id = tc("validation.governorateRequired");
+    }
+
+    if (!form.governorate_id) {
+      errors.governorate_id = tc("validation.governorateRequired");
+    }
     if (!form.city.trim()) errors.city = tc("validation.cityRequired");
-    if (!form.country.trim()) errors.country = tc("validation.countryRequired");
-    if (!form.street_address.trim()) errors.street_address = tc("validation.streetRequired");
+    if (!form.street.trim()) errors.street = tc("validation.streetRequired");
     return errors;
   }, [form, tc]);
 
@@ -239,6 +269,8 @@ export function GuestCheckoutForm({ taxEnabled = false, taxRate = null }: GuestC
   const handleSubmit = useCallback(
     async (event: React.FormEvent) => {
       event.preventDefault();
+      if (submitting || coolingDown) return;
+
       setApiError(null);
 
       const errors = validate();
@@ -256,20 +288,21 @@ export function GuestCheckoutForm({ taxEnabled = false, taxRate = null }: GuestC
       const payload = {
         name: form.name.trim(),
         user_phone: form.user_phone.trim(),
-        user_email: form.user_email.trim(),
+        ...(form.user_email.trim() ? { user_email: form.user_email.trim() } : {}),
         address: {
+          street: form.street.trim(),
           city: form.city.trim(),
-          state: form.state.trim(),
-          country: form.country.trim(),
-          street_address: form.street_address.trim(),
         },
         notes: form.notes.trim() || undefined,
-        governorate_id: form.governorate_id ?? undefined,
+        governorate_id: form.governorate_id as number,
         fulfillment_type: "delivery" as const,
         payment_method: form.payment_method,
         ...(form.payment_method === "online" && gateway ? { gateway } : {}),
         shipping_type: "local",
       };
+
+      let orderId: number;
+      let orderNumber: string;
 
       try {
         const checkoutKey = getOrCreateIdempotencyKey("checkout");
@@ -278,32 +311,9 @@ export function GuestCheckoutForm({ taxEnabled = false, taxRate = null }: GuestC
         );
         clearIdempotencyKey("checkout");
 
-        saveGuestOrderTokens({
-          orderId: result.order.id,
-          orderNumber: result.order.order_number,
-          trackingToken: result.tracking_token,
-          cancellationToken: result.cancellation_token,
-        });
-
-        const paymentKey = getOrCreateIdempotencyKey(`payment-${result.order.id}`);
-        const payment = await runWithGuestSession(locale, () =>
-          guestCheckoutService.initiatePayment(
-            result.order.id,
-            form.payment_method === "online"
-              ? { payment_method: "online", gateway: gateway ?? undefined }
-              : { payment_method: "cod" },
-            paymentKey,
-            locale,
-          ),
-        );
-        clearIdempotencyKey(`payment-${result.order.id}`);
-
-        if (form.payment_method === "online" && payment.url) {
-          saveGuestPaymentReturnNote(result.order.id);
-          window.location.href = payment.url;
-        } else {
-          intlRouter.push(`/guest-order/${result.order.id}`);
-        }
+        orderId = result.order.id;
+        orderNumber = result.order.order_number;
+        setCartBadge(0);
       } catch (error) {
         if (error instanceof ApiError) {
           // A rejected checkout must not keep its intent key — only genuine
@@ -314,11 +324,14 @@ export function GuestCheckoutForm({ taxEnabled = false, taxRate = null }: GuestC
           if (error.status === 400) {
             setApiError(tc("errors.cartNotFound"));
           } else if (error.status === 429) {
+            setCooldown(RATE_LIMIT_COOLDOWN_SECONDS);
             setApiError(tc("errors.tooManyAttempts"));
           } else if (error.fields && Object.keys(error.fields).length > 0) {
             const mapped: Record<string, string> = {};
             for (const [field, messages] of Object.entries(error.fields)) {
-              const clean = field.replace(/^item\./, "").replace(/^address\./, "");
+              const clean = field
+                .replace(/^item\./, "")
+                .replace(/^address\./, "");
               mapped[clean] = messages[0] ?? tc("errorProcessing");
             }
             setFieldErrors(mapped);
@@ -330,9 +343,70 @@ export function GuestCheckoutForm({ taxEnabled = false, taxRate = null }: GuestC
           setApiError(tc("errors.network"));
         }
         setSubmitting(false);
+        return;
       }
+
+      // Checkout consumed the cart. Re-issue the public tokens: the ones
+      // returned by checkout are known to be unusable for track/cancel.
+      let issuedTokens: GuestOrderTokensResult | null = null;
+      try {
+        issuedTokens = await runWithGuestSession(locale, () =>
+          guestCheckoutService.issueAccessTokens(orderId, locale),
+        );
+      } catch {
+        // Non-fatal — the confirmation page can re-issue them.
+      }
+      saveGuestOrderTokens({
+        orderId,
+        orderNumber,
+        trackingToken: issuedTokens?.tracking_token ?? null,
+        cancellationToken: issuedTokens?.cancellation_token ?? null,
+      });
+
+      let paymentFailed = false;
+      try {
+        const paymentKey = getOrCreateIdempotencyKey(`payment-${orderId}`);
+        const payment = await runWithGuestSession(locale, () =>
+          guestCheckoutService.initiatePayment(
+            orderId,
+            form.payment_method === "online"
+              ? { payment_method: "online", gateway: gateway ?? undefined }
+              : { payment_method: "cod" },
+            paymentKey,
+            locale,
+          ),
+        );
+        clearIdempotencyKey(`payment-${orderId}`);
+
+        if (form.payment_method === "online" && payment.url) {
+          saveGuestPaymentReturnNote(orderId);
+          window.location.href = payment.url;
+          return;
+        }
+      } catch {
+        // The order exists and the cart is gone — never resubmit checkout.
+        // The confirmation page offers a "complete payment" retry instead.
+        paymentFailed = true;
+      }
+
+      intlRouter.push(
+        paymentFailed
+          ? `/guest-order/${orderId}?payment=retry`
+          : `/guest-order/${orderId}`,
+      );
     },
-    [form, gateway, gatewaysError, locale, intlRouter, tc, validate],
+    [
+      submitting,
+      coolingDown,
+      validate,
+      form,
+      gateway,
+      gatewaysError,
+      locale,
+      setCartBadge,
+      intlRouter,
+      tc,
+    ],
   );
 
   // ---------------------------------------------------------------------------
@@ -342,6 +416,18 @@ export function GuestCheckoutForm({ taxEnabled = false, taxRate = null }: GuestC
     return (
       <div className="flex flex-col items-center justify-center py-24 text-center">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
+
+  if (cartError) {
+    return (
+      <div className="flex flex-col items-center justify-center py-24 text-center">
+        <AlertTriangle className="mb-3 h-10 w-10 text-amber-400" />
+        <p className="text-sm text-text-secondary">{t("cartLoadError")}</p>
+        <Button type="button" variant="outline" className="mt-4" onClick={loadCart}>
+          {tc("retry")}
+        </Button>
       </div>
     );
   }
@@ -399,6 +485,7 @@ export function GuestCheckoutForm({ taxEnabled = false, taxRate = null }: GuestC
               name="user_phone"
               type="tel"
               dir="ltr"
+              inputMode="tel"
               value={form.user_phone}
               onChange={(e) => setField("user_phone", e.target.value)}
               error={err("user_phone")}
@@ -406,14 +493,13 @@ export function GuestCheckoutForm({ taxEnabled = false, taxRate = null }: GuestC
             />
           </div>
           <Input
-            label={tc("email")}
+            label={t("emailOptional")}
             name="user_email"
             type="email"
             dir="ltr"
             value={form.user_email}
             onChange={(e) => setField("user_email", e.target.value)}
             error={err("user_email")}
-            required
           />
         </section>
 
@@ -429,6 +515,7 @@ export function GuestCheckoutForm({ taxEnabled = false, taxRate = null }: GuestC
               value={form.governorate_id ?? ""}
               onChange={(e) => setField("governorate_id", e.target.value ? Number(e.target.value) : null)}
               disabled={governoratesLoading}
+              required
               className="w-full rounded-lg border bg-white px-3 py-2.5 text-sm text-text-primary focus:border-primary/50 focus:outline-none disabled:cursor-not-allowed disabled:bg-surface"
             >
               <option value="">
@@ -464,15 +551,7 @@ export function GuestCheckoutForm({ taxEnabled = false, taxRate = null }: GuestC
               {tc("governorateRetry")}
             </button>
           )}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            <Input
-              label={tc("country")}
-              name="country"
-              value={form.country}
-              onChange={(e) => setField("country", e.target.value)}
-              error={err("country")}
-              required
-            />
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <Input
               label={tc("city")}
               name="city"
@@ -482,20 +561,14 @@ export function GuestCheckoutForm({ taxEnabled = false, taxRate = null }: GuestC
               required
             />
             <Input
-              label={t("state")}
-              name="state"
-              value={form.state}
-              onChange={(e) => setField("state", e.target.value)}
+              label={tc("streetAddress")}
+              name="street"
+              value={form.street}
+              onChange={(e) => setField("street", e.target.value)}
+              error={err("street")}
+              required
             />
           </div>
-          <Input
-            label={tc("streetAddress")}
-            name="street_address"
-            value={form.street_address}
-            onChange={(e) => setField("street_address", e.target.value)}
-            error={err("street_address")}
-            required
-          />
           <Input
             label={tc("notes")}
             name="notes"
@@ -631,10 +704,15 @@ export function GuestCheckoutForm({ taxEnabled = false, taxRate = null }: GuestC
             size="lg"
             full
             loading={submitting}
-            disabled={submitting || !isOnline}
+            disabled={submitting || !isOnline || coolingDown}
           >
             {form.payment_method === "cod" ? tc("placeOrderCod") : tc("payNow")}
           </Button>
+          {cooldown > 0 && (
+            <p className="text-center text-xs text-text-secondary">
+              {t("retryIn", { seconds: cooldown })}
+            </p>
+          )}
           {submitting && (
             <p className="text-center text-xs text-text-secondary">{tc("processing")}</p>
           )}

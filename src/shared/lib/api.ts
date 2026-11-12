@@ -78,7 +78,7 @@ function extractApiErrors(body: Record<string, unknown>): Record<string, string[
   return undefined;
 }
 
-type ApiFetchOptions = RequestInit & {
+export type ApiFetchOptions = RequestInit & {
   next?: { revalidate?: false | 0 | number; tags?: string[] };
   lang?: string;
   /** Request timeout in ms. Defaults to 15000. Set to 0 to disable. */
@@ -121,6 +121,18 @@ export async function apiFetch<T>(
 
   if (lang && !headers.has("lang")) {
     headers.set("lang", lang);
+  }
+
+  // Server-side guest calls have no browser Origin. The backend validates
+  // the Origin allowlist for guest writes, so present the canonical site
+  // origin explicitly (the browser bridge does the same in `src/proxy.ts`).
+  if (
+    typeof window === "undefined" &&
+    cleanEndpoint.startsWith("/general/guest") &&
+    !headers.has("Origin")
+  ) {
+    const siteOrigin = process.env.NEXT_PUBLIC_SITE_URL;
+    if (siteOrigin) headers.set("Origin", siteOrigin);
   }
 
   // Guest currency travels via `X-Currency` (no currency cookie exists).

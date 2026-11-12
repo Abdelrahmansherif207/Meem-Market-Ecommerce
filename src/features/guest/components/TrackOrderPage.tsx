@@ -1,5 +1,5 @@
 ﻿"use client";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useLocale, useTranslations } from "next-intl";
 import { AlertTriangle, Loader2, Search } from "lucide-react";
@@ -7,13 +7,18 @@ import { Button } from "@/components/ui/Button";
 import { Input, FieldWrapper } from "@/components/ui/Input";
 import { ApiError } from "@/shared/lib/api";
 import { guestOrderTrackingService } from "../services/guestOrderTrackingService";
-import { findGuestOrderTokensByNumber } from "../store/useGuestOrderTokensStore";
+import {
+  findGuestOrderTokensByNumber,
+  findLatestGuestTrackingToken,
+} from "../store/useGuestOrderTokensStore";
+import { CopyTrackingLink } from "./CopyTrackingLink";
 import type { GuestTrackResult } from "../types";
 
 /**
- * Public order tracking (contract Â§7): the token is submitted in the POST
- * body â€” never placed in the URL. The input is prefilled from tokens the
- * confirmation page saved in this tab, but any valid token works.
+ * Public order tracking (contract §7): the token is submitted in the POST
+ * body. The shareable link keeps it in the URL hash (never sent to the
+ * server), and the input is prefilled from tokens the confirmation page
+ * saved in this browser — any valid token works.
  */
 export function TrackOrderPage() {
   const t = useTranslations("guestCheckout.tracking");
@@ -25,21 +30,37 @@ export function TrackOrderPage() {
   const [error, setError] = useState<string | null>(null);
   const [cancelling, setCancelling] = useState(false);
   const [cancelError, setCancelError] = useState<string | null>(null);
+  const [cancelBlocked, setCancelBlocked] = useState(false);
   const [cancelledDone, setCancelledDone] = useState(false);
+  const [trackedToken, setTrackedToken] = useState<string | null>(null);
+  const [canCancel, setCanCancel] = useState(false);
+  const autoTrackedRef = useRef(false);
 
   const submit = useCallback(
-    async (rawToken: string) => {
+    async (rawToken: string, keepCancelState = false) => {
       const value = rawToken.trim();
       if (!value) return;
       setLoading(true);
       setError(null);
       setCancelError(null);
-      setCancelledDone(false);
+      if (!keepCancelState) {
+        setCancelBlocked(false);
+        setCancelledDone(false);
+      }
       try {
         const data = await guestOrderTrackingService.track(value, locale);
         setResult(data);
+        setTrackedToken(value);
+        setCanCancel(
+          Boolean(
+            findGuestOrderTokensByNumber(data.order.order_number)
+              ?.cancellationToken,
+          ),
+        );
       } catch (err) {
         setResult(null);
+        setTrackedToken(null);
+        setCanCancel(false);
         setError(
           err instanceof ApiError && (err.status === 404 || err.status === 422)
             ? t("invalidToken")
@@ -52,23 +73,28 @@ export function TrackOrderPage() {
     [locale, t],
   );
 
-  // Prefill from a confirmation page in this tab.
+  // Auto-track once: the shareable link carries the token in the hash,
+  // otherwise reuse the latest token the confirmation page stored in this
+  // browser. The same storage also keeps the cancellation token, so the
+  // cancel action survives leaving the confirmation page.
   useEffect(() => {
-    if (typeof window === "undefined") return;
-    try {
-      for (let i = 0; i < window.sessionStorage.length; i += 1) {
-        const key = window.sessionStorage.key(i);
-        if (!key || !key.startsWith("guest-order-tokens:")) continue;
-        const raw = window.sessionStorage.getItem(key);
-        if (!raw) continue;
-        const parsed = JSON.parse(raw) as { trackingToken?: string | null };
-        if (parsed?.trackingToken) {
-          setToken(parsed.trackingToken);
-          submit(parsed.trackingToken);
-          break;
-        }
-      }
-    } catch {}
+    if (typeof window === "undefined" || autoTrackedRef.current) return;
+    autoTrackedRef.current = true;
+
+    const hashToken = new URLSearchParams(window.location.hash.slice(1))
+      .get("token")
+      ?.trim();
+    if (hashToken) {
+      setToken(hashToken); // eslint-disable-line react-hooks/set-state-in-effect
+      submit(hashToken);
+      return;
+    }
+
+    const storedToken = findLatestGuestTrackingToken();
+    if (storedToken) {
+      setToken(storedToken);
+      submit(storedToken);
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -84,19 +110,28 @@ export function TrackOrderPage() {
     try {
       await guestOrderTrackingService.cancel(stored.cancellationToken, locale);
       setCancelledDone(true);
-      await submit(stored.trackingToken ?? "");
+      setCancelBlocked(true);
+      setCanCancel(false);
+      const refreshToken = stored.trackingToken ?? token.trim();
+      if (refreshToken) await submit(refreshToken, true);
     } catch (err) {
       if (err instanceof ApiError) {
-        if (err.status === 409) setCancelError(t("cancelBlocked"));
-        else if (err.status === 422) setCancelError(t("cancelUsed"));
-        else setCancelError(t("errorGeneric"));
+        if (err.status === 409) {
+          setCancelError(t("cancelBlocked"));
+          setCancelBlocked(true);
+        } else if (err.status === 422) {
+          setCancelError(t("cancelUsed"));
+          setCancelBlocked(true);
+        } else {
+          setCancelError(t("errorGeneric"));
+        }
       } else {
         setCancelError(t("errorGeneric"));
       }
     } finally {
       setCancelling(false);
     }
-  }, [result, locale, submit, t]);
+  }, [result, locale, submit, t, token]);
 
   return (
     <div className="mx-auto max-w-2xl space-y-6 py-6">
@@ -164,6 +199,11 @@ export function TrackOrderPage() {
                 {t("expiresAt")}: {new Date(result.tracking_expires_at).toLocaleDateString()}
               </p>
             )}
+            {trackedToken && (
+              <div className="border-t border-border pt-4">
+                <CopyTrackingLink token={trackedToken} />
+              </div>
+            )}
           </div>
 
           {cancelError && (
@@ -201,7 +241,7 @@ export function TrackOrderPage() {
             </ol>
           </div>
 
-          {result.order.status !== "cancelled" && (
+          {canCancel && result.order.status !== "cancelled" && !cancelBlocked && (
             <Button variant="outline" full onClick={handleCancel} loading={cancelling}>
               {t("cancelOrder")}
             </Button>

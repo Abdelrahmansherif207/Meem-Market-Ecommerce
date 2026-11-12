@@ -47,15 +47,15 @@ export type GuestPaymentMethod = "online" | "cod";
 export interface GuestCheckoutRequest {
   name: string;
   user_phone: string;
-  user_email: string;
+  /** Optional — validated on the client only when provided. */
+  user_email?: string;
   address: {
+    street: string;
     city: string;
-    state: string;
-    country: string;
-    street_address: string;
   };
   notes?: string;
-  governorate_id?: number;
+  /** Required by the backend for delivery orders. */
+  governorate_id: number;
   fulfillment_type?: "delivery" | "pickup";
   payment_method?: GuestPaymentMethod;
   gateway?: string;
