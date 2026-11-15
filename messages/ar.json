@@ -94,21 +94,33 @@
   "home": {
     "metaDescription": "تسوق أفضل المنتجات - إلكترونيات، أزياء، منتجات المنزل والمزيد"
   },
-  "catchHeader": {
-    "announcement": "خصم 20% على طلبك الأول باستخدام الكود NEW20",
-    "brandNameAr": "كاتش بيوتي",
-    "brandNameEn": "CATCH BEAUTY",
+  "meemHeader": {
+    "announcement": "توصيل فوري في الرياض — اطلب اليوم واستلم خلال ساعات",
+    "brandNameAr": "سوق ميم الرياض",
+    "brandNameEn": "MEEM MARKET RIYADH",
     "searchPlaceholder": "ماذا تبحث عنه ؟",
-    "awardBadge": "أفضل موقع مكياج في قطر",
     "deliverTo": "التوصيل إلى",
     "profile": "حسابي",
     "language": "اللغة",
     "categories": "التصنيفات",
     "brands": "العلامات التجارية",
     "allProducts": "كل المنتجات",
-    "cart": "السلة"
+    "cart": "السلة",
+    "deliveryModes": {
+      "label": "طريقة التوصيل",
+      "scheduled": "مجدول",
+      "now": "الآن",
+      "unavailable": "غير متاح",
+      "loading": "جارٍ تحميل خيارات التوصيل",
+      "signInRequired": "سجّل الدخول لاستخدام التوصيل الفوري",
+      "etaMinutes": "{count} دقيقة",
+      "etaHours": "{count} ساعة",
+      "etaHoursMinutes": "{hours} ساعة {minutes} دقيقة",
+      "fee": "+{amount}",
+      "free": "مجاني"
+    }
   },
-  "catchHome": {
+  "meemHome": {
     "viewAll": "عرض الكل",
     "productCount": "{count, plural, zero {لا منتجات} one {منتج واحد} two {منتجان} few {# منتجات} many {# منتجًا} other {# منتج}}",
     "addToCart": "أضف إلى السلة",
@@ -121,9 +133,10 @@
     "copyCode": "نسخ كود القسيمة",
     "copied": "تم النسخ",
     "hero": {
-      "eyebrow": "كاتش بيوتي",
-      "title": "المجموعة الجديدة",
-      "cta": "تسوقي المجموعة"
+      "eyebrow": "سوق ميم الرياض",
+      "title": "كل ما تحتاجه يصلك",
+      "subtitle": "توصيل مجدول خلال 3–7 أيام عمل، أو توصيل فوري خلال ساعات في الرياض.",
+      "cta": "تسوق الآن"
     },
     "carousel": {
       "label": "مجموعات مميزة",
@@ -158,19 +171,19 @@
       "callUs": "اتصل بنا"
     }
   },
-  "catchFooter": {
+  "meemFooter": {
     "popularCategories": "التصنيفات الشائعة",
-    "companyTitle": "كاتش بيوتي",
+    "companyTitle": "سوق ميم الرياض",
     "profileTitle": "حسابي",
     "stayConnected": "ابق على تواصل",
     "downloadApps": "حمل تطبيقاتنا",
     "categories": {
-      "makeup": "مكياج",
-      "perfume": "عطور",
-      "care": "عناية",
-      "nails": "أظافر",
-      "accessories": "إكسسوارات",
-      "lenses": "عدسات"
+      "electronics": "إلكترونيات",
+      "fashion": "أزياء",
+      "beauty": "جمال وعناية",
+      "home": "منزل",
+      "grocery": "بقالة",
+      "sports": "رياضة"
     },
     "company": {
       "blogs": "المدونة",
@@ -280,9 +293,13 @@
     "outOfStock": "غير متوفر",
     "loading": "جاري تحميل السلة...",
     "cartItems": "{count, plural, =0 {0 عناصر} one {# عنصر} other {# عناصر}}",
-    "scheduledTitle": "توصيل عادي",
-    "scheduledEta": "3-5 أيام عمل",
-    "freeShippingNote": "يُحسب الشحن المجاني عند إتمام الطلب.",
+    "scheduledTitle": "التوصيل المجدول",
+    "scheduledEta": "3-7 أيام عمل",
+    "fastTitle": "التوصيل الفوري",
+    "fastEta": "يُوصّل خلال ساعات",
+    "checkoutScheduled": "إتمام طلب التوصيل المجدول",
+    "checkoutFast": "إتمام طلب التوصيل الفوري",
+    "couponScheduledOnly": "تُطبق الكوبونات على منتجات التوصيل المجدول فقط.",
     "orderSummary": "ملخص الطلب",
     "discount": "الخصم",
     "inStock": "متوفر",
@@ -803,6 +820,15 @@
       "noNotes": "لا يوجد",
       "summaryHint": "إجمالي طلبك ظاهر دائمًا هنا."
     },
+    "fastDelivery": "توصيل فوري",
+    "fastDeliveryFee": "رسوم التوصيل الفوري",
+    "fastCheckout": "إتمام طلب التوصيل الفوري",
+    "fastEmptyTitle": "لا توجد منتجات للتوصيل الفوري",
+    "fastEmptyDesc": "سلة التوصيل الفوري فارغة. أضف منتجات مع اختيار التوصيل الفوري، أو أتمم طلب منتجاتك المجدولة من السلة.",
+    "groupEmptyTitle": "لا توجد منتجات مجدولة",
+    "groupEmptyDesc": "سلة المنتجات المجدولة فارغة. يمكنك إتمام طلب منتجات التوصيل الفوري بشكل منفصل من السلة.",
+    "fastOnlyNotice": "هذه الصفحة تشمل منتجات التوصيل الفوري فقط. ستبقى المنتجات المجدولة في سلتك.",
+    "scheduledOnlyNotice": "هذه الصفحة تشمل المنتجات المجدولة فقط. ستبقى منتجات التوصيل الفوري في سلتك.",
     "promotionsError": "تعذّر تحميل العروض المتاحة."
   },
   "guestCheckout": {

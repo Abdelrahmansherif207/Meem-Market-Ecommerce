@@ -109,7 +109,7 @@ export default function FlashSaleCard({ item, priority }: FlashSaleCardProps) {
           <div className="flex items-baseline gap-1.5 flex-wrap" dir="ltr">
             <Price
               amount={item.price}
-              className="text-sm font-bold text-text-primary"
+              className="text-sm font-medium text-text-primary"
             />
             {item.originalPrice != null && item.originalPrice > item.price && (
               <>
@@ -117,7 +117,7 @@ export default function FlashSaleCard({ item, priority }: FlashSaleCardProps) {
                   amount={item.originalPrice}
                   className="text-xs text-text-muted line-through"
                 />
-                <span className="text-xs font-semibold text-success">
+                <span className="text-xs font-medium text-success">
                   {discountPercent}%
                 </span>
               </>

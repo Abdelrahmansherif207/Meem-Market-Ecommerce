@@ -410,26 +410,26 @@ export function GuestOrderConfirmation({
                     × {item.quantity}
                   </span>
                 </div>
-                <Price amount={item.total_price} className="text-sm font-semibold text-text-primary" />
+                <Price amount={item.total_price} className="text-sm font-medium text-text-primary" />
               </li>
             ))}
           </ul>
           <div className="space-y-2 border-t border-border pt-3 text-sm">
             <div className="flex items-center justify-between">
               <span className="text-text-secondary">{tc("subtotal")}</span>
-              <Price amount={order.subtotal} />
+              <Price amount={order.subtotal} className="font-medium text-text-primary" />
             </div>
             {(order.shipping_price ?? 0) > 0 && (
               <div className="flex items-center justify-between">
                 <span className="text-text-secondary">{tc("shipping")}</span>
-                <Price amount={order.shipping_price ?? 0} />
+                <Price amount={order.shipping_price ?? 0} className="font-medium text-text-primary" />
               </div>
             )}
             <div className="flex items-center justify-between font-semibold">
               <span className="text-xs font-medium uppercase tracking-wider text-text-secondary">
                 {tc("total")}
               </span>
-              <Price amount={order.total} className="text-base font-bold text-text-primary" />
+              <Price amount={order.total} className="text-base font-medium text-text-primary" />
             </div>
           </div>
         </div>

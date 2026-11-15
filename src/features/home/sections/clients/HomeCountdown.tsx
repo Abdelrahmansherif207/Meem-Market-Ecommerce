@@ -11,8 +11,8 @@ interface HomeCountdownProps {
 }
 
 /**
- * Sovereign Rose glass countdown chip (Stitch: "Daily Flash Deals" timer).
- * Blocks sit on the canvas-deep surface, seconds tinted rose; the whole
+ * Meem glass countdown chip (Stitch: "Daily Flash Deals" timer).
+ * Blocks sit on the canvas-deep surface, seconds tinted blue; the whole
  * chip mounts on a frosted surface. Hides itself once the sale expires.
  */
 export default function HomeCountdown({ endsAt }: HomeCountdownProps) {

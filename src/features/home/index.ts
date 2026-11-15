@@ -1,2 +1,2 @@
 export { HomePage } from "./HomePage";
-export { default as CatchProductCard } from "./redesign/CatchProductCard";
+export { default as MeemProductCard } from "./redesign/MeemProductCard";

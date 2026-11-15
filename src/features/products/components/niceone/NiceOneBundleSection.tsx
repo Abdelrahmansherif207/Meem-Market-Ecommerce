@@ -180,7 +180,7 @@ export function NiceOneBundleSection({ items, pricesLoading = false }: NiceOneBu
               onClick={() => setIndex((i) => clamp(i - 1))}
               aria-label={t("previousSlide")}
               disabled={index === 0}
-              className="absolute top-1/2 start-0 flex size-7 -translate-y-1/2 items-center justify-center text-text-secondary/80 transition hover:text-primary disabled:pointer-events-none disabled:opacity-0 lg:flex"
+              className="absolute top-1/2 start-0 flex size-7 -translate-y-1/2 items-center justify-center text-font-medium text-text-primary transition hover:text-primary disabled:pointer-events-none disabled:opacity-0 lg:flex"
             >
               <PrevChevron className="size-5" aria-hidden />
             </button>
@@ -189,7 +189,7 @@ export function NiceOneBundleSection({ items, pricesLoading = false }: NiceOneBu
               onClick={() => setIndex((i) => clamp(i + 1))}
               aria-label={t("nextSlide")}
               disabled={index === items.length - 1}
-              className="absolute top-1/2 end-0 flex size-7 -translate-y-1/2 items-center justify-center text-text-secondary/80 transition hover:text-primary disabled:pointer-events-none disabled:opacity-0 lg:flex"
+              className="absolute top-1/2 end-0 flex size-7 -translate-y-1/2 items-center justify-center text-font-medium text-text-primary transition hover:text-primary disabled:pointer-events-none disabled:opacity-0 lg:flex"
             >
               <NextChevron className="size-5" aria-hidden />
             </button>
@@ -287,7 +287,7 @@ function NiceOneBundleCard({
               <Skeleton className="h-3 w-16" />
             ) : (
               <>
-                <span className="text-xs font-bold text-discount">
+                <span className="text-xs font-medium text-text-primary">
                   {formatPrice(displayPrice)} <span className="text-[9px]">{currencySymbol}</span>
                 </span>
                 {originalPrice > displayPrice && (
@@ -296,7 +296,7 @@ function NiceOneBundleCard({
                   </span>
                 )}
                 {discountPercent != null && (
-                  <span className="rounded bg-primary-tint px-1 text-[10px] font-bold text-discount">
+                  <span className="rounded bg-discount/10 px-1 text-[10px] font-bold text-discount">
                     -{discountPercent}%
                   </span>
                 )}

@@ -10,6 +10,7 @@ import { cn } from "@/shared/utils/cn";
 import { useCartActions } from "@/features/cart/hooks/useCartActions";
 import { WishlistButton } from "@/features/wishlist/components/WishlistButton";
 import { Price } from "@/components/ui/Price";
+import { badgeToneClass, badgeToneFor } from "@/components/ui/Badge";
 import { QuantityStepper } from "@/components/ui/QuantityStepper";
 
 import type { ProductItem } from "../../types";
@@ -130,18 +131,16 @@ export default function HomeProductCard({
               <ShoppingBag className="size-4" aria-hidden />
             </span>
           ) : quantity > 0 ? (
-            <div className="flex h-9 min-w-[76px] items-center justify-center rounded-lg border border-(--home-stroke) bg-white">
-              <QuantityStepper
-                value={quantity}
-                onIncrement={increment}
-                onDecrement={decrement}
-                decrementAsRemove
-                incrementDisabled={!inStock}
-                disabled={isPending}
-                variant="pill"
-                size="sm"
-              />
-            </div>
+            <QuantityStepper
+              value={quantity}
+              onIncrement={increment}
+              onDecrement={decrement}
+              decrementAsRemove
+              incrementDisabled={!inStock}
+              disabled={isPending}
+              variant="solid"
+              size="sm"
+            />
           ) : selectVariants ? (
             <Link
               href={`/products/${item.slug}`}
@@ -195,9 +194,14 @@ export default function HomeProductCard({
           </h3>
         </Link>
 
-        {/* CMS gold badge (authentic/exclusive-style tag) */}
+        {/* CMS badge — color varies per product */}
         {badgeText && !discountPercent && (
-          <span className="home-gold-glow mt-2 inline-flex w-fit items-center rounded-full bg-(--home-gold) px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-white">
+          <span
+            className={cn(
+              "mt-2 inline-flex w-fit items-center rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide",
+              badgeToneClass(badgeToneFor(item.id, badgeText)),
+            )}
+          >
             {badgeText}
           </span>
         )}
@@ -227,7 +231,7 @@ export default function HomeProductCard({
                 amount={safePrice}
                 currency={item.currency}
                 decimals={2}
-                className="text-[17px] font-extrabold leading-6 text-(--home-vermilion)"
+                className="text-[17px] font-medium leading-6 text-text-primary"
               />
               {discountPercent > 0 && (
                 <span

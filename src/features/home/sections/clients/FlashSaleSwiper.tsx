@@ -19,7 +19,7 @@ interface FlashSaleSwiperProps {
 const AUTO_PLAY_MS = 6000;
 
 /**
- * Sovereign Rose flash-deal banner (Stitch: countdown strip pattern).
+ * Meem flash-deal banner (Stitch: countdown strip pattern).
  * Charcoal-panel creative from the backend flash-sales API with a serif
  * title, one-line description and the glass countdown chip. The whole
  * slide links to the existing flash-sale route.

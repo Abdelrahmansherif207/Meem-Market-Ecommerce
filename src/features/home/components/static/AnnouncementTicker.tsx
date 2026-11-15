@@ -9,7 +9,7 @@ interface AnnouncementTickerProps {
 }
 
 /**
- * Stitch ribbon ticker (full-bleed rose strip directly under the header).
+ * Stitch ribbon ticker (full-bleed blue strip directly under the header).
  * Pure marketing copy about Beauty Week — no API equivalent (static section).
  */
 export default async function AnnouncementTicker({

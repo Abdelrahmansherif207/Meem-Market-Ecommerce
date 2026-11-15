@@ -43,7 +43,7 @@ const clampCols = (value?: number) =>
   Math.max(2, Math.min(8, Math.round(value ?? 5)));
 
 /**
- * Sovereign Rose product rail (Stitch: "Catch Most Wanted" grid family).
+ * Meem product rail (Stitch: "Meem Most Wanted" grid family).
  * Currency-aware when `fetchKind` + `endpoint` are provided; prices-only
  * skeletons during refetch — images, titles and badges stay untouched.
  */

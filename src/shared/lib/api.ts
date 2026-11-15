@@ -78,11 +78,20 @@ function extractApiErrors(body: Record<string, unknown>): Record<string, string[
   return undefined;
 }
 
+/** Delivery channel for mixed-cart scoping. Never sent unless explicit. */
+export type RequestChannel = "home" | "fast-shipping";
+
 export type ApiFetchOptions = RequestInit & {
   next?: { revalidate?: false | 0 | number; tags?: string[] };
   lang?: string;
   /** Request timeout in ms. Defaults to 15000. Set to 0 to disable. */
   timeout?: number;
+  /**
+   * Explicit mixed-cart scope header (`X-Channel`). Only mutation/checkout
+   * calls that operate on a specific delivery group pass this; reads,
+   * settings, cached, coupon and guest calls must omit it.
+   */
+  channel?: RequestChannel | false;
   /**
    * Guest currency code (e.g. `"SAR"`). Normalized to uppercase 3-letter;
    * invalid/missing values omit the `X-Currency` header so the Backend
@@ -108,6 +117,7 @@ export async function apiFetch<T>(
     lang,
     timeout: timeoutMs = 15_000,
     currency: currencyOption,
+    channel,
     ...requestOptions
   } = options;
   const headers = new Headers(requestOptions.headers);
@@ -121,6 +131,12 @@ export async function apiFetch<T>(
 
   if (lang && !headers.has("lang")) {
     headers.set("lang", lang);
+  }
+
+  // Mixed-cart scope: only explicit callers opt in; there is deliberately no
+  // global/channel default so unrelated requests stay channel-agnostic.
+  if (channel && !headers.has("X-Channel")) {
+    headers.set("X-Channel", channel);
   }
 
   // Server-side guest calls have no browser Origin. The backend validates

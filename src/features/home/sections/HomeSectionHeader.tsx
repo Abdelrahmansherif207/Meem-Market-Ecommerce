@@ -4,15 +4,15 @@ interface HomeSectionHeaderProps {
   title: string;
   /** Optional one-line subtitle under the headline (real data only). */
   subtitle?: string;
-  /** Optional icon rendered in the rose square chip (design: flash deals). */
+  /** Optional icon rendered in the blue square chip (design: flash deals). */
   icon?: ReactNode;
   /** Right-side action slot: countdown block, "View All" link, etc. */
   action?: ReactNode;
 }
 
 /**
- * Sovereign Rose section header: editorial serif headline with an optional
- * rose chip icon, subtitle and right-side action (Stitch design pattern).
+ * Meem section header: editorial serif headline with an optional
+ * blue chip icon, subtitle and right-side action (Stitch design pattern).
  */
 export default function HomeSectionHeader({
   title,

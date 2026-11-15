@@ -6,9 +6,9 @@ import { getCachedSettings } from "@/features/settings/services/settingsService"
 import { resolvePromotionVideo } from "@/features/settings/lib/video";
 import { homePageService } from "./services/homePageService";
 import type { HomeContentPage } from "./types";
-import { CatchSectionSuspense } from "./redesign/CatchSectionRenderer";
-import CatchHeroVideoSection from "./redesign/CatchHeroVideoSection";
-import CatchHelpBanner from "./redesign/CatchHelpBanner";
+import { MeemSectionSuspense } from "./redesign/MeemSectionRenderer";
+import MeemHeroSection from "./redesign/MeemHeroSection";
+import MeemHelpBanner from "./redesign/MeemHelpBanner";
 
 export async function HomePage({ locale }: { locale: string }) {
   const result = await guardLoad(() => homePageService.getHomePage(locale), {
@@ -18,7 +18,7 @@ export async function HomePage({ locale }: { locale: string }) {
   if (!result.ok) {
     const te = await getTranslations({ locale, namespace: "error" });
     return (
-      <div className="catch-surface">
+      <div className="meem-surface">
         <main className="mx-auto flex w-full max-w-[1440px] flex-col px-3 py-10 sm:px-4 lg:px-8">
           <ErrorState
             variant="serverError"
@@ -35,25 +35,18 @@ export async function HomePage({ locale }: { locale: string }) {
   const settings = await getCachedSettings(locale);
   const promotionVideo = resolvePromotionVideo(settings.promotion_video_url);
 
-  // A CMS `hero` section wins. Until the backend registers that type, keep the
-  // existing campaign video as a fallback so the homepage never loses its hero.
-  const hasHero = page.sections.some((section) => section.type === "hero");
-  const slidersSection = page.sections.find(
-    (section) => section.type === "sliders",
+  // A CMS `hero` or `sliders` section owns the top of the page. When neither
+  // exists, render the Meem gradient panel so the homepage never loses its hero.
+  const hasHero = page.sections.some(
+    (section) => section.type === "hero" || section.type === "sliders",
   );
 
   return (
-    <div className="catch-surface">
+    <div className="meem-surface">
       <main className="mx-auto flex w-full max-w-[1440px] flex-col gap-y-10 px-3 py-6 sm:gap-y-12 sm:px-4 lg:gap-y-16 lg:px-8">
-        {/* {!hasHero ? (
-          <CatchHeroVideoSection
-            locale={locale}
-            title={slidersSection?.title}
-            promotionVideo={promotionVideo}
-          />
-        ) : null} */}
+        {!hasHero ? <MeemHeroSection locale={locale} /> : null}
         {page.sections.map((section) => (
-          <CatchSectionSuspense
+          <MeemSectionSuspense
             key={section.id}
             section={section}
             locale={locale}
@@ -62,7 +55,7 @@ export async function HomePage({ locale }: { locale: string }) {
         ))}
       </main>
       {/* Screen's static help banner sits between content and footer */}
-      <CatchHelpBanner locale={locale} />
+      <MeemHelpBanner locale={locale} />
     </div>
   );
 }

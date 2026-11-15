@@ -28,12 +28,16 @@ export interface CartItem {
   total: number;
 }
 
+export type DeliveryType = "scheduled" | "fast";
+
 /**
- * Identity of a single cart line. Keyed by product + variant — every
- * lookup / mutation must match the full key, never `product_id` alone.
+ * Identity of a single cart line. The same product may live in the scheduled
+ * AND the fast cart as two independent lines, so every lookup / mutation must
+ * match the full key — never `product_id` alone.
  */
 export interface CartLineIdentity {
   productVariantId?: number | null;
+  deliveryType?: DeliveryType;
 }
 
 /** Stable string key for a cart line (pending flags, React keys). */
@@ -41,16 +45,17 @@ export function getCartLineKey(
   productId: number,
   line?: CartLineIdentity | null,
 ): string {
-  return `${productId}:${line?.productVariantId ?? 0}`;
+  return `${productId}:${line?.productVariantId ?? 0}:${line?.deliveryType ?? "scheduled"}`;
 }
 
 /** True when a stored line matches the given identity (undefined = wildcard). */
 export function matchesCartLine(
-  item: { product_id: number; product_variant_id?: number | null },
+  item: { product_id: number; product_variant_id?: number | null; deliveryType?: DeliveryType },
   productId: number,
   line?: CartLineIdentity | null,
 ): boolean {
   if (item.product_id !== productId) return false;
+  if (line?.deliveryType !== undefined && item.deliveryType !== line.deliveryType) return false;
   if (line?.productVariantId !== undefined && (item.product_variant_id ?? null) !== (line.productVariantId ?? null)) return false;
   return true;
 }
@@ -59,6 +64,7 @@ export interface GuestCartItem {
   product_id: number;
   product_variant_id?: number | null;
   quantity: number;
+  deliveryType: DeliveryType;
   /** Human-readable variant label, e.g. "Color: White / Size: Medium". */
   variant_label?: string | null;
   name: string;
@@ -83,7 +89,7 @@ export interface AddBulkPayload {
     product_id: number;
     quantity: number;
     product_variant_id?: number | null;
-    shipping_method?: "scheduled";
+    shipping_method?: "scheduled" | "fast";
   }>;
 }
 
@@ -134,6 +140,8 @@ export interface CartApiCart {
   coupon_discount: number;
   total_after_coupon: number;
   normal_items: CartApiItem[];
+  fast_items: CartApiItem[];
   normal_items_count: number;
+  fast_items_count: number;
   has_eligible_promotion: boolean;
 }

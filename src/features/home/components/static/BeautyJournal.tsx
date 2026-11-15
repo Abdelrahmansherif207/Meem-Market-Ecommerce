@@ -2,7 +2,7 @@ import Image from "next/image";
 import { getTranslations } from "next-intl/server";
 
 /**
- * Stitch "Catch Beauty Journal" — three editorial story cards. The backend
+ * Stitch "Meem Market Riyadh Journal" — three editorial story cards. The backend
  * has no blog/articles API, so this is a purely decorative static section:
  * visuals and copy ship with the design, and cards are intentionally not
  * links (there is no real destination to point at).

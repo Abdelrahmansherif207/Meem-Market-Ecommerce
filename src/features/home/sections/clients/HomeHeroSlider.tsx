@@ -26,7 +26,7 @@ interface HomeHeroSliderProps {
 const AUTO_PLAY_MS = 5000;
 
 /**
- * Sovereign Rose hero (Stitch: charcoal promo panel — `lg:col-span-8`).
+ * Meem hero (Stitch: charcoal promo panel — `lg:col-span-8`).
  * Full-width panel of the CMS slider creative with the design's charcoal
  * scrim, serif overlay title, hover zoom and glass arrows. The CMS image
  * and title are the only content — nothing is invented.

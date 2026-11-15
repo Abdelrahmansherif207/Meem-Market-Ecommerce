@@ -41,7 +41,7 @@ function PriceBlock({
 }) {
   return (
     <div className="flex min-w-0 max-w-full flex-wrap items-center gap-x-2 gap-y-1">
-      <Price amount={value} className="shrink-0 text-base font-bold sm:text-lg" />
+      <Price amount={value} className="shrink-0 text-base font-medium text-text-primary sm:text-lg" />
       {hasDiscount && (
         <Price
           amount={originalValue}
@@ -49,7 +49,7 @@ function PriceBlock({
         />
       )}
       {hasDiscount && (
-        <span className="shrink-0 rounded bg-error-surface px-1 py-0.5 text-[10px] font-bold whitespace-nowrap text-discount">
+        <span className="shrink-0 rounded bg-discount/10 px-1 py-0.5 text-[10px] font-bold whitespace-nowrap text-discount">
           -{discountPercent}%
         </span>
       )}
@@ -162,7 +162,7 @@ export function ProductCartItem({
         )}
         <Price
           amount={lineTotal}
-          className="shrink-0 text-end text-sm font-bold text-text-primary"
+          className="shrink-0 text-end text-sm font-medium text-text-primary"
         />
       </div>
     </div>

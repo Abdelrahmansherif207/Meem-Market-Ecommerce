@@ -31,10 +31,10 @@ interface HomeDepartmentsSectionProps {
 
 /**
  * "Shop by Department" matched to the approved reference shot: rounded
- * square image tiles (~80px, hairline border → rose border on hover) with
+ * square image tiles (~80px, hairline border → blue border on hover) with
  * muted labels below, a decorative dotted film-strip pinned to the start
  * edge, the serif headline with a crimson "VIEW ALL →", and the two accent
- * tiles — black "New In" (gold sparkles) and deep-rose "Best Deals"
+ * tiles — black "New In" (gold sparkles) and deep-blue "Best Deals"
  * (flame, only when the backend has a live flash sale).
  */
 export default async function HomeDepartmentsSection({
@@ -175,7 +175,7 @@ export default async function HomeDepartmentsSection({
   );
 }
 
-/* ── Square image tile (reference: hairline border → rose on hover) ──── */
+/* ── Square image tile (reference: hairline border → blue on hover) ──── */
 
 function DepartmentChip({
   category,
@@ -221,7 +221,7 @@ function DepartmentChip({
   );
 }
 
-/* ── Accent tiles: black "New In" / deep-rose "Best Deals" ───────────── */
+/* ── Accent tiles: black "New In" / deep-blue "Best Deals" ───────────── */
 
 function AccentTile({
   href,

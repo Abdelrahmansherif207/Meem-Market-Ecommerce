@@ -27,7 +27,7 @@ const navItems: NavItem[] = [
 function CartBadge({ count }: { count: number }) {
   if (count <= 0) return null;
   return (
-    <span className="absolute -right-1 -top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-secondary text-[9px] font-bold text-white px-1">
+    <span className="absolute -right-1 -top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-primary text-[9px] font-bold text-white px-1">
       {count > 99 ? "99+" : count}
     </span>
   );
@@ -51,7 +51,7 @@ export default function MobileBottomNav() {
   const cartCount = isAuthenticated ? serverCartCount : guestCartCount;
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-50 w-full border-t border-catch-border bg-catch-ivory lg:hidden">
+    <nav className="fixed bottom-0 left-0 right-0 z-50 w-full border-t border-meem-border bg-meem-ivory lg:hidden">
       <div className="flex items-center justify-around py-1">
         {navItems.map((item) => (
           <Link

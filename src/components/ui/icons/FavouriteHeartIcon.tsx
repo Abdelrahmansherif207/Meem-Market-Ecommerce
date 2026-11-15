@@ -41,7 +41,7 @@ export default function FavouriteHeartIcon({
       viewBox="0 0 20 18"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
-      className={cn("text-catch-charcoal", className)}
+      className={cn("text-meem-charcoal", className)}
       aria-hidden
     >
       <path

@@ -28,11 +28,13 @@ export const useGuestCartStore = create<GuestCartState>()(
 
       addItem: (item) => {
         const variantId = item.product_variant_id ?? null;
+        const deliveryType = item.deliveryType ?? "scheduled";
         set((state) => {
           const existing = state.items.find(
             (i) =>
               i.product_id === item.product_id &&
-              (i.product_variant_id ?? null) === variantId,
+              (i.product_variant_id ?? null) === variantId &&
+              (i.deliveryType ?? "scheduled") === deliveryType,
           );
           if (existing) {
             return {

@@ -9,7 +9,7 @@ import { cn } from "@/shared/utils/cn";
 import { useCartActions } from "@/features/cart/hooks/useCartActions";
 import type { ProductCurrency } from "@/features/currencies";
 import { WishlistButton } from "@/features/wishlist/components/WishlistButton";
-import { Badge } from "./Badge";
+import { Badge, badgeToneFor } from "./Badge";
 import { Price } from "./Price";
 import { QuantityStepper } from "./QuantityStepper";
 import Skeleton from "./Skeleton";
@@ -108,7 +108,9 @@ export default function ProductCard({
             <Badge tone="discount" className="self-end">{discountPercent}% OFF</Badge>
           ) : null}
           {badgeText ? (
-            <Badge tone="primary" className="self-end">{badgeText}</Badge>
+            <Badge tone={badgeToneFor(productId ?? title, badgeText)} className="self-end">
+              {badgeText}
+            </Badge>
           ) : null}
         </div>
         {showWishlist && (
@@ -170,7 +172,7 @@ export default function ProductCard({
             decrementAsRemove
             incrementDisabled={!isInStock}
             disabled={isPending}
-            variant="pill"
+            variant="solid"
             size="sm"
             className="absolute end-1 bottom-1 z-10"
           />
@@ -233,7 +235,7 @@ export default function ProductCard({
               currency={currency}
               decimals={priceDecimals}
               className={cn(
-                "text-lg font-bold leading-6 md:text-xl",
+                "text-lg font-medium leading-6 md:text-xl",
                 isDark ? "text-white" : "text-text-primary",
               )}
             />

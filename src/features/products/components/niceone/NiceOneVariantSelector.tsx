@@ -69,7 +69,7 @@ export function NiceOneVariantSelector({
               {pricesLoading ? (
                 <Skeleton className="h-3 w-14" />
               ) : (
-                <span className="text-[11px] font-bold text-text-primary">
+                <span className="text-[11px] font-medium text-text-primary">
                   {formatNumber(variant.current_price, locale, decimalPlaces)} {currencySymbol}
                 </span>
               )}

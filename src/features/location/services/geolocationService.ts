@@ -29,7 +29,7 @@ async function reverseGeocode(
   const res = await fetch(
     `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json&accept-language=en`,
     {
-      headers: { "User-Agent": "CatchBeauty/1.0" },
+      headers: { "User-Agent": "MeemMarket/1.0" },
     },
   );
 

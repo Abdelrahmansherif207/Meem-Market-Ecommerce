@@ -4,11 +4,11 @@ import type { CSSProperties, ReactNode } from "react";
 import { NextIntlClientProvider } from "next-intl";
 import { routing } from "@/i18n/routing";
 import { getMessages, setRequestLocale } from "next-intl/server";
-import CatchHeader from "@/features/navigation/components/catch/CatchHeader";
-import CatchMobileHeader from "@/features/navigation/components/catch/CatchMobileHeader";
-import CatchStickyHeader from "@/features/navigation/components/catch/CatchStickyHeader";
+import MeemHeader from "@/features/navigation/components/meem/MeemHeader";
+import MeemMobileHeader from "@/features/navigation/components/meem/MeemMobileHeader";
+import MeemStickyHeader from "@/features/navigation/components/meem/MeemStickyHeader";
 import MobileBottomNav from "@/features/navigation/components/mobile/MobileBottomNav";
-import CatchFooter from "@/features/navigation/components/catch/CatchFooter";
+import MeemFooter from "@/features/navigation/components/meem/MeemFooter";
 import { AuthModal, AuthSyncHandler } from "@/features/auth";
 import { ProfileSyncHandler } from "@/features/profile";
 import { CartSyncProvider } from "@/features/cart/components/CartSyncProvider";
@@ -29,6 +29,7 @@ import {
   getFontPreconnectOrigins,
 } from "@/features/settings/lib/font";
 import { CurrencyProvider, currencyService } from "@/features/currencies";
+import { ChannelThemeProvider } from "@/features/fast-shipping";
 
 export function generateStaticParams() {
   return routing.locales.map((locale) => ({ locale }));
@@ -175,19 +176,20 @@ export default async function RootLayout({
             baseCode={siteCurrencyCode}
             selectionEnabled={currencySelectionEnabled}
           >
-          <CatchStickyHeader
+          <ChannelThemeProvider />
+          <MeemStickyHeader
             settingsLogo={settingsLogo}
             siteName={siteName}
           />
           <div className="hidden lg:block">
-            <CatchHeader
+            <MeemHeader
               params={params}
               settingsLogo={settingsLogo}
               siteName={siteName}
             />
           </div>
           <div className="lg:hidden">
-            <CatchMobileHeader settingsLogo={settingsLogo} siteName={siteName} />
+            <MeemMobileHeader settingsLogo={settingsLogo} siteName={siteName} />
           </div>
           <MobileBottomNav />
           <AuthSyncHandler />
@@ -199,7 +201,7 @@ export default async function RootLayout({
               <div className="container mx-auto flex flex-1 flex-col px-4 pb-[56px] lg:pb-0">
                 {children}
               </div>
-              <CatchFooter params={params} />
+              <MeemFooter params={params} />
             </div>
           </CartSyncProvider>
           <GuestSessionProvider />

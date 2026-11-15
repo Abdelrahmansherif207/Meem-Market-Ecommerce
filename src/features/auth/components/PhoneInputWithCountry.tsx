@@ -6,8 +6,8 @@ import Image from "next/image";
 import { cn } from "@/shared/utils/cn";
 
 const COUNTRIES = [
-  { code: "QA", name: "Qatar", dialCode: "+974" },
   { code: "SA", name: "Saudi Arabia", dialCode: "+966" },
+  { code: "QA", name: "Qatar", dialCode: "+974" },
   { code: "AE", name: "United Arab Emirates", dialCode: "+971" },
   { code: "KW", name: "Kuwait", dialCode: "+965" },
   { code: "EG", name: "Egypt", dialCode: "+20" },

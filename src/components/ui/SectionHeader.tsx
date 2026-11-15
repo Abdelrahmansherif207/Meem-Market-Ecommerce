@@ -34,7 +34,7 @@ export function SectionHeader({
     (actionLabel && actionHref ? (
       <Link
         href={actionHref}
-        className="whitespace-nowrap text-xs font-semibold text-catch-muted underline decoration-catch-rose decoration-2 underline-offset-4 transition-colors hover:text-primary"
+        className="whitespace-nowrap text-xs font-semibold text-meem-muted underline decoration-meem-sky decoration-2 underline-offset-4 transition-colors hover:text-primary"
       >
         {actionLabel}
       </Link>
@@ -44,12 +44,12 @@ export function SectionHeader({
     <div className={cn("flex items-end justify-between gap-4", className)}>
       <div className="min-w-0">
         {title ? (
-          <h2 className="text-lg font-bold tracking-tight text-catch-charcoal sm:text-xl">
+          <h2 className="text-lg font-bold tracking-tight text-meem-charcoal sm:text-xl">
             {title}
           </h2>
         ) : null}
         {subtitle ? (
-          <p className={cn("mt-1 text-xs text-catch-muted", subtitleClassName)}>
+          <p className={cn("mt-1 text-xs text-meem-muted", subtitleClassName)}>
             {subtitle}
           </p>
         ) : null}

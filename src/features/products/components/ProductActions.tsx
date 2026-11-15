@@ -78,7 +78,7 @@ export function ProductActions({ product, selectedVariant, pricesLoading = false
         {pricesLoading ? (
           <Skeleton className="h-7 w-32" />
         ) : (
-          <span className="text-lg font-bold text-text-primary">
+          <span className="text-lg font-medium text-text-primary">
             {formatNumber(price * selectedQuantity, locale, decimalPlaces)} {currencySymbol}
           </span>
         )}

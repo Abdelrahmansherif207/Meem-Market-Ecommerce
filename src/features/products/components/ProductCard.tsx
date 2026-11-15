@@ -8,6 +8,7 @@ import { Link } from "@/i18n/navigation";
 import { cn } from "@/shared/utils/cn";
 import { Price } from "@/components/ui/Price";
 import { QuantityStepper } from "@/components/ui/QuantityStepper";
+import { badgeToneClass, badgeToneFor } from "@/components/ui/Badge";
 import {
   AddToCartIcon,
   FavouriteHeartIcon,
@@ -42,7 +43,7 @@ function titleBrand(title: string): string {
 }
 
 /**
- * Canonical Catch Beauty product card.
+ * Canonical Meem Market Riyadh product card.
  *
  * One card for every listing surface. The whole card navigates through an
  * overlay link; interactive controls are siblings above it, so there are no
@@ -57,7 +58,7 @@ export default function ProductCard({
   variant = "grid",
 }: ProductCardProps) {
   const isList = variant === "list";
-  const t = useTranslations("catchHome");
+  const t = useTranslations("meemHome");
   const tPdp = useTranslations("niceOnePdp");
   const { quantity, isPending, addItem, increment, decrement } =
     useCartActions(item.id);
@@ -120,7 +121,7 @@ export default function ProductCard({
   return (
     <article
       className={cn(
-        "group relative h-full overflow-hidden rounded-2xl border border-catch-border-soft bg-white transition-[box-shadow,transform] duration-200 hover:-translate-y-0.5 hover:shadow-elev-2",
+        "group relative h-full overflow-hidden rounded-2xl border border-meem-border-soft bg-white transition-[box-shadow,transform] duration-200 hover:-translate-y-0.5 hover:shadow-elev-2",
         isList
           ? "grid grid-cols-[6.5rem_minmax(0,1fr)] sm:grid-cols-[8rem_minmax(0,1fr)]"
           : "flex flex-col",
@@ -142,7 +143,7 @@ export default function ProductCard({
       >
         <div className="min-w-0 overflow-hidden pt-0.5">
           {!explicitBadge && item.flashSaleActive ? (
-            <span className="inline-flex h-5 max-w-full min-w-0 items-center overflow-hidden rounded-full bg-primary px-2 text-[10px] leading-none text-white">
+            <span className="inline-flex h-5 max-w-full min-w-0 items-center overflow-hidden rounded-full bg-[#4c1d95] px-2 text-[10px] leading-none text-white">
               <NiceOneCountdown
                 endDate={item.flashEndDate ?? null}
                 alwaysShow
@@ -155,10 +156,10 @@ export default function ProductCard({
             <span
               title={badge}
               className={cn(
-                "inline-flex h-5 max-w-full items-center overflow-hidden rounded-full bg-primary font-semibold leading-none text-white",
+                "inline-flex h-5 max-w-full items-center overflow-hidden rounded-full font-semibold leading-none",
                 isLowStock
-                  ? "px-1.5 text-[9px] sm:px-2 sm:text-[10px]"
-                  : "px-2 text-[10px]",
+                  ? "bg-[#334155] px-1.5 text-[9px] text-white sm:px-2 sm:text-[10px]"
+                  : cn("px-2 text-[10px]", badgeToneClass(badgeToneFor(item.id, badge))),
               )}
             >
               <span className="truncate">{badge}</span>
@@ -173,7 +174,7 @@ export default function ProductCard({
           aria-pressed={inWishlist}
           aria-label={inWishlist ? t("inWishlist") : t("addToWishlist")}
           className={cn(
-            "relative z-20 flex h-8 w-8 shrink-0 cursor-pointer items-center justify-center rounded-full border border-catch-border-soft bg-white text-catch-charcoal shadow-sm transition-all hover:border-catch-rose hover:text-primary active:scale-90",
+            "relative z-20 flex h-8 w-8 shrink-0 cursor-pointer items-center justify-center rounded-full border border-meem-border-soft bg-white text-meem-charcoal shadow-sm transition-all hover:border-meem-sky hover:text-primary active:scale-90",
             wishlistPending && "cursor-not-allowed opacity-60",
           )}
         >
@@ -183,7 +184,7 @@ export default function ProductCard({
 
       <div
         className={cn(
-          "relative overflow-hidden rounded-xl bg-catch-blush",
+          "relative overflow-hidden rounded-xl bg-meem-tint",
           isList
             ? "col-start-1 row-span-2 row-start-1 m-2 me-0 self-center"
             : "mx-3 mt-2",
@@ -200,7 +201,7 @@ export default function ProductCard({
             />
           ) : (
             <div
-              className="absolute inset-3 rounded-lg bg-catch-surface"
+              className="absolute inset-3 rounded-lg bg-meem-surface"
               aria-hidden
             />
           )}
@@ -213,7 +214,7 @@ export default function ProductCard({
               disabled
               className={cn(
                 floatingButtonClass,
-                "cursor-not-allowed border border-catch-border bg-white/90 text-catch-muted-soft",
+                "cursor-not-allowed border border-meem-border bg-white/90 text-meem-muted-soft",
               )}
               aria-label={t("outOfStock")}
             >
@@ -253,7 +254,7 @@ export default function ProductCard({
               decrementAsRemove
               incrementDisabled={item.isInStock === false}
               disabled={isPending}
-              variant="pill"
+              variant="solid"
               size="sm"
             />
           )}
@@ -267,21 +268,21 @@ export default function ProductCard({
         )}
       >
         <div className="flex min-h-4 items-center justify-between gap-2">
-          <span className="truncate text-[10px] font-bold uppercase tracking-[0.08em] text-catch-muted">
+          <span className="truncate text-[10px] font-bold uppercase tracking-[0.08em] text-meem-muted">
             {brandName}
           </span>
           {rating > 0 ? (
-            <span className="flex shrink-0 items-center gap-0.5 rounded-full bg-catch-surface px-1.5 py-0.5 text-[10px] font-semibold text-catch-charcoal">
+            <span className="flex shrink-0 items-center gap-0.5 rounded-full bg-meem-surface px-1.5 py-0.5 text-[10px] font-semibold text-meem-charcoal">
               {rating}
-              <Star className="size-2.5 fill-catch-rose text-catch-rose" />
+              <Star className="size-2.5 fill-meem-sky text-meem-sky" />
               {item.reviewsCount != null && item.reviewsCount > 0 ? (
-                <span className="text-catch-muted">({item.reviewsCount})</span>
+                <span className="text-meem-muted">({item.reviewsCount})</span>
               ) : null}
             </span>
           ) : null}
         </div>
 
-        <h3 className="line-clamp-2 min-h-9 text-xs font-medium leading-[1.45] text-catch-charcoal transition-colors group-hover:text-primary">
+        <h3 className="line-clamp-2 min-h-9 text-xs font-medium leading-[1.45] text-meem-charcoal transition-colors group-hover:text-primary">
           {item.title}
         </h3>
 
@@ -290,7 +291,7 @@ export default function ProductCard({
             {item.tags.slice(0, 2).map((tag) => (
               <span
                 key={tag.id}
-                className="shrink-0 whitespace-nowrap rounded-full bg-catch-surface px-1.5 py-0.5 text-[9px] font-medium leading-4 text-catch-muted"
+                className="shrink-0 whitespace-nowrap rounded-full bg-meem-surface px-1.5 py-0.5 text-[9px] font-medium leading-4 text-meem-muted"
               >
                 #{tag.name}
               </span>
@@ -301,7 +302,7 @@ export default function ProductCard({
         <div className="mt-auto flex items-end justify-between gap-2 pt-1">
           {pricesLoading ? (
             <div
-              className="h-8 w-20 animate-pulse rounded-lg bg-catch-surface"
+              className="h-8 w-20 animate-pulse rounded-lg bg-meem-surface"
               aria-hidden
             />
           ) : (
@@ -310,18 +311,18 @@ export default function ProductCard({
                 <Price
                   amount={safeOriginalPrice}
                   currency={item.currency}
-                  className="block text-[10px] font-medium text-catch-muted-soft line-through"
+                  className="block text-[10px] font-medium text-meem-muted-soft line-through"
                 />
               ) : null}
               <div className="flex items-center gap-1.5">
                 <Price
                   amount={safePrice}
                   currency={item.currency}
-                  className="text-sm font-bold tracking-wide text-primary sm:text-base"
+                  className="text-sm font-medium tracking-wide text-text-primary sm:text-base"
                 />
                 {discountPercent > 0 ? (
                   <span
-                    className="flex h-4 items-center rounded-full bg-catch-blush px-1.5 text-[10px] font-semibold text-primary"
+                    className="flex h-4 items-center rounded-full bg-discount/10 px-1.5 text-[10px] font-semibold text-discount"
                     dir="ltr"
                   >
                     -{discountPercent}%

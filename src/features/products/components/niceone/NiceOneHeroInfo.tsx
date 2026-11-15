@@ -112,9 +112,9 @@ export function NiceOneHeroInfo({ product, selectedVariant, pricesLoading = fals
           </div>
         ) : selectedVariant || !hasVariants ? (
           <>
-            <div className="text-2xl font-extrabold text-discount">
+            <div className="text-2xl font-medium text-text-primary">
               {formatPrice(displayPrice)}
-              <span className="ms-1 text-sm font-bold">{currencySymbol}</span>
+              <span className="ms-1 text-sm font-medium">{currencySymbol}</span>
             </div>
             {hasDiscount && (
               <>
@@ -122,7 +122,7 @@ export function NiceOneHeroInfo({ product, selectedVariant, pricesLoading = fals
                   {formatPrice(originalPrice)} {currencySymbol}
                 </span>
                 {discountPercent != null && (
-                  <span className="rounded-full border border-discount/20 bg-primary-tint px-2 py-0.5 text-xs font-bold text-discount">
+                  <span className="rounded-full border border-discount/20 bg-discount/10 px-2 py-0.5 text-xs font-bold text-discount">
                     -{discountPercent}%
                   </span>
                 )}
@@ -130,20 +130,20 @@ export function NiceOneHeroInfo({ product, selectedVariant, pricesLoading = fals
             )}
           </>
         ) : range!.min === range!.max ? (
-          <div className="text-2xl font-extrabold text-discount">
+          <div className="text-2xl font-medium text-text-primary">
             {formatPrice(range!.min)}
-            <span className="ms-1 text-sm font-bold">{currencySymbol}</span>
+            <span className="ms-1 text-sm font-medium">{currencySymbol}</span>
           </div>
         ) : (
           <div
-            className="text-2xl font-extrabold text-discount"
+            className="text-2xl font-medium text-text-primary"
             aria-label={t("fromPrice", {
               min: `${formatPrice(range!.min)} ${currencySymbol}`,
               max: `${formatPrice(range!.max)} ${currencySymbol}`,
             })}
           >
             {formatPrice(range!.min)} – {formatPrice(range!.max)}
-            <span className="ms-1 text-sm font-bold">{currencySymbol}</span>
+            <span className="ms-1 text-sm font-medium">{currencySymbol}</span>
           </div>
         )}
       </div>

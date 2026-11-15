@@ -72,8 +72,8 @@ export function NiceOneBuyBox({ product, selectedVariant, pricesLoading = false 
           decrementAsRemove
           incrementDisabled={!stock.inStock || cartQuantity >= maxQuantity}
           disabled={isPending}
-          variant="pill"
-          alwaysExpanded
+          variant="solid"
+          className="w-full justify-between"
           incrementLabel={t("increaseQuantity")}
           decrementLabel={t("decreaseQuantity")}
           removeLabel={t("removeItem")}
@@ -104,7 +104,7 @@ export function NiceOneBuyBox({ product, selectedVariant, pricesLoading = false 
           <Skeleton className="h-3 w-20" />
         ) : (
           <>
-            <span className="font-semibold text-text-primary">
+            <span className="font-medium text-text-primary">
               {formatNumber(price * Math.max(cartQuantity, 1), locale, decimalPlaces)} {currencySymbol}
             </span>
             <span className={stock.inStock ? "text-success" : "text-error"}>

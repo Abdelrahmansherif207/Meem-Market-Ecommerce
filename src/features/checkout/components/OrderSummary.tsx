@@ -1,6 +1,6 @@
 "use client";
 import { useTranslations } from "next-intl";
-import { Truck, Minus, Tag, ShoppingBag, Percent } from "lucide-react";
+import { Truck, Minus, Tag, ShoppingBag, Percent, Zap } from "lucide-react";
 import CouponInput from "@/features/coupons/components/CouponInput";
 import CouponBadge from "@/features/coupons/components/CouponBadge";
 import { Price } from "@/components/ui/Price";
@@ -20,6 +20,10 @@ interface OrderSummaryProps {
   /** Site settings: `order_tax_enabled` / `order_tax_rate`. */
   taxEnabled?: boolean;
   taxRate?: number | null;
+  /** NOW checkout: fast-items-only subtotal, no coupons/promotions. */
+  isFast?: boolean;
+  /** `options.fast_shipping.fee` (display currency); null hides the row. */
+  fastFee?: number | null;
 }
 
 export function OrderSummary({
@@ -33,16 +37,23 @@ export function OrderSummary({
   onCouponApplied,
   taxEnabled = false,
   taxRate = null,
+  isFast = false,
+  fastFee = null,
 }: OrderSummaryProps) {
   const t = useTranslations("checkout");
-  const shippingFee = pickupLocationName ? 0 : shipping?.fee ?? 0;
+  const shippingFee = isFast
+    ? fastFee ?? 0
+    : pickupLocationName
+      ? 0
+      : shipping?.fee ?? 0;
   const discountedSubtotal = Math.max(
     0,
     subtotal - promotionDiscount - couponDiscount,
   );
   const taxAmount = calcTaxAmount(discountedSubtotal, taxEnabled, taxRate);
   const total = discountedSubtotal + shippingFee + taxAmount;
-  const estimatedDays = pickupLocationName ? null : shipping?.estimatedDays ?? null;
+  const estimatedDays =
+    isFast || pickupLocationName ? null : shipping?.estimatedDays ?? null;
 
   return (
     <div className="rounded-2xl border-2 border-border bg-white p-5 space-y-4">
@@ -61,7 +72,7 @@ export function OrderSummary({
               {t("subtotal")} ({totalQuantity} {t("items")})
             </span>
           </div>
-          <Price amount={subtotal} className="text-sm font-semibold text-text-primary" />
+          <Price amount={subtotal} className="text-sm font-medium text-text-primary" />
         </div>
 
         {promotionDiscount > 0 && (
@@ -70,7 +81,7 @@ export function OrderSummary({
               <Tag className="h-3.5 w-3.5 text-success shrink-0" />
               <span className="text-sm text-success">{t("promotionDiscount")}</span>
             </div>
-            <Price amount={promotionDiscount} prefix="-" className="text-sm font-semibold text-success" />
+            <Price amount={promotionDiscount} prefix="-" className="text-sm font-medium text-success" />
           </div>
         )}
 
@@ -80,11 +91,32 @@ export function OrderSummary({
               <Minus className="h-3.5 w-3.5 text-success shrink-0" />
               <span className="text-sm text-success">{t("couponDiscount")}</span>
             </div>
-            <Price amount={couponDiscount} prefix="-" className="text-sm font-semibold text-success" />
+            <Price amount={couponDiscount} prefix="-" className="text-sm font-medium text-success" />
           </div>
         )}
 
-        {pickupLocationName ? (
+        {isFast ? (
+          fastFee !== null && fastFee !== undefined ? (
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Zap className="h-3.5 w-3.5 text-text-secondary shrink-0" />
+                <span className="text-sm text-text-secondary">
+                  {t("fastDeliveryFee")}
+                </span>
+              </div>
+              {fastFee > 0 ? (
+                <Price
+                  amount={fastFee}
+                  className="text-sm font-medium text-text-primary"
+                />
+              ) : (
+                <span className="text-sm font-medium text-success">
+                  {t("freeShipping")}
+                </span>
+              )}
+            </div>
+          ) : null
+        ) : pickupLocationName ? (
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <Truck className="h-3.5 w-3.5 text-text-secondary shrink-0" />
@@ -103,7 +135,7 @@ export function OrderSummary({
                   )}
                 </span>
               </div>
-              <span className="text-sm font-semibold text-success">{t("freeShipping")}</span>
+              <span className="text-sm font-medium text-success">{t("freeShipping")}</span>
             </div>
           ) : (
             <div className="flex items-center justify-between">
@@ -116,7 +148,7 @@ export function OrderSummary({
                   )}
                 </span>
               </div>
-              <Price amount={shipping.fee} className="text-sm font-semibold text-text-primary" />
+              <Price amount={shipping.fee} className="text-sm font-medium text-text-primary" />
             </div>
           )
         ) : null}
@@ -131,14 +163,16 @@ export function OrderSummary({
                   : t("tax")}
               </span>
             </div>
-            <Price amount={taxAmount} className="text-sm font-semibold text-text-primary" />
+            <Price amount={taxAmount} className="text-sm font-medium text-text-primary" />
           </div>
         )}
       </div>
 
-      <CouponInput onApplied={onCouponApplied} isAuthenticated={true} />
+      {!isFast && (
+        <CouponInput onApplied={onCouponApplied} isAuthenticated={true} />
+      )}
 
-      {appliedCoupon && (
+      {!isFast && appliedCoupon && (
         <CouponBadge coupon={appliedCoupon} />
       )}
 
@@ -147,7 +181,7 @@ export function OrderSummary({
           <span className="text-xs font-medium uppercase tracking-wider text-text-secondary">
             {t("total")}
           </span>
-          <Price amount={Math.max(0, total)} className="text-lg font-bold text-text-primary" />
+          <Price amount={Math.max(0, total)} className="text-lg font-medium text-text-primary" />
         </div>
         <p className="text-[11px] text-text-secondary text-right mt-1">
           ({totalQuantity} {t("items")})

@@ -13,7 +13,7 @@ interface HomeProductRailSectionProps {
 }
 
 /**
- * `products` CMS type — Sovereign Rose rail (design: "Catch Most Wanted").
+ * `products` CMS type — Meem rail (design: "Meem Most Wanted").
  * Fetches the same endpoint the shared section uses and exposes the same
  * currency-aware refetch island; only the presentation differs.
  */

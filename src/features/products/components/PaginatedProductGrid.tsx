@@ -64,7 +64,7 @@ export default function PaginatedProductGrid({
   itemsPerPage = 12,
   pricesLoading = false,
 }: PaginatedProductGridProps) {
-  const t = useTranslations("catchHome");
+  const t = useTranslations("meemHome");
   const [currentPage, setCurrentPage] = useState(1);
   const totalPages = Math.ceil(products.length / itemsPerPage);
 

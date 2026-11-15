@@ -64,7 +64,7 @@ export function PatternTiles() {
   return (
     <div className="pointer-events-none absolute inset-0 overflow-hidden">
       <div className="absolute inset-0 bg-[linear-gradient(130deg,rgba(255,255,255,0.62),rgba(255,255,255,0.2))]" />
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_15%,rgba(14,90,167,0.12),transparent_30%),radial-gradient(circle_at_78%_20%,rgba(207,158,54,0.14),transparent_33%),radial-gradient(circle_at_40%_84%,rgba(227,0,15,0.09),transparent_28%)]" />
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_15%,rgba(14,90,167,0.12),transparent_30%),radial-gradient(circle_at_78%_20%,rgba(207,158,54,0.14),transparent_33%),radial-gradient(circle_at_40%_84%,rgba(14,90,167,0.09),transparent_28%)]" />
       
       {/* Main tiles */}
       {PATTERN_TILES.map((tile, index) => (

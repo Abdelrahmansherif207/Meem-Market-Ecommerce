@@ -1,6 +1,7 @@
 import { getTranslations } from "next-intl/server";
 import Breadcrumb from "@/components/ui/Breadcrumb";
 import { getCachedSettings } from "@/features/settings/services/settingsService";
+import { getFastShippingStatusFromSettings } from "@/features/fast-shipping/services/fastShippingService";
 import { CheckoutForm } from "./CheckoutForm";
 
 interface CheckoutPageProps {
@@ -11,6 +12,7 @@ export async function CheckoutPage({ locale }: CheckoutPageProps) {
   const t = await getTranslations({ locale, namespace: "checkout" });
   const tb = await getTranslations({ locale, namespace: "header.breadcrumb" });
   const settings = await getCachedSettings(locale);
+  const fastShipping = getFastShippingStatusFromSettings(settings);
 
   return (
     <div className="py-6">
@@ -26,6 +28,7 @@ export async function CheckoutPage({ locale }: CheckoutPageProps) {
           orderTaxEnabled={settings.order_tax_enabled}
           orderTaxRate={settings.order_tax_rate}
           gatewaySettings={settings.payment_gateways}
+          fastShippingFee={fastShipping.fee}
         />
       </div>
     </div>

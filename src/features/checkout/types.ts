@@ -108,6 +108,24 @@ export interface Governorate {
   shipping_price?: GovernorateShippingPrice | null;
 }
 
+/**
+ * NOW checkout payload (POST /general/checkout/fast). Deliberately carries no
+ * payment/gateway/promotion/flow fields — the backend forces delivery +
+ * online payment and only touches FAST cart items.
+ */
+export interface FastCheckoutRequest {
+  name: string;
+  user_phone: string;
+  user_email: string;
+  address: {
+    address: string;
+    city: string;
+    country: string;
+  };
+  notes?: string;
+  governorate_id: number;
+}
+
 export interface CheckoutRequest {
   name: string;
   user_phone: string;

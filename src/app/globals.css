@@ -5,74 +5,73 @@ button {
 }
 
 @theme {
-  /* Velvet crimson/berry red */
-  --color-primary: #b81d24;
-  --color-primary-active: #9d151b;
-  --color-primary-dark: #8c1217;
+  /* Meem brand blue */
+  --color-primary: #0e5aa7;
+  --color-primary-active: #0a4d91;
+  --color-primary-dark: #00387b;
 
-  /* Rich onyx black for solid structure */
-  --color-secondary: #1c1a1a;
-  --color-secondary-dark: #0b0a0a;
+  /* Secondary is an alias of the primary brand blue — no red brand accents */
+  --color-secondary: #0e5aa7;
+  --color-secondary-dark: #0a4d91;
 
-  /* Soft, warm rose-nude accent */
-  --color-accent: #e0b0b0;
-  --color-success: #2d7a4d;
+  /* Meem gold accent */
+  --color-accent: #cf9e36;
+  --color-success: #237f52;
   --color-success-surface: #edf6f0;
   --color-warning: #a3620a;
   --color-warning-surface: #fdf4e7;
   --color-error: #c0392b;
   --color-error-surface: #fbeeed;
 
-  --color-background: #f8f8f8;
-  /* Creamy, warm cosmetic powder surface */
-  --color-surface: #faf6f5;
+  --color-background: #ffffff;
+  /* Cool, blue-tinted surface for Meem cards and panels */
+  --color-surface: #f3f6fa;
 
-  --color-text-primary: #1c1a1a;
-  --color-text-secondary: #706565;
-  --color-text-muted: #9b8f8f;
+  --color-text-primary: #0f1b2d;
+  --color-text-secondary: #5c6b7d;
+  --color-text-muted: #8b98a8;
 
-  /* Warm neutral borders to wrap around product cards */
-  --color-border: #ede4e2;
-  --color-border-light: #e9dedb;
-  --color-border-subtle: #f5eeed;
-  --color-discount: #b81d24;
+  /* Cool blue-gray borders to wrap around product cards */
+  --color-border: #dfe7f0;
+  --color-border-light: #e8eef5;
+  --color-border-subtle: #eef3f9;
+  --color-discount: #bc1e20;
 
-  /* Nice One screen recreation tokens — pink #E90276 mapped to Catch crimson */
-  --color-ink: #1a1a1a;            /* screen dark */
-  --color-page-gray: #f8f9fa;      /* screen grayBg */
-  --color-line: #efefef;           /* screen border #EFEFEF */
-  --color-neutral: #71717a;        /* screen muted */
-  --color-primary-tint: #fbf1f2;   /* screen pinkLight #FDF2F7, crimson-mapped */
-  --color-brand-badge: #c2185b;    /* screen pinkBadge #FF2E93, crimson-mapped */
-  --color-violet-banner: #9674cc;  /* screen help banner purple */
+  /* Nice One screen recreation tokens — mapped to Meem blue */
+  --color-ink: #0f1b2d;            /* screen dark */
+  --color-page-gray: #f7f9fc;      /* screen grayBg */
+  --color-line: #e8eef5;           /* screen border */
+  --color-neutral: #64748b;        /* screen muted */
+  --color-primary-tint: #eaf2fb;   /* screen light tint, primary-mapped */
+  --color-brand-badge: #0e5aa7;    /* screen badge, primary-mapped */
+  --color-violet-banner: #0e5aa7;  /* screen help banner, primary-mapped */
 
   /* Nice One quantity stepper (cards / PDP): count ink + light pill surface.
      Values from the niceonesa.com DOM (count = rgb(55,46,76), pill = #f2f2f2). */
-  --color-qty-ink: #372e4c;
-  --color-qty-surface: #f2f2f2;
+  --color-qty-ink: #0f1b2d;
+  --color-qty-surface: #eef3f9;
 
-  /* Catch Beauty supporting palette — additive only.
-     The primary brand crimson (#b81d24) remains the single primary token. */
-  --color-catch-primary: #b81d24;
-  --color-catch-primary-active: #9d151b;
-  --color-catch-berry: #6e0d1f;
-  --color-catch-berry-deep: #4a0a16;
-  --color-catch-ivory: #fbf7f4;
-  --color-catch-surface: #f6efea;
-  --color-catch-surface-deep: #f2e9e5;
-  --color-catch-blush: #fbf1ee;
-  --color-catch-charcoal: #241c1c;
-  --color-catch-muted: #6f605d;
-  --color-catch-muted-soft: #9a8a86;
-  --color-catch-rose: #d8a7a0;
-  --color-catch-rose-soft: #f3ddd8;
-  --color-catch-border: #e9ddd7;
-  --color-catch-border-soft: #f2e9e5;
+  /* Meem Market Riyadh supporting palette — cool blue-tinted surfaces. */
+  --color-meem-primary: #0e5aa7;
+  --color-meem-primary-active: #0a4d91;
+  --color-meem-deep: #00387b;
+  --color-meem-deepest: #002a5c;
+  --color-meem-ivory: #f7f9fc;
+  --color-meem-surface: #eef3f9;
+  --color-meem-surface-deep: #e4ecf5;
+  --color-meem-tint: #eaf2fb;
+  --color-meem-charcoal: #0f1b2d;
+  --color-meem-muted: #5c6b7d;
+  --color-meem-muted-soft: #8b98a8;
+  --color-meem-sky: #9db6d1;
+  --color-meem-sky-soft: #dbe7f3;
+  --color-meem-border: #dfe7f0;
+  --color-meem-border-soft: #e8eef5;
 
   /* Elevation scale — canonical shadows; prefer these over ad-hoc shadow values */
-  --shadow-elev-1: 0 1px 3px 0 rgba(28, 26, 26, 0.04), 0 1px 2px -1px rgba(28, 26, 26, 0.06);
-  --shadow-elev-2: 0 4px 12px -2px rgba(28, 26, 26, 0.08), 0 2px 4px -2px rgba(28, 26, 26, 0.05);
-  --shadow-elev-3: 0 12px 28px -6px rgba(28, 26, 26, 0.14), 0 4px 10px -6px rgba(28, 26, 26, 0.06);
+  --shadow-elev-1: 0 1px 3px 0 rgba(15, 27, 45, 0.04), 0 1px 2px -1px rgba(15, 27, 45, 0.06);
+  --shadow-elev-2: 0 4px 12px -2px rgba(15, 27, 45, 0.08), 0 2px 4px -2px rgba(15, 27, 45, 0.05);
+  --shadow-elev-3: 0 12px 28px -6px rgba(15, 27, 45, 0.14), 0 4px 10px -6px rgba(15, 27, 45, 0.06);
 
   /* Typography scale — replaces scattered text-[Npx] values */
   --text-2xs: 0.6875rem;   /* 11px — micro metadata, badge text */
@@ -113,7 +112,6 @@ button {
 @layer base {
   body {
     font-family: var(--font-storefront);
-    background: var(--color-background);
     color: var(--color-text-primary);
     -webkit-font-smoothing: antialiased;
   }
@@ -144,45 +142,41 @@ button {
 :root {
   /* Single storefront stack: admin font when configured, IBM Plex otherwise. */
   --font-storefront: var(--font-custom, var(--font-ibm-arabic)), "IBM Plex Sans Arabic", sans-serif;
-  --header-gradient-start: rgb(245, 235, 235);
-  --header-gradient-end: rgb(255, 255, 255);
 }
 
 /*
- * Catch Beauty homepage scope.
+ * Meem Market Riyadh homepage scope.
  *
  * Applied explicitly on the homepage shell (never via `body:has(...)`) so
  * only this page re-tones the shared Tailwind utilities. Primary/discount
- * stay the validated brand crimson; supporting surfaces and text move to
- * the warm berry/ivory palette.
+ * stay the validated Meem blue/red; supporting surfaces and text use the
+ * cool white/blue-gray palette.
  */
-.catch-surface {
-  --color-background: #fbf7f4;
-  --color-surface: #f6efea;
-  --color-border: #e9ddd7;
-  --color-border-light: #f2e9e5;
-  --color-border-subtle: #f2e9e5;
-  --color-text-primary: #241c1c;
-  --color-text-secondary: #6f605d;
-  --color-text-muted: #9a8a86;
-  --color-accent: #d8a7a0;
-  --color-primary-tint: #fbf1ee;
-  --color-page-gray: #fbf7f4;
-  --color-line: #f2e9e5;
-  background-color: var(--color-catch-ivory);
-  color: var(--color-catch-charcoal);
+.meem-surface {
+  --color-surface: #eef3f9;
+  --color-border: #dfe7f0;
+  --color-border-light: #e8eef5;
+  --color-border-subtle: #eef3f9;
+  --color-text-primary: #0f1b2d;
+  --color-text-secondary: #5c6b7d;
+  --color-text-muted: #8b98a8;
+  --color-accent: #cf9e36;
+  --color-primary-tint: #eaf2fb;
+  --color-page-gray: #f7f9fc;
+  --color-line: #e8eef5;
+  color: var(--color-meem-charcoal);
 }
 
-.catch-surface ::selection {
+.meem-surface ::selection {
   background: color-mix(in srgb, var(--color-primary) 16%, transparent);
 }
 
 /* Hero carousel pagination — white pills over campaign artwork. */
-.catch-hero-swiper .swiper-pagination {
+.meem-hero-swiper .swiper-pagination {
   bottom: 14px !important;
 }
 
-.catch-hero-swiper .swiper-pagination-bullet {
+.meem-hero-swiper .swiper-pagination-bullet {
   width: 7px;
   height: 7px;
   margin: 0 3px !important;
@@ -193,18 +187,18 @@ button {
     background-color 0.25s ease;
 }
 
-.catch-hero-swiper .swiper-pagination-bullet-active {
+.meem-hero-swiper .swiper-pagination-bullet-active {
   width: 22px;
   border-radius: 999px;
   background: #fff;
 }
 
-.catch-shelf-swiper .swiper-slide {
+.meem-shelf-swiper .swiper-slide {
   height: auto;
 }
 
 /* Layout-reserving media well for art-directed CMS artwork. */
-.catch-media-well {
+.meem-media-well {
   position: relative;
   width: 100%;
   aspect-ratio: var(--media-aspect, 16 / 9);
@@ -212,20 +206,20 @@ button {
 }
 
 @media (max-width: 767px) {
-  .catch-media-well {
+  .meem-media-well {
     aspect-ratio: var(--media-aspect-mobile, var(--media-aspect, 16 / 9));
   }
 }
 
 /* CMS-driven grid used by brands/coupons: 2 mobile, 4 tablet, N desktop. */
-.catch-cms-grid {
+.meem-cms-grid {
   display: grid;
   grid-template-columns: repeat(var(--cms-cols-mobile, 2), minmax(0, 1fr));
   gap: var(--cms-gap, 0.75rem);
 }
 
 @media (min-width: 768px) {
-  .catch-cms-grid {
+  .meem-cms-grid {
     grid-template-columns: repeat(
       var(--cms-cols-tablet, var(--cms-cols-mobile, 2)),
       minmax(0, 1fr)
@@ -234,7 +228,7 @@ button {
 }
 
 @media (min-width: 1024px) {
-  .catch-cms-grid {
+  .meem-cms-grid {
     grid-template-columns: repeat(
       var(--cms-cols-desktop, 4),
       minmax(0, 1fr)
@@ -244,7 +238,7 @@ button {
 }
 
 /* CMS-ordered category rail: 4 visible mobile, N visible desktop. */
-.catch-category-rail {
+.meem-category-rail {
   display: grid;
   grid-auto-flow: column;
   grid-auto-columns: calc(
@@ -258,16 +252,16 @@ button {
   padding-bottom: 0.25rem;
 }
 
-.catch-category-rail::-webkit-scrollbar {
+.meem-category-rail::-webkit-scrollbar {
   display: none;
 }
 
-.catch-category-rail > * {
+.meem-category-rail > * {
   scroll-snap-align: start;
 }
 
 @media (min-width: 1024px) {
-  .catch-category-rail {
+  .meem-category-rail {
     grid-auto-columns: calc(
       (100% - (var(--cat-cols, 8) - 1) * 1rem) / var(--cat-cols, 8)
     );
@@ -278,18 +272,18 @@ button {
 /* CMS-ordered category grid (default): every category, breakpoint columns.
    `--cat-cols-*` and the tile mode are computed on the server from
    `setting.front`; no client-side breakpoint logic. */
-.catch-category-grid {
+.meem-category-grid {
   display: grid;
   grid-template-columns: repeat(var(--cat-cols-mobile, 4), minmax(0, 1fr));
   gap: 0.75rem;
   align-items: stretch;
 }
 
-.catch-category-grid > * {
+.meem-category-grid > * {
   min-width: 0;
 }
 
-.catch-category-tile {
+.meem-category-tile {
   display: flex;
   min-width: 0;
   flex-direction: column;
@@ -306,11 +300,11 @@ button {
     background-color 180ms ease;
 }
 
-.catch-category-tile:hover {
+.meem-category-tile:hover {
   transform: translateY(-2px);
 }
 
-.catch-category-tile__image {
+.meem-category-tile__image {
   position: relative;
   display: block;
   width: 100%;
@@ -318,50 +312,50 @@ button {
   aspect-ratio: 1 / 1;
   overflow: hidden;
   border-radius: 9999px;
-  background: var(--color-catch-blush);
-  box-shadow: 0 0 0 2px var(--color-catch-border-soft);
+  background: var(--color-meem-tint);
+  box-shadow: 0 0 0 2px var(--color-meem-border-soft);
   transition: box-shadow 180ms ease;
 }
 
 @media (hover: hover) {
-  .catch-category-tile:hover .catch-category-tile__image {
-    box-shadow: 0 0 0 2px var(--color-catch-rose);
+  .meem-category-tile:hover .meem-category-tile__image {
+    box-shadow: 0 0 0 2px var(--color-meem-sky);
   }
 }
 
-.catch-category-tile__name {
+.meem-category-tile__name {
   width: 100%;
   text-align: center;
   font-size: 0.75rem;
   font-weight: 600;
   line-height: 1.25;
-  color: var(--color-catch-charcoal);
+  color: var(--color-meem-charcoal);
   transition: color 180ms ease;
 }
 
-.catch-category-tile:hover .catch-category-tile__name {
+.meem-category-tile:hover .meem-category-tile__name {
   color: var(--color-primary);
 }
 
-.catch-category-tile__count {
+.meem-category-tile__count {
   text-align: center;
   font-size: 0.6875rem;
   line-height: 1.2;
-  color: var(--color-catch-muted);
+  color: var(--color-meem-muted);
 }
 
 @media (min-width: 768px) {
-  .catch-category-grid {
+  .meem-category-grid {
     grid-template-columns: repeat(var(--cat-cols-tablet, 4), minmax(0, 1fr));
   }
 
-  .catch-category-tile__name {
+  .meem-category-tile__name {
     font-size: 0.8125rem;
   }
 }
 
 @media (min-width: 1024px) {
-  .catch-category-grid {
+  .meem-category-grid {
     grid-template-columns: repeat(var(--cat-cols-desktop, 8), minmax(0, 1fr));
     gap: 1rem;
   }
@@ -370,15 +364,15 @@ button {
 /* Card tiles: square shape, or a grid with two or more rows. Borderless
    circular tiles stay the default. */
 @media (max-width: 767px) {
-  .catch-category-grid[data-cat-tile-mobile="card"] .catch-category-tile {
+  .meem-category-grid[data-cat-tile-mobile="card"] .meem-category-tile {
     gap: 0.5rem;
     padding: 0.5rem;
-    border-color: var(--color-catch-border-soft);
+    border-color: var(--color-meem-border-soft);
     background: #fff;
     box-shadow: var(--shadow-elev-1);
   }
 
-  .catch-category-grid[data-cat-tile-mobile="card"] .catch-category-tile__image {
+  .meem-category-grid[data-cat-tile-mobile="card"] .meem-category-tile__image {
     max-width: none;
     border-radius: 0.75rem;
     box-shadow: none;
@@ -386,15 +380,15 @@ button {
 }
 
 @media (min-width: 768px) and (max-width: 1023px) {
-  .catch-category-grid[data-cat-tile-tablet="card"] .catch-category-tile {
+  .meem-category-grid[data-cat-tile-tablet="card"] .meem-category-tile {
     gap: 0.5rem;
     padding: 0.5rem;
-    border-color: var(--color-catch-border-soft);
+    border-color: var(--color-meem-border-soft);
     background: #fff;
     box-shadow: var(--shadow-elev-1);
   }
 
-  .catch-category-grid[data-cat-tile-tablet="card"] .catch-category-tile__image {
+  .meem-category-grid[data-cat-tile-tablet="card"] .meem-category-tile__image {
     max-width: none;
     border-radius: 0.75rem;
     box-shadow: none;
@@ -402,39 +396,39 @@ button {
 }
 
 @media (min-width: 1024px) {
-  .catch-category-grid[data-cat-tile-desktop="card"] .catch-category-tile {
+  .meem-category-grid[data-cat-tile-desktop="card"] .meem-category-tile {
     gap: 0.5rem;
     padding: 0.625rem;
-    border-color: var(--color-catch-border-soft);
+    border-color: var(--color-meem-border-soft);
     background: #fff;
     box-shadow: var(--shadow-elev-1);
   }
 
-  .catch-category-grid[data-cat-tile-desktop="card"] .catch-category-tile__image {
+  .meem-category-grid[data-cat-tile-desktop="card"] .meem-category-tile__image {
     max-width: none;
     border-radius: 0.75rem;
     box-shadow: none;
   }
 
-  .catch-category-grid[data-cat-tile-desktop="card"] .catch-category-tile:hover {
+  .meem-category-grid[data-cat-tile-desktop="card"] .meem-category-tile:hover {
     box-shadow: var(--shadow-elev-2);
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .catch-category-tile,
-  .catch-category-tile__image,
-  .catch-category-tile__name {
+  .meem-category-tile,
+  .meem-category-tile__image,
+  .meem-category-tile__name {
     transition: none;
   }
 
-  .catch-category-tile:hover {
+  .meem-category-tile:hover {
     transform: none;
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .catch-hero-swiper .swiper-pagination-bullet {
+  .meem-hero-swiper .swiper-pagination-bullet {
     transition: none;
   }
 }
@@ -444,9 +438,6 @@ button {
     font-family: var(--font-storefront);
   }
 
-  .header-gradient {
-    background: linear-gradient(var(--header-gradient-start), var(--header-gradient-end));
-  }
   .header-shadow {
     box-shadow: 0 4px 24px 0 rgba(0, 0, 0, 0.06);
   }

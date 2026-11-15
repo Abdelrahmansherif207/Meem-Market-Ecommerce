@@ -94,7 +94,7 @@ export function DeliveryStep({
         {(form.fulfillment_type === "delivery" || isFast) && (
           <div className={isFast ? "space-y-4" : "border-t border-border pt-4 space-y-4"}>
             <h3 className="text-xs font-bold uppercase tracking-wider text-text-secondary">
-              {isFast ? t("fastDelivery") : t("addressTitle")}
+              {t("addressTitle")}
             </h3>
 
             {addressesLoading ? (
@@ -221,6 +221,18 @@ export function DeliveryStep({
               <MapPin className="size-4" aria-hidden="true" />
               {t("pickOnMap")}
             </button>
+          </div>
+        )}
+
+        {isFast && (
+          <div className="space-y-2 border-t border-border pt-4">
+            <label className={labelClass}>{t("notes")}</label>
+            <textarea
+              className={`${inputClass} min-h-[80px] resize-none`}
+              placeholder={t("notesPlaceholder")}
+              value={form.notes}
+              onChange={controller.setField("notes")}
+            />
           </div>
         )}
 

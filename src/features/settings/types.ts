@@ -54,10 +54,25 @@ export interface PaymentGatewayState {
   available: boolean;
 }
 
+/**
+ * Raw `options.fast_shipping` block from `GET /general/settings`. The backend
+ * serializes scalars as strings (e.g. `enabled: "1"`, `fee: "0"`), so every
+ * field stays tolerant and is parsed by the fast-shipping feature.
+ */
+export interface FastShippingOptions {
+  enabled?: string | number | boolean | null;
+  duration_minutes?: string | number | null;
+  fee?: string | number | null;
+  start_hour?: string | null;
+  end_hour?: string | null;
+}
+
 export interface SiteSettingsOptions {
   currency?: string;
   base_currency_code?: string;
   catalog_currency_code?: string;
+  /** Fast (NOW) delivery availability/fee/window. */
+  fast_shipping?: FastShippingOptions | null;
   currency_selection_enabled: boolean;
 }
 
@@ -96,7 +111,7 @@ export type CustomFont =
 
 /**
  * Normalized settings. Branding and contact fields always carry a usable
- * value (locale-aware Catch Beauty defaults when the API omits them or
+ * value (locale-aware Meem Market Riyadh defaults when the API omits them or
  * returns placeholder copy); invalid social / video URLs become `""`.
  */
 export interface SiteSettings {

@@ -94,21 +94,33 @@
   "home": {
     "metaDescription": "Shop the best products — electronics, fashion, home goods, and more."
   },
-  "catchHeader": {
-    "announcement": "20% OFF YOUR FIRST ORDER WITH CODE NEW20",
-    "brandNameAr": "كاتش بيوتي",
-    "brandNameEn": "CATCH BEAUTY",
+  "meemHeader": {
+    "announcement": "NOW delivery across Riyadh — order today, get it within hours",
+    "brandNameAr": "سوق ميم الرياض",
+    "brandNameEn": "MEEM MARKET RIYADH",
     "searchPlaceholder": "What are you looking for ?",
-    "awardBadge": "Best Makeup website in Qatar",
     "deliverTo": "Deliver to",
     "profile": "Profile",
     "language": "Language",
     "categories": "Categories",
     "brands": "Brands",
     "allProducts": "All Products",
-    "cart": "Cart"
+    "cart": "Cart",
+    "deliveryModes": {
+      "label": "Delivery method",
+      "scheduled": "Scheduled",
+      "now": "NOW",
+      "unavailable": "Unavailable",
+      "loading": "Loading delivery options",
+      "signInRequired": "Sign in to use NOW delivery",
+      "etaMinutes": "{count} min",
+      "etaHours": "{count} h",
+      "etaHoursMinutes": "{hours} h {minutes} m",
+      "fee": "+{amount}",
+      "free": "Free"
+    }
   },
-  "catchHome": {
+  "meemHome": {
     "viewAll": "View all",
     "productCount": "{count, plural, one {# product} other {# products}}",
     "addToCart": "Add to cart",
@@ -121,9 +133,10 @@
     "copyCode": "Copy coupon code",
     "copied": "Copied",
     "hero": {
-      "eyebrow": "Catch Beauty",
-      "title": "New Collection",
-      "cta": "Shop the collection"
+      "eyebrow": "Meem Market Riyadh",
+      "title": "Everything you need, delivered",
+      "subtitle": "Scheduled delivery in 3–7 business days, or NOW delivery within hours across Riyadh.",
+      "cta": "Shop now"
     },
     "carousel": {
       "label": "Featured collections",
@@ -158,19 +171,19 @@
       "callUs": "Call us"
     }
   },
-  "catchFooter": {
+  "meemFooter": {
     "popularCategories": "Popular Categories",
-    "companyTitle": "Catch Beauty",
+    "companyTitle": "Meem Market Riyadh",
     "profileTitle": "Profile",
     "stayConnected": "Stay connected",
     "downloadApps": "Download our apps",
     "categories": {
-      "makeup": "Makeup",
-      "perfume": "Perfume",
-      "care": "Care",
-      "nails": "Nails",
-      "accessories": "Accessories",
-      "lenses": "Lenses"
+      "electronics": "Electronics",
+      "fashion": "Fashion",
+      "beauty": "Beauty & Care",
+      "home": "Home",
+      "grocery": "Grocery",
+      "sports": "Sports"
     },
     "company": {
       "blogs": "Blogs",
@@ -281,8 +294,12 @@
     "loading": "Loading cart...",
     "cartItems": "{count, plural, =0 {0 items} one {# item} other {# items}}",
     "scheduledTitle": "Scheduled Delivery",
-    "scheduledEta": "3-5 business days",
-    "freeShippingNote": "Free shipping is calculated at checkout.",
+    "scheduledEta": "3-7 business days",
+    "fastTitle": "NOW Delivery",
+    "fastEta": "Delivered within hours",
+    "checkoutScheduled": "Checkout scheduled items",
+    "checkoutFast": "Checkout NOW items",
+    "couponScheduledOnly": "Coupons apply to scheduled items only.",
     "orderSummary": "Order Summary",
     "discount": "Discount",
     "inStock": "In Stock",
@@ -803,6 +820,15 @@
       "noNotes": "None",
       "summaryHint": "Your order total is always visible here."
     },
+    "fastDelivery": "NOW Delivery",
+    "fastDeliveryFee": "NOW delivery fee",
+    "fastCheckout": "Place NOW order",
+    "fastEmptyTitle": "No NOW delivery items",
+    "fastEmptyDesc": "Your NOW cart is empty. Add items with NOW delivery selected, or check out your scheduled items from the cart.",
+    "groupEmptyTitle": "No scheduled items",
+    "groupEmptyDesc": "Your scheduled cart is empty. Your NOW delivery items can be checked out separately from the cart.",
+    "fastOnlyNotice": "This checkout covers your NOW delivery items only. Scheduled items stay in your cart.",
+    "scheduledOnlyNotice": "This checkout covers your scheduled items only. NOW delivery items stay in your cart.",
     "promotionsError": "Couldn't load available promotions."
   },
   "guestCheckout": {

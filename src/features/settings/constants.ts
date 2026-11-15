@@ -1,5 +1,5 @@
 /**
- * Locale-aware Catch Beauty fallbacks and placeholder guards for
+ * Locale-aware Meem Market Riyadh fallbacks and placeholder guards for
  * `GET /general/settings`.
  *
  * The backend currently returns placeholder copy ("Site Name",
@@ -8,27 +8,27 @@
  */
 
 export const DEFAULT_SITE_NAME: Record<string, string> = {
-  ar: "كاتش بيوتي",
-  en: "Catch Beauty",
+  ar: "سوق ميم الرياض",
+  en: "Meem Market Riyadh",
 };
 
 export const DEFAULT_SITE_DESCRIPTION: Record<string, string> = {
-  ar: "تسوقي أفضل المنتجات في كاتش بيوتي — الجمال والعناية الشخصية والمزيد في قطر",
-  en: "Shop the best products at Catch Beauty — beauty, personal care, and more in Qatar.",
+  ar: "تسوق أفضل المنتجات في سوق ميم الرياض — الجمال والعناية الشخصية والإلكترونيات والأزياء ومنتجات المنزل والمزيد في الرياض",
+  en: "Shop the best products at Meem Market Riyadh — beauty, personal care, electronics, fashion, home goods, and more in Riyadh.",
 };
 
 export const DEFAULT_SITE_COPYRIGHT: Record<string, string> = {
-  ar: "حقوق النشر © 2026 كاتش بيوتي. جميع الحقوق محفوظة",
-  en: "Copyright © 2026 Catch Beauty. All rights reserved",
+  ar: "حقوق النشر © 2026 سوق ميم الرياض. جميع الحقوق محفوظة",
+  en: "Copyright © 2026 Meem Market Riyadh. All rights reserved",
 };
 
-export const DEFAULT_LOGO = "/catch-logo.png";
-export const DEFAULT_FOOTER_LOGO = "/catch-footer-logo.jpeg";
-export const DEFAULT_FAVICON = "/catch-footer-logo.jpeg";
+export const DEFAULT_LOGO = "/meem-new.png";
+export const DEFAULT_FOOTER_LOGO = "/new-footer-logo.png";
+export const DEFAULT_FAVICON = "/meem-icon.jpeg";
 
-export const DEFAULT_SITE_EMAIL = "cs@catchbeauty.com";
-export const DEFAULT_PHONE = "+974 9636 7199";
-export const DEFAULT_WHATSAPP_URL = "https://wa.me/97496367199";
+export const DEFAULT_SITE_EMAIL = "info@meemmarket.com";
+export const DEFAULT_PHONE = "+966 55 000 0000";
+export const DEFAULT_WHATSAPP_URL = "https://wa.me/966550000000";
 
 /** Text values the API uses as placeholders (compared case-insensitively). */
 export const PLACEHOLDER_TEXTS = [

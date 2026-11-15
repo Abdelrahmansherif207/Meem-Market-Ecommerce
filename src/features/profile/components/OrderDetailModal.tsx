@@ -124,13 +124,13 @@ export function OrderDetailModal({ order, open, onClose, onViewInvoice }: OrderD
                     <div className="min-w-0 flex-1">
                       <p className="text-sm font-semibold text-text-primary truncate">{item.product.name}</p>
                       <p className="text-xs text-text-secondary">
-                        {item.quantity} x <Price amount={item.unit_price} currency={detail.currency} />
+                        {item.quantity} x <Price amount={item.unit_price} currency={detail.currency} className="font-medium text-text-primary" />
                       </p>
                     </div>
                     <Price
                       amount={item.total_price}
                       currency={detail.currency}
-                      className="text-sm font-bold text-text-primary shrink-0"
+                      className="text-sm font-medium text-text-primary shrink-0"
                     />
                   </div>
                 ))}
@@ -194,7 +194,7 @@ export function OrderDetailModal({ order, open, onClose, onViewInvoice }: OrderD
                   <Price
                     amount={detail.total}
                     currency={detail.currency}
-                    className="font-bold text-text-primary"
+                    className="font-medium text-text-primary"
                   />
                 </div>
               </div>

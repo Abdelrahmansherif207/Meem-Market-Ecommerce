@@ -674,14 +674,14 @@ export function GuestCheckoutForm({ taxEnabled = false, taxRate = null }: GuestC
               <span className="text-text-secondary">
                 {tc("subtotal")} <span className="text-xs">({totalQuantity} {tc("items")})</span>
               </span>
-              <Price amount={subtotal} />
+              <Price amount={subtotal} className="font-medium text-text-primary" />
             </div>
             <div className="flex items-center justify-between">
               <span className="text-text-secondary">{tc("shipping")}</span>
               {shippingQuote.fee === 0 ? (
                 <span className="text-success text-xs font-semibold">{tc("freeShipping")}</span>
               ) : (
-                <Price amount={shippingQuote.fee} />
+                <Price amount={shippingQuote.fee} className="font-medium text-text-primary" />
               )}
             </div>
             {taxAmount > 0 && (
@@ -689,7 +689,7 @@ export function GuestCheckoutForm({ taxEnabled = false, taxRate = null }: GuestC
                 <span className="text-text-secondary">
                   {taxRate && taxRate > 0 ? tc("taxWithRate", { rate: taxRate }) : tc("tax")}
                 </span>
-                <Price amount={taxAmount} />
+                <Price amount={taxAmount} className="font-medium text-text-primary" />
               </div>
             )}
           </div>
@@ -697,7 +697,7 @@ export function GuestCheckoutForm({ taxEnabled = false, taxRate = null }: GuestC
             <span className="text-xs font-medium uppercase tracking-wider text-text-secondary">
               {tc("total")}
             </span>
-            <Price amount={total} className="text-lg font-bold text-text-primary" />
+            <Price amount={total} className="text-lg font-medium text-text-primary" />
           </div>
           <Button
             type="submit"

@@ -22,7 +22,7 @@ import { calcSubtotal, calcTotalQuantity } from "../utils";
 import type { AppliedCoupon } from "@/features/coupons/types";
 import { couponService } from "@/features/coupons/services/couponService";
 import { ApiError } from "@/shared/lib/api";
-import type { HydratedCartItem, CartApiItem, CartApiCart, CartLineIdentity } from "../types";
+import type { HydratedCartItem, CartApiItem, CartApiCart, CartLineIdentity, DeliveryType } from "../types";
 import { getCartLineKey, matchesCartLine } from "../types";
 import type { GuestCart } from "@/features/guest/types";
 import EmptyState from "@/components/ui/EmptyState";
@@ -207,12 +207,16 @@ export function CartPageContent({
   // processCart — map server cart data into all local state
   // -------------------------------------------------------------------------
   const processCart = useCallback((cart: CartApiCart | GuestCart) => {
-    const mapItem = (item: CartApiItem): HydratedCartItem => {
+    const mapItem = (
+      item: CartApiItem,
+      deliveryType: DeliveryType,
+    ): HydratedCartItem => {
       return {
         product_id: item.product_id,
         product_variant_id: item.product_variant_id ?? null,
         cartItemId: item.id,
         quantity: item.quantity,
+        deliveryType,
         variant_label: item.attributes?.length
           ? item.attributes.map((a) => `${a.attribute}: ${a.value}`).join(" / ")
           : null,
@@ -235,13 +239,10 @@ export function CartPageContent({
     const items: HydratedCartItem[] = [];
 
     if (cart.normal_items) {
-      items.push(...cart.normal_items.map((i) => mapItem(i)));
+      items.push(...cart.normal_items.map((i) => mapItem(i, "scheduled")));
     }
-    // Defensive: backend may still return legacy fast_items — merge into the
-    // single cart instead of dropping them.
-    const legacyFast = (cart as unknown as { fast_items?: CartApiItem[] }).fast_items;
-    if (legacyFast) {
-      items.push(...legacyFast.map((i) => mapItem(i)));
+    if (cart.fast_items) {
+      items.push(...cart.fast_items.map((i) => mapItem(i, "fast")));
     }
 
     dispatch({ type: "SET_SERVER", items });
@@ -396,8 +397,10 @@ export function CartPageContent({
       const item = state.serverItems.find((i) => matchesCartLine(i, productId, line));
       if (!item || !item.cartItemId) return;
       const itemId = item.cartItemId;
+      const deliveryType = item.deliveryType ?? line.deliveryType ?? "scheduled";
       const pendingKey = getCartLineKey(productId, {
         productVariantId: item.product_variant_id ?? null,
+        deliveryType,
       });
       if (state.pendingItemIds.has(pendingKey)) return;
 
@@ -419,7 +422,7 @@ export function CartPageContent({
             if (cart) processCart(cart);
             else dispatch({ type: "SET_SERVER", items: [] });
           } else {
-            await cartService.removeItem(itemId, locale);
+            await cartService.removeItem(itemId, deliveryType, locale);
           }
         } else {
           dispatch({ type: "UPDATE_ITEM", productId, quantity, line });
@@ -430,7 +433,7 @@ export function CartPageContent({
               quantity: delta,
               operation,
               product_variant_id: item.product_variant_id ?? null,
-              shipping_method: "scheduled",
+              shipping_method: deliveryType,
             },
           } as const;
           const updatedCart = guestServerMode
@@ -501,6 +504,7 @@ export function CartPageContent({
   const displayItems: HydratedCartItem[] =
     state.source === "server" ? state.serverItems : guestItems.map((g) => ({
       ...g,
+      deliveryType: g.deliveryType ?? "scheduled",
       name: g.name ?? `Product #${g.product_id}`,
       image: g.image ?? "",
       price: g.price ?? 0,
@@ -511,10 +515,18 @@ export function CartPageContent({
       stock_quantity: g.stock_quantity ?? 0,
     }));
 
-  const subtotal = calcSubtotal(
-    displayItems.map((i) => ({ price: i.current_price, quantity: i.quantity })),
+  const scheduledItems = displayItems.filter(
+    (i) => i.deliveryType === "scheduled",
   );
-  const totalQuantity = calcTotalQuantity(displayItems);
+  const fastItems = displayItems.filter((i) => i.deliveryType === "fast");
+  const scheduledSubtotal = calcSubtotal(
+    scheduledItems.map((i) => ({ price: i.current_price, quantity: i.quantity })),
+  );
+  const fastSubtotal = calcSubtotal(
+    fastItems.map((i) => ({ price: i.current_price, quantity: i.quantity })),
+  );
+  const scheduledQty = calcTotalQuantity(scheduledItems);
+  const fastQty = calcTotalQuantity(fastItems);
 
   // -------------------------------------------------------------------------
   // Render states
@@ -594,7 +606,8 @@ export function CartPageContent({
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           <div className="lg:col-span-2 space-y-8">
             <CartSection
-              items={displayItems}
+              deliveryType="scheduled"
+              items={scheduledItems}
               pendingItemIds={state.pendingItemIds}
               onUpdateQuantity={handleUpdateQuantity}
               onRemove={handleRemove}
@@ -608,6 +621,14 @@ export function CartPageContent({
                 ) : null
               }
             />
+            <CartSection
+              deliveryType="fast"
+              items={fastItems}
+              pendingItemIds={state.pendingItemIds}
+              onUpdateQuantity={handleUpdateQuantity}
+              onRemove={handleRemove}
+              minimumOrderAmount={minimumOrderAmount}
+            />
           </div>
 
           <div className="lg:col-span-1">
@@ -616,8 +637,10 @@ export function CartPageContent({
               style={stickyTop !== null ? { top: stickyTop } : undefined}
             >
               <CartSummary
-                subtotal={subtotal}
-                quantity={totalQuantity}
+                scheduledSubtotal={scheduledSubtotal}
+                scheduledQty={scheduledQty}
+                fastSubtotal={fastSubtotal}
+                fastQty={fastQty}
                 appliedCoupon={appliedCoupon}
                 couponDiscount={couponDiscount}
                 taxEnabled={taxEnabled}

@@ -1,10 +1,22 @@
-import { apiFetch } from "@/shared/lib/api";
+import { apiFetch, type RequestChannel } from "@/shared/lib/api";
 import type { ApiResponse, PaginatedData } from "@/shared/types";
 import type {
   CartApiCart,
   CartItem,
   AddBulkPayload,
+  DeliveryType,
 } from "../types";
+
+/**
+ * Mixed cart scoping: every mutation names its delivery group explicitly and
+ * also sends `X-Channel`, so the backend can never apply it to the other
+ * group. Reads/coupons/guest calls deliberately omit the header.
+ */
+function channelForDelivery(
+  deliveryType: DeliveryType | null | undefined,
+): RequestChannel {
+  return deliveryType === "fast" ? "fast-shipping" : "home";
+}
 
 export const cartService = {
   getCart: async (lang?: string): Promise<CartApiCart | null> => {
@@ -17,7 +29,7 @@ export const cartService = {
       product_id: number;
       quantity: number;
       product_variant_id?: number | null;
-      shipping_method?: "scheduled";
+      shipping_method?: DeliveryType;
     },
     lang?: string,
   ): Promise<CartItem> => {
@@ -25,6 +37,7 @@ export const cartService = {
       method: "POST",
       body: JSON.stringify({ item: payload }),
       lang,
+      channel: channelForDelivery(payload.shipping_method),
     });
     return response.data;
   },
@@ -36,7 +49,7 @@ export const cartService = {
         quantity: number;
         operation: "increment" | "decrement";
         product_variant_id?: number | null;
-        shipping_method?: "scheduled";
+        shipping_method?: DeliveryType;
       };
     },
     lang?: string,
@@ -45,23 +58,34 @@ export const cartService = {
       method: "PUT",
       body: JSON.stringify(payload),
       lang,
+      channel: channelForDelivery(payload.item.shipping_method),
     });
     return response.data;
   },
 
-  removeItem: async (itemId: number, lang?: string): Promise<void> => {
+  removeItem: async (
+    itemId: number,
+    deliveryType: DeliveryType = "scheduled",
+    lang?: string,
+  ): Promise<void> => {
     await apiFetch<ApiResponse<{ message: string }>>("/cart/delete-items", {
       method: "DELETE",
       body: JSON.stringify({ item_id: itemId }),
       lang,
+      channel: channelForDelivery(deliveryType),
     });
   },
 
+  /**
+   * Guest → authenticated bulk upload. Guests are scheduled-only, so this is
+   * intentionally channel-agnostic.
+   */
   addBulkToCart: async (payload: AddBulkPayload, lang?: string): Promise<void> => {
     await apiFetch<ApiResponse<{ message: string }>>("/cart/bulk-items", {
       method: "POST",
       body: JSON.stringify(payload),
       lang,
+      channel: false,
     });
   },
 };

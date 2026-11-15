@@ -1,7 +1,7 @@
 import Skeleton from "@/components/ui/Skeleton";
 
 /**
- * Homepage-only skeletons matching the Sovereign Rose section shapes.
+ * Homepage-only skeletons matching the Meem section shapes.
  * Shared skeletons used by `app/[locale]/loading.tsx` are untouched.
  */
 

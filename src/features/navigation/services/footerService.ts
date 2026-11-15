@@ -122,7 +122,7 @@ function getMockFooterData(lang: string): FooterData {
         id: 3,
         title: isAr ? "معلومات عنا" : "About Us",
         links: [
-          { id: 6, label: isAr ? "عن كاتش بيوتي" : "About Catch Beauty", slug: "/info/about" },
+          { id: 6, label: isAr ? "عن سوق ميم الرياض" : "About Meem Market Riyadh", slug: "/info/about" },
           { id: 7, label: isAr ? "شركتنا" : "Our Company", slug: "/info/company" },
           { id: 8, label: isAr ? "المسؤولية المجتمعية" : "Community & Society", slug: "/info/community" },
           { id: 9, label: isAr ? "النشرة البريدية" : "Newsletter", slug: "/info/newsletter" },
@@ -155,10 +155,10 @@ function getMockFooterData(lang: string): FooterData {
     socialLinks: [],
     contactInfo: {
       stayInTouchText: isAr ? "ابق على تواصل معنا" : "Stay in touch with us",
-      whatsappUrl: "https://wa.me/97496367199",
+      whatsappUrl: "https://wa.me/966550000000",
       assistanceText: isAr ? "تحدث معنا للمساعدة" : "Have a question? We are here to help.",
       callUsText: isAr ? "اتصل بنا للمساعدة" : "Call us for assistance",
-      phoneNumber: "+974 9636 7199",
+      phoneNumber: "+966 55 000 0000",
     },
     bottomRow: {
       title: isAr ? "حمل تطبيقنا" : "Download Our App",

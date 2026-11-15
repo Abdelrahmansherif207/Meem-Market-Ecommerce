@@ -94,7 +94,7 @@ export function ProductInfo({ product, selectedVariant, pricesLoading = false }:
           </div>
         ) : selectedVariant || !hasVariants ? (
           <>
-            <span className="text-3xl font-bold text-text-primary">
+            <span className="text-3xl font-medium text-text-primary">
               {formatNumber(displayPrice, locale, decimalPlaces)} {currencySymbol}
             </span>
             {hasDiscount && (
@@ -111,11 +111,11 @@ export function ProductInfo({ product, selectedVariant, pricesLoading = false }:
             )}
           </>
         ) : range!.min === range!.max ? (
-          <span className="text-3xl font-bold text-text-primary">
+          <span className="text-3xl font-medium text-text-primary">
             {formatNumber(range!.min, locale, decimalPlaces)} {currencySymbol}
           </span>
         ) : (
-          <span className="text-3xl font-bold text-text-primary">
+          <span className="text-3xl font-medium text-text-primary">
             {t("fromPrice", {
               min: `${formatNumber(range!.min, locale, decimalPlaces)} ${currencySymbol}`,
               max: `${formatNumber(range!.max, locale, decimalPlaces)} ${currencySymbol}`,

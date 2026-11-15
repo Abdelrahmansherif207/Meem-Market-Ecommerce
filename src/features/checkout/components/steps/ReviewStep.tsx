@@ -75,7 +75,9 @@ export function ReviewStep({
   const shippingTypeLabel = form.shipping_type === "international" ? t("shippingType.international") : t("shippingType.local");
   const fulfillmentLabel =
     isFast || form.fulfillment_type === "delivery"
-      ? t("delivery")
+      ? isFast
+        ? t("fastDelivery")
+        : t("delivery")
       : `${t("pickup")}${pickupLocationName ? ` — ${pickupLocationName}` : ""}`;
 
   const selectedGovernorate = governorates.find((g) => g.id === selectedGovernorateId);
@@ -119,11 +121,13 @@ export function ReviewStep({
             value={[form.name, form.user_phone, form.user_email].filter((v) => v.trim()).join("\n")}
             onEdit={() => onEdit("contact")}
           />
-          <ReviewRow
-            label={t("shippingType")}
-            value={shippingTypeLabel}
-            onEdit={() => onEdit("contact")}
-          />
+          {!isFast && (
+            <ReviewRow
+              label={t("shippingType")}
+              value={shippingTypeLabel}
+              onEdit={() => onEdit("contact")}
+            />
+          )}
           <ReviewRow
             label={t("fulfillmentType")}
             value={fulfillmentLabel}
@@ -158,7 +162,7 @@ export function ReviewStep({
           <ReviewRow
             label={t("notes")}
             value={form.notes.trim() || t("review.noNotes")}
-            onEdit={() => onEdit("payment")}
+            onEdit={() => onEdit(isFast ? "delivery" : "payment")}
             last
           />
         </div>

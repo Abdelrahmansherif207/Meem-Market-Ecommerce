@@ -25,7 +25,7 @@ interface HomeFlashSalesSectionProps {
 }
 
 /**
- * `flash-sales` — Sovereign Rose rose-tinted frame (Stitch: "Daily Flash
+ * `flash-sales` — Meem blue-tinted frame (Stitch: "Daily Flash
  * Deals"): icon chip, CMS title + sale description, live glass countdown
  * from the real `end_date`, and a currency-aware product rail. Endpoint,
  * settings and data mapping are identical to the shared section.
@@ -70,7 +70,7 @@ export async function HomeFlashSalesSection({
   return (
     <section className="home-container">
       <div className="home-flash-frame home-shadow-float">
-        {/* Stitch header row: rose bolt chip + title + "Limited Stocks" pill */}
+        {/* Stitch header row: blue bolt chip + title + "Limited Stocks" pill */}
         <div className="flex flex-col gap-3 pb-4 md:flex-row md:items-center md:justify-between">
           <div className="flex items-center gap-3">
             <span className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-(--home-rose) text-white shadow-sm">

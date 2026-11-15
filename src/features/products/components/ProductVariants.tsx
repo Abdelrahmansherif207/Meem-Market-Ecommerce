@@ -78,7 +78,7 @@ export function ProductVariants({
               {pricesLoading ? (
                 <Skeleton className="h-4 w-16" />
               ) : (
-                <span className="text-sm font-bold text-text-primary">
+                <span className="text-sm font-medium text-text-primary">
                   {formatNumber(variant.current_price, locale, decimalPlaces)} {currencySymbol}
                 </span>
               )}

@@ -9,18 +9,27 @@ interface ContactStepProps {
   form: CheckoutFormData;
   controller: CheckoutFormController;
   availableShippingTypes: ShippingType[];
+  /** NOW checkout is local delivery only — no shipping-type choice. */
+  isFast?: boolean;
 }
 
-export function ContactStep({ form, controller, availableShippingTypes }: ContactStepProps) {
+export function ContactStep({
+  form,
+  controller,
+  availableShippingTypes,
+  isFast = false,
+}: ContactStepProps) {
   const t = useTranslations("checkout");
 
   return (
     <div className="space-y-6">
-      <ShippingTypeSelector
-        value={form.shipping_type}
-        available={availableShippingTypes}
-        onChange={controller.setShippingType}
-      />
+      {!isFast && (
+        <ShippingTypeSelector
+          value={form.shipping_type}
+          available={availableShippingTypes}
+          onChange={controller.setShippingType}
+        />
+      )}
 
       <div className="rounded-2xl border-2 border-border bg-white p-6 space-y-5">
         <SectionHeader title={t("contactInfo")} />

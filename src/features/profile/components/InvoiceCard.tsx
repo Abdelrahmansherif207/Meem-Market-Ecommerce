@@ -46,7 +46,7 @@ export function InvoiceCard({ invoice, onViewDetails }: InvoiceCardProps) {
           <Price
             amount={invoice.total}
             currency={invoice.currency}
-            className="text-sm font-bold text-text-primary"
+            className="text-sm font-medium text-text-primary"
           />
           {expanded ? (
             <ChevronUp className="h-4 w-4 text-text-secondary" />
@@ -93,7 +93,7 @@ export function InvoiceCard({ invoice, onViewDetails }: InvoiceCardProps) {
               <Price
                 amount={invoice.total}
                 currency={invoice.currency}
-                className="font-bold text-text-primary"
+                className="font-medium text-text-primary"
               />
             </div>
           </div>

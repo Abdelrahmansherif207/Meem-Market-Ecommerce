@@ -59,7 +59,7 @@ export function WishlistItemCard({
           <Price
             amount={price}
             currency={product.currency}
-            className="text-base font-bold text-text-primary"
+            className="text-base font-medium text-text-primary"
           />
           {sale && (
             <Price

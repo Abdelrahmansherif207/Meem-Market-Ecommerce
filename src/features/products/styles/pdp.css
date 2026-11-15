@@ -7,9 +7,9 @@
  * re-mapped onto the app's existing `@theme` tokens — see
  * `docs/product-details/section-mapping.md`.
  *
- * Only values with no Catch-token equivalent live here: the cross-sell
+ * Only values with no Meem-token equivalent live here: the cross-sell
  * band (kept at its exact Stitch values — `#f0f6fc` / blue-100 — per
- * explicit request after the Catch-mapped tint) and the third-party
+ * explicit request after the Meem-mapped tint) and the third-party
  * BNPL (Tabby / Tamara) brand badges, which keep their official colors
  * by design.
  */

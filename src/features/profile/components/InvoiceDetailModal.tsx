@@ -140,7 +140,7 @@ export function InvoiceDetailModal({ invoice, open, onClose }: InvoiceDetailModa
                   <Price
                     amount={snapshot.pricing_breakdown.total}
                     currency={currency}
-                    className="font-bold text-text-primary"
+                    className="font-medium text-text-primary"
                   />
                 </div>
               </div>
@@ -158,13 +158,13 @@ export function InvoiceDetailModal({ invoice, open, onClose }: InvoiceDetailModa
                       <p className="font-medium text-text-primary truncate">{item.product_name}</p>
                       <p className="text-xs text-text-secondary">
                         {item.product_sku} &middot; {item.quantity} x{" "}
-                        <Price amount={item.unit_price} currency={currency} />
+                        <Price amount={item.unit_price} currency={currency} className="font-medium text-text-primary" />
                       </p>
                     </div>
                     <Price
                       amount={item.total_price}
                       currency={currency}
-                      className="font-semibold text-text-primary shrink-0 ml-3"
+                      className="font-medium text-text-primary shrink-0 ml-3"
                     />
                   </div>
                 ))}

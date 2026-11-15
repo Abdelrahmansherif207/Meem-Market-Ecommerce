@@ -21,9 +21,9 @@ export function isGuestCheckoutEnabled(): boolean {
  * proxied requests by `src/proxy.ts` (apiBridge) and mirrored into app state
  * from the session-init response as a fallback.
  *
- * Cookie NAMES are env-configurable on the backend (contract §2): this
- * deployment issues `catch_*`, the contract default is `meem_*`. The proxy
- * therefore matches the first candidate present on the request.
+ * Cookie NAMES are env-configurable on the backend (contract §2). Deployments
+ * may issue legacy `catch_*` or Meem `meem_*` names, so the proxy matches
+ * the first candidate present on the request.
  */
 export const GUEST_SESSION_COOKIE_CANDIDATES = [
   process.env.NEXT_PUBLIC_GUEST_SESSION_COOKIE,

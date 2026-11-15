@@ -14,8 +14,8 @@ interface QuantityStepperProps {
   disabled?: boolean;
   min?: number;
   max?: number;
-  /** "pill" = card-overlay stepper; "outline" = bordered control for forms/summary rows. */
-  variant?: "pill" | "outline";
+  /** "pill" = card-overlay stepper; "outline" = bordered control; "solid" = full CTA-sized pill. */
+  variant?: "pill" | "outline" | "solid";
   size?: "sm" | "md";
   incrementLabel?: string;
   decrementLabel?: string;
@@ -96,6 +96,60 @@ export function QuantityStepper({
       : "h-11 w-11",
     pill ? "text-qty-ink hover:bg-ink/10" : "hover:bg-surface",
   );
+
+  /* ── solid variant: same CTA footprint, quantity visible inline ──────── */
+  if (variant === "solid") {
+    const solidHeight = size === "sm" ? "h-9" : "h-11";
+    const solidBtn = cn(
+      "flex shrink-0 items-center justify-center transition-colors duration-200 hover:bg-white/15 disabled:cursor-not-allowed disabled:opacity-40",
+      solidHeight,
+      size === "sm" ? "w-9" : "w-11",
+    );
+
+    return (
+      <div
+        className={cn(
+          "inline-flex items-center rounded-full bg-primary text-white shadow-elev-1",
+          disabled && "pointer-events-none opacity-70",
+          className,
+        )}
+      >
+        <button
+          type="button"
+          onClick={onDecrement}
+          disabled={disabled || (value <= min && !decrementAsRemove)}
+          className={solidBtn}
+          aria-label={decrementAsRemove && value === 1 ? removeLabel : decrementLabel}
+        >
+          {decrementAsRemove && value === 1 ? (
+            <Trash2 className="size-4" />
+          ) : (
+            <Minus className="size-4" />
+          )}
+        </button>
+
+        <span
+          className={cn(
+            "min-w-6 text-center font-bold tabular-nums",
+            size === "sm" ? "text-sm" : "text-base",
+          )}
+          aria-live="polite"
+        >
+          {value}
+        </span>
+
+        <button
+          type="button"
+          onClick={onIncrement}
+          disabled={disabled || incrementDisabled || (max !== undefined && value >= max)}
+          className={cn(solidBtn, incrementDisabled && "cursor-not-allowed opacity-40")}
+          aria-label={incrementLabel}
+        >
+          <Plus className="size-4" />
+        </button>
+      </div>
+    );
+  }
 
   /* ── outline variant (cart rows, forms) — unchanged ──────────────────── */
   if (!pill) {

@@ -50,7 +50,7 @@ export default function GlobalError({
                 marginTop: "8px",
                 fontSize: "14px",
                 lineHeight: "1.5",
-                color: "#706565",
+                color: "#5c6b7d",
               }}
             >
               A critical error occurred. Please try again.
@@ -60,7 +60,7 @@ export default function GlobalError({
               style={{
                 marginTop: "24px",
                 borderRadius: "12px",
-                background: "#b81d24",
+                background: "#0e5aa7",
                 padding: "10px 24px",
                 fontSize: "14px",
                 fontWeight: 600,

@@ -1,6 +1,6 @@
 /*
- * Sovereign Rose — scoped design system for the Catch Beauty homepage.
- * Tokens extracted from the Stitch design "Catch Beauty Store Homepage"
+ * Meem Riyadh — scoped design system for the Meem Market Riyadh homepage.
+ * Tokens extracted from the Stitch design "Meem Market Riyadh Store Homepage"
  * (projects/6326555564353219150, screen 9c6a3dde1a984cfeb74a3c6a39bf0c78).
  *
  * Every token remap lives exclusively inside `.home-theme`, which is applied
@@ -10,42 +10,42 @@
  * changes appearance. Design-only colors use the `--home-*` namespace and
  * are consumed via arbitrary values (`bg-(--home-gold)`).
  *
- * Painted over the app:
- *   primary   #b81d24 → #121214 (charcoal CTAs/structure)
- *   discount  #b81d24 → #c93b2b (vermilion urgency)
- *   surface   #faf6f5 → #faf9f7 (warm alabaster canvas)
- *   border    #ede4e2 → #eceae5 (warm hairline)
- *   accent    #e0b0b0 → #d88b97 (blush rose highlight)
- *   text-secondary/muted → design's warm neutrals
+ * Painted over the app (kept in sync with the app-wide Meem theme):
+ *   primary   → #0e5aa7 (Meem blue CTAs/structure)
+ *   discount  → #bc1e20 (Meem discount red)
+ *   surface   → #f3f6fa (cool blue-tinted canvas)
+ *   border    → #dfe7f0 (cool blue-gray hairline)
+ *   accent    → #cf9e36 (Meem gold highlight)
+ *   text-secondary/muted → cool blue-gray neutrals
  */
 
 .home-theme {
-  /* Sovereign Rose design-only tokens */
-  --home-rose: #d88b97;
-  --home-rose-deep: #793c47;
-  --home-rose-tint: rgba(216, 139, 151, 0.08);
-  --home-gold: #c5a880;
-  --home-vermilion: #c93b2b;
-  --home-jade: #2e7d32;
-  --home-canvas-deep: #f4f3f1;
-  --home-stroke: #eceae5;
-  --home-ink: #1a1c1b;
-  --home-ink-muted: #73716e;
-  --home-strike: #9e9c98;
+  /* Meem design-only tokens (rose names retained for the legacy sections) */
+  --home-rose: #0e5aa7;
+  --home-rose-deep: #00387b;
+  --home-rose-tint: rgba(14, 90, 167, 0.08);
+  --home-gold: #cf9e36;
+  --home-vermilion: #0e5aa7;
+  --home-jade: #237f52;
+  --home-canvas-deep: #eef3f9;
+  --home-stroke: #dfe7f0;
+  --home-ink: #0f1b2d;
+  --home-ink-muted: #5c6b7d;
+  --home-strike: #8b98a8;
 
   /* Scoped remap of the app's semantic tokens (homepage subtree only) */
-  --color-primary: #121214;
-  --color-primary-active: #2a2a2e;
-  --color-primary-dark: #2a2a2e;
-  --color-accent: #d88b97;
-  --color-discount: #c93b2b;
-  --color-surface: #faf9f7;
-  --color-background: #faf9f7;
-  --color-border: #eceae5;
-  --color-border-light: #f0edea;
-  --color-border-subtle: #f6f4f1;
-  --color-text-secondary: #73716e;
-  --color-text-muted: #9e9c98;
+  --color-primary: #0e5aa7;
+  --color-primary-active: #0a4d91;
+  --color-primary-dark: #00387b;
+  --color-accent: #cf9e36;
+  --color-discount: #bc1e20;
+  --color-surface: #f3f6fa;
+  --color-background: #f3f6fa;
+  --color-border: #dfe7f0;
+  --color-border-light: #e8eef5;
+  --color-border-subtle: #eef3f9;
+  --color-text-secondary: #5c6b7d;
+  --color-text-muted: #8b98a8;
 
   /* UI copy: storefront family (custom when configured, IBM Plex otherwise) */
   font-family: var(--font-storefront);
@@ -85,7 +85,7 @@
 }
 
 .home-card:hover {
-  box-shadow: 0 12px 32px -8px rgba(18, 18, 20, 0.06);
+  box-shadow: 0 12px 32px -8px rgba(15, 27, 45, 0.06);
   transform: translateY(-2px);
 }
 
@@ -93,7 +93,7 @@
 .home-shadow-float {
   box-shadow:
     0 4px 16px 0 rgba(0, 0, 0, 0.04),
-    0 24px 48px -12px rgba(18, 18, 20, 0.12);
+    0 24px 48px -12px rgba(15, 27, 45, 0.12);
 }
 
 /* Level 3 frosted surface */
@@ -105,13 +105,13 @@
 
 /* Gold embellishment radiance */
 .home-gold-glow {
-  box-shadow: 0 2px 8px rgba(197, 168, 128, 0.25);
+  box-shadow: 0 2px 8px rgba(207, 158, 54, 0.25);
 }
 
-/* Rose-tinted flash-deal frame (L2) */
+/* Brand-tinted flash-deal frame (L2) */
 .home-flash-frame {
   background: var(--home-rose-tint);
-  border: 1px solid rgba(216, 139, 151, 0.45);
+  border: 1px solid rgba(14, 90, 167, 0.35);
   border-radius: 0.75rem;
   padding: 1rem;
 }
@@ -122,7 +122,7 @@
   }
 }
 
-/* Circular ring for categories & brands (gold → canvas → rose sweep) */
+/* Circular ring for categories & brands (gold → canvas → blue sweep) */
 .home-ring {
   padding: 3px;
   border-radius: 9999px;
@@ -172,7 +172,7 @@
   transition: box-shadow 0.25s ease, transform 0.25s ease;
 }
 .home-brand-tile:hover {
-  box-shadow: 0 12px 32px -8px rgba(18, 18, 20, 0.06);
+  box-shadow: 0 12px 32px -8px rgba(15, 27, 45, 0.06);
   transform: translateY(-2px);
 }
 

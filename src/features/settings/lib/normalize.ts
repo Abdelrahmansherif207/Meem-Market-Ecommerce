@@ -14,6 +14,7 @@ import {
   PLACEHOLDER_URL_PATH,
 } from "../constants";
 import type {
+  FastShippingOptions,
   PaymentGatewayState,
   RawPaymentGateways,
   RawSiteSettings,
@@ -108,6 +109,38 @@ export function buildWhatsAppUrl(phone: string): string {
   return digits ? `https://wa.me/${digits}` : DEFAULT_WHATSAPP_URL;
 }
 
+/**
+ * Preserve the raw fast-shipping block (scalars may be strings). The
+ * fast-shipping feature parses it tolerantly so availability logic has a
+ * single source of truth.
+ */
+export function normalizeFastShippingOptions(
+  value: unknown,
+): FastShippingOptions | null {
+  if (!value || typeof value !== "object") return null;
+  const raw = value as Record<string, unknown>;
+  const text = (key: string): string | null => {
+    const entry = raw[key];
+    return entry === null || entry === undefined ? null : String(entry);
+  };
+  return {
+    enabled:
+      raw.enabled === null || raw.enabled === undefined
+        ? null
+        : (raw.enabled as string | number | boolean),
+    duration_minutes:
+      raw.duration_minutes === null || raw.duration_minutes === undefined
+        ? null
+        : (raw.duration_minutes as string | number),
+    fee:
+      raw.fee === null || raw.fee === undefined
+        ? null
+        : (raw.fee as string | number),
+    start_hour: text("start_hour"),
+    end_hour: text("end_hour"),
+  };
+}
+
 function normalizeGateways(value: RawPaymentGateways | null | undefined): Record<string, PaymentGatewayState> {
   if (!value || typeof value !== "object") return {};
   const result: Record<string, PaymentGatewayState> = {};
@@ -146,10 +179,10 @@ export function getLocaleSettingsDefaults(locale: string): LocaleSettingsDefault
  * - `site_desc`    → locale default
  * - `meta_desc`    → resolved `site_desc` → locale default
  * - `site_copy_right` → locale default
- * - `logo`         → `/catch-logo.png`
- * - `footer_logo`  → raw `logo` → `/catch-footer-logo.jpeg`
- * - `favicon`      → `/catch-footer-logo.jpeg`
- * - contact/social → Catch Beauty contact defaults; invalid URLs become `""`
+ * - `logo`         → `/meem-new.png`
+ * - `footer_logo`  → raw `logo` → `/new-footer-logo.png`
+ * - `favicon`      → `/new-footer-logo.png`
+ * - contact/social → Meem Market Riyadh contact defaults; invalid URLs become `""`
  */
 export function normalizeSiteSettings(raw: unknown, locale: string): SiteSettings {
   const data: RawSiteSettings =
@@ -209,6 +242,7 @@ export function normalizeSiteSettings(raw: unknown, locale: string): SiteSetting
       currency: currency ?? baseCurrency ?? catalogCurrency,
       base_currency_code: baseCurrency,
       catalog_currency_code: catalogCurrency,
+      fast_shipping: normalizeFastShippingOptions(rawOptions.fast_shipping),
       currency_selection_enabled: currencySelectionEnabled,
     },
   };

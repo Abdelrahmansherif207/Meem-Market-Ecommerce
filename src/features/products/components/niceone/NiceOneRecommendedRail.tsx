@@ -106,7 +106,7 @@ function NiceOneRecommendedCard({
       )}
     >
       {item.has_flash_sale && (
-        <span className="absolute start-2 top-2 z-10 rounded bg-discount px-1.5 py-0.5 text-[9px] font-bold text-white">
+        <span className="absolute start-2 top-2 z-10 rounded bg-[#4c1d95] px-1.5 py-0.5 text-[9px] font-bold text-white">
           {tPdp("flashDeal")}
         </span>
       )}
@@ -155,11 +155,11 @@ function NiceOneRecommendedCard({
                 </span>
               )}
               <span className="flex flex-wrap items-center gap-1">
-                <span className="text-xs font-bold text-discount">
+                <span className="text-xs font-medium text-text-primary">
                   {formatPrice(displayPrice)} <span className="text-[9px]">{currencySymbol}</span>
                 </span>
                 {discountPercent != null && (
-                  <span className="rounded bg-primary-tint px-1 text-[10px] font-bold text-discount">
+                  <span className="rounded bg-discount/10 px-1 text-[10px] font-bold text-discount">
                     -{discountPercent}%
                   </span>
                 )}

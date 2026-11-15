@@ -3,7 +3,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { useLocale, useTranslations } from "next-intl";
-import { ChevronLeft, ChevronRight, CreditCard, Loader2, Store, WifiOff } from "lucide-react";
+import { ChevronLeft, ChevronRight, CreditCard, Info, Loader2, Store, WifiOff, Zap } from "lucide-react";
 import { useShallow } from "zustand/react/shallow";
 import { useAuthStore } from "@/features/auth";
 import { useCurrencyStore, useCurrencySnapshot, useDisplayCurrency } from "@/features/currencies";
@@ -51,6 +51,7 @@ function fieldToStep(field: string): StepId {
   if (["name", "user_phone", "user_email"].includes(field)) return "contact";
   if (
     ["governorate_id", "city", "state", "country", "street_address"].includes(field) ||
+    field.startsWith("address") ||
     field.startsWith("flow:")
   ) {
     return "delivery";
@@ -72,12 +73,15 @@ interface CheckoutFormProps {
   orderTaxRate?: number | null;
   /** Settings gateway flags, used only when the gateway endpoint omits them. */
   gatewaySettings?: Record<string, PaymentGatewayState>;
+  /** Site settings fast-shipping fee — display-only estimate for NOW. */
+  fastShippingFee?: number | null;
 }
 
 export function CheckoutForm({
   orderTaxEnabled = false,
   orderTaxRate = null,
   gatewaySettings,
+  fastShippingFee = null,
 }: CheckoutFormProps) {
   const t = useTranslations("checkout");
   const locationT = useTranslations("locationPicker");
@@ -95,6 +99,7 @@ export function CheckoutForm({
     useShallow((s) => ({ name: s.name, email: s.email, phone: s.phoneNumber })),
   );
   const searchParams = useSearchParams();
+  const isFast = searchParams.get("type") === "fast";
   const selectedLocationId = usePickupLocationStore((s) => s.selectedLocationId);
   const clearLocation = usePickupLocationStore((s) => s.clear);
   const isOnline = useOnlineStatus();
@@ -109,7 +114,11 @@ export function CheckoutForm({
 
   useEffect(() => useAuthStore.persist.onFinishHydration(() => setHydrated(true)), []);
 
-  const steps: StepId[] = ALL_STEPS;
+  // NOW checkout skips the payment step (delivery + online are forced).
+  const steps = useMemo<StepId[]>(
+    () => (isFast ? ALL_STEPS.filter((step) => step !== "payment") : ALL_STEPS),
+    [isFast],
+  );
 
   // ---- URL-synced step state ------------------------------------------------
   const stepParam = searchParams.get("step");
@@ -125,13 +134,14 @@ export function CheckoutForm({
       const clamped = Math.min(Math.max(index, 0), steps.length - 1);
       setStepIndex(clamped);
       const query: Record<string, string> = {};
+      if (isFast) query.type = "fast";
       if (clamped > 0) query.step = steps[clamped];
       intlRouter.replace(
         { pathname: "/payment", query },
         { scroll: false },
       );
     },
-    [intlRouter, steps],
+    [intlRouter, steps, isFast],
   );
 
   useEffect(() => {
@@ -160,6 +170,7 @@ export function CheckoutForm({
     hydrated,
     isAuthenticated,
     shippingType: form.shipping_type,
+    deliveryType: isFast ? "fast" : "scheduled",
     gatewaySettings,
     onShippingTypeUnsupported: (type) => {
       if (form.shipping_type !== type) return;
@@ -197,6 +208,13 @@ export function CheckoutForm({
     promotionsError,
     retryPromotions,
   } = data;
+
+  // NOW checkout forces delivery + online payment; the payment step is hidden.
+  useEffect(() => {
+    if (!isFast) return;
+    if (form.fulfillment_type !== "delivery") controller.setFulfillment("delivery");
+    if (form.payment_method !== "online") controller.setPaymentMethod("online");
+  }, [isFast, form.fulfillment_type, form.payment_method, controller]);
 
   const [submitting, setSubmitting] = useState(false);
   const [apiError, setApiError] = useState<string | null>(null);
@@ -314,6 +332,13 @@ export function CheckoutForm({
     if (!displayRate || !baseRate || baseRate <= 0) return null;
     return displayRate / baseRate;
   });
+  const fastFee = useMemo(() => {
+    if (!isFast || fastShippingFee === null || fastShippingFee === undefined) {
+      return null;
+    }
+    return fastShippingFee * (selectedCurrencyRate ?? 1);
+  }, [isFast, fastShippingFee, selectedCurrencyRate]);
+
   const shippingQuote = useMemo(
     () =>
       resolveShippingQuote({
@@ -366,17 +391,18 @@ export function CheckoutForm({
           return validateDeliveryStep(form, {
             vt,
             governorateId: selectedGovernorateId,
-            flow,
+            flow: isFast ? null : flow,
             flowValues: controller.flowValues,
             flowLabel,
           });
         case "payment":
+          if (isFast) return [];
           return validatePaymentStep(form, { selectedGateway, gatewaysError });
         default:
           return [];
       }
     },
-    [form, vt, selectedGovernorateId, flow, controller.flowValues, flowLabel, selectedGateway, gatewaysError],
+    [form, vt, selectedGovernorateId, flow, controller.flowValues, flowLabel, selectedGateway, gatewaysError, isFast],
   );
 
   const handleContinue = useCallback(
@@ -417,26 +443,29 @@ export function CheckoutForm({
         ...validateDeliveryStep(form, {
           vt,
           governorateId: selectedGovernorateId,
-          flow,
+          flow: isFast ? null : flow,
           flowValues: controller.flowValues,
           flowLabel,
         }),
       ];
-      const gatewayErrors = validatePaymentStep(form, { selectedGateway, gatewaysError });
+      const gatewayErrors = isFast
+        ? []
+        : validatePaymentStep(form, { selectedGateway, gatewaysError });
       if (allErrors.length > 0 || gatewayErrors.length > 0) {
         const bannerError = gatewayErrors.find((err) => err.field === "__gateway");
         if (allErrors.length > 0) {
           controller.setErrors(allErrors);
           setApiError(t("fixRequiredFields"));
           const offender = stepOfFieldErrors(allErrors);
-          goToStep(steps.indexOf(offender));
+          const offenderIndex = steps.indexOf(offender);
+          goToStep(offenderIndex >= 0 ? offenderIndex : steps.length - 1);
         } else {
           setApiError(t(bannerError ? bannerError.message : "fixRequiredFields"));
           goToStep(steps.indexOf("payment"));
         }
         return;
       }
-      if (form.payment_method === "online" && !selectedGateway) {
+      if (!isFast && form.payment_method === "online" && !selectedGateway) {
         setApiError(gatewaysError ? t("paymentGatewaysError") : t("onlineUnavailable"));
         return;
       }
@@ -472,7 +501,8 @@ export function CheckoutForm({
         controller.setErrors(fieldErrors);
         setApiError(t("fixRequiredFields"));
         const target = stepOfFieldErrors(fieldErrors);
-        goToStep(steps.indexOf(target));
+        const targetIndex = steps.indexOf(target);
+        goToStep(targetIndex >= 0 ? targetIndex : steps.length - 1);
       };
 
       const payload = {
@@ -500,6 +530,43 @@ export function CheckoutForm({
       };
 
       try {
+        if (isFast) {
+          if (selectedGovernorateId === null) {
+            setApiError(t("validation.governorateRequired"));
+            setSubmitting(false);
+            return;
+          }
+          const result = await checkoutService.processFastCheckout({
+            name: form.name.trim(),
+            user_phone: form.user_phone.trim(),
+            user_email: form.user_email.trim(),
+            address: {
+              address: form.street_address.trim(),
+              city: form.city.trim(),
+              country: form.country.trim(),
+            },
+            notes: form.notes.trim() || undefined,
+            governorate_id: selectedGovernorateId,
+          });
+          if (result.url) {
+            if (result.order_id) paymentOrderIdRef.current = result.order_id;
+            savePaymentReturnNote(result.order_id);
+            if (result.order_id) {
+              history.replaceState(
+                null,
+                "",
+                "/" + locale + "/payment/success?order_id=" + result.order_id,
+              );
+            }
+            setTimeout(() => setNavStalled(true), 10_000);
+            window.location.href = result.url;
+            return;
+          }
+          // No gateway redirect: the NOW order was created directly.
+          routeToPaymentSuccess(result.order_id);
+          return;
+        }
+
         const result = await checkoutService.processCheckout(payload);
 
         if (form.payment_method === "online" && result.url) {
@@ -534,7 +601,7 @@ export function CheckoutForm({
         setSubmitting(false);
       }
     },
-    [form, vt, selectedGovernorateId, flow, controller, selectedGateway, gatewaysError, t, locale, flowLabel, selectedLocationId, goToStep, steps, intlRouter],
+    [form, vt, selectedGovernorateId, flow, controller, selectedGateway, gatewaysError, t, locale, flowLabel, selectedLocationId, goToStep, steps, intlRouter, isFast, routeToPaymentSuccess],
   );
 
   // ---- Map pick (unchanged behavior) ----------------------------------------
@@ -573,9 +640,13 @@ export function CheckoutForm({
   useEffect(() => {
     if (!hydrated) return;
     if (!isAuthenticated) {
-      router.replace("/auth?redirect=/payment");
+      router.replace(
+        isFast
+          ? "/auth?redirect=" + encodeURIComponent("/payment?type=fast")
+          : "/auth?redirect=/payment",
+      );
     }
-  }, [hydrated, isAuthenticated, router]);
+  }, [hydrated, isAuthenticated, isFast, router]);
 
   const handleEditSection = useCallback(
     (section: ReviewSectionId) => {
@@ -594,6 +665,30 @@ export function CheckoutForm({
         <Store className="mb-4 size-12 text-text-secondary" aria-hidden="true" />
         <h1 className="text-xl font-bold text-text-primary">{t("cartExpired")}</h1>
         <p className="mt-2 text-sm text-text-secondary">{t("cartExpiredDesc")}</p>
+        <button
+          onClick={() => router.push("/cart")}
+          className="mt-6 inline-flex items-center gap-2 rounded-xl bg-primary px-6 py-2.5 text-sm font-semibold text-white"
+        >
+          {t("goToCart")}
+        </button>
+      </div>
+    );
+  }
+
+  const groupQuantity = isFast
+    ? cartData?.fastQuantity ?? 0
+    : cartData?.scheduledQuantity ?? 0;
+
+  if (cartData && groupQuantity === 0) {
+    return (
+      <div className="flex flex-col items-center justify-center py-24 text-center">
+        <Store className="mb-4 size-12 text-text-secondary" aria-hidden="true" />
+        <h1 className="text-xl font-bold text-text-primary">
+          {isFast ? t("fastEmptyTitle") : t("groupEmptyTitle")}
+        </h1>
+        <p className="mt-2 text-sm text-text-secondary">
+          {isFast ? t("fastEmptyDesc") : t("groupEmptyDesc")}
+        </p>
         <button
           onClick={() => router.push("/cart")}
           className="mt-6 inline-flex items-center gap-2 rounded-xl bg-primary px-6 py-2.5 text-sm font-semibold text-white"
@@ -650,11 +745,13 @@ export function CheckoutForm({
             form={form}
             controller={controller}
             availableShippingTypes={availableShippingTypes}
+            isFast={isFast}
           />
         );
       case "delivery":
         return (
           <DeliveryStep
+            isFast={isFast}
             form={form}
             controller={controller}
             selectedGovernorateId={selectedGovernorateId}
@@ -714,6 +811,18 @@ export function CheckoutForm({
           {t("offlineBanner")}
         </div>
       )}
+      {isFast && (cartData?.scheduledQuantity ?? 0) > 0 && (
+        <div className="mb-6 flex items-start gap-2 rounded-xl border border-primary/20 bg-primary/5 p-4 text-sm text-primary">
+          <Zap className="mt-0.5 size-4 shrink-0" aria-hidden="true" />
+          <p>{t("fastOnlyNotice")}</p>
+        </div>
+      )}
+      {!isFast && (cartData?.fastQuantity ?? 0) > 0 && (
+        <div className="mb-6 flex items-start gap-2 rounded-xl border border-primary/20 bg-primary/5 p-4 text-sm text-primary">
+          <Info className="mt-0.5 size-4 shrink-0" aria-hidden="true" />
+          <p>{t("scheduledOnlyNotice")}</p>
+        </div>
+      )}
       {apiError && (
         <div
           role="alert"
@@ -738,6 +847,7 @@ export function CheckoutForm({
 
           {isReviewStep ? (
             <ReviewStep
+              isFast={isFast}
               form={form}
               flow={flow}
               flowValues={controller.flowValues}
@@ -783,10 +893,12 @@ export function CheckoutForm({
             style={stickyTop !== null ? { top: stickyTop } : undefined}
           >
             <OrderSummary
+              isFast={isFast}
+              fastFee={fastFee}
               subtotal={cartData?.subtotal ?? 0}
               totalQuantity={cartData?.totalQuantity ?? 0}
               shipping={shippingQuote}
-              promotionDiscount={form.selected_promotion_discount}
+              promotionDiscount={isFast ? 0 : form.selected_promotion_discount}
               couponDiscount={cartData?.couponDiscount ?? 0}
               pickupLocationName={controller.pickupLocationName || undefined}
               appliedCoupon={cartData?.appliedCoupon}
@@ -825,11 +937,13 @@ export function CheckoutForm({
               className="flex-1 inline-flex items-center justify-center gap-2 rounded-xl bg-primary py-2.5 text-sm font-bold text-white disabled:opacity-50"
             >
               <CreditCard className="size-4" aria-hidden="true" />
-              {form.payment_method === "online"
-                ? t("payNow")
-                : form.payment_method === "cod"
-                  ? t("placeOrderCod")
-                  : t("placeOrderCashier")}
+              {isFast
+                ? t("fastCheckout")
+                : form.payment_method === "online"
+                  ? t("payNow")
+                  : form.payment_method === "cod"
+                    ? t("placeOrderCod")
+                    : t("placeOrderCashier")}
             </button>
           ) : (
             <button

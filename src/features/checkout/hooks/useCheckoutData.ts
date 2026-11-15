@@ -9,7 +9,7 @@ import type { PaymentGatewayState } from "@/features/settings";
 import { isGatewayEligible } from "../utils/gatewayEligibility";
 import type { Address } from "@/features/profile/types";
 import type { AppliedCoupon } from "@/features/coupons/types";
-import type { CartApiCart } from "@/features/cart/types";
+import type { CartApiCart, DeliveryType } from "@/features/cart/types";
 import type { ApiError } from "@/shared/lib/api";
 import type {
   EligiblePromotion,
@@ -23,6 +23,10 @@ import { SHIPPING_TYPE_CODES } from "../types";
 export interface CartCheckoutData {
   subtotal: number;
   totalQuantity: number;
+  /** Scheduled group quantity, even when checking out the fast group. */
+  scheduledQuantity: number;
+  /** Fast group quantity, even when checking out the scheduled group. */
+  fastQuantity: number;
   couponDiscount: number;
   appliedCoupon: AppliedCoupon | null;
   expired: boolean;
@@ -31,20 +35,43 @@ export interface CartCheckoutData {
 const EMPTY_CART: CartCheckoutData = {
   subtotal: 0,
   totalQuantity: 0,
+  scheduledQuantity: 0,
+  fastQuantity: 0,
   couponDiscount: 0,
   appliedCoupon: null,
   expired: true,
 };
 
-function toCartData(cart: CartApiCart | null): CartCheckoutData {
+function toCartData(
+  cart: CartApiCart | null,
+  deliveryType: DeliveryType,
+): CartCheckoutData {
   if (!cart) return EMPTY_CART;
-  const appliedCoupon: AppliedCoupon | null = cart.coupon && cart.coupon_code
-    ? { code: cart.coupon_code, name: cart.coupon.name, discount_amount: cart.coupon_discount }
-    : null;
+
+  // Cart-wide `subtotal`/`total_quantity` mix both delivery groups. Checkout
+  // must only charge the group being ordered.
+  const items = deliveryType === "fast" ? cart.fast_items ?? [] : cart.normal_items ?? [];
+  const subtotal = items.reduce((sum, item) => sum + item.total_price, 0);
+  const totalQuantity = items.reduce((sum, item) => sum + item.quantity, 0);
+
+  // Coupons are scheduled-only; NOW checkout never claims a discount.
+  const appliedCoupon: AppliedCoupon | null =
+    deliveryType === "scheduled" && cart.coupon && cart.coupon_code
+      ? { code: cart.coupon_code, name: cart.coupon.name, discount_amount: cart.coupon_discount }
+      : null;
+
   return {
-    subtotal: cart.subtotal,
-    totalQuantity: cart.total_quantity,
-    couponDiscount: cart.coupon_discount,
+    subtotal,
+    totalQuantity,
+    scheduledQuantity: (cart.normal_items ?? []).reduce(
+      (sum, item) => sum + item.quantity,
+      0,
+    ),
+    fastQuantity: (cart.fast_items ?? []).reduce(
+      (sum, item) => sum + item.quantity,
+      0,
+    ),
+    couponDiscount: deliveryType === "scheduled" ? cart.coupon_discount : 0,
     appliedCoupon,
     expired: false,
   };
@@ -57,6 +84,8 @@ interface UseCheckoutDataArgs {
   hydrated: boolean;
   isAuthenticated: boolean;
   shippingType: ShippingType;
+  /** Which mixed-cart group this checkout charges. */
+  deliveryType?: DeliveryType;
   /** Settings gateway flags, used only when the gateway endpoint omits them. */
   gatewaySettings?: Record<string, PaymentGatewayState>;
   /** Called when the API reports the shipping type is unsupported for this store. */
@@ -71,6 +100,7 @@ export function useCheckoutData({
   hydrated,
   isAuthenticated,
   shippingType,
+  deliveryType = "scheduled",
   gatewaySettings,
   onShippingTypeUnsupported,
   onFirstAddressSelected,
@@ -110,18 +140,18 @@ export function useCheckoutData({
 
   useEffect(() => {
     if (!hydrated || !isAuthenticated) return;
-    const key = `${locale}:${currency}`;
+    const key = `${locale}:${currency}:${deliveryType}`;
     if (fetchedKey.current === key) return;
     fetchedKey.current = key;
 
     setCartLoading(true);
     cartService.getCart(locale)
       .then((cart: CartApiCart | null) => {
-        setCartData(toCartData(cart));
+        setCartData(toCartData(cart, deliveryType));
       })
       .catch(() => setCartData(EMPTY_CART))
       .finally(() => setCartLoading(false));
-  }, [hydrated, isAuthenticated, locale, currency]);
+  }, [hydrated, isAuthenticated, locale, currency, deliveryType]);
 
   // Cart expiry poll (every 30 s).
   useEffect(() => {
@@ -140,6 +170,7 @@ export function useCheckoutData({
 
   /** Re-reads the coupon state from the server (after coupon apply/remove). */
   const refreshCartCoupon = useCallback(() => {
+    if (deliveryType !== "scheduled") return;
     cartService.getCart(locale).then((cart) => {
       if (cart) {
         const appliedCoupon: AppliedCoupon | null = cart.coupon && cart.coupon_code
@@ -152,7 +183,7 @@ export function useCheckoutData({
         } : prev);
       }
     }).catch(() => {});
-  }, [locale]);
+  }, [locale, deliveryType]);
 
   // Governorates
   useEffect(() => {
@@ -224,8 +255,9 @@ export function useCheckoutData({
   }, []);
 
   // Order flow definition (auth-gated; unsupported types fall back).
+  // NOW checkout deliberately skips the configurable order flow.
   useEffect(() => {
-    if (!hydrated || !isAuthenticated) return;
+    if (!hydrated || !isAuthenticated || deliveryType === "fast") return;
     let cancelled = false;
     orderFlowService.getByShippingType(shippingType, locale)
       .then((definition) => {
@@ -252,7 +284,7 @@ export function useCheckoutData({
         setFlowState({ type: shippingType, definition: null, error: true });
       });
     return () => { cancelled = true; };
-  }, [shippingType, locale, hydrated, isAuthenticated]);
+  }, [shippingType, locale, hydrated, isAuthenticated, deliveryType]);
 
   // Saved addresses
   useEffect(() => {
@@ -294,8 +326,10 @@ export function useCheckoutData({
     setSavedAddresses((prev) => [...prev, address]);
   }, []);
 
-  // Eligible promotions
+  // Eligible promotions (scheduled orders only). NOW checkout derives an
+  // empty list instead of setting state synchronously from an effect.
   useEffect(() => {
+    if (deliveryType === "fast") return;
     let cancelled = false;
     checkoutService.getEligiblePromotions(locale)
       .then((data) => {
@@ -309,9 +343,10 @@ export function useCheckoutData({
         setPromotionsError(true);
       });
     return () => { cancelled = true; };
-  }, [locale]);
+  }, [locale, deliveryType]);
 
   const retryPromotions = useCallback(() => {
+    if (deliveryType === "fast") return;
     setPromotionsError(false);
     setPromotions(null);
     checkoutService.getEligiblePromotions(locale)
@@ -323,7 +358,7 @@ export function useCheckoutData({
         setPromotions([]);
         setPromotionsError(true);
       });
-  }, [locale]);
+  }, [locale, deliveryType]);
 
   // Derive the flow for the *current* shipping type (stale types hidden).
   const flow = flowState && flowState.type === shippingType ? flowState.definition : null;
@@ -350,8 +385,8 @@ export function useCheckoutData({
     addressesError,
     retryAddresses,
     addSavedAddress,
-    promotions,
-    promotionsError,
+    promotions: deliveryType === "fast" ? [] : promotions,
+    promotionsError: deliveryType === "fast" ? false : promotionsError,
     retryPromotions,
   };
 }

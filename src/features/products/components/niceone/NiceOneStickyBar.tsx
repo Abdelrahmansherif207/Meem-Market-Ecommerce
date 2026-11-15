@@ -68,25 +68,24 @@ export function NiceOneStickyBar({ product, selectedVariant, pricesLoading = fal
           <Skeleton className="mt-1 h-6 w-24" />
         ) : (
           <div className="mt-0.5 flex items-baseline gap-1" dir="ltr">
-            <span className="text-lg font-extrabold leading-none text-discount">
+            <span className="text-lg font-bold leading-none font-medium text-text-primary">
               {formatPrice(price)}
             </span>
-            <span className="text-xs font-bold text-text-primary">{currencySymbol}</span>
+            <span className="text-xs font-medium text-text-primary">{currencySymbol}</span>
           </div>
         )}
       </div>
 
       {cartQuantity > 0 ? (
         <QuantityStepper
-          className="flex-1 justify-center"
+          className="flex-1 justify-between"
           value={cartQuantity}
           onIncrement={() => increment()}
           onDecrement={() => decrement()}
           decrementAsRemove
           incrementDisabled={!stock.inStock || cartQuantity >= maxQuantity}
           disabled={isPending}
-          variant="pill"
-          alwaysExpanded
+          variant="solid"
           incrementLabel={tProduct("increaseQuantity")}
           decrementLabel={tProduct("decreaseQuantity")}
           removeLabel={tProduct("removeItem")}
@@ -96,7 +95,7 @@ export function NiceOneStickyBar({ product, selectedVariant, pricesLoading = fal
           type="button"
           onClick={handleAddToCart}
           disabled={!stock.inStock || isPending}
-          className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-secondary py-3.5 text-xs font-bold tracking-wide text-white shadow-elev-1 transition-colors hover:bg-secondary-dark active:bg-secondary-dark disabled:pointer-events-none disabled:opacity-60"
+          className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-primary py-3.5 text-xs font-bold tracking-wide text-white shadow-elev-1 transition-colors hover:bg-primary-dark active:bg-primary-active disabled:pointer-events-none disabled:opacity-60"
         >
           {isPending ? (
             <Loader2 className="size-4 animate-spin" aria-hidden />
