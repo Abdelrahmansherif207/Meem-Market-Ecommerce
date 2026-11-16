@@ -60,7 +60,7 @@ export default function MeemMobileNavRow({
   };
 
   return (
-    <div className="relative border-b border-meem-border bg-background">
+    <div className="relative border-b border-meem-border">
       <div className="flex items-center justify-between px-3 py-2">
         {/* Categories pill */}
         <button

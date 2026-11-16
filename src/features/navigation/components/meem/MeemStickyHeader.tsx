@@ -46,7 +46,7 @@ export default function MeemStickyHeader({
       aria-hidden={!isVisible}
       inert={!isVisible}
       className={cn(
-        "fixed inset-x-0 top-0 z-50 border-b border-meem-border bg-background transition-transform duration-200 ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none",
+        "meem-channel-surface fixed inset-x-0 top-0 z-50 border-b border-meem-border transition-transform duration-200 ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none",
         isVisible ? "translate-y-0" : "pointer-events-none -translate-y-full",
       )}
     >

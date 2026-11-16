@@ -34,7 +34,7 @@ export default async function MeemMobileHeader({
   }
 
   return (
-    <header className="relative z-40 border-b border-meem-border bg-background lg:hidden">
+    <header className="meem-channel-surface relative z-40 border-b border-meem-border lg:hidden">
       <MeemAnnouncementBar />
       <MeemMobileSearchBar
         placeholder={t("searchPlaceholder")}

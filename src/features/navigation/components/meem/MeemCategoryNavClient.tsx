@@ -31,7 +31,7 @@ export default function MeemCategoryNavClient({
   return (
     <nav
       aria-label="Categories"
-      className="relative border-t border-meem-border bg-background"
+      className="relative border-t border-meem-border"
       onMouseLeave={() => setActiveSlug(null)}
     >
       <div className="mx-auto flex max-w-[1440px] items-center justify-between gap-4 px-4 py-2.5 text-xs font-semibold text-meem-charcoal lg:gap-6 lg:px-8">

@@ -70,7 +70,7 @@ export default function MeemMobileSearchBar({
         {leading}
         <form
           onSubmit={handleSubmit}
-          className="relative flex min-w-0 flex-1 items-center rounded-lg bg-meem-tint px-3 py-2"
+          className="relative flex min-w-0 flex-1 items-center rounded-lg border border-meem-border bg-transparent px-3 py-2 transition-colors focus-within:border-meem-primary"
         >
           <Search className="pointer-events-none me-2 h-4 w-4 shrink-0 text-meem-muted-soft" />
           <input

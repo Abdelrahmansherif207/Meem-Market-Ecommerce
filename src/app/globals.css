@@ -171,6 +171,44 @@ button {
   background: color-mix(in srgb, var(--color-primary) 16%, transparent);
 }
 
+/*
+ * Shipping-mode header wash.
+ *
+ * `ChannelThemeProvider` mirrors the persisted browsing channel onto
+ * `<html data-channel>`. Scheduled (default `home`) paints a soft brand-blue
+ * wash; NOW (`fast-shipping`) paints a soft gold wash. Strengths stay low so
+ * the dark text, logo and white controls remain readable on both modes;
+ * only the tint behind them changes.
+ */
+.meem-channel-surface {
+  --meem-channel-wash: var(--color-meem-primary);
+  --meem-channel-wash-top: 14%;
+  --meem-channel-wash-mid: 6%;
+  background-color: var(--color-background);
+  background-image: linear-gradient(
+    180deg,
+    color-mix(
+        in srgb,
+        var(--meem-channel-wash) var(--meem-channel-wash-top),
+        var(--color-background)
+      )
+      0%,
+    color-mix(
+        in srgb,
+        var(--meem-channel-wash) var(--meem-channel-wash-mid),
+        var(--color-background)
+      )
+      58%,
+    var(--color-background) 100%
+  );
+}
+
+html[data-channel="fast-shipping"] .meem-channel-surface {
+  --meem-channel-wash: var(--color-accent);
+  --meem-channel-wash-top: 22%;
+  --meem-channel-wash-mid: 9%;
+}
+
 /* Hero carousel pagination — white pills over campaign artwork. */
 .meem-hero-swiper .swiper-pagination {
   bottom: 14px !important;
@@ -194,7 +232,26 @@ button {
 }
 
 .meem-shelf-swiper .swiper-slide {
+  width: calc((100% - 12px) / 2);
+  margin-inline-end: 12px;
   height: auto;
+}
+
+@media (min-width: 768px) {
+  .meem-shelf-swiper .swiper-slide {
+    width: calc((100% - 28px) / 3);
+    margin-inline-end: 14px;
+  }
+}
+
+@media (min-width: 1280px) {
+  .meem-shelf-swiper .swiper-slide {
+    width: calc(
+      (100% - (var(--meem-shelf-columns, 5) - 1) * 16px) /
+        var(--meem-shelf-columns, 5)
+    );
+    margin-inline-end: 16px;
+  }
 }
 
 /* Layout-reserving media well for art-directed CMS artwork. */

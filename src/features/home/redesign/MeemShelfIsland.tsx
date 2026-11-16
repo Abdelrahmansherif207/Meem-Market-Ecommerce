@@ -119,7 +119,10 @@ export default function MeemShelfIsland({
       ) : null}
 
       {isSlider ? (
-        <div className="relative">
+        <div
+          className="relative"
+          style={{ "--meem-shelf-columns": desktopColumns } as CSSProperties}
+        >
           <Swiper
             key={`${locale_}-${desktopColumns}`}
             dir={isRtl ? "rtl" : "ltr"}

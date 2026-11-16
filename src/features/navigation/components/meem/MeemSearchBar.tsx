@@ -81,7 +81,7 @@ export default function MeemSearchBar({
           onFocus={handleFocus}
           placeholder={placeholder}
           className={cn(
-            "w-full border-none bg-meem-tint text-xs text-meem-charcoal shadow-none placeholder:text-meem-muted-soft focus:bg-white focus:outline-none focus:ring-0",
+            "w-full border border-meem-border bg-transparent text-xs text-meem-charcoal shadow-none transition-colors placeholder:text-meem-muted-soft hover:border-meem-sky focus:border-meem-primary focus:bg-transparent focus:outline-none focus:ring-0",
             compact
               ? "h-10 rounded-lg ps-9 pe-3"
               : "h-11 rounded-none ps-11 pe-4",

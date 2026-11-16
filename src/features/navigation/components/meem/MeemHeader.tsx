@@ -23,7 +23,7 @@ export default function MeemHeader({
   return (
     <>
       <MeemAnnouncementBar />
-      <header className="relative z-40 border-b border-meem-border bg-background">
+      <header className="meem-channel-surface relative z-40 border-b border-meem-border">
         <MeemTopRow settingsLogo={settingsLogo} siteName={siteName} />
         <Suspense fallback={null}>
           <MeemCategoryNav params={params} />
