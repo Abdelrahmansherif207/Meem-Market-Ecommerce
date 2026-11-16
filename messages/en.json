@@ -180,6 +180,11 @@
     "companyTitle": "Meem Market Riyadh",
     "profileTitle": "Profile",
     "stayConnected": "Stay connected",
+    "followUs": "Follow us",
+    "contactUs": "Contact us",
+    "contact": {
+      "whatsapp": "WhatsApp"
+    },
     "downloadApps": "Download our apps",
     "categories": {
       "electronics": "Electronics",

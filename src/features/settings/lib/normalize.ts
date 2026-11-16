@@ -15,7 +15,9 @@ import {
 } from "../constants";
 import type {
   FastShippingOptions,
+  PaymentGatewaySettings,
   PaymentGatewayState,
+  RawPaymentGatewayOptions,
   RawPaymentGateways,
   RawSiteSettings,
   RawSiteSettingsOptions,
@@ -103,10 +105,18 @@ export function cleanSettingsPhone(value: unknown): string {
   return trimmed;
 }
 
-/** Derive a wa.me link from any phone display format. */
+/**
+ * Derive a wa.me link from any phone display format. Local Saudi numbers
+ * (`05...`) and international `00` prefixes are normalized so the link always
+ * includes the country code.
+ */
 export function buildWhatsAppUrl(phone: string): string {
-  const digits = phone.replace(/\D/g, "");
-  return digits ? `https://wa.me/${digits}` : DEFAULT_WHATSAPP_URL;
+  let digits = phone.replace(/\D/g, "");
+  if (!digits) return DEFAULT_WHATSAPP_URL;
+  if (digits.startsWith("00")) digits = digits.slice(2);
+  if (digits.startsWith("9660")) digits = `966${digits.slice(4)}`;
+  else if (digits.startsWith("0")) digits = `966${digits.slice(1)}`;
+  return `https://wa.me/${digits}`;
 }
 
 /**
@@ -155,6 +165,49 @@ function normalizeGateways(value: RawPaymentGateways | null | undefined): Record
     }
   }
   return result;
+}
+
+/**
+ * Normalize `options.payment_gateways` into a sorted display list. When the
+ * backend omits the block entirely, derive it from the top-level gateway map
+ * so the footer still shows settings-driven badges. A present-but-empty block
+ * stays `[]` (backend says there are no gateways) and never falls back.
+ */
+function normalizePaymentGatewayOptions(
+  value: RawPaymentGatewayOptions | null | undefined,
+  states: Record<string, PaymentGatewayState>,
+): PaymentGatewaySettings[] | null {
+  if (!value || typeof value !== "object") {
+    const codes = Object.keys(states);
+    if (codes.length === 0) return null;
+    return codes.map((code, index) => ({
+      code,
+      display_name: code,
+      enabled: states[code].enabled,
+      sort_order: index,
+    }));
+  }
+
+  const result: PaymentGatewaySettings[] = [];
+  for (const [rawCode, option] of Object.entries(value)) {
+    const code = rawCode.trim().toLowerCase();
+    if (!code) continue;
+    const entry: RawPaymentGatewayOptions[string] =
+      option && typeof option === "object" ? option : {};
+    result.push({
+      code,
+      display_name: cleanSettingsText(entry.display_name) || code,
+      enabled:
+        entry.enabled === null || entry.enabled === undefined
+          ? Boolean(states[code]?.enabled)
+          : toBoolean(entry.enabled),
+      sort_order: toNumber(entry.sort_order, Number.MAX_SAFE_INTEGER),
+    });
+  }
+
+  return result.sort(
+    (a, b) => a.sort_order - b.sort_order || a.code.localeCompare(b.code),
+  );
 }
 
 export interface LocaleSettingsDefaults {
@@ -207,6 +260,12 @@ export function normalizeSiteSettings(raw: unknown, locale: string): SiteSetting
   const rawOptions: RawSiteSettingsOptions =
     data.options && typeof data.options === "object" ? data.options : {};
 
+  const paymentGateways = normalizeGateways(data.payment_gateways);
+  const paymentGatewayOptions = normalizePaymentGatewayOptions(
+    rawOptions.payment_gateways,
+    paymentGateways,
+  );
+
   const currency = normalizeCurrencyCode(rawOptions.currency);
   const baseCurrency = normalizeCurrencyCode(rawOptions.base_currency_code);
   const catalogCurrency = normalizeCurrencyCode(rawOptions.catalog_currency_code);
@@ -237,12 +296,13 @@ export function normalizeSiteSettings(raw: unknown, locale: string): SiteSetting
     order_tax_enabled: toBoolean(data.order_tax_enabled),
     order_tax_rate: toNullableNumber(data.order_tax_rate),
     currency_selection_enabled: currencySelectionEnabled,
-    payment_gateways: normalizeGateways(data.payment_gateways),
+    payment_gateways: paymentGateways,
     options: {
       currency: currency ?? baseCurrency ?? catalogCurrency,
       base_currency_code: baseCurrency,
       catalog_currency_code: catalogCurrency,
       fast_shipping: normalizeFastShippingOptions(rawOptions.fast_shipping),
+      payment_gateways: paymentGatewayOptions,
       currency_selection_enabled: currencySelectionEnabled,
     },
   };

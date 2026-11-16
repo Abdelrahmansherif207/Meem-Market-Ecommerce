@@ -2,7 +2,7 @@ import { notFound } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import Breadcrumb from "@/components/ui/Breadcrumb";
 import { getCachedSettings } from "@/features/settings/services/settingsService";
-import { getFastShippingStatusFromSettings } from "@/features/fast-shipping/services/fastShippingService";
+import { resolveFastShippingStatus } from "@/features/fast-shipping/services/fastShippingService";
 import { isGuestCheckoutEnabled } from "@/shared/constants/guestCheckout";
 import { GuestCheckoutForm } from "./GuestCheckoutForm";
 
@@ -17,7 +17,7 @@ export async function GuestCheckoutPage({ locale }: GuestCheckoutPageProps) {
   const t = await getTranslations({ locale, namespace: "guestCheckout" });
   const tb = await getTranslations({ locale, namespace: "header.breadcrumb" });
   const settings = await getCachedSettings(locale);
-  const fastShipping = getFastShippingStatusFromSettings(settings);
+  const fastShipping = await resolveFastShippingStatus(locale, settings);
 
   return (
     <div className="py-6">

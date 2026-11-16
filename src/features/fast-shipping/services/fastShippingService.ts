@@ -1,6 +1,7 @@
 import { apiFetch } from "@/shared/lib/api";
 import type { ApiResponse } from "@/shared/types";
-import type { SiteSettings } from "@/features/settings/types";
+import { CACHE_TTL } from "@/shared/constants/cache";
+import type { RawSiteSettings, SiteSettings } from "@/features/settings/types";
 
 export interface FastShippingStatus {
   enabled: boolean;
@@ -14,11 +15,22 @@ export interface FastShippingStatus {
   available_again_at: string | null;
 }
 
+interface FastShippingConfig {
+  enabled?: string | number | boolean | null;
+  duration_minutes?: string | number | null;
+  fee?: string | number | null;
+  start_hour?: string | null;
+  end_hour?: string | null;
+}
+
+const FAST_SHIPPING_CACHE_TAG = "fast-shipping-status";
+
 /**
- * NOTE: `GET /general/fast-shipping/status` is outdated and must NOT be used.
- * Fast-shipping state comes from `GET /general/settings` ->
- * `data.options.fast_shipping`. Backend serializes scalars as strings
+ * Fast-shipping state comes primarily from `GET /general/settings` ->
+ * `data.options.fast_shipping`. The backend serializes scalars as strings
  * (e.g. `enabled: "1"`, `fee: "0"`), so everything is parsed tolerantly.
+ * When the settings block omits fee/ETA/window, the public status endpoint
+ * fills only those missing fields.
  */
 function toBooleanFlag(value: unknown): boolean {
   if (typeof value === "boolean") return value;
@@ -64,14 +76,30 @@ function isWithinWindow(
   return nowMinutes >= start || nowMinutes < end;
 }
 
-export function getFastShippingStatusFromSettings(
+function parseConfig(
   settings: SiteSettings | null | undefined,
-  now: Date = new Date(),
+): FastShippingConfig {
+  return settings?.options?.fast_shipping ?? {};
+}
+
+function isConfigComplete(config: FastShippingConfig): boolean {
+  return (
+    config.enabled !== null &&
+    config.enabled !== undefined &&
+    toOptionalNumber(config.fee) !== null &&
+    toOptionalNumber(config.duration_minutes) !== null &&
+    parseHourToMinutes(config.start_hour) !== null &&
+    parseHourToMinutes(config.end_hour) !== null
+  );
+}
+
+function buildStatus(
+  config: FastShippingConfig,
+  now: Date,
 ): FastShippingStatus {
-  const config = settings?.options?.fast_shipping;
-  const enabled = toBooleanFlag(config?.enabled);
-  const startHour = config?.start_hour ?? null;
-  const endHour = config?.end_hour ?? null;
+  const enabled = toBooleanFlag(config.enabled);
+  const startHour = config.start_hour ?? null;
+  const endHour = config.end_hour ?? null;
   const withinWindow = isWithinWindow(
     now.getHours() * 60 + now.getMinutes(),
     parseHourToMinutes(startHour),
@@ -82,21 +110,104 @@ export function getFastShippingStatusFromSettings(
   return {
     enabled,
     available,
-    fee: toOptionalNumber(config?.fee),
-    duration_minutes: toOptionalNumber(config?.duration_minutes),
+    fee: toOptionalNumber(config.fee),
+    duration_minutes: toOptionalNumber(config.duration_minutes),
     opens_at: startHour,
     closes_at: endHour,
     available_again_at: enabled && !withinWindow ? startHour : null,
   };
 }
 
+export function getFastShippingStatusFromSettings(
+  settings: SiteSettings | null | undefined,
+  now: Date = new Date(),
+): FastShippingStatus {
+  return buildStatus(parseConfig(settings), now);
+}
+
+async function fetchRemoteStatus(
+  lang: string,
+): Promise<FastShippingStatus | null> {
+  try {
+    const response = await apiFetch<ApiResponse<FastShippingStatus>>(
+      "/general/fast-shipping/status",
+      {
+        lang,
+        next: {
+          revalidate: CACHE_TTL.STANDARD,
+          tags: [FAST_SHIPPING_CACHE_TAG],
+        },
+      },
+    );
+    return response?.data ?? null;
+  } catch {
+    return null;
+  }
+}
+
+async function fetchSettingsConfig(lang: string): Promise<FastShippingConfig> {
+  try {
+    const response = await apiFetch<ApiResponse<RawSiteSettings>>(
+      "/general/settings",
+      {
+        lang,
+        next: { revalidate: CACHE_TTL.STANDARD },
+      },
+    );
+    const options = response?.data?.options;
+    if (!options || typeof options !== "object") return {};
+    return (options.fast_shipping as FastShippingConfig | undefined) ?? {};
+  } catch {
+    return {};
+  }
+}
+
+/**
+ * Resolve fast-shipping state with settings as the primary source:
+ * `GET /general/settings` -> `data.options.fast_shipping`, then fill missing
+ * fee/ETA/window fields from `GET /general/fast-shipping/status`.
+ */
+export async function resolveFastShippingStatus(
+  lang: string,
+  settings?: SiteSettings | null,
+  now: Date = new Date(),
+): Promise<FastShippingStatus> {
+  const config = settings
+    ? parseConfig(settings)
+    : await fetchSettingsConfig(lang);
+
+  if (isConfigComplete(config)) return buildStatus(config, now);
+
+  const remote = await fetchRemoteStatus(lang);
+
+  const merged: FastShippingConfig = {
+    enabled:
+      config.enabled === null || config.enabled === undefined
+        ? (remote?.enabled ?? null)
+        : config.enabled,
+    fee:
+      toOptionalNumber(config.fee) !== null
+        ? config.fee
+        : (remote?.fee ?? null),
+    duration_minutes:
+      toOptionalNumber(config.duration_minutes) !== null
+        ? config.duration_minutes
+        : (remote?.duration_minutes ?? null),
+    start_hour:
+      parseHourToMinutes(config.start_hour) !== null
+        ? config.start_hour
+        : (remote?.opens_at ?? null),
+    end_hour:
+      parseHourToMinutes(config.end_hour) !== null
+        ? config.end_hour
+        : (remote?.closes_at ?? null),
+  };
+
+  return buildStatus(merged, now);
+}
+
 export const fastShippingService = {
   getStatus: async (lang = "en"): Promise<FastShippingStatus> => {
-    // Intentionally no `next.revalidate` — this service runs client-side.
-    const response = await apiFetch<ApiResponse<SiteSettings>>(
-      "/general/settings",
-      { channel: false, headers: { lang } },
-    );
-    return getFastShippingStatusFromSettings(response.data);
+    return resolveFastShippingStatus(lang);
   },
 };

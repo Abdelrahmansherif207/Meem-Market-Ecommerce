@@ -11,7 +11,15 @@ export interface FooterColumn {
 }
 
 export interface SocialLink {
-  platform: "facebook" | "twitter" | "instagram" | "youtube" | "tiktok" | "snapchat" | "linkedin";
+  platform:
+    | "facebook"
+    | "twitter"
+    | "instagram"
+    | "youtube"
+    | "tiktok"
+    | "snapchat"
+    | "linkedin"
+    | "whatsapp";
   url: string;
   label: string;
 }
@@ -29,6 +37,7 @@ export interface ContactInfo {
   assistanceText: string;
   callUsText: string;
   phoneNumber: string;
+  email: string;
 }
 
 export interface FooterData {

@@ -3,7 +3,10 @@ import { buildWhatsAppUrl } from "@/features/settings/lib/normalize";
 import {
   DEFAULT_FOOTER_LOGO,
   DEFAULT_LOGO,
+  DEFAULT_SOCIAL_LINKS,
 } from "@/features/settings/constants";
+import { isLegacyBrandUrl } from "@/shared/utils/legacyBrand";
+import type { PaymentGatewaySettings } from "@/features/settings";
 import type { ContactInfo, FooterData, SocialLink } from "../types";
 
 export interface AssembledFooterContent {
@@ -14,6 +17,8 @@ export interface AssembledFooterContent {
   copyright: string;
   mergedSocialLinks: SocialLink[];
   contactInfo: ContactInfo;
+  /** `options.payment_gateways` from site settings; `null` when absent. */
+  paymentGateways: PaymentGatewaySettings[] | null;
   /** `fast_shipping_page_publish` from site settings. */
   fastShippingPageEnabled: boolean;
 }
@@ -21,47 +26,63 @@ export interface AssembledFooterContent {
 export async function assembleFooterContent(locale: string): Promise<AssembledFooterContent> {
   const data = await footerService.getFooter(locale);
   const settings = await getCachedSettings(locale);
+  const socialLabels: Record<string, string> = {
+    instagram: "Instagram",
+    facebook: "Facebook",
+    tiktok: "TikTok",
+    snapchat: "Snapchat",
+    youtube: "YouTube",
+    linkedin: "LinkedIn",
+    whatsapp: "WhatsApp",
+  };
 
   const mainLogoSrc = settings.logo || DEFAULT_LOGO;
   const logoSrc = settings.footer_logo || mainLogoSrc || DEFAULT_FOOTER_LOGO;
   const siteName = settings.site_name;
   const copyright = settings.site_copy_right;
 
-  const settingsSocial: { platform: string; url: string }[] = [];
-  const platformMap: Record<string, string> = {
-    facebook: settings.facebook,
-    instagram: settings.instagram,
-    linkedin: settings.linkedin,
-    youtube: settings.youtube,
-    tiktok: settings.tiktok,
-    snapchat: settings.snapchat,
-  };
-  for (const [platform, url] of Object.entries(platformMap)) {
-    if (url) settingsSocial.push({ platform, url });
+  const settingsSocial: SocialLink[] = (
+    [
+      ["instagram", settings.instagram],
+      ["facebook", settings.facebook],
+      ["tiktok", settings.tiktok],
+      ["snapchat", settings.snapchat],
+      ["youtube", settings.youtube],
+      ["linkedin", settings.linkedin],
+    ] as const
+  )
+    .filter(([, url]) => Boolean(url) && url !== "#" && !isLegacyBrandUrl(url))
+    .map(([platform, url]) => ({
+      platform,
+      url,
+      label: socialLabels[platform] ?? platform,
+    }));
+
+  // Merge the future `/footer` payload first, then override it with settings.
+  // Invalid/legacy entries are dropped per link, never as a whole row.
+  const merged = new Map<string, SocialLink>();
+  for (const link of data.socialLinks) {
+    if (link.url && link.url !== "#" && !isLegacyBrandUrl(link.url)) {
+      merged.set(link.platform, link);
+    }
+  }
+  for (const link of settingsSocial) {
+    merged.set(link.platform, link);
   }
 
-  const baseLinks: SocialLink[] = data.socialLinks;
-
-  const mergedSocialLinks: SocialLink[] = (
-    settingsSocial.length > 0
-      ? (() => {
-          const map = new Map<string, SocialLink>(
-            baseLinks.map((l) => [l.platform, l])
-          );
-          for (const s of settingsSocial) {
-            map.set(s.platform, {
-              platform: s.platform as SocialLink["platform"],
-              url: s.url,
-              label: s.platform.charAt(0).toUpperCase() + s.platform.slice(1),
-            });
-          }
-          return Array.from(map.values());
-        })()
-      : baseLinks
-  ).filter((link) => Boolean(link.url) && link.url !== "#");
+  const backendSocialLinks = Array.from(merged.values());
+  const mergedSocialLinks: SocialLink[] =
+    backendSocialLinks.length > 0
+      ? backendSocialLinks
+      : DEFAULT_SOCIAL_LINKS.map((link) => ({
+          platform: link.platform,
+          url: link.url,
+          label: link.label,
+        }));
 
   const contactInfo: ContactInfo = {
     ...data.contactInfo,
+    email: settings.email_support || settings.site_email,
     phoneNumber: settings.phone || data.contactInfo.phoneNumber,
     whatsappUrl: settings.phone
       ? buildWhatsAppUrl(settings.phone)
@@ -76,6 +97,7 @@ export async function assembleFooterContent(locale: string): Promise<AssembledFo
     copyright,
     mergedSocialLinks,
     contactInfo,
+    paymentGateways: settings.options.payment_gateways,
     fastShippingPageEnabled: settings.fast_shipping_page_publish,
   };
 }
@@ -159,6 +181,7 @@ function getMockFooterData(lang: string): FooterData {
       assistanceText: isAr ? "تحدث معنا للمساعدة" : "Have a question? We are here to help.",
       callUsText: isAr ? "اتصل بنا للمساعدة" : "Call us for assistance",
       phoneNumber: "+966 55 000 0000",
+      email: "",
     },
     bottomRow: {
       title: isAr ? "حمل تطبيقنا" : "Download Our App",

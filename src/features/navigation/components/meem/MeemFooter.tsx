@@ -1,14 +1,14 @@
+import Image from "next/image";
 import { getTranslations } from "next-intl/server";
-import { FaGooglePlay, FaApple } from "react-icons/fa6";
+import { FaApple, FaGooglePlay, FaWhatsapp } from "react-icons/fa6";
+import { Mail, Phone } from "lucide-react";
 import { Link } from "@/i18n/navigation";
 import { assembleFooterContent } from "../../services/footerService";
 import { categoryMenuService } from "@/features/categories/services/categoryMenuService";
-import {
-  isLegacyBrandUrl,
-  sanitizeLegacyBrand,
-} from "@/shared/utils/legacyBrand";
+import { sanitizeLegacyBrand } from "@/shared/utils/legacyBrand";
+import type { PaymentGatewaySettings } from "@/features/settings";
 import { SocialIcon } from "../footer/SocialIcons";
-import MeemPaymentStrip, { PAYMENT_BADGES } from "./MeemPaymentStrip";
+import MeemPaymentStrip, { PaymentBadges } from "./MeemPaymentStrip";
 
 interface MeemFooterProps {
   params: Promise<{ locale: string }>;
@@ -16,11 +16,11 @@ interface MeemFooterProps {
 
 /**
  * Site footer: cool surface 5-column grid (popular categories, company
- * links, profile links, social circles, app badges) followed by the
- * copyright + payment strip. Social/app data comes from the existing
- * footerService assembly; popular categories come from the backend
- * navigation tree (with generic Meem fallbacks), and the remaining link
- * columns are static per the screen.
+ * links, profile links, social/contact, app badges) followed by the
+ * copyright + payment strip. Social/contact/logo/copyright data comes from
+ * the backend settings; popular categories come from the backend navigation
+ * tree (with generic Meem fallbacks), and the remaining link columns are
+ * static per the screen.
  */
 export default async function MeemFooter({ params }: MeemFooterProps) {
   const { locale } = await params;
@@ -28,21 +28,26 @@ export default async function MeemFooter({ params }: MeemFooterProps) {
 
   let siteName = "";
   let socialLinks: { platform: string; url: string; label: string }[] = [];
+  let contact = { email: "", phone: "", whatsapp: "" };
+  let copyright = "";
+  let logoSrc = "";
+  let paymentGateways: PaymentGatewaySettings[] | null = null;
   let appStoreUrl = "";
   let googlePlayUrl = "";
   let fastShippingPageEnabled = false;
 
   try {
     const assembled = await assembleFooterContent(locale);
-    siteName = sanitizeLegacyBrand(assembled.siteName, locale);
-    // Backend settings still hold the previous brand's accounts (including
-    // neutral-looking share URLs). When any legacy handle is present the whole
-    // set is stale, so hide it rather than surface a cross-brand social row.
-    socialLinks = assembled.mergedSocialLinks.some((link) =>
-      isLegacyBrandUrl(link.url),
-    )
-      ? []
-      : assembled.mergedSocialLinks.slice(0, 8);
+    siteName = assembled.siteName;
+    socialLinks = assembled.mergedSocialLinks;
+    contact = {
+      email: assembled.contactInfo.email,
+      phone: assembled.contactInfo.phoneNumber,
+      whatsapp: assembled.contactInfo.whatsappUrl,
+    };
+    copyright = assembled.copyright;
+    logoSrc = assembled.logoSrc;
+    paymentGateways = assembled.paymentGateways;
     appStoreUrl = assembled.data.bottomRow.appStore.url || "";
     googlePlayUrl = assembled.data.bottomRow.googlePlay.url || "";
     fastShippingPageEnabled = assembled.fastShippingPageEnabled;
@@ -98,12 +103,18 @@ export default async function MeemFooter({ params }: MeemFooterProps) {
     (link) => Boolean(link.url) && link.url !== "#",
   );
   const hasSocialLinks = visibleSocialLinks.length > 0;
+  const hasContact = Boolean(contact.email || contact.phone || contact.whatsapp);
+  const hasConnectColumn = hasSocialLinks || hasContact;
+  const contactPhoneHref = contact.phone.replace(/\s+/g, "");
   const hasGooglePlayUrl = Boolean(googlePlayUrl) && googlePlayUrl !== "#";
   const hasAppStoreUrl = Boolean(appStoreUrl) && appStoreUrl !== "#";
   const hasAppLinks = hasGooglePlayUrl || hasAppStoreUrl;
+  const hasPaymentBadges = Boolean(
+    paymentGateways?.some((gateway) => gateway.enabled),
+  );
 
   const desktopColumnCount =
-    3 + (hasSocialLinks ? 1 : 0) + (hasAppLinks ? 1 : 0);
+    3 + (hasConnectColumn ? 1 : 0) + (hasAppLinks ? 1 : 0);
   const desktopGridClass =
     desktopColumnCount >= 5
       ? "md:grid-cols-5"
@@ -115,11 +126,11 @@ export default async function MeemFooter({ params }: MeemFooterProps) {
     <>
       {/* Mobile footer — centered stacked block (mobile screen spec) */}
       <div className="space-y-5 border-t border-meem-border bg-meem-surface px-3 pb-8 pt-4 text-center lg:hidden">
-        {/* Stay connected */}
+        {/* Follow us */}
         {hasSocialLinks && (
           <div className="space-y-2.5">
             <h3 className="text-xs font-extrabold tracking-tight text-meem-charcoal">
-              {t("stayConnected")}
+              {t("followUs")}
             </h3>
             <div className="flex items-center justify-center space-x-2.5 rtl:space-x-reverse">
               {visibleSocialLinks.map((s) => (
@@ -134,6 +145,46 @@ export default async function MeemFooter({ params }: MeemFooterProps) {
                   <SocialIcon platform={s.platform} className="h-3.5 w-3.5" />
                 </a>
               ))}
+            </div>
+          </div>
+        )}
+
+        {/* Contact details from settings */}
+        {hasContact && (
+          <div className="space-y-2">
+            <h3 className="text-xs font-extrabold tracking-tight text-meem-charcoal">
+              {t("contactUs")}
+            </h3>
+            <div className="flex flex-col items-center gap-1.5 text-xs text-meem-muted">
+              {contact.email && (
+                <a
+                  href={`mailto:${contact.email}`}
+                  className="inline-flex items-center gap-1.5 transition-colors hover:text-meem-primary"
+                >
+                  <Mail className="h-3.5 w-3.5" aria-hidden />
+                  <span className="break-all">{contact.email}</span>
+                </a>
+              )}
+              {contact.phone && (
+                <a
+                  href={`tel:${contactPhoneHref}`}
+                  className="inline-flex items-center gap-1.5 transition-colors hover:text-meem-primary"
+                >
+                  <Phone className="h-3.5 w-3.5" aria-hidden />
+                  <span>{contact.phone}</span>
+                </a>
+              )}
+              {contact.whatsapp && (
+                <a
+                  href={contact.whatsapp}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1.5 transition-colors hover:text-meem-primary"
+                >
+                  <FaWhatsapp className="h-3.5 w-3.5" aria-hidden />
+                  <span>{t("contact.whatsapp")}</span>
+                </a>
+              )}
             </div>
           </div>
         )}
@@ -181,16 +232,32 @@ export default async function MeemFooter({ params }: MeemFooterProps) {
           </div>
         )}
 
-        {/* Payment badges */}
-        <div className="flex flex-wrap items-center justify-center gap-2">
-          {PAYMENT_BADGES.map((badge) => (
-            <span
-              key={badge.label}
-              className={`rounded border px-2 py-1 text-[10px] font-bold ${badge.className}`}
-            >
-              {badge.label}
-            </span>
-          ))}
+        {/* Payment badges from settings */}
+        {hasPaymentBadges && (
+          <div className="flex justify-center">
+            <PaymentBadges
+              gateways={paymentGateways}
+              className="justify-center"
+            />
+          </div>
+        )}
+
+        {/* Footer logo + copyright */}
+        <div className="space-y-2 border-t border-meem-border pt-4">
+          {logoSrc && (
+            <Image
+              src={logoSrc}
+              alt={siteName || t("companyTitle")}
+              width={160}
+              height={48}
+              className="mx-auto h-8 w-auto object-contain"
+            />
+          )}
+          {copyright && (
+            <p className="text-[10px] leading-relaxed text-meem-muted">
+              {copyright}
+            </p>
+          )}
         </div>
       </div>
 
@@ -246,26 +313,77 @@ export default async function MeemFooter({ params }: MeemFooterProps) {
             </ul>
           </div>
 
-          {/* Column 4: Stay connected */}
-          {hasSocialLinks && (
+          {/* Column 4: Follow us + contact */}
+          {hasConnectColumn && (
             <div className="space-y-3">
-              <h4 className="text-xs font-bold tracking-wider text-meem-charcoal">
-                {t("stayConnected")}
-              </h4>
-              <div className="grid w-fit grid-cols-4 gap-2">
-                {visibleSocialLinks.map((s) => (
-                  <a
-                    key={s.platform}
-                    href={s.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    aria-label={s.label}
-                    className="flex h-8 w-8 items-center justify-center rounded-full bg-meem-charcoal text-white transition-colors hover:bg-meem-primary"
-                  >
-                    <SocialIcon platform={s.platform} className="h-3.5 w-3.5" />
-                  </a>
-                ))}
-              </div>
+              {hasSocialLinks && (
+                <>
+                  <h4 className="text-xs font-bold tracking-wider text-meem-charcoal">
+                    {t("followUs")}
+                  </h4>
+                  <div className="grid w-fit grid-cols-4 gap-2">
+                    {visibleSocialLinks.map((s) => (
+                      <a
+                        key={s.platform}
+                        href={s.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        aria-label={s.label}
+                        className="flex h-8 w-8 items-center justify-center rounded-full bg-meem-charcoal text-white transition-colors hover:bg-meem-primary"
+                      >
+                        <SocialIcon platform={s.platform} className="h-3.5 w-3.5" />
+                      </a>
+                    ))}
+                  </div>
+                </>
+              )}
+
+              {hasContact && (
+                <div className={hasSocialLinks ? "space-y-2 pt-1" : "space-y-2"}>
+                  {!hasSocialLinks && (
+                    <h4 className="text-xs font-bold tracking-wider text-meem-charcoal">
+                      {t("contactUs")}
+                    </h4>
+                  )}
+                  <ul className="space-y-2 text-xs text-meem-muted">
+                    {contact.email && (
+                      <li>
+                        <a
+                          href={`mailto:${contact.email}`}
+                          className="inline-flex items-center gap-2 transition-colors hover:text-meem-primary"
+                        >
+                          <Mail className="h-3.5 w-3.5 shrink-0" aria-hidden />
+                          <span className="break-all">{contact.email}</span>
+                        </a>
+                      </li>
+                    )}
+                    {contact.phone && (
+                      <li>
+                        <a
+                          href={`tel:${contactPhoneHref}`}
+                          className="inline-flex items-center gap-2 transition-colors hover:text-meem-primary"
+                        >
+                          <Phone className="h-3.5 w-3.5 shrink-0" aria-hidden />
+                          <span>{contact.phone}</span>
+                        </a>
+                      </li>
+                    )}
+                    {contact.whatsapp && (
+                      <li>
+                        <a
+                          href={contact.whatsapp}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-2 transition-colors hover:text-meem-primary"
+                        >
+                          <FaWhatsapp className="h-3.5 w-3.5 shrink-0" aria-hidden />
+                          <span>{t("contact.whatsapp")}</span>
+                        </a>
+                      </li>
+                    )}
+                  </ul>
+                </div>
+              )}
             </div>
           )}
 
@@ -314,7 +432,12 @@ export default async function MeemFooter({ params }: MeemFooterProps) {
         </div>
       </footer>
 
-      <MeemPaymentStrip />
+      <MeemPaymentStrip
+        copyright={copyright}
+        logoSrc={logoSrc}
+        siteName={siteName || t("companyTitle")}
+        gateways={paymentGateways}
+      />
     </>
   );
 }

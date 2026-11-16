@@ -7,6 +7,7 @@ export {
   DEFAULT_SITE_DESCRIPTION,
   DEFAULT_SITE_EMAIL,
   DEFAULT_SITE_NAME,
+  DEFAULT_SOCIAL_LINKS,
   DEFAULT_WHATSAPP_URL,
   FONT_CACHE_TAG,
   SETTINGS_CACHE_TAG,
@@ -40,12 +41,16 @@ export {
   type PromotionVideo,
 } from "./lib/video";
 export { getCachedSettings, settingsService } from "./services/settingsService";
+export type { DefaultSocialLink } from "./constants";
 export type {
   CustomFont,
   CustomFontFormat,
   CustomFontSourceType,
+  PaymentGatewaySettings,
   PaymentGatewayState,
   RawCustomFont,
+  RawPaymentGatewayOption,
+  RawPaymentGatewayOptions,
   RawSiteSettings,
   RawSiteSettingsOptions,
   SiteSettings,

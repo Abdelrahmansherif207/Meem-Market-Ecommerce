@@ -14,11 +14,21 @@ export interface RawPaymentGatewayState {
 
 export type RawPaymentGateways = Record<string, RawPaymentGatewayState>;
 
+/** Admin `options.payment_gateways` entry (display metadata + toggle). */
+export interface RawPaymentGatewayOption {
+  enabled?: boolean | number | string | null;
+  display_name?: string | null;
+  sort_order?: string | number | null;
+}
+
+export type RawPaymentGatewayOptions = Record<string, RawPaymentGatewayOption>;
+
 export interface RawSiteSettingsOptions {
   currency?: string | null;
   base_currency_code?: string | null;
   catalog_currency_code?: string | null;
   currency_selection_enabled?: boolean | number | string | null;
+  payment_gateways?: RawPaymentGatewayOptions | null;
   [key: string]: unknown;
 }
 
@@ -54,6 +64,14 @@ export interface PaymentGatewayState {
   available: boolean;
 }
 
+/** Normalized gateway option from `options.payment_gateways`, sorted for UI. */
+export interface PaymentGatewaySettings {
+  code: string;
+  display_name: string;
+  enabled: boolean;
+  sort_order: number;
+}
+
 /**
  * Raw `options.fast_shipping` block from `GET /general/settings`. The backend
  * serializes scalars as strings (e.g. `enabled: "1"`, `fee: "0"`), so every
@@ -73,6 +91,8 @@ export interface SiteSettingsOptions {
   catalog_currency_code?: string;
   /** Fast (NOW) delivery availability/fee/window. */
   fast_shipping?: FastShippingOptions | null;
+  /** Admin-ordered gateway display metadata; `null` when the backend omits it. */
+  payment_gateways: PaymentGatewaySettings[] | null;
   currency_selection_enabled: boolean;
 }
 

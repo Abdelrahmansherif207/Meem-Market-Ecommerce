@@ -26,9 +26,44 @@ export const DEFAULT_LOGO = "/meem-new.png";
 export const DEFAULT_FOOTER_LOGO = "/new-footer-logo.png";
 export const DEFAULT_FAVICON = "/meem-icon.jpeg";
 
-export const DEFAULT_SITE_EMAIL = "info@meemmarket.com";
-export const DEFAULT_PHONE = "+966 55 000 0000";
-export const DEFAULT_WHATSAPP_URL = "https://wa.me/966550000000";
+export const DEFAULT_SITE_EMAIL = "meemmarketryiadh@gmail.com";
+export const DEFAULT_PHONE = "0573666192";
+export const DEFAULT_WHATSAPP_URL = "https://wa.me/966573666192";
+
+/**
+ * Riyadh branch social accounts. Used only when the backend returns no valid
+ * social URL at all. As soon as one valid backend URL exists, only backend
+ * values are rendered (no per-platform mixing with these defaults).
+ */
+export const DEFAULT_SOCIAL_LINKS = [
+  {
+    platform: "instagram",
+    url: "https://www.instagram.com/meemmarketryiadh",
+    label: "Instagram",
+  },
+  {
+    platform: "facebook",
+    url: "https://www.facebook.com/meemmarketryiadh",
+    label: "Facebook",
+  },
+  {
+    platform: "tiktok",
+    url: "https://www.tiktok.com/@meemmarketryiadh",
+    label: "TikTok",
+  },
+  {
+    platform: "snapchat",
+    url: "https://www.snapchat.com/@meemmarketryiad",
+    label: "Snapchat",
+  },
+  {
+    platform: "whatsapp",
+    url: "https://wa.me/966573666192",
+    label: "WhatsApp",
+  },
+] as const;
+
+export type DefaultSocialLink = (typeof DEFAULT_SOCIAL_LINKS)[number];
 
 /** Text values the API uses as placeholders (compared case-insensitively). */
 export const PLACEHOLDER_TEXTS = [

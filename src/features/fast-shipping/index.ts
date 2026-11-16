@@ -2,6 +2,7 @@ export type { FastShippingStatus } from "./services/fastShippingService";
 export {
   fastShippingService,
   getFastShippingStatusFromSettings,
+  resolveFastShippingStatus,
 } from "./services/fastShippingService";
 export { useChannelStore } from "./store/useChannelStore";
 export type { Channel } from "./store/useChannelStore";
