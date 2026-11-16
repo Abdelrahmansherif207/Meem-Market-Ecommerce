@@ -51,7 +51,15 @@ function CatchSectionBlock({
     case "sliders":
       return <CatchHeroSliderSection title={title} locale={locale} setting={setting} endpoint={endpoint} />;
     case "banners":
-      return <CatchBannerSection endpoint={endpoint} locale={locale} title={title} setting={setting} />;
+      return (
+        <CatchBannerSection
+          endpoint={endpoint}
+          locale={locale}
+          title={title}
+          setting={setting}
+          back={section.setting?.back}
+        />
+      );
     case "products":
       return <CatchProductShelfSection title={title} locale={locale} setting={setting} endpoint={endpoint} />;
     case "flash-sales":
@@ -88,7 +96,7 @@ function getSectionSkeleton(type: string, setting?: SectionFrontSetting): React.
     case "categories":
       return <CatchCategoriesSkeleton setting={setting} />;
     case "brands":
-      return <CatchBrandsSkeleton />;
+      return <CatchBrandsSkeleton setting={setting} />;
     case "promotions":
       return <CatchPromotionsSkeleton />;
     case "coupons":

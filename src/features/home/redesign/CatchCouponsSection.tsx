@@ -3,6 +3,7 @@ import type { Coupon } from "@/features/coupons/types";
 import { SectionHeader } from "@/components/ui/SectionHeader";
 import type { SectionFrontSetting } from "../types";
 import { resolveLocalizedText } from "../utils";
+import { parseBooleanSetting } from "./categoryGrid";
 import CatchCouponBanner from "./CatchCouponBanner";
 
 interface CatchCouponsSectionProps {
@@ -73,7 +74,7 @@ export default async function CatchCouponsSection({
   if (!coupons.length) return null;
 
   const placements = planLayout(coupons);
-  const showTitle = setting?.show_title !== false;
+  const showTitle = parseBooleanSetting(setting?.show_title, true);
   const subtitle = resolveLocalizedText(setting?.subtitle, locale);
 
   return (

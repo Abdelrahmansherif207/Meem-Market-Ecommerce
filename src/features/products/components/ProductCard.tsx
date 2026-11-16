@@ -32,9 +32,6 @@ interface ProductCardProps {
   variant?: "grid" | "list";
 }
 
-/** Low stock threshold for the automatic "Only X left" chip. */
-const LOW_STOCK_THRESHOLD = 10;
-
 /** Brand placeholder = first word of the title when the API has no brand. */
 function titleBrand(title: string): string {
   const first = title.trim().split(/\s+/)[0];
@@ -78,15 +75,9 @@ export default function ProductCard({
       : 0;
 
   const rating = item.ratings ?? 0;
-  const safeStock = item.stockQuantity ?? item.inStock ?? 0;
+  // Badges are backend-driven: only the CMS `badge_text` renders.
   const explicitBadge = badgeText?.trim() || null;
-  const isLowStock =
-    !explicitBadge &&
-    !item.flashSaleActive &&
-    safeStock > 0 &&
-    safeStock <= LOW_STOCK_THRESHOLD;
-  const badge =
-    explicitBadge ?? (isLowStock ? t("lowStock", { count: safeStock }) : null);
+  const badge = explicitBadge;
   const brandName = item.brands?.[0]?.name?.trim() || titleBrand(item.title);
 
   /** Whole-card navigation target (fallback builds the PDP slug). */
@@ -154,12 +145,7 @@ export default function ProductCard({
           ) : badge ? (
             <span
               title={badge}
-              className={cn(
-                "inline-flex h-5 max-w-full items-center overflow-hidden rounded-full bg-primary font-semibold leading-none text-white",
-                isLowStock
-                  ? "px-1.5 text-[9px] sm:px-2 sm:text-[10px]"
-                  : "px-2 text-[10px]",
-              )}
+              className="inline-flex h-5 max-w-full items-center overflow-hidden rounded-full bg-primary px-2 text-[10px] font-semibold leading-none text-white"
             >
               <span className="truncate">{badge}</span>
             </span>

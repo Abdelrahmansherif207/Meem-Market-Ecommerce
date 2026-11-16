@@ -367,8 +367,29 @@ button {
   }
 }
 
-/* Card tiles: square shape, or a grid with two or more rows. Borderless
-   circular tiles stay the default. */
+/* Per-breakpoint caps: tiles beyond a breakpoint's `columns × rows` capacity
+   are hidden on that breakpoint only, so desktop may keep more tiles than
+   phones while every device still shows exactly the requested rows. */
+@media (max-width: 767px) {
+  .catch-category-grid > [data-cat-hide-mobile="true"] {
+    display: none;
+  }
+}
+
+@media (min-width: 768px) and (max-width: 1023px) {
+  .catch-category-grid > [data-cat-hide-tablet="true"] {
+    display: none;
+  }
+}
+
+@media (min-width: 1024px) {
+  .catch-category-grid > [data-cat-hide-desktop="true"] {
+    display: none;
+  }
+}
+
+/* Card tiles follow `shape: square` exactly; circular is the default.
+   Circular tiles are borderless. */
 @media (max-width: 767px) {
   .catch-category-grid[data-cat-tile-mobile="card"] .catch-category-tile {
     gap: 0.5rem;

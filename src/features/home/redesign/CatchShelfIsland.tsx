@@ -17,6 +17,7 @@ import {
   getProductSliderItemsAction,
 } from "../actions/homeCurrencyActions";
 import { resolveLocalizedText } from "../utils";
+import { parseIntegerSetting } from "./categoryGrid";
 import type { LocalizedText, ProductItem } from "../types";
 import CatchCountdown from "./CatchCountdown";
 
@@ -44,9 +45,10 @@ interface CatchShelfIslandProps {
 }
 
 /**
- * Catch Beauty product shelf: a fluid Swiper (2 mobile / 3 tablet / 5 desktop)
- * rendering every CMS product, with currency-driven refetches and optional
- * CMS countdown. Presentation only — all card behavior lives in ProductCard.
+ * Catch Beauty product shelf: a fluid Swiper (2 mobile / 3 tablet / CMS
+ * desktop columns) rendering every CMS product, with currency-driven
+ * refetches and optional CMS countdown. Presentation only — all card behavior
+ * lives in ProductCard.
  */
 export default function CatchShelfIsland({
   fetchKind,
@@ -68,10 +70,8 @@ export default function CatchShelfIsland({
   const isRtl = locale_ === "ar";
   const [swiper, setSwiper] = useState<SwiperType | null>(null);
   const [isLocked, setIsLocked] = useState(true);
-  const desktopColumns = Math.max(
-    3,
-    Math.min(5, Math.round(columnsCount ?? 5)),
-  );
+  // Literal CMS column count on desktop — no clamping. Mobile/tablet stay 2/3.
+  const desktopColumns = parseIntegerSetting(columnsCount, 5);
   const isSlider = layout !== "grid" && layout !== "list";
   const isList = layout === "list";
   const resolvedBadgeText = resolveLocalizedText(badgeText, locale);

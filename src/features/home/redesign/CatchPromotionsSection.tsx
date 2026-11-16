@@ -6,6 +6,7 @@ import { cn } from "@/shared/utils/cn";
 import { homePageService } from "../services/homePageService";
 import { resolveLocalizedText } from "../utils";
 import { normalizeList } from "./normalize";
+import { parseBooleanSetting } from "./categoryGrid";
 import type { SectionFrontSetting, Promotion } from "../types";
 
 interface CatchPromotionsSectionProps {
@@ -51,7 +52,7 @@ export default async function CatchPromotionsSection({
 
   const lastIndex = valid.length - 1;
   const lastSpansBoth = valid.length % 2 === 1;
-  const showTitle = setting?.show_title !== false;
+  const showTitle = parseBooleanSetting(setting?.show_title, true);
   const subtitle = resolveLocalizedText(setting?.subtitle, locale);
 
   return (
