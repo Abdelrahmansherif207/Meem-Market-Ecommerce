@@ -1,5 +1,6 @@
 import { Link } from "@/i18n/navigation";
 import { tagService } from "@/features/tags/services/tagService";
+import { parseBooleanSetting } from "./categoryGrid";
 import type { SectionFrontSetting } from "../types";
 
 interface CatchTagsSectionProps {
@@ -33,9 +34,10 @@ export default async function CatchTagsSection({
 
   if (!tags || tags.length === 0) return null;
 
-  const showTitle = setting?.show_title !== false;
-  const showHashtag = setting?.show_hashtag !== false;
-  const tone = setting?.tone ?? "dark";
+  const showTitle = parseBooleanSetting(setting?.show_title, true);
+  const showHashtag = parseBooleanSetting(setting?.show_hashtag, true);
+  const tone =
+    typeof setting?.tone === "string" && setting.tone ? setting.tone : "dark";
 
   const toneClasses =
     tone === "light"

@@ -7,6 +7,10 @@ import { cn } from "@/shared/utils/cn";
 import { homePageService } from "../services/homePageService";
 import { resolveLocalizedText } from "../utils";
 import { normalizeList } from "./normalize";
+import {
+  parseBooleanSetting,
+  parseIntegerSetting,
+} from "./categoryGrid";
 import type { SectionFrontSetting, ApiBrandWithProducts } from "../types";
 
 interface CatchBrandsSectionProps {
@@ -44,16 +48,13 @@ export default async function CatchBrandsSection({
   const valid = brands.filter((b) => b.image?.desktop || b.image?.mobile);
   if (!valid.length) return null;
 
-  // Respect the CMS cap without leaving empty columns when the merchant
-  // selected fewer brands than the configured column count.
-  const desktopColumns = Math.max(
-    2,
-    Math.min(8, Math.round(setting?.columns_count ?? 6), valid.length),
-  );
+  // Literal CMS column count — no clamp and no shrink-to-fit when the
+  // merchant selected fewer brands than the configured column count.
+  const desktopColumns = parseIntegerSetting(setting?.columns_count, 6);
 
-  const showTitle = setting?.show_title !== false;
+  const showTitle = parseBooleanSetting(setting?.show_title, true);
   const subtitle = resolveLocalizedText(setting?.subtitle, locale);
-  const showViewAll = setting?.show_view_all !== false;
+  const showViewAll = parseBooleanSetting(setting?.show_view_all, true);
   const actionLabel = resolveLocalizedText(
     setting?.action_label,
     locale,

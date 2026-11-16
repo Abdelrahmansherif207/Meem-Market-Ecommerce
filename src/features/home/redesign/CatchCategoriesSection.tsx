@@ -24,9 +24,12 @@ interface CatchCategoriesSectionProps {
 /**
  * CMS-ordered category section.
  *
- * Grid is the default: all categories the CMS returns are rendered, with
- * desktop/tablet/mobile column counts driven by `setting.front`. The old
- * horizontal rail remains available with `layout: "slider"`.
+ * Grid is the default: `columns_count` / `rows_count` (and their tablet and
+ * mobile variants) are rendered literally, per breakpoint. Tiles beyond a
+ * breakpoint's `columns × rows` capacity are hidden there only (desktop can
+ * therefore keep more tiles than phones). `shape` is honored as-is (circular
+ * tiles can span multiple rows). The old rail remains available with
+ * `layout: "slider"`.
  */
 export default async function CatchCategoriesSection({
   title,
@@ -51,7 +54,8 @@ export default async function CatchCategoriesSection({
 
   if (!categories || categories.length === 0) return null;
 
-  const config = resolveCategoryGridConfig(categories.length, setting);
+  const config = resolveCategoryGridConfig(setting);
+  const gridCategories = categories.slice(0, config.maxVisible);
   const showTitle = parseBooleanSetting(setting?.show_title, true);
   const subtitle = resolveLocalizedText(setting?.subtitle, locale);
   const showViewAll = parseBooleanSetting(setting?.show_view_all, true);
@@ -161,11 +165,14 @@ export default async function CatchCategoriesSection({
             } as CSSProperties
           }
         >
-          {categories.map((cat) => (
+          {gridCategories.map((cat, index) => (
             <CategoryGridTile
               key={cat.id}
               category={cat}
               sizes={gridImageSizes}
+              hideMobile={index >= config.mobile.slots}
+              hideTablet={index >= config.tablet.slots}
+              hideDesktop={index >= config.desktop.slots}
               productCount={
                 showProductCount && typeof cat.products_count === "number"
                   ? t("productCount", { count: cat.products_count })
@@ -183,16 +190,26 @@ function CategoryGridTile({
   category,
   sizes,
   productCount,
+  hideMobile = false,
+  hideTablet = false,
+  hideDesktop = false,
 }: {
   category: HomeCategory;
   sizes: string;
   productCount: string | null;
+  /** Tiles beyond a breakpoint's `columns × rows` capacity are hidden there. */
+  hideMobile?: boolean;
+  hideTablet?: boolean;
+  hideDesktop?: boolean;
 }) {
   const image = category.image?.desktop || category.image?.mobile;
 
   return (
     <Link
       href={`/category/${category.slug}`}
+      data-cat-hide-mobile={hideMobile ? "true" : undefined}
+      data-cat-hide-tablet={hideTablet ? "true" : undefined}
+      data-cat-hide-desktop={hideDesktop ? "true" : undefined}
       className="catch-category-tile group rounded-2xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-catch-rose focus-visible:ring-offset-2 focus-visible:ring-offset-white"
     >
       <span className="catch-category-tile__image">

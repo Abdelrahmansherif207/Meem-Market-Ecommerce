@@ -2,7 +2,9 @@ import type { CSSProperties } from "react";
 import { Link } from "@/i18n/navigation";
 import { CampaignImage } from "@/components/ui/CampaignImage";
 import { homePageService } from "../services/homePageService";
+import { resolveLocalizedText } from "../utils";
 import CatchShelfIsland from "./CatchShelfIsland";
+import { parseBooleanSetting } from "./categoryGrid";
 import type { SectionFrontSetting } from "../types";
 import type { BannerDetail } from "@/features/banners/types";
 import type { ProductItem } from "../types";
@@ -45,17 +47,23 @@ interface CatchBannerSectionProps {
   locale: string;
   title?: string;
   setting?: SectionFrontSetting;
+  /** Section `setting.back` — carries the CMS `with_products` switch. */
+  back?: Record<string, unknown>;
 }
 
 /**
  * Catch Beauty wide banner: a layout-reserving media well with art-directed
  * mobile artwork. When the CMS requests products (`with_products=1`), the
- * recurring "banner + shelf" pattern renders below the image.
+ * recurring "banner + shelf" pattern renders below the image, driven by the
+ * same front settings a `products` section supports (`show_title`, `subtitle`,
+ * `columns_count`, `badge_text`, `layout`, `show_timer`, `timer_end_at`).
  */
 export default async function CatchBannerSection({
   endpoint,
   locale,
+  title,
   setting,
+  back,
 }: CatchBannerSectionProps) {
   if (!endpoint) return null;
 
@@ -77,6 +85,24 @@ export default async function CatchBannerSection({
   const mobileArt = artOverride?.src ?? image.mobile;
   const artWidth = artOverride?.width ?? 1500;
   const artHeight = artOverride?.height ?? 377;
+
+  // The CMS flag is authoritative. Older section rows only pre-build the
+  // endpoint query (`?with_products=1`), so fall back to that when the
+  // `back` setting is absent.
+  const endpointWantsProducts = /[?&]with_products=(1|true|yes|on)\b/i.test(
+    endpoint ?? "",
+  );
+  const withProducts = parseBooleanSetting(
+    back?.with_products,
+    endpointWantsProducts,
+  );
+
+  const shelfTitle = title?.trim() || bannerTitle;
+  const showTitle = parseBooleanSetting(setting?.show_title, true);
+  const subtitle = resolveLocalizedText(setting?.subtitle, locale);
+  const showTimer = parseBooleanSetting(setting?.show_timer, false);
+  const timerEndAt =
+    typeof setting?.timer_end_at === "string" ? setting.timer_end_at : undefined;
 
   const productItems: ProductItem[] = (products ?? []).map((p) => ({
     id: p.id,
@@ -119,12 +145,17 @@ export default async function CatchBannerSection({
         </div>
       </Link>
 
-      {productItems.length > 0 && (
+      {withProducts && productItems.length > 0 && (
         <CatchShelfIsland
           key={endpoint}
           fetchKind="banner"
           endpoint={endpoint}
           locale={locale}
+          title={shelfTitle}
+          subtitle={subtitle}
+          showTitle={showTitle}
+          showTimer={showTimer}
+          timerEndAt={timerEndAt}
           initialItems={productItems}
           columnsCount={setting?.columns_count}
           badgeText={setting?.badge_text}

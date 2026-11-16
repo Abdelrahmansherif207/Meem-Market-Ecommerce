@@ -47,21 +47,33 @@ export function CatchTagsSkeleton() {
   );
 }
 
-/** Shelf placeholder: title row + fluid 2 / 3 / 5 card grid. */
+/**
+ * Shelf placeholder: title row + 2 mobile / 3 tablet / CMS desktop card grid,
+ * matching `CatchShelfIsland`'s literal column count.
+ */
 export function CatchShelfSkeleton({
   setting,
 }: {
   setting?: SectionFrontSetting;
 }) {
-  void setting;
+  const desktopColumns = parseIntegerSetting(setting?.columns_count, 5);
   return (
     <section className="space-y-4" aria-hidden>
       <div className="flex items-center justify-between">
         <div className={`h-6 w-48 ${shimmer}`} />
         <div className={`h-4 w-16 ${shimmer}`} />
       </div>
-      <div className="grid grid-cols-2 gap-3 md:grid-cols-3 xl:grid-cols-5">
-        {Array.from({ length: 5 }).map((_, i) => (
+      <div
+        className="catch-cms-grid"
+        style={
+          {
+            "--cms-cols-mobile": 2,
+            "--cms-cols-tablet": 3,
+            "--cms-cols-desktop": desktopColumns,
+          } as CSSProperties
+        }
+      >
+        {Array.from({ length: desktopColumns }).map((_, i) => (
           <div
             key={i}
             className="flex flex-col gap-2 rounded-2xl border border-catch-border-soft bg-white p-2.5"
@@ -96,34 +108,20 @@ export function CatchBannerSkeleton() {
 }
 
 /**
- * Category placeholder: mirrors the resolved grid (columns + tile mode) so
- * the skeleton occupies the same shape as the real section. The rail layout
- * keeps the old single-row placeholder.
+ * Category placeholder: mirrors the resolved grid (columns, tile mode and the
+ * per-breakpoint caps) so the skeleton occupies the same shape as the real
+ * section. The rail layout keeps the old single-row placeholder.
  */
 export function CatchCategoriesSkeleton({
   setting,
 }: {
   setting?: SectionFrontSetting;
 }) {
-  // Mirror the largest shape the CMS settings can produce so the placeholder
-  // uses the same column count as the real section.
-  const placeholderTotal = Math.max(
-    parseIntegerSetting(setting?.columns_count, 8) *
-      parseIntegerSetting(setting?.rows_count, 1),
-    parseIntegerSetting(setting?.tablet_columns_count, 4) *
-      parseIntegerSetting(setting?.tablet_rows_count, 2),
-    parseIntegerSetting(setting?.mobile_columns_count, 4) *
-      parseIntegerSetting(setting?.mobile_rows_count, 2),
-    8,
-  );
-  const config = resolveCategoryGridConfig(placeholderTotal, setting);
+  const config = resolveCategoryGridConfig(setting);
   const sliderColumns = parseIntegerSetting(setting?.columns_count, 8);
-  const placeholderCount = Math.max(
-    config.mobile.columns * config.mobile.rows,
-    config.tablet.columns * config.tablet.rows,
-    config.desktop.columns * config.desktop.rows,
-    8,
-  );
+  // The real section renders the largest breakpoint's tile count and hides
+  // the overflow per breakpoint; the placeholder does the same.
+  const placeholderCount = config.maxVisible;
 
   return (
     <section className="space-y-4" aria-hidden>
@@ -161,7 +159,13 @@ export function CatchCategoriesSkeleton({
           }
         >
           {Array.from({ length: placeholderCount }).map((_, i) => (
-            <div key={i} className="catch-category-tile">
+            <div
+              key={i}
+              className="catch-category-tile"
+              data-cat-hide-mobile={i >= config.mobile.slots ? "true" : undefined}
+              data-cat-hide-tablet={i >= config.tablet.slots ? "true" : undefined}
+              data-cat-hide-desktop={i >= config.desktop.slots ? "true" : undefined}
+            >
               <div className="catch-category-tile__image">
                 <div className={`h-full w-full ${shimmer}`} />
               </div>
@@ -175,13 +179,27 @@ export function CatchCategoriesSkeleton({
   );
 }
 
-/** Brand grid placeholder: 2 / 4 / 6 tiles. */
-export function CatchBrandsSkeleton() {
+/** Brand grid placeholder: 2 mobile / 4 tablet / CMS desktop columns. */
+export function CatchBrandsSkeleton({
+  setting,
+}: {
+  setting?: SectionFrontSetting;
+}) {
+  const desktopColumns = parseIntegerSetting(setting?.columns_count, 6);
   return (
     <section className="space-y-4" aria-hidden>
       <div className={`h-6 w-40 ${shimmer}`} />
-      <div className="catch-cms-grid">
-        {Array.from({ length: 6 }).map((_, i) => (
+      <div
+        className="catch-cms-grid"
+        style={
+          {
+            "--cms-cols-mobile": 2,
+            "--cms-cols-tablet": 4,
+            "--cms-cols-desktop": desktopColumns,
+          } as CSSProperties
+        }
+      >
+        {Array.from({ length: desktopColumns }).map((_, i) => (
           <div
             key={i}
             className="flex flex-col gap-2 rounded-2xl border border-catch-border-soft bg-white p-3"

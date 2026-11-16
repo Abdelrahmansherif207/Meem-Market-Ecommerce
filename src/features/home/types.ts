@@ -179,7 +179,6 @@ export interface SectionFrontSetting {
   tablet_rows_count?: number;
   mobile_columns_count?: number;
   mobile_rows_count?: number;
-  balance_last_row?: boolean;
   shape?: string;
   show_timer?: boolean;
   timer_end_at?: string;
