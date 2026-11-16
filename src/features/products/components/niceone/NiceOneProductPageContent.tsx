@@ -52,6 +52,12 @@ export function NiceOneProductPageContent({
     [product.variants, selectedVariantId],
   );
 
+  // Some variable products are published without any options. Without a
+  // variant every add would 422, so the buy controls switch to an explicit
+  // unavailable state instead of silently rolling back.
+  const optionsUnavailable =
+    product.product_type === "variable" && product.variants.length === 0;
+
   const handleReviewSuccess = useCallback(() => {
     router.refresh();
   }, [router]);
@@ -103,6 +109,7 @@ export function NiceOneProductPageContent({
               product={product}
               selectedVariant={selectedVariant}
               pricesLoading={pricesLoading}
+              optionsUnavailable={optionsUnavailable}
             />
           </div>
 
@@ -146,6 +153,7 @@ export function NiceOneProductPageContent({
         product={product}
         selectedVariant={selectedVariant}
         pricesLoading={pricesLoading}
+        optionsUnavailable={optionsUnavailable}
       />
     </div>
   );

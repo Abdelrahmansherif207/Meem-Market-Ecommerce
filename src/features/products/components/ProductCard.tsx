@@ -14,6 +14,7 @@ import {
   FavouriteHeartIcon,
 } from "@/components/ui/icons";
 import { useCartActions } from "@/features/cart/hooks/useCartActions";
+import { showCartFeedback } from "@/features/cart/store/useCartFeedbackStore";
 import { useWishlistActions } from "@/features/wishlist/hooks/useWishlistActions";
 import { NiceOneCountdown } from "./niceone/NiceOneCountdown";
 import type { ProductCardItem } from "../types";
@@ -100,7 +101,7 @@ export default function ProductCard({
   }`;
 
   const handleAdd = useCallback(async () => {
-    await addItem({
+    const added = await addItem({
       quantity: 1,
       name: item.title,
       image: item.image,
@@ -111,6 +112,7 @@ export default function ProductCard({
       in_stock: item.isInStock ?? true,
       stock_quantity: item.stockQuantity ?? 10,
     });
+    if (!added) return;
     setAnimating(true);
     setTimeout(() => setAnimating(false), 300);
   }, [addItem, item, safePrice]);
@@ -211,26 +213,34 @@ export default function ProductCard({
           {item.isInStock === false && quantity === 0 ? (
             <button
               type="button"
-              disabled
+              aria-disabled="true"
+              aria-label={t("outOfStock")}
+              onClick={() =>
+                showCartFeedback({
+                  title: t("outOfStock"),
+                  message: t("outOfStockNotice"),
+                })
+              }
               className={cn(
                 floatingButtonClass,
                 "cursor-not-allowed border border-meem-border bg-white/90 text-meem-muted-soft",
               )}
-              aria-label={t("outOfStock")}
             >
               <AddToCartIcon className="h-5 w-5" />
             </button>
           ) : quantity === 0 && item.hasVariants ? (
-            // Variant products: the overlay link navigates to the PDP.
-            <span
+            // Variant products: the bag opens the PDP so an option can be
+            // chosen; a real link keeps the control from swallowing clicks.
+            <Link
+              href={productHref}
+              aria-label={t("selectOptions")}
               className={cn(
                 floatingButtonClass,
-                "pointer-events-none bg-primary text-white shadow-md",
+                "bg-primary text-white shadow-md hover:bg-primary-active",
               )}
-              aria-hidden
             >
               <AddToCartIcon className="h-5 w-5" />
-            </span>
+            </Link>
           ) : quantity === 0 ? (
             <button
               type="button"

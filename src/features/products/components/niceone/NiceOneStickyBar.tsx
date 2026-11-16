@@ -15,6 +15,8 @@ interface NiceOneStickyBarProps {
   selectedVariant: ProductVariant | null;
   /** While the currency refetch is in flight, price numbers skeleton. */
   pricesLoading?: boolean;
+  /** Variable product with no options: disable the CTA with a clear label. */
+  optionsUnavailable?: boolean;
 }
 
 /**
@@ -27,7 +29,12 @@ interface NiceOneStickyBarProps {
  * Cart payload is the same shape as `ProductActions` (variant-aware) so
  * the cart logic stays untouched.
  */
-export function NiceOneStickyBar({ product, selectedVariant, pricesLoading = false }: NiceOneStickyBarProps) {
+export function NiceOneStickyBar({
+  product,
+  selectedVariant,
+  pricesLoading = false,
+  optionsUnavailable = false,
+}: NiceOneStickyBarProps) {
   const t = useTranslations("niceOnePdp");
   const tProduct = useTranslations("product");
   const locale = useLocale();
@@ -38,6 +45,7 @@ export function NiceOneStickyBar({ product, selectedVariant, pricesLoading = fal
     ? { inStock: product.in_stock && selectedVariant.quantity > 0, remaining: selectedVariant.quantity }
     : getStockStatus(product);
   const maxQuantity = Math.min(stock.remaining, 99);
+  const canPurchase = stock.inStock && !optionsUnavailable;
 
   const { addItem, increment, decrement, quantity: cartQuantity, isPending } = useCartActions(product.id);
 
@@ -46,6 +54,7 @@ export function NiceOneStickyBar({ product, selectedVariant, pricesLoading = fal
   const variant = selectedVariant;
 
   async function handleAddToCart() {
+    if (optionsUnavailable) return;
     await addItem({
       quantity: 1,
       product_variant_id: variant?.id ?? null,
@@ -83,7 +92,7 @@ export function NiceOneStickyBar({ product, selectedVariant, pricesLoading = fal
           onIncrement={() => increment()}
           onDecrement={() => decrement()}
           decrementAsRemove
-          incrementDisabled={!stock.inStock || cartQuantity >= maxQuantity}
+          incrementDisabled={!canPurchase || cartQuantity >= maxQuantity}
           disabled={isPending}
           variant="solid"
           incrementLabel={tProduct("increaseQuantity")}
@@ -94,7 +103,7 @@ export function NiceOneStickyBar({ product, selectedVariant, pricesLoading = fal
         <button
           type="button"
           onClick={handleAddToCart}
-          disabled={!stock.inStock || isPending}
+          disabled={!canPurchase || isPending}
           className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-primary py-3.5 text-xs font-bold tracking-wide text-white shadow-elev-1 transition-colors hover:bg-primary-dark active:bg-primary-active disabled:pointer-events-none disabled:opacity-60"
         >
           {isPending ? (
@@ -102,7 +111,9 @@ export function NiceOneStickyBar({ product, selectedVariant, pricesLoading = fal
           ) : (
             <ShoppingBag className="size-4" aria-hidden />
           )}
-          {stock.inStock ? (
+          {optionsUnavailable ? (
+            tProduct("optionsUnavailable")
+          ) : stock.inStock ? (
             <span className="uppercase">{t("addToBag")}</span>
           ) : (
             tProduct("outOfStock")

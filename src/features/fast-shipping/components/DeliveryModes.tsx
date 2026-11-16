@@ -6,7 +6,6 @@ import { Loader2 } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import { cn } from "@/shared/utils/cn";
 import { formatMoney } from "@/shared/utils/formatMoney";
-import { useAuthModalStore, useAuthStore } from "@/features/auth";
 import {
   useCurrencySnapshot,
   useCurrencyStore,
@@ -24,10 +23,11 @@ interface DeliveryModesProps {
 }
 
 /**
- * Delivery-mode toggle (Scheduled / NOW).
+ * Delivery-mode toggle (Scheduled / NOW), available to guests and signed-in
+ * shoppers alike.
  *
- * - Guests can see the control, but selecting NOW opens the sign-in modal and
- *   never flips the persisted channel (fast lines are authenticated-only).
+ * - The persisted browsing channel drives the default delivery type for all
+ *   cart actions, so a guest can browse and add NOW items without signing in.
  * - Availability, fee and ETA come from `GET /general/settings` →
  *   `options.fast_shipping`; missing fee/ETA data is simply not rendered.
  * - No `X-Channel` header is set here. Mutations pass the channel explicitly.
@@ -58,24 +58,22 @@ export default function DeliveryModes({
   const channel = useChannelStore((s) => s.channel);
   const setChannel = useChannelStore((s) => s.setChannel);
   const { status, loading, fetchStatus } = useFastShippingStatusStore();
-  const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
-  const sessionChecked = useAuthStore((s) => s.sessionChecked);
-  const openAuthModal = useAuthModalStore((s) => s.open);
 
   useEffect(() => {
     fetchStatus(locale);
   }, [fetchStatus, locale]);
 
-  // A fast channel must never survive a sign-out: guests are scheduled-only.
-  useEffect(() => {
-    if (sessionChecked && !isAuthenticated && channel !== "home") {
-      setChannel("home");
-    }
-  }, [sessionChecked, isAuthenticated, channel, setChannel]);
-
   const isDetermined = status !== null && !loading;
   const isFastAvailable = Boolean(status?.enabled && status.available);
   const isUnavailable = isDetermined && !isFastAvailable;
+
+  // Never keep browsing in a channel the backend has disabled (covers a
+  // status change or a click made while the status was still loading).
+  useEffect(() => {
+    if (isUnavailable && channel !== "home") {
+      setChannel("home");
+    }
+  }, [isUnavailable, channel, setChannel]);
 
   const eta = (): ReactNode => {
     if (!isDetermined) {
@@ -131,13 +129,8 @@ export default function DeliveryModes({
   const handleChannelChange = (next: Channel) => {
     if (next === channel) return;
 
-    if (next === "fast-shipping") {
-      // Fast delivery is authenticated-only. Guests get the sign-in modal.
-      if (!isAuthenticated) {
-        openAuthModal();
-        return;
-      }
-      if (isDetermined && !isFastAvailable) return;
+    if (next === "fast-shipping" && isDetermined && !isFastAvailable) {
+      return;
     }
 
     setChannel(next);
@@ -170,7 +163,7 @@ export default function DeliveryModes({
           note={t("unavailable")}
           compact
           onClick={() => handleChannelChange("fast-shipping")}
-          disabled={isAuthenticated && isUnavailable}
+          disabled={isUnavailable}
         />
       </div>
     );
@@ -197,7 +190,7 @@ export default function DeliveryModes({
         etaText={etaText}
         note={t("unavailable")}
         onClick={() => handleChannelChange("fast-shipping")}
-        disabled={isAuthenticated && isUnavailable}
+        disabled={isUnavailable}
       />
     </div>
   );

@@ -417,7 +417,7 @@ export function CartPageContent({
           dispatch({ type: "REMOVE_ITEM", productId, line });
           if (guestServerMode) {
             const cart = await runWithGuestSession(locale, () =>
-              guestCartService.removeLine(itemId, locale),
+              guestCartService.removeLine(itemId, locale, deliveryType),
             );
             if (cart) processCart(cart);
             else dispatch({ type: "SET_SERVER", items: [] });

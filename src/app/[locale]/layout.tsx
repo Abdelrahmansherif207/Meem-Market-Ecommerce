@@ -12,6 +12,7 @@ import MeemFooter from "@/features/navigation/components/meem/MeemFooter";
 import { AuthModal, AuthSyncHandler } from "@/features/auth";
 import { ProfileSyncHandler } from "@/features/profile";
 import { CartSyncProvider } from "@/features/cart/components/CartSyncProvider";
+import { CartFeedbackToast } from "@/features/cart/components/CartFeedbackToast";
 import { WishlistSyncProvider } from "@/features/wishlist/components/WishlistSyncProvider";
 import { GuestSessionProvider } from "@/features/guest";
 import {
@@ -208,6 +209,7 @@ export default async function RootLayout({
           <WishlistSyncProvider />
           <AuthModal logo={settingsLogo} siteName={siteName} />
           <NotificationToast />
+          <CartFeedbackToast />
           </CurrencyProvider>
         </NextIntlClientProvider>
       </body>

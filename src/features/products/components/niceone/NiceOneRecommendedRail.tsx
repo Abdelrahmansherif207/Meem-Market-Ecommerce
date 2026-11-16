@@ -8,6 +8,7 @@ import { cn } from "@/shared/utils/cn";
 import { WishlistButton } from "@/features/wishlist/components/WishlistButton";
 import { QuantityStepper } from "@/components/ui/QuantityStepper";
 import { useCartActions } from "@/features/cart/hooks/useCartActions";
+import { showCartFeedback } from "@/features/cart/store/useCartFeedbackStore";
 import { useDisplayCurrency } from "@/features/currencies";
 import { formatNumber } from "@/shared/utils/formatMoney";
 import Skeleton from "@/components/ui/Skeleton";
@@ -75,11 +76,12 @@ function NiceOneRecommendedCard({
   const displayPrice = getDisplayPrice(item);
   const originalPrice = getOriginalPrice(item);
   const discountPercent = getDiscountPercent(item);
-  const inStock = item.quantity > 0;
+  const inStock = item.in_stock ?? item.quantity > 0;
 
   const { quantity: cartQuantity, isPending, addItem, increment, decrement } = useCartActions(item.id);
 
   async function handleAdd() {
+    if (item.has_variants) return;
     await addItem({
       quantity: 1,
       product_variant_id: null,
@@ -181,12 +183,29 @@ function NiceOneRecommendedCard({
             decrementLabel={tProduct("decreaseQuantity")}
             removeLabel={tProduct("removeItem")}
           />
+        ) : item.has_variants ? (
+          <Link
+            href={href}
+            aria-label={tProduct("options")}
+            className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full border border-line text-text-secondary transition hover:bg-ink hover:text-white"
+          >
+            <ShoppingBag className="size-3" />
+          </Link>
         ) : (
           <button
             type="button"
-            onClick={handleAdd}
-            disabled={!inStock || isPending}
-            aria-label={tPdp("addToBag")}
+            onClick={
+              inStock
+                ? handleAdd
+                : () =>
+                    showCartFeedback({
+                      title: tProduct("outOfStock"),
+                      message: tProduct("outOfStockNotice"),
+                    })
+            }
+            disabled={isPending}
+            aria-disabled={!inStock || undefined}
+            aria-label={inStock ? tPdp("addToBag") : tProduct("outOfStock")}
             className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full border border-line text-text-secondary transition hover:bg-ink hover:text-white disabled:cursor-not-allowed disabled:opacity-50"
           >
             <ShoppingBag className="size-3" />

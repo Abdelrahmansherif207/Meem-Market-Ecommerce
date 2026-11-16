@@ -1,11 +1,13 @@
 "use client";
 import { useCallback, useMemo, useState } from "react";
-import { useLocale } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
+import { ApiError } from "@/shared/lib/api";
 import { useAuthStore } from "@/features/auth";
 import { isGuestCheckoutEnabled } from "@/shared/constants/guestCheckout";
 import { useChannelStore } from "@/features/fast-shipping/store/useChannelStore";
 import { useGuestCartStore } from "../store/useGuestCartStore";
 import { useServerCartStore } from "../store/useServerCartStore";
+import { useCartFeedbackStore } from "../store/useCartFeedbackStore";
 import { cartService } from "../services/cartService";
 import { guestCartService } from "@/features/guest/services/guestCartService";
 import { runWithGuestSession } from "@/features/guest/utils/guestErrors";
@@ -34,8 +36,7 @@ function findCartLine(
  *
  * - **Guest (legacy):** reads/writes localStorage via `useGuestCartStore`.
  * - **Guest (flag ON):** writes to the server-backed guest cart
- *   (`/general/guest/*`). Guests are scheduled-only: fast adds are forced
- *   back to scheduled.
+ *   (`/general/guest/*`) and sends the matching `X-Channel` for fast lines.
  * - **Authenticated:** maintains optimistic per-card quantity state, calls
  *   the server API with the explicit delivery group + `X-Channel`, and rolls
  *   back on failure. The header badge is kept in sync via `useServerCartStore`.
@@ -45,12 +46,14 @@ function findCartLine(
  */
 export function useCartActions(productId: number) {
   const locale = useLocale();
+  const tFeedback = useTranslations("cartPage.feedback");
+  const showFeedback = useCartFeedbackStore((s) => s.showFeedback);
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
   const guestServerMode = !isAuthenticated && isGuestCheckoutEnabled();
   const channel = useChannelStore((s) => s.channel);
-  // Fast lines are authenticated-only; guests are always scheduled.
+  // Both guests and signed-in shoppers follow the selected channel.
   const channelDeliveryType: DeliveryType =
-    isAuthenticated && channel === "fast-shipping" ? "fast" : "scheduled";
+    channel === "fast-shipping" ? "fast" : "scheduled";
 
   // ── Legacy guest store (flag OFF) ────────────────────────────────────────
   const guestAddItem = useGuestCartStore((s) => s.addItem);
@@ -91,6 +94,32 @@ export function useCartActions(productId: number) {
     [adjustQuantity],
   );
 
+  /**
+   * Surface cart failures instead of swallowing them. The API error message is
+   * preferred for validation failures (e.g. stock), while transport/session
+   * errors get a localized, actionable message.
+   */
+  const reportError = useCallback(
+    (error: unknown, action: "add" | "update") => {
+      const title =
+        action === "add" ? tFeedback("addTitle") : tFeedback("updateTitle");
+
+      let message = tFeedback("generic");
+      if (error instanceof ApiError) {
+        if (error.status === 429) message = tFeedback("rateLimited");
+        else if (error.status === 401 || error.status === 419)
+          message = tFeedback("sessionExpired");
+        else if (error.status === 422 && error.message) message = error.message;
+      } else if (error instanceof TypeError) {
+        message = tFeedback("network");
+      }
+
+      console.error(`[cart] ${action} failed`, error);
+      showFeedback({ title, message });
+    },
+    [showFeedback, tFeedback],
+  );
+
   // ── addItem ──────────────────────────────────────────────────────────────
   const addItem = useCallback(
     async (item: {
@@ -106,10 +135,8 @@ export function useCartActions(productId: number) {
       in_stock: boolean;
       stock_quantity: number;
     }) => {
-      // Guests must never create fast lines, even if a caller asks for one.
-      const deliveryType: DeliveryType = isAuthenticated
-        ? (item.deliveryType ?? channelDeliveryType)
-        : "scheduled";
+      // An explicit per-call delivery type always wins over the channel.
+      const deliveryType: DeliveryType = item.deliveryType ?? channelDeliveryType;
 
       if (!isAuthenticated) {
         if (guestServerMode) {
@@ -124,24 +151,26 @@ export function useCartActions(productId: number) {
                   product_id: productId,
                   quantity: item.quantity,
                   product_variant_id: item.product_variant_id ?? null,
-                  shipping_method: "scheduled",
+                  shipping_method: deliveryType,
                 },
                 locale,
               ),
             );
             setTotalQuantity(cart.total_quantity);
-          } catch {
+          } catch (error) {
+            reportError(error, "add");
             rollback(item.quantity);
+            return false;
           } finally {
             setIsPending(false);
           }
-          return;
+          return true;
         }
         guestAddItem({
           product_id: productId,
           quantity: item.quantity,
           product_variant_id: item.product_variant_id ?? null,
-          deliveryType: "scheduled",
+          deliveryType,
           name: item.name,
           image: item.image,
           price: item.price,
@@ -151,7 +180,7 @@ export function useCartActions(productId: number) {
           in_stock: item.in_stock,
           stock_quantity: item.stock_quantity,
         });
-        return;
+        return true;
       }
 
       // Optimistically update UI and badge immediately.
@@ -169,9 +198,11 @@ export function useCartActions(productId: number) {
           },
           locale,
         );
-      } catch {
-        // Rollback on failure.
+        return true;
+      } catch (error) {
+        reportError(error, "add");
         rollback(item.quantity);
+        return false;
       } finally {
         setIsPending(false);
       }
@@ -186,6 +217,7 @@ export function useCartActions(productId: number) {
       setTotalQuantity,
       locale,
       rollback,
+      reportError,
     ],
   );
 
@@ -199,12 +231,17 @@ export function useCartActions(productId: number) {
         try {
           const cart = await runWithGuestSession(locale, () =>
             guestCartService.addItem(
-              { product_id: productId, quantity: 1, shipping_method: "scheduled" },
+              {
+                product_id: productId,
+                quantity: 1,
+                shipping_method: channelDeliveryType,
+              },
               locale,
             ),
           );
           setTotalQuantity(cart.total_quantity);
-        } catch {
+        } catch (error) {
+          reportError(error, "update");
           rollback(1);
         } finally {
           setIsPending(false);
@@ -216,12 +253,12 @@ export function useCartActions(productId: number) {
         .items.find(
           (i) =>
             i.product_id === productId &&
-            (i.deliveryType ?? "scheduled") === "scheduled",
+            (i.deliveryType ?? "scheduled") === channelDeliveryType,
         );
       // Stepper only renders when quantity > 0, so a line exists in practice.
       if (!target) return;
       guestUpdateQuantity(productId, target.quantity + 1, {
-        deliveryType: "scheduled",
+        deliveryType: channelDeliveryType,
         productVariantId: target.product_variant_id ?? null,
       });
       return;
@@ -240,7 +277,8 @@ export function useCartActions(productId: number) {
         },
         locale,
       );
-    } catch {
+    } catch (error) {
+      reportError(error, "update");
       rollback(1);
     } finally {
       setIsPending(false);
@@ -255,6 +293,7 @@ export function useCartActions(productId: number) {
     setTotalQuantity,
     locale,
     rollback,
+    reportError,
   ]);
 
   // ── decrement ────────────────────────────────────────────────────────────
@@ -268,11 +307,15 @@ export function useCartActions(productId: number) {
         try {
           const cart = await runWithGuestSession(locale, async () => {
             const current = await guestCartService.getCart(locale);
-            const line = findCartLine(current, productId, "scheduled");
+            const line = findCartLine(current, productId, channelDeliveryType);
             if (!line) throw new Error("Guest cart line not found");
             // `quantity` is a delta, not the target quantity.
             return line.quantity <= 1
-              ? guestCartService.removeLine(line.id, locale)
+              ? guestCartService.removeLine(
+                  line.id,
+                  locale,
+                  channelDeliveryType,
+                )
               : guestCartService.updateItem(
                   {
                     item: {
@@ -280,14 +323,15 @@ export function useCartActions(productId: number) {
                       quantity: 1,
                       operation: "decrement",
                       product_variant_id: line.product_variant_id ?? null,
-                      shipping_method: "scheduled",
+                      shipping_method: channelDeliveryType,
                     },
                   },
                   locale,
                 );
           });
           setTotalQuantity(cart?.total_quantity ?? 0);
-        } catch {
+        } catch (error) {
+          reportError(error, "update");
           rollback(-1);
         } finally {
           setIsPending(false);
@@ -300,11 +344,11 @@ export function useCartActions(productId: number) {
         .items.find(
           (i) =>
             i.product_id === productId &&
-            (i.deliveryType ?? "scheduled") === "scheduled",
+            (i.deliveryType ?? "scheduled") === channelDeliveryType,
         );
       if (!target) return;
       const line: CartLineIdentity = {
-        deliveryType: "scheduled",
+        deliveryType: channelDeliveryType,
         productVariantId: target.product_variant_id ?? null,
       };
       if (target.quantity <= 1) guestRemoveItem(productId, line);
@@ -345,7 +389,8 @@ export function useCartActions(productId: number) {
         );
         setTotalQuantity(updatedCart.total_quantity);
       }
-    } catch {
+    } catch (error) {
+      reportError(error, "update");
       rollback(-1);
     } finally {
       setIsPending(false);
@@ -362,6 +407,7 @@ export function useCartActions(productId: number) {
     adjustQuantity,
     setTotalQuantity,
     rollback,
+    reportError,
   ]);
 
   return useMemo(

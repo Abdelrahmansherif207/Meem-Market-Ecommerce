@@ -1,7 +1,7 @@
 "use client";
 
 import { useSyncExternalStore } from "react";
-import { User, ChevronDown, ShoppingBag } from "lucide-react";
+import { User, ChevronDown, Heart, ShoppingBag } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { useAuthModalStore, useAuthStore, UserMenu } from "@/features/auth";
@@ -9,6 +9,7 @@ import { NotificationBell } from "@/features/notifications";
 import { CurrencySwitcher } from "@/features/currencies";
 import { useGuestCartStore } from "@/features/cart/store/useGuestCartStore";
 import { useServerCartStore } from "@/features/cart/store/useServerCartStore";
+import { useWishlistStore } from "@/features/wishlist/store/useWishlistStore";
 import { cn } from "@/shared/utils/cn";
 import MeemLocaleSwitcher from "./MeemLocaleSwitcher";
 import MeemLocationDisplay from "./MeemLocationDisplay";
@@ -19,7 +20,7 @@ interface MeemHeaderActionsProps {
 }
 
 /**
- * Deliver-to, language, profile, notifications and cart actions.
+ * Deliver-to, language, profile, notifications, wishlist and cart actions.
  * Rendered inside the categories nav row so both groups share one
  * full-width line (space-between).
  *
@@ -41,6 +42,7 @@ export default function MeemHeaderActions({
   const guestCartCount = useGuestCartStore((s) => s.getTotalItems());
   const serverCartCount = useServerCartStore((s) => s.totalQuantity);
   const cartCount = isAuthenticated ? serverCartCount : guestCartCount;
+  const wishlistCount = useWishlistStore((s) => s.count);
 
   return (
     <div
@@ -71,6 +73,20 @@ export default function MeemHeaderActions({
       )}
 
       <NotificationBell />
+
+      {/* Wishlist */}
+      <Link
+        href="/wishlist"
+        aria-label={t("wishlist")}
+        className="relative transition-colors hover:text-meem-primary"
+      >
+        <Heart className="h-5 w-5 text-meem-muted" />
+        {mounted && isAuthenticated && wishlistCount > 0 && (
+          <span className="absolute -end-1.5 -top-1.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-primary px-1 text-[10px] font-bold leading-none text-white ring-2 ring-background">
+            {wishlistCount > 99 ? "99+" : wishlistCount}
+          </span>
+        )}
+      </Link>
 
       {/* Cart */}
       <Link

@@ -13,7 +13,7 @@ interface UseWishlistActionsOptions {
   variantId?: number | null;
   /** Initial heart state from the product payload (`in_wishlist` field). */
   initialInWishlist?: boolean;
-  /** Fetch the guest-safe initial state from the API (used on the detail page). */
+  /** Fetch the signed-in shopper's initial state from the API (detail page). */
   fetchInitial?: boolean;
 }
 

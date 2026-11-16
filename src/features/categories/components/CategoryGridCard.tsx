@@ -7,10 +7,10 @@ type CategoryGridCardProps = {
 };
 
 /**
- * Compact grid card for the categories page (mobile + desktop):
- * light rounded tile, contained image, centered name below.
- * Base classes preserve the mobile appearance; `sm:` overrides
- * scale the tile up on larger screens.
+ * Grid card for the categories page (mobile + desktop), matching the
+ * homepage "Shop by Category" card style: white card shell, tinted
+ * rounded panel, artwork inside a circle, white name area below.
+ * Base classes preserve the compact mobile tiles; `sm:` scales them up.
  */
 export default function CategoryGridCard({
   subcategory,
@@ -20,21 +20,24 @@ export default function CategoryGridCard({
   return (
     <Link
       href={`/category/${subcategory.slug}`}
-      className="flex flex-col items-center gap-1.5 rounded-xl bg-gradient-to-b from-primary/10 to-white p-2 pt-3 transition-shadow active:shadow-sm hover:shadow-md sm:gap-2 sm:p-3 sm:pt-4"
+      className="group flex flex-col items-center gap-1.5 rounded-2xl border border-meem-border-soft bg-white p-2 shadow-elev-1 transition-[box-shadow,transform] duration-200 hover:-translate-y-0.5 hover:shadow-elev-2 sm:gap-2 sm:p-2.5"
     >
-      {imageSrc ? (
-        <Image
-          src={imageSrc}
-          alt={subcategory.name}
-          width={80}
-          height={80}
-          sizes="(min-width: 640px) 80px, 64px"
-          className="h-16 w-16 object-contain sm:h-20 sm:w-20"
-        />
-      ) : (
-        <div className="h-16 w-16 rounded-lg bg-border-light/60 sm:h-20 sm:w-20" />
-      )}
-      <span className="text-center text-[11px] font-semibold leading-snug line-clamp-2 sm:text-xs">
+      <div className="w-full rounded-xl bg-meem-tint p-[7px] sm:p-2">
+        <div className="relative aspect-square w-full overflow-hidden rounded-full bg-white">
+          {imageSrc ? (
+            <Image
+              src={imageSrc}
+              alt={subcategory.name}
+              fill
+              sizes="(min-width: 1024px) 112px, (min-width: 640px) 96px, 64px"
+              className="object-cover transition-transform duration-300 group-hover:scale-[1.04]"
+            />
+          ) : (
+            <div className="h-full w-full bg-border-light/60" />
+          )}
+        </div>
+      </div>
+      <span className="text-center text-[11px] font-semibold leading-snug line-clamp-2 text-meem-charcoal sm:text-xs">
         {subcategory.name}
       </span>
     </Link>

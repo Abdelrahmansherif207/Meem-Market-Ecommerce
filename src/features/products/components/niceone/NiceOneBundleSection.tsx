@@ -8,6 +8,7 @@ import { ChevronLeft, ChevronRight, ShoppingBag, Sparkles } from "lucide-react";
 import { cn } from "@/shared/utils/cn";
 import { QuantityStepper } from "@/components/ui/QuantityStepper";
 import { useCartActions } from "@/features/cart/hooks/useCartActions";
+import { showCartFeedback } from "@/features/cart/store/useCartFeedbackStore";
 import { useDisplayCurrency } from "@/features/currencies";
 import { formatNumber } from "@/shared/utils/formatMoney";
 import Skeleton from "@/components/ui/Skeleton";
@@ -235,7 +236,7 @@ function NiceOneBundleCard({
   const locale = useLocale();
   const { symbol: currencySymbol, decimalPlaces } = useDisplayCurrency(item.currency);
   const { quantity: cartQuantity, isPending, addItem, increment, decrement } = useCartActions(item.id);
-  const inStock = item.quantity > 0;
+  const inStock = item.in_stock ?? item.quantity > 0;
 
   const displayPrice = getDisplayPrice(item);
   const originalPrice = getOriginalPrice(item);
@@ -243,6 +244,7 @@ function NiceOneBundleCard({
   const formatPrice = (v: number) => formatNumber(v, locale, decimalPlaces);
 
   async function handleAdd() {
+    if (item.has_variants) return;
     await addItem({
       quantity: 1,
       product_variant_id: null,
@@ -319,12 +321,29 @@ function NiceOneBundleCard({
           decrementLabel={tProduct("decreaseQuantity")}
           removeLabel={tProduct("removeItem")}
         />
+      ) : item.has_variants ? (
+        <Link
+          href={href}
+          aria-label={tProduct("options")}
+          className="flex size-10 shrink-0 items-center justify-center rounded-full border border-line text-text-secondary transition hover:bg-ink hover:text-white"
+        >
+          <ShoppingBag className="size-4" aria-hidden />
+        </Link>
       ) : (
         <button
           type="button"
-          onClick={handleAdd}
-          disabled={!inStock || isPending}
-          aria-label={tPdp("addToBag")}
+          onClick={
+            inStock
+              ? handleAdd
+              : () =>
+                  showCartFeedback({
+                    title: tProduct("outOfStock"),
+                    message: tProduct("outOfStockNotice"),
+                  })
+          }
+          disabled={isPending}
+          aria-disabled={!inStock || undefined}
+          aria-label={inStock ? tPdp("addToBag") : tProduct("outOfStock")}
           className="flex size-10 shrink-0 items-center justify-center rounded-full border border-line text-text-secondary transition hover:bg-ink hover:text-white disabled:cursor-not-allowed disabled:opacity-50"
         >
           <ShoppingBag className="size-4" aria-hidden />

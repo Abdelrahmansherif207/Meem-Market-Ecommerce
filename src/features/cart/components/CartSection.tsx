@@ -69,7 +69,9 @@ export function CartSection({
   const checkoutHref = isFast
     ? isAuthenticated
       ? "/payment?type=fast"
-      : `/auth?redirect=${encodeURIComponent("/payment?type=fast")}`
+      : isGuestCheckoutEnabled()
+        ? "/guest-checkout"
+        : `/auth?redirect=${encodeURIComponent("/payment?type=fast")}`
     : isAuthenticated
       ? "/payment"
       : isGuestCheckoutEnabled()

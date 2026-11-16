@@ -5,7 +5,11 @@ import { useLocale, useTranslations } from "next-intl";
 import { AlertTriangle, Banknote, CreditCard, Loader2, RefreshCw } from "lucide-react";
 import { useRouter as useIntlRouter } from "@/i18n/navigation";
 import { useAuthStore } from "@/features/auth";
-import { useDisplayCurrency } from "@/features/currencies";
+import {
+  useCurrencySnapshot,
+  useCurrencyStore,
+  useDisplayCurrency,
+} from "@/features/currencies";
 import {
   checkoutService,
   governorateService,
@@ -41,6 +45,8 @@ import type {
 interface GuestCheckoutFormProps {
   taxEnabled?: boolean;
   taxRate?: number | null;
+  /** `options.fast_shipping.fee` in the backend base currency. */
+  fastShippingFee?: number | null;
 }
 
 interface GuestFormState {
@@ -71,13 +77,33 @@ const PHONE_PATTERN = /^\+?\d{8,15}$/;
 /** Cooldown after a 429 (checkout is rate-limited to ~6 requests/minute). */
 const RATE_LIMIT_COOLDOWN_SECONDS = 60;
 
-export function GuestCheckoutForm({ taxEnabled = false, taxRate = null }: GuestCheckoutFormProps) {
+export function GuestCheckoutForm({
+  taxEnabled = false,
+  taxRate = null,
+  fastShippingFee = null,
+}: GuestCheckoutFormProps) {
   const t = useTranslations("guestCheckout");
   const tc = useTranslations("checkout");
   const intlRouter = useIntlRouter();
   const locale = useLocale();
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
   const displayCurrency = useDisplayCurrency();
+  const snapshot = useCurrencySnapshot();
+  // The NOW fee is configured in the backend base currency; convert it to the
+  // guest's display currency the same way the authenticated checkout does.
+  const selectedCurrencyRate = useCurrencyStore((s) => {
+    if (
+      !displayCurrency.code ||
+      !snapshot ||
+      displayCurrency.code === snapshot.baseCode
+    ) {
+      return null;
+    }
+    const displayRate = s.byCode[displayCurrency.code]?.effectiveRate;
+    const baseRate = s.byCode[snapshot.baseCode]?.effectiveRate;
+    if (!displayRate || !baseRate || baseRate <= 0) return null;
+    return displayRate / baseRate;
+  });
   const isOnline = useOnlineStatus();
   const setCartBadge = useServerCartStore((s) => s.setTotalQuantity);
 
@@ -224,6 +250,13 @@ export function GuestCheckoutForm({ taxEnabled = false, taxRate = null }: GuestC
 
   const subtotal = cart?.subtotal ?? 0;
   const totalQuantity = cart?.total_quantity ?? 0;
+  const scheduledItemsCount = cart?.normal_items?.length ?? 0;
+  const hasFastItems = (cart?.fast_items?.length ?? 0) > 0;
+  // NOW delivery is charged per order only when fast lines are present.
+  const fastFee =
+    hasFastItems && fastShippingFee !== null && fastShippingFee !== undefined
+      ? fastShippingFee * (selectedCurrencyRate ?? 1)
+      : null;
   const shippingQuote = useMemo(
     () =>
       resolveShippingQuote({
@@ -234,9 +267,11 @@ export function GuestCheckoutForm({ taxEnabled = false, taxRate = null }: GuestC
       }),
     [selectedGovernorate, subtotal],
   );
+  const deliveryFee =
+    scheduledItemsCount > 0 && !shippingQuote.free ? shippingQuote.fee : 0;
   const taxAmount =
     taxEnabled && taxRate && taxRate > 0 ? subtotal * (taxRate / 100) : 0;
-  const total = subtotal + (shippingQuote.free ? 0 : shippingQuote.fee) + taxAmount;
+  const total = subtotal + deliveryFee + (fastFee ?? 0) + taxAmount;
 
   // ---------------------------------------------------------------------------
   // Validation
@@ -676,14 +711,26 @@ export function GuestCheckoutForm({ taxEnabled = false, taxRate = null }: GuestC
               </span>
               <Price amount={subtotal} className="font-medium text-text-primary" />
             </div>
-            <div className="flex items-center justify-between">
-              <span className="text-text-secondary">{tc("shipping")}</span>
-              {shippingQuote.fee === 0 ? (
-                <span className="text-success text-xs font-semibold">{tc("freeShipping")}</span>
-              ) : (
-                <Price amount={shippingQuote.fee} className="font-medium text-text-primary" />
-              )}
-            </div>
+            {scheduledItemsCount > 0 && (
+              <div className="flex items-center justify-between">
+                <span className="text-text-secondary">{tc("shipping")}</span>
+                {deliveryFee === 0 ? (
+                  <span className="text-success text-xs font-semibold">{tc("freeShipping")}</span>
+                ) : (
+                  <Price amount={deliveryFee} className="font-medium text-text-primary" />
+                )}
+              </div>
+            )}
+            {fastFee !== null && (
+              <div className="flex items-center justify-between">
+                <span className="text-text-secondary">{tc("fastDeliveryFee")}</span>
+                {fastFee === 0 ? (
+                  <span className="text-success text-xs font-semibold">{tc("freeShipping")}</span>
+                ) : (
+                  <Price amount={fastFee} className="font-medium text-text-primary" />
+                )}
+              </div>
+            )}
             {taxAmount > 0 && (
               <div className="flex items-center justify-between">
                 <span className="text-text-secondary">

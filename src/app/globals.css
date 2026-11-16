@@ -317,6 +317,16 @@ button {
   transition: box-shadow 180ms ease;
 }
 
+.meem-category-tile__circle {
+  position: relative;
+  display: block;
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  overflow: hidden;
+  border-radius: 9999px;
+  background: #fff;
+}
+
 @media (hover: hover) {
   .meem-category-tile:hover .meem-category-tile__image {
     box-shadow: 0 0 0 2px var(--color-meem-sky);
@@ -361,8 +371,9 @@ button {
   }
 }
 
-/* Card tiles: square shape, or a grid with two or more rows. Borderless
-   circular tiles stay the default. */
+/* Card tiles: white card shell for square shapes and multi-row grids.
+   The artwork sits in a smaller circle inside the card so the card
+   background stays visible; borderless full-circle tiles stay the default. */
 @media (max-width: 767px) {
   .meem-category-grid[data-cat-tile-mobile="card"] .meem-category-tile {
     gap: 0.5rem;
@@ -373,8 +384,11 @@ button {
   }
 
   .meem-category-grid[data-cat-tile-mobile="card"] .meem-category-tile__image {
+    width: 100%;
     max-width: none;
+    padding: 0.4375rem;
     border-radius: 0.75rem;
+    background: var(--color-meem-tint);
     box-shadow: none;
   }
 }
@@ -389,8 +403,11 @@ button {
   }
 
   .meem-category-grid[data-cat-tile-tablet="card"] .meem-category-tile__image {
+    width: 100%;
     max-width: none;
+    padding: 0.4375rem;
     border-radius: 0.75rem;
+    background: var(--color-meem-tint);
     box-shadow: none;
   }
 }
@@ -405,8 +422,11 @@ button {
   }
 
   .meem-category-grid[data-cat-tile-desktop="card"] .meem-category-tile__image {
+    width: 100%;
     max-width: none;
+    padding: 0.5rem;
     border-radius: 0.75rem;
+    background: var(--color-meem-tint);
     box-shadow: none;
   }
 

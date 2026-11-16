@@ -17,6 +17,12 @@ interface NiceOneBuyBoxProps {
   selectedVariant: ProductVariant | null;
   /** When true, the total price renders as a skeleton bar. */
   pricesLoading?: boolean;
+  /**
+   * Variable product without any returned options: every add would fail with
+   * "select a product option", so the CTA becomes an explicit unavailable
+   * state instead of a silent rejection.
+   */
+  optionsUnavailable?: boolean;
 }
 
 /**
@@ -29,7 +35,12 @@ interface NiceOneBuyBoxProps {
  * initial add quantity is 1 (multi-quantity is handled afterwards via the
  * stepper, exactly like the product cards).
  */
-export function NiceOneBuyBox({ product, selectedVariant, pricesLoading = false }: NiceOneBuyBoxProps) {
+export function NiceOneBuyBox({
+  product,
+  selectedVariant,
+  pricesLoading = false,
+  optionsUnavailable = false,
+}: NiceOneBuyBoxProps) {
   const t = useTranslations("product");
   const tPdp = useTranslations("niceOnePdp");
   const locale = useLocale();
@@ -39,6 +50,7 @@ export function NiceOneBuyBox({ product, selectedVariant, pricesLoading = false 
     ? { inStock: product.in_stock && selectedVariant.quantity > 0, remaining: selectedVariant.quantity }
     : getStockStatus(product);
   const maxQuantity = Math.min(stock.remaining, 99);
+  const canPurchase = stock.inStock && !optionsUnavailable;
   /** Fixed initial add quantity (design decision — see section-mapping doc). */
   const [addQuantity] = useState(1);
 
@@ -48,6 +60,7 @@ export function NiceOneBuyBox({ product, selectedVariant, pricesLoading = false 
   const productImage = product.images?.thumbnail ?? "";
 
   async function handleAddToCart() {
+    if (optionsUnavailable) return;
     await addItem({
       quantity: addQuantity,
       product_variant_id: selectedVariant?.id ?? null,
@@ -70,7 +83,7 @@ export function NiceOneBuyBox({ product, selectedVariant, pricesLoading = false 
           onIncrement={() => increment()}
           onDecrement={() => decrement()}
           decrementAsRemove
-          incrementDisabled={!stock.inStock || cartQuantity >= maxQuantity}
+          incrementDisabled={!canPurchase || cartQuantity >= maxQuantity}
           disabled={isPending}
           variant="solid"
           className="w-full justify-between"
@@ -84,16 +97,22 @@ export function NiceOneBuyBox({ product, selectedVariant, pricesLoading = false 
           size="lg"
           variant="secondary"
           loading={isPending}
-          disabled={!stock.inStock}
+          disabled={!canPurchase}
           onClick={handleAddToCart}
         >
           {!isPending && <ShoppingBag className="size-5" aria-hidden />}
-          {stock.inStock ? (
+          {optionsUnavailable ? (
+            t("optionsUnavailable")
+          ) : stock.inStock ? (
             <span className="uppercase tracking-wide">{tPdp("addToBag")}</span>
           ) : (
             t("outOfStock")
           )}
         </Button>
+      )}
+
+      {optionsUnavailable && (
+        <p className="text-xs text-error">{t("optionsUnavailableHint")}</p>
       )}
 
       <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-[11px] text-text-secondary">

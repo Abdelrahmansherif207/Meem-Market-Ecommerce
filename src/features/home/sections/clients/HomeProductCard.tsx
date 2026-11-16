@@ -8,6 +8,7 @@ import { useTranslations } from "next-intl";
 import { cn } from "@/shared/utils/cn";
 
 import { useCartActions } from "@/features/cart/hooks/useCartActions";
+import { showCartFeedback } from "@/features/cart/store/useCartFeedbackStore";
 import { WishlistButton } from "@/features/wishlist/components/WishlistButton";
 import { Price } from "@/components/ui/Price";
 import { badgeToneClass, badgeToneFor } from "@/components/ui/Badge";
@@ -58,7 +59,7 @@ export default function HomeProductCard({
   const brandTag = item.tags?.[0];
 
   const handleAdd = useCallback(async () => {
-    await addItem({
+    const added = await addItem({
       quantity: 1,
       name: item.title,
       image: item.image,
@@ -69,6 +70,7 @@ export default function HomeProductCard({
       in_stock: inStock,
       stock_quantity: item.stockQuantity ?? 10,
     });
+    if (!added) return;
     setAnimating(true);
     setTimeout(() => setAnimating(false), 300);
   }, [addItem, item.title, item.image, item.slug, item.sku, item.stockQuantity, safePrice, inStock]);
@@ -124,12 +126,20 @@ export default function HomeProductCard({
               aria-hidden
             />
           ) : outOfStock ? (
-            <span
-              className="flex h-9 w-9 items-center justify-center rounded-lg bg-[#f2f0ec] text-(--home-ink-muted)"
-              aria-label={t("stockStates.out")}
+            <button
+              type="button"
+              aria-disabled="true"
+              aria-label={t("outOfStock")}
+              onClick={() =>
+                showCartFeedback({
+                  title: t("outOfStock"),
+                  message: t("outOfStockNotice"),
+                })
+              }
+              className="flex h-9 w-9 cursor-not-allowed items-center justify-center rounded-lg bg-[#f2f0ec] text-(--home-ink-muted)"
             >
               <ShoppingBag className="size-4" aria-hidden />
-            </span>
+            </button>
           ) : quantity > 0 ? (
             <QuantityStepper
               value={quantity}

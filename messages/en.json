@@ -92,6 +92,8 @@
     }
   },
   "home": {
+    "outOfStock": "Out of Stock",
+    "outOfStockNotice": "This product is currently out of stock.",
     "metaDescription": "Shop the best products — electronics, fashion, home goods, and more."
   },
   "meemHeader": {
@@ -106,6 +108,7 @@
     "brands": "Brands",
     "allProducts": "All Products",
     "cart": "Cart",
+    "wishlist": "Wishlist",
     "deliveryModes": {
       "label": "Delivery method",
       "scheduled": "Scheduled",
@@ -121,6 +124,7 @@
     }
   },
   "meemHome": {
+    "outOfStockNotice": "This product is currently out of stock.",
     "viewAll": "View all",
     "productCount": "{count, plural, one {# product} other {# products}}",
     "addToCart": "Add to cart",
@@ -273,6 +277,15 @@
     }
   },
   "cartPage": {
+    "feedback": {
+      "addTitle": "Couldn't add to cart",
+      "updateTitle": "Couldn't update cart",
+      "rateLimited": "Too many requests. Please wait a moment and try again.",
+      "sessionExpired": "Your session expired. Please try again.",
+      "network": "Connection problem. Please check your internet and try again.",
+      "generic": "Something went wrong. Please try again.",
+      "dismiss": "Dismiss"
+    },
     "metaTitle": "Cart",
     "metaDescription": "Review your cart and complete your checkout.",
     "title": "Cart",
@@ -355,6 +368,9 @@
     "inWishlist": "Remove from Wishlist"
   },
   "product": {
+    "optionsUnavailable": "Currently unavailable",
+    "outOfStockNotice": "This product is currently out of stock.",
+    "optionsUnavailableHint": "This product's options aren't available right now. Please try again later.",
     "home": "Home",
     "reviews": "reviews",
     "reviewsTitle": "Customer Reviews",

@@ -425,6 +425,12 @@ export function GuestOrderConfirmation({
                 <Price amount={order.shipping_price ?? 0} className="font-medium text-text-primary" />
               </div>
             )}
+            {(order.fast_shipping_fee ?? 0) > 0 && (
+              <div className="flex items-center justify-between">
+                <span className="text-text-secondary">{tc("fastDeliveryFee")}</span>
+                <Price amount={order.fast_shipping_fee ?? 0} className="font-medium text-text-primary" />
+              </div>
+            )}
             <div className="flex items-center justify-between font-semibold">
               <span className="text-xs font-medium uppercase tracking-wider text-text-secondary">
                 {tc("total")}

@@ -13,7 +13,7 @@ interface WishlistButtonProps {
   hasVariants?: boolean;
   /** Initial heart state from the product payload (`in_wishlist` field). */
   initialInWishlist?: boolean;
-  /** Fetch the guest-safe initial state from the API (product detail page). */
+  /** Fetch the signed-in shopper's initial state from the API (detail page). */
   fetchInitial?: boolean;
   variant?: "icon" | "full";
   className?: string;

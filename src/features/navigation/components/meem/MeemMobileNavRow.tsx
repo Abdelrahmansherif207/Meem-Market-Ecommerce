@@ -2,13 +2,14 @@
 
 import { useState } from "react";
 import { useSyncExternalStore } from "react";
-import { Bell, ChevronDown, Globe, Menu, ShoppingBag, User } from "lucide-react";
+import { Bell, ChevronDown, Globe, Heart, Menu, ShoppingBag, User } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import { cn } from "@/shared/utils/cn";
 import { Link, usePathname, useRouter } from "@/i18n/navigation";
 import { useAuthModalStore, useAuthStore } from "@/features/auth";
 import { useGuestCartStore } from "@/features/cart/store/useGuestCartStore";
 import { useServerCartStore } from "@/features/cart/store/useServerCartStore";
+import { useWishlistStore } from "@/features/wishlist/store/useWishlistStore";
 import type { CategoryMenuItem } from "@/features/categories/types";
 import MeemCategoriesPanel from "./MeemCategoriesPanel";
 
@@ -20,7 +21,7 @@ interface MeemMobileNavRowProps {
 /**
  * Mobile header action row (mobile screen spec): "Categories" pill on the
  * start side (taps open the mega panel) and language / profile /
- * notifications / cart icons on the end side. Navigation itself stays in
+ * notifications / wishlist / cart icons on the end side. Navigation stays in
  * the bottom bar.
  */
 export default function MeemMobileNavRow({
@@ -41,6 +42,7 @@ export default function MeemMobileNavRow({
   const guestCartCount = useGuestCartStore((s) => s.getTotalItems());
   const serverCartCount = useServerCartStore((s) => s.totalQuantity);
   const cartCount = isAuthenticated ? serverCartCount : guestCartCount;
+  const wishlistCount = useWishlistStore((s) => s.count);
 
   const [panelOpen, setPanelOpen] = useState(false);
   const [activeCategoryId, setActiveCategoryId] = useState<number | null>(null);
@@ -102,6 +104,15 @@ export default function MeemMobileNavRow({
 
           <Link href="/notifications" aria-label="Notifications">
             <Bell className="h-[18px] w-[18px]" />
+          </Link>
+
+          <Link href="/wishlist" aria-label={t("wishlist")} className="relative">
+            <Heart className="h-[18px] w-[18px]" />
+            {mounted && isAuthenticated && wishlistCount > 0 && (
+              <span className="absolute -end-1.5 -top-1.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-primary px-1 text-[9px] font-bold leading-none text-white">
+                {wishlistCount > 99 ? "99+" : wishlistCount}
+              </span>
+            )}
           </Link>
 
           <Link href="/cart" aria-label={t("cart")} className="relative">

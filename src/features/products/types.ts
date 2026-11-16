@@ -92,6 +92,8 @@ export interface RelatedProduct {
   quantity: number;
   ratings: number;
   discount_valid?: boolean;
+  has_variants?: boolean;
+  in_stock?: boolean;
   tags?: ProductTag[];
   in_wishlist?: boolean;
   currency?: ProductCurrency;

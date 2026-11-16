@@ -114,7 +114,10 @@ export const wishlistService = {
     return normalizeResponse(response);
   },
 
-  /** GET /api/v1/wishlists/in_wishlist/{product_id} — public, guest-safe. */
+  /**
+   * GET /api/v1/wishlists/in_wishlist/{product_id} — authenticated.
+   * Callers must gate on `useAuthStore` before invoking it.
+   */
   getInWishlist: async (productId: number, lang?: string): Promise<boolean> => {
     const response = await apiFetch<ApiResponse<unknown>>(
       `/wishlists/in_wishlist/${productId}`,

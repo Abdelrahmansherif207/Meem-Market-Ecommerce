@@ -196,27 +196,29 @@ function CategoryGridTile({
       className="meem-category-tile group rounded-2xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-meem-sky focus-visible:ring-offset-2 focus-visible:ring-offset-white"
     >
       <span className="meem-category-tile__image">
-        {image ? (
-          <CampaignImage
-            desktop={category.image.desktop || category.image.mobile}
-            mobile={category.image.mobile}
-            alt={category.name}
-            width={320}
-            height={320}
-            mobileWidth={320}
-            mobileHeight={320}
-            sizes={sizes}
-            fill
-            className="object-cover transition-transform duration-300 group-hover:scale-[1.04]"
-          />
-        ) : (
-          <span
-            className="flex h-full w-full items-center justify-center text-lg font-bold text-meem-sky"
-            aria-hidden
-          >
-            {category.name.charAt(0)}
-          </span>
-        )}
+        <span className="meem-category-tile__circle">
+          {image ? (
+            <CampaignImage
+              desktop={category.image.desktop || category.image.mobile}
+              mobile={category.image.mobile}
+              alt={category.name}
+              width={320}
+              height={320}
+              mobileWidth={320}
+              mobileHeight={320}
+              sizes={sizes}
+              fill
+              className="object-cover transition-transform duration-300 group-hover:scale-[1.04]"
+            />
+          ) : (
+            <span
+              className="flex h-full w-full items-center justify-center text-lg font-bold text-meem-sky"
+              aria-hidden
+            >
+              {category.name.charAt(0)}
+            </span>
+          )}
+        </span>
       </span>
       <span className="meem-category-tile__name line-clamp-2">
         {category.name}
