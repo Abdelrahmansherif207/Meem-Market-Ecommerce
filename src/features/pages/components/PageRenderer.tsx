@@ -78,5 +78,3 @@ export default async function PageRenderer({ slug, locale }: PageRendererProps) 
     </main>
   );
 }
-
-export { PageSkeleton } from "./SectionRenderer";

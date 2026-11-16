@@ -1,15 +1,3 @@
-export interface NavbarMenu {
-  id: number;
-  name: string;
-  slug: string;
-  level: number;
-  image: {
-    desktop: string;
-    mobile: string;
-  };
-  children: NavbarMenu[];
-}
-
 export interface FooterLink {
   id: number;
   label: string;

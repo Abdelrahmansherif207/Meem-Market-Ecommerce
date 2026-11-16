@@ -233,3 +233,34 @@ export function MeemCouponsSkeleton() {
     </section>
   );
 }
+
+/**
+ * Full home placeholder used by `app/[locale]/(home)/loading.tsx`. Mirrors the
+ * real page shell and the current CMS section order (hero → categories →
+ * banner → shelf → brands) so the first paint already looks like Meem.
+ */
+export function MeemHomePageSkeleton() {
+  const categorySetting: SectionFrontSetting = {
+    layout: "grid",
+    shape: "square",
+    columns_count: 5,
+    rows_count: 2,
+    tablet_columns_count: 5,
+    tablet_rows_count: 2,
+    mobile_columns_count: 4,
+    mobile_rows_count: 2,
+    balance_last_row: true,
+  };
+
+  return (
+    <div className="meem-surface">
+      <main className="mx-auto flex w-full max-w-[1440px] flex-col gap-y-10 px-3 py-6 sm:gap-y-12 sm:px-4 lg:gap-y-16 lg:px-8">
+        <MeemHeroSkeleton />
+        <MeemCategoriesSkeleton setting={categorySetting} />
+        <MeemBannerSkeleton />
+        <MeemShelfSkeleton />
+        <MeemBrandsSkeleton />
+      </main>
+    </div>
+  );
+}
