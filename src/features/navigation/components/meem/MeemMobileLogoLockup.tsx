@@ -18,7 +18,7 @@ export default function MeemMobileLogoLockup({
   src,
   siteName,
 }: MeemMobileLogoLockupProps) {
-  const brandName = siteName || "Meem Market Riyadh";
+  const brandName = siteName || "Meem Market Kuwait";
   // The settings default is the stacked logo, which is too tall for the
   // search row; use the compact horizontal Meem logo in that case.
   return (

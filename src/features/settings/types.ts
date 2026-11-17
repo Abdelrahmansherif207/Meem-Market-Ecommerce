@@ -131,7 +131,7 @@ export type CustomFont =
 
 /**
  * Normalized settings. Branding and contact fields always carry a usable
- * value (locale-aware Meem Market Riyadh defaults when the API omits them or
+ * value (locale-aware Meem Market Kuwait defaults when the API omits them or
  * returns placeholder copy); invalid social / video URLs become `""`.
  */
 export interface SiteSettings {

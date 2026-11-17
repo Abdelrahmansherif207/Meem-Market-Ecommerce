@@ -6,10 +6,10 @@ import Image from "next/image";
 import { cn } from "@/shared/utils/cn";
 
 const COUNTRIES = [
+  { code: "KW", name: "Kuwait", dialCode: "+965" },
   { code: "SA", name: "Saudi Arabia", dialCode: "+966" },
   { code: "QA", name: "Qatar", dialCode: "+974" },
   { code: "AE", name: "United Arab Emirates", dialCode: "+971" },
-  { code: "KW", name: "Kuwait", dialCode: "+965" },
   { code: "EG", name: "Egypt", dialCode: "+20" },
   { code: "BH", name: "Bahrain", dialCode: "+973" },
   { code: "OM", name: "Oman", dialCode: "+968" },

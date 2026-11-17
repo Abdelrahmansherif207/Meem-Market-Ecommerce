@@ -70,7 +70,7 @@ export default function MeemPaymentStrip({
         {logoSrc ? (
           <Image
             src={logoSrc}
-            alt={siteName || "Meem Market Riyadh"}
+            alt={siteName || "Meem Market Kuwait"}
             width={160}
             height={48}
             className="h-8 w-auto object-contain"

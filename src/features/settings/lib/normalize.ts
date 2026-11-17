@@ -1,5 +1,6 @@
 import { normalizeCurrencyCode } from "@/shared/lib/currency";
 import {
+  DEFAULT_COUNTRY_CODE,
   DEFAULT_FAVICON,
   DEFAULT_FOOTER_LOGO,
   DEFAULT_LOGO,
@@ -106,16 +107,21 @@ export function cleanSettingsPhone(value: unknown): string {
 }
 
 /**
- * Derive a wa.me link from any phone display format. Local Saudi numbers
- * (`05...`) and international `00` prefixes are normalized so the link always
- * includes the country code.
+ * Derive a wa.me link from any phone display format. Local Kuwait numbers
+ * (`2228 1130`), international `00` prefixes, and an accidental `0` after
+ * the country code are normalized so the link always includes `965`.
  */
 export function buildWhatsAppUrl(phone: string): string {
   let digits = phone.replace(/\D/g, "");
   if (!digits) return DEFAULT_WHATSAPP_URL;
   if (digits.startsWith("00")) digits = digits.slice(2);
-  if (digits.startsWith("9660")) digits = `966${digits.slice(4)}`;
-  else if (digits.startsWith("0")) digits = `966${digits.slice(1)}`;
+  if (digits.startsWith(`${DEFAULT_COUNTRY_CODE}0`)) {
+    digits = `${DEFAULT_COUNTRY_CODE}${digits.slice(DEFAULT_COUNTRY_CODE.length + 1)}`;
+  } else if (digits.startsWith("0")) {
+    digits = `${DEFAULT_COUNTRY_CODE}${digits.slice(1)}`;
+  } else if (!digits.startsWith(DEFAULT_COUNTRY_CODE) && digits.length === 8) {
+    digits = `${DEFAULT_COUNTRY_CODE}${digits}`;
+  }
   return `https://wa.me/${digits}`;
 }
 
@@ -235,7 +241,7 @@ export function getLocaleSettingsDefaults(locale: string): LocaleSettingsDefault
  * - `logo`         → `/meem-new.png`
  * - `footer_logo`  → raw `logo` → `/new-footer-logo.png`
  * - `favicon`      → `/new-footer-logo.png`
- * - contact/social → Meem Market Riyadh contact defaults; invalid URLs become `""`
+ * - contact/social → Meem Market Kuwait contact defaults; invalid URLs become `""`
  */
 export function normalizeSiteSettings(raw: unknown, locale: string): SiteSettings {
   const data: RawSiteSettings =

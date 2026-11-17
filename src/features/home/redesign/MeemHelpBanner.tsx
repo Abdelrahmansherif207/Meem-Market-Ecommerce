@@ -25,9 +25,9 @@ function HelpOptionLink({ href, children }: { href: string; children: ReactNode 
 }
 
 /**
- * Meem Market Riyadh "Do you need help?" banner — deep blue strip with the four
+ * Meem Market Kuwait "Do you need help?" banner — deep blue strip with the four
  * existing contact options. Email, phone and WhatsApp all come from the
- * normalized site settings (with Meem Market Riyadh fallbacks).
+ * normalized site settings (with Meem Market Kuwait fallbacks).
  */
 export default async function MeemHelpBanner({ locale }: { locale: string }) {
   const t = await getTranslations("meemHome");

@@ -97,9 +97,9 @@
     "metaDescription": "تسوق أفضل المنتجات - إلكترونيات، أزياء، منتجات المنزل والمزيد"
   },
   "meemHeader": {
-    "announcement": "توصيل فوري في الرياض — اطلب اليوم واستلم خلال ساعات",
-    "brandNameAr": "سوق ميم الرياض",
-    "brandNameEn": "MEEM MARKET RIYADH",
+    "announcement": "توصيل سريع في جميع مناطق الكويت — اطلب اليوم واستلم خلال ساعات",
+    "brandNameAr": "سوق ميم الكويت",
+    "brandNameEn": "MEEM MARKET KUWAIT",
     "searchPlaceholder": "ماذا تبحث عنه ؟",
     "deliverTo": "التوصيل إلى",
     "profile": "حسابي",
@@ -137,9 +137,9 @@
     "copyCode": "نسخ كود القسيمة",
     "copied": "تم النسخ",
     "hero": {
-      "eyebrow": "سوق ميم الرياض",
+      "eyebrow": "سوق ميم الكويت",
       "title": "كل ما تحتاجه يصلك",
-      "subtitle": "توصيل مجدول خلال 3–7 أيام عمل، أو توصيل فوري خلال ساعات في الرياض.",
+      "subtitle": "توصيل في نفس اليوم للطلبات قبل الساعة 12 ظهراً، أو توصيل مجدول في جميع مناطق الكويت.",
       "cta": "تسوق الآن"
     },
     "carousel": {
@@ -177,7 +177,7 @@
   },
   "meemFooter": {
     "popularCategories": "التصنيفات الشائعة",
-    "companyTitle": "سوق ميم الرياض",
+    "companyTitle": "سوق ميم الكويت",
     "profileTitle": "حسابي",
     "stayConnected": "ابق على تواصل",
     "followUs": "تابعنا",

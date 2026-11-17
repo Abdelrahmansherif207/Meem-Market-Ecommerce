@@ -7,8 +7,8 @@
  */
 
 const BRAND_NAME: Record<string, string> = {
-  ar: "سوق ميم الرياض",
-  en: "Meem Market Riyadh",
+  ar: "سوق ميم الكويت",
+  en: "Meem Market Kuwait",
 };
 
 /** "Catch Beauty" in English (with or without a space) and in Arabic. */

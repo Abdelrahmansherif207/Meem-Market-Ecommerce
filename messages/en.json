@@ -97,9 +97,9 @@
     "metaDescription": "Shop the best products — electronics, fashion, home goods, and more."
   },
   "meemHeader": {
-    "announcement": "NOW delivery across Riyadh — order today, get it within hours",
-    "brandNameAr": "سوق ميم الرياض",
-    "brandNameEn": "MEEM MARKET RIYADH",
+    "announcement": "Fast delivery across Kuwait — order today, get it within hours",
+    "brandNameAr": "سوق ميم الكويت",
+    "brandNameEn": "MEEM MARKET KUWAIT",
     "searchPlaceholder": "What are you looking for ?",
     "deliverTo": "Deliver to",
     "profile": "Profile",
@@ -137,9 +137,9 @@
     "copyCode": "Copy coupon code",
     "copied": "Copied",
     "hero": {
-      "eyebrow": "Meem Market Riyadh",
+      "eyebrow": "Meem Market Kuwait",
       "title": "Everything you need, delivered",
-      "subtitle": "Scheduled delivery in 3–7 business days, or NOW delivery within hours across Riyadh.",
+      "subtitle": "Same-day delivery on orders before 12 PM, or scheduled delivery across Kuwait.",
       "cta": "Shop now"
     },
     "carousel": {
@@ -177,7 +177,7 @@
   },
   "meemFooter": {
     "popularCategories": "Popular Categories",
-    "companyTitle": "Meem Market Riyadh",
+    "companyTitle": "Meem Market Kuwait",
     "profileTitle": "Profile",
     "stayConnected": "Stay connected",
     "followUs": "Follow us",

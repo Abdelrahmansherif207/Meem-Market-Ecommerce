@@ -120,14 +120,16 @@ export default async function RootLayout({
   const settingsLogo = settings.logo;
   const siteName = settings.site_name;
 
-  // Backend-driven currency: settings own the base/catalog code, the
-  // currencies endpoint owns the display metadata (symbol, decimals). The
-  // provider mounts both so every `<Price>` renders the backend currency —
-  // stale persisted selections are ignored while selection is disabled.
+  // Backend-driven currency: `options.currency` is the store's default
+  // display currency (KWD for the Kuwait project), while `base_currency_code`
+  // is the catalog currency the API stores prices in. The currencies endpoint
+  // owns the display metadata (symbol, decimals). The provider mounts both so
+  // every `<Price>` renders the configured storefront currency — stale
+  // persisted selections are ignored while selection is disabled.
   const [currencySelectionEnabled, siteCurrencyCode, currencies] =
     await Promise.all([
       settings.currency_selection_enabled,
-      settings.options.base_currency_code ?? settings.options.currency ?? "",
+      settings.options.currency ?? settings.options.base_currency_code ?? "",
       currencyService.getCurrencies(locale).catch(() => []),
     ]);
 

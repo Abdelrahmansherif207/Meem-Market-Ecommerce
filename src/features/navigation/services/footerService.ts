@@ -144,7 +144,7 @@ function getMockFooterData(lang: string): FooterData {
         id: 3,
         title: isAr ? "معلومات عنا" : "About Us",
         links: [
-          { id: 6, label: isAr ? "عن سوق ميم الرياض" : "About Meem Market Riyadh", slug: "/info/about" },
+          { id: 6, label: isAr ? "عن سوق ميم الكويت" : "About Meem Market Kuwait", slug: "/info/about" },
           { id: 7, label: isAr ? "شركتنا" : "Our Company", slug: "/info/company" },
           { id: 8, label: isAr ? "المسؤولية المجتمعية" : "Community & Society", slug: "/info/community" },
           { id: 9, label: isAr ? "النشرة البريدية" : "Newsletter", slug: "/info/newsletter" },
@@ -177,10 +177,10 @@ function getMockFooterData(lang: string): FooterData {
     socialLinks: [],
     contactInfo: {
       stayInTouchText: isAr ? "ابق على تواصل معنا" : "Stay in touch with us",
-      whatsappUrl: "https://wa.me/966550000000",
+      whatsappUrl: "https://wa.me/96522281130",
       assistanceText: isAr ? "تحدث معنا للمساعدة" : "Have a question? We are here to help.",
       callUsText: isAr ? "اتصل بنا للمساعدة" : "Call us for assistance",
-      phoneNumber: "+966 55 000 0000",
+      phoneNumber: "+965 2228 1130",
       email: "",
     },
     bottomRow: {
@@ -194,7 +194,7 @@ function getMockFooterData(lang: string): FooterData {
       googlePlay: {
         platform: "android",
         imageSrc: "/images/badges/play-store.svg",
-        url: "",
+        url: "https://play.google.com/store/apps/details?id=market.meem",
         alt: "Google Play",
       },
     },

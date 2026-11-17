@@ -18,7 +18,7 @@ interface MeemTopRowProps {
  */
 export default function MeemTopRow({ settingsLogo, siteName }: MeemTopRowProps) {
   const t = useTranslations("meemHeader");
-  const brandName = siteName || "Meem Market Riyadh";
+  const brandName = siteName || "Meem Market Kuwait";
 
   return (
     <div className="mx-auto flex w-full max-w-[1440px] items-center justify-between px-4 pt-4 pb-0 lg:px-8">

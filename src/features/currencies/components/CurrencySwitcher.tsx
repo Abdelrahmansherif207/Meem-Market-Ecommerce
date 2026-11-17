@@ -40,13 +40,18 @@ export function CurrencySwitcher({ className }: CurrencySwitcherProps) {
   // The settings switch decides visibility; also guard the backend list.
   if (!snapshot?.selectionEnabled || currencies.length === 0) return null;
 
+  // Until the client store hydrates, show the server-resolved default
+  // (`options.currency`) instead of the first row of the currencies list.
+  const activeCode =
+    currencies.find((c) => c.code === selectedCode)?.code ??
+    snapshot.defaultCurrency.code;
   const selected =
-    currencies.find((c) => c.code === selectedCode) ?? currencies[0];
+    currencies.find((c) => c.code === activeCode) ?? currencies[0];
 
   const handleSelect = async (currency: Currency) => {
     const code = normalizeCurrencyCode(currency.code);
     // Only offer codes the backend lists as available; ignore anything else.
-    if (!code || code === selectedCode || pendingCode) return;
+    if (!code || code === activeCode || pendingCode) return;
     if (!currencies.some((c) => c.code === code)) return;
     setPendingCode(code);
     // Authenticated users persist the preference server-side
@@ -92,7 +97,7 @@ export function CurrencySwitcher({ className }: CurrencySwitcherProps) {
           className="absolute end-0 top-full z-50 mt-2 max-h-72 w-52 overflow-y-auto rounded-xl border border-border bg-white p-1 shadow-elev-1"
         >
           {currencies.map((currency) => {
-            const isActive = currency.code === selectedCode;
+            const isActive = currency.code === activeCode;
             const isPending = pendingCode === currency.code;
             return (
               <li key={currency.code} role="option" aria-selected={isActive}>

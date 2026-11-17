@@ -29,7 +29,7 @@ export default function MeemStickyHeader({
   const t = useTranslations("meemHeader");
   const pathname = usePathname();
   const isVisible = useScrollState(STICKY_SCROLL_THRESHOLD);
-  const brandName = siteName || "Meem Market Riyadh";
+  const brandName = siteName || "Meem Market Kuwait";
   const hasCustomLogo = Boolean(settingsLogo && settingsLogo !== DEFAULT_LOGO);
 
   const categoriesActive = pathname.startsWith("/categories");
