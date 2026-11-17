@@ -2,7 +2,8 @@
 import { useEffect, useRef, useReducer, useCallback, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import Link from "next/link";
-import { Loader2, AlertTriangle, RefreshCw } from "lucide-react";
+import { Link as LocaleLink } from "@/i18n/navigation";
+import { Loader2, AlertTriangle, RefreshCw, ShieldCheck } from "lucide-react";
 import { useAuthStore } from "@/features/auth";
 import { useDisplayCurrency } from "@/features/currencies";
 import { isGuestCheckoutEnabled } from "@/shared/constants/guestCheckout";
@@ -10,6 +11,7 @@ import { guestCartService } from "@/features/guest/services/guestCartService";
 import { useGuestSessionStore } from "@/features/guest/store/useGuestSessionStore";
 import { runWithGuestSession } from "@/features/guest/utils/guestErrors";
 import { CartPageContentSkeleton } from "./skeletons/CartPageContentSkeleton";
+import { MinimumOrderProgress } from "./MinimumOrderProgress";
 import { useGuestCartStore } from "../store/useGuestCartStore";
 import { useServerCartStore } from "../store/useServerCartStore";
 import { cartService } from "../services/cartService";
@@ -18,13 +20,14 @@ import { CartSummary } from "./CartSummary";
 import AvailableCoupons from "@/features/coupons/components/AvailableCoupons";
 import MyAvailableCoupons from "@/features/coupons/components/MyAvailableCoupons";
 import { MyCouponsList } from "@/features/coupons/components/MyCouponsList";
-import { calcSubtotal, calcTotalQuantity } from "../utils";
+import { calcSubtotal, calcTotalQuantity, canCheckout } from "../utils";
 import type { AppliedCoupon } from "@/features/coupons/types";
 import { couponService } from "@/features/coupons/services/couponService";
 import { ApiError } from "@/shared/lib/api";
 import type { HydratedCartItem, CartApiItem, CartApiCart, CartLineIdentity, DeliveryType } from "../types";
 import { getCartLineKey, matchesCartLine } from "../types";
-import type { GuestCart } from "@/features/guest/types";
+import type { GuestCart, GuestCartLine } from "@/features/guest/types";
+import { formatGuestDate } from "@/features/guest/lib/format";
 import EmptyState from "@/components/ui/EmptyState";
 
 
@@ -184,6 +187,11 @@ export function CartPageContent({
   const abortRef = useRef<AbortController | null>(null);
 
   const [appliedCoupon, setAppliedCoupon] = useState<AppliedCoupon | null>(null);
+  const [guestTotals, setGuestTotals] = useState<{
+    shipping: number;
+    total: number;
+  } | null>(null);
+  const [guestExpiry, setGuestExpiry] = useState<string | null>(null);
   const [stickyTop, setStickyTop] = useState<number | null>(null);
   const couponDiscount = appliedCoupon?.discount_amount ?? 0;
 
@@ -206,7 +214,7 @@ export function CartPageContent({
   // -------------------------------------------------------------------------
   // processCart — map server cart data into all local state
   // -------------------------------------------------------------------------
-  const processCart = useCallback((cart: CartApiCart | GuestCart) => {
+  const processAuthCart = useCallback((cart: CartApiCart) => {
     const mapItem = (
       item: CartApiItem,
       deliveryType: DeliveryType,
@@ -246,6 +254,8 @@ export function CartPageContent({
     }
 
     dispatch({ type: "SET_SERVER", items });
+    setGuestTotals(null);
+    setGuestExpiry(null);
 
     if (cart.coupon && cart.coupon_code) {
       setAppliedCoupon({
@@ -258,6 +268,44 @@ export function CartPageContent({
     }
   }, []);
 
+  const processGuestCart = useCallback((cart: GuestCart) => {
+    const mapLine = (line: GuestCartLine): HydratedCartItem => ({
+      product_id: line.productId,
+      product_variant_id: line.productVariantId,
+      cartItemId: line.id,
+      quantity: line.quantity,
+      deliveryType: line.shippingMethod,
+      variant_label: line.attributes.length
+        ? line.attributes.map((a) => `${a.attribute}: ${a.value}`).join(" / ")
+        : null,
+      name: line.name,
+      image: line.image,
+      price: line.unitPrice,
+      current_price: line.unitPrice,
+      total_price: line.subtotal,
+      discount_amount: 0,
+      promotion_id: null,
+      slug: line.slug,
+      sku: line.sku,
+      in_stock: line.isAvailable,
+      stock_quantity: undefined,
+    });
+
+    dispatch({ type: "SET_SERVER", items: cart.items.map(mapLine) });
+    setGuestTotals({ shipping: cart.shippingCost, total: cart.total });
+    setGuestExpiry(cart.expiresAt);
+    // Guest carts never carry coupons.
+    setAppliedCoupon(null);
+  }, []);
+
+  const processCart = useCallback(
+    (cart: CartApiCart | GuestCart) => {
+      if (guestServerMode) processGuestCart(cart as GuestCart);
+      else processAuthCart(cart as CartApiCart);
+    },
+    [guestServerMode, processGuestCart, processAuthCart],
+  );
+
   // -------------------------------------------------------------------------
   // refreshCart — silent background re-fetch (no loading spinner)
   // -------------------------------------------------------------------------
@@ -266,7 +314,13 @@ export function CartPageContent({
       const cart = guestServerMode
         ? await runWithGuestSession(locale, () => guestCartService.getCart(locale))
         : await cartService.getCart(locale);
-      if (cart) processCart(cart);
+      if (cart) {
+        processCart(cart);
+      } else {
+        dispatch({ type: "SET_SERVER", items: [] });
+        setGuestTotals(null);
+        setGuestExpiry(null);
+      }
     } catch {
       // silent — cart data stays as-is
     }
@@ -301,12 +355,11 @@ export function CartPageContent({
     } catch (err) {
       if (controller.signal.aborted) return;
       const status = err instanceof ApiError ? err.status : 0;
-      const msg = status === 401
-        ? "Your session has expired. Please log in again."
-        : err instanceof Error ? err.message : "Failed to load cart";
+      const msg =
+        status === 401 ? t("sessionExpired") : t("loadFailed");
       dispatch({ type: "SET_ERROR", error: msg });
     }
-  }, [guestServerMode, locale, processCart]);
+  }, [guestServerMode, locale, processCart, t]);
 
   // -------------------------------------------------------------------------
   // Auth / sync state machine effect
@@ -419,8 +472,13 @@ export function CartPageContent({
             const cart = await runWithGuestSession(locale, () =>
               guestCartService.removeLine(itemId, locale, deliveryType),
             );
-            if (cart) processCart(cart);
-            else dispatch({ type: "SET_SERVER", items: [] });
+            if (cart) {
+              processCart(cart);
+            } else {
+              dispatch({ type: "SET_SERVER", items: [] });
+              setGuestTotals(null);
+              setGuestExpiry(null);
+            }
           } else {
             await cartService.removeItem(itemId, deliveryType, locale);
           }
@@ -436,12 +494,21 @@ export function CartPageContent({
               shipping_method: deliveryType,
             },
           } as const;
-          const updatedCart = guestServerMode
-            ? await runWithGuestSession(locale, () =>
-                guestCartService.updateItem(payload, locale),
-              )
-            : await cartService.updateItem(payload, locale);
-          processCart(updatedCart);
+          if (guestServerMode) {
+            const updatedCart = await runWithGuestSession(locale, () =>
+              guestCartService.updateItem(payload, locale),
+            );
+            if (updatedCart) {
+              processCart(updatedCart);
+            } else {
+              dispatch({ type: "SET_SERVER", items: [] });
+              setGuestTotals(null);
+              setGuestExpiry(null);
+            }
+          } else {
+            const updatedCart = await cartService.updateItem(payload, locale);
+            processCart(updatedCart);
+          }
         }
       } catch {
         dispatch({ type: "SET_ITEM_ROLLBACK", items: snapshot });
@@ -528,6 +595,14 @@ export function CartPageContent({
   const scheduledQty = calcTotalQuantity(scheduledItems);
   const fastQty = calcTotalQuantity(fastItems);
 
+  // Anonymous shoppers with the flag ON checkout their whole cart in one
+  // guest order, so the CTA is cart-level instead of per delivery group.
+  const isGuestCart = guestServerMode && !isAuthenticated;
+  const guestCheckoutReady = canCheckout(
+    scheduledSubtotal + fastSubtotal,
+    minimumOrderAmount,
+  );
+
   // -------------------------------------------------------------------------
   // Render states
   // -------------------------------------------------------------------------
@@ -540,7 +615,7 @@ export function CartPageContent({
       <div className="flex flex-col items-center justify-center py-24 text-center">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
         <p className="mt-4 text-sm font-medium text-text-secondary">
-          Syncing your cart…
+          {t("syncing")}
         </p>
       </div>
     );
@@ -556,7 +631,7 @@ export function CartPageContent({
           className="mt-4 inline-flex items-center gap-2 rounded-xl bg-primary px-6 py-2 text-sm font-medium text-white"
         >
           <RefreshCw className="h-4 w-4" />
-          Retry
+          {t("retry")}
         </button>
       </div>
     );
@@ -570,8 +645,7 @@ export function CartPageContent({
           <div className="flex items-center gap-2 text-sm text-red-700">
             <AlertTriangle className="h-4 w-4 shrink-0" />
             <span>
-              Some items from your guest cart could not be synced:{" "}
-              <strong>{syncError}</strong>
+              {t("syncPartialError")} <strong>{syncError}</strong>
             </span>
           </div>
           <button
@@ -579,7 +653,7 @@ export function CartPageContent({
             className="inline-flex shrink-0 items-center gap-1.5 rounded-lg bg-red-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-red-700 transition-colors"
           >
             <RefreshCw className="h-3 w-3" />
-            Retry sync
+            {t("retrySync")}
           </button>
         </div>
       )}
@@ -612,6 +686,7 @@ export function CartPageContent({
               onUpdateQuantity={handleUpdateQuantity}
               onRemove={handleRemove}
               minimumOrderAmount={minimumOrderAmount}
+              hideCheckout={isGuestCart}
               couponSlot={
                 isAuthenticated ? (
                   <MyCouponsList
@@ -628,6 +703,7 @@ export function CartPageContent({
               onUpdateQuantity={handleUpdateQuantity}
               onRemove={handleRemove}
               minimumOrderAmount={minimumOrderAmount}
+              hideCheckout={isGuestCart}
             />
           </div>
 
@@ -645,8 +721,61 @@ export function CartPageContent({
                 couponDiscount={couponDiscount}
                 taxEnabled={taxEnabled}
                 taxRate={taxRate}
+                shippingAmount={isGuestCart ? guestTotals?.shipping ?? null : null}
+                authoritativeTotal={isGuestCart ? guestTotals?.total ?? null : null}
                 onCouponApplied={async () => { await refreshCart(); }}
               />
+
+              {isGuestCart && (
+                <div className="space-y-4 rounded-2xl border-2 border-border bg-white p-5">
+                  <div className="flex items-start gap-3">
+                    <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
+                      <ShieldCheck className="h-4 w-4" aria-hidden />
+                    </span>
+                    <div className="min-w-0">
+                      <p className="text-sm font-bold text-text-primary">
+                        {t("guestCheckoutTitle")}
+                      </p>
+                      <p className="mt-1 text-sm leading-relaxed text-text-secondary">
+                        {t("guestCheckoutHint")}
+                      </p>
+                    </div>
+                  </div>
+
+                  <MinimumOrderProgress
+                    subtotal={scheduledSubtotal + fastSubtotal}
+                    minimumOrderAmount={minimumOrderAmount}
+                    className="rounded-xl bg-surface px-3.5 py-3"
+                  />
+
+                  {guestCheckoutReady ? (
+                    <LocaleLink
+                      href="/guest-checkout"
+                      className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-primary px-6 py-3 text-sm font-bold text-white shadow-sm shadow-primary/40 transition-all hover:bg-primary-dark hover:shadow-md"
+                    >
+                      <ShieldCheck className="h-4 w-4" aria-hidden />
+                      {t("guestCheckout")}
+                    </LocaleLink>
+                  ) : (
+                    <button
+                      type="button"
+                      disabled
+                      className="inline-flex w-full cursor-not-allowed items-center justify-center gap-2 rounded-xl bg-primary/45 px-6 py-3 text-sm font-bold text-white"
+                    >
+                      <ShieldCheck className="h-4 w-4" aria-hidden />
+                      {t("guestCheckout")}
+                    </button>
+                  )}
+
+                  {guestExpiry && (
+                    <p className="text-center text-xs leading-relaxed text-text-secondary">
+                      {t("guestExpiry", {
+                        date: formatGuestDate(guestExpiry, locale),
+                      })}
+                    </p>
+                  )}
+                </div>
+              )}
               {isAuthenticated && (
                 <>
                   <MyAvailableCoupons

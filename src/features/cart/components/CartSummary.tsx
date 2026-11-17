@@ -18,6 +18,10 @@ interface CartSummaryProps {
   /** Site settings: `order_tax_enabled` / `order_tax_rate`. */
   taxEnabled?: boolean;
   taxRate?: number | null;
+  /** Guest cart: server shipping charge, when the backend reports one. */
+  shippingAmount?: number | null;
+  /** Guest cart: backend-authored total (never recomputed client-side). */
+  authoritativeTotal?: number | null;
   onCouponApplied?: () => void;
 }
 
@@ -34,6 +38,8 @@ export function CartSummary({
   couponDiscount = 0,
   taxEnabled = false,
   taxRate = null,
+  shippingAmount = null,
+  authoritativeTotal = null,
   onCouponApplied,
 }: CartSummaryProps) {
   const t = useTranslations("cartPage");
@@ -43,13 +49,15 @@ export function CartSummary({
   const scheduledAfterCoupon = Math.max(0, scheduledSubtotal - couponDiscount);
   const taxableSubtotal = scheduledAfterCoupon + fastSubtotal;
   const taxAmount = calcTaxAmount(taxableSubtotal, taxEnabled, taxRate);
-  const total = taxableSubtotal + taxAmount;
+  const clientTotal = taxableSubtotal + taxAmount;
+  const total = authoritativeTotal ?? clientTotal;
+  const hasAuthoritativeTotal = authoritativeTotal !== null;
 
   return (
     <div className="space-y-5 rounded-2xl border-2 border-border bg-white p-5">
       <div className="flex items-center gap-2">
         <div className="h-1 w-6 rounded-full bg-primary" />
-        <h3 className="text-sm font-bold uppercase tracking-wider text-text-primary">
+        <h3 className="text-sm font-bold uppercase tracking-wider rtl:tracking-normal text-text-primary">
           {t("orderSummary")}
         </h3>
       </div>
@@ -94,10 +102,18 @@ export function CartSummary({
 
       {(scheduledQty > 0 || couponDiscount > 0) && (
         <div className="space-y-2 border-t border-border pt-4">
-          <p className="text-[11px] text-text-secondary">
-            {t("couponScheduledOnly")}
-          </p>
-          <CouponInput onApplied={onCouponApplied} isAuthenticated={isAuthenticated} />
+          {isAuthenticated ? (
+            <>
+              <p className="text-xs text-text-secondary">
+                {t("couponScheduledOnly")}
+              </p>
+              <CouponInput onApplied={onCouponApplied} isAuthenticated />
+            </>
+          ) : (
+            <p className="text-xs text-text-secondary">
+              {t("couponSignIn")}
+            </p>
+          )}
         </div>
       )}
 
@@ -109,7 +125,7 @@ export function CartSummary({
             {appliedCoupon?.code && (
               <span
                 dir="ltr"
-                className="truncate rounded-full bg-success/10 px-2 py-0.5 text-[11px] font-medium text-success"
+                className="truncate rounded-full bg-success/10 px-2 py-0.5 text-xs font-medium text-success"
               >
                 {appliedCoupon.code}
               </span>
@@ -123,7 +139,17 @@ export function CartSummary({
         </div>
       )}
 
-      {taxAmount > 0 && (
+      {(shippingAmount ?? 0) > 0 && (
+        <div className="flex items-center justify-between">
+          <span className="text-sm text-text-secondary">{t("shipping")}</span>
+          <Price
+            amount={shippingAmount ?? 0}
+            className="text-sm font-medium text-text-primary"
+          />
+        </div>
+      )}
+
+      {taxAmount > 0 && !hasAuthoritativeTotal && (
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Percent className="h-3.5 w-3.5 shrink-0 text-text-secondary" />
@@ -142,7 +168,7 @@ export function CartSummary({
 
       <div className="space-y-1 border-t border-border pt-3">
         <div className="flex items-center justify-between">
-          <span className="text-xs font-medium uppercase tracking-wider text-text-secondary">
+          <span className="text-xs font-medium uppercase tracking-wider rtl:tracking-normal text-text-secondary">
             {t("total")}
           </span>
           <Price
@@ -150,7 +176,12 @@ export function CartSummary({
             className="text-lg font-medium text-text-primary"
           />
         </div>
-        <p className="text-end text-[11px] text-text-secondary">
+        {hasAuthoritativeTotal && (
+          <p className="text-end text-xs text-text-secondary">
+            {t("totalConfirmedAtCheckout")}
+          </p>
+        )}
+        <p className="text-end text-xs text-text-secondary">
           {t("cartItems", { count: totalQty })}
         </p>
       </div>

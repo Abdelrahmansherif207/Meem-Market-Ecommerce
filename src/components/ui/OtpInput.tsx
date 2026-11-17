@@ -38,7 +38,7 @@ export default function OtpInput({
   }, [autoFocus]);
 
   function updateValue(input: string, index: number) {
-    const cleaned = input.replace(/D/g, "");
+    const cleaned = input.replace(/\D/g, "");
     if (!cleaned && input !== "") return;
     if (!cleaned) {
       const next = value.split("");
@@ -85,7 +85,7 @@ export default function OtpInput({
   }
 
   function handlePaste(event: React.ClipboardEvent<HTMLInputElement>) {
-    const clipboard = event.clipboardData.getData("text").replace(/D/g, "").slice(0, length);
+    const clipboard = event.clipboardData.getData("text").replace(/\D/g, "").slice(0, length);
     if (!clipboard) return;
     event.preventDefault();
     const digitsArr = value.split("").slice(0, length);
@@ -120,8 +120,7 @@ export default function OtpInput({
             onPaste={handlePaste}
             ref={(el) => { inputsRef.current[index] = el; }}
             className={cn(
-              "h-14 w-12 rounded-3xl border bg-background text-center text-2xl font-semibold text-text-primary outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/10 sm:w-14",
-              disabled && "cursor-not-allowed opacity-50",
+              "h-12 w-10 rounded-xl border-2 bg-white text-center text-xl font-semibold text-text-primary outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/15 disabled:cursor-not-allowed disabled:bg-surface disabled:opacity-50 sm:h-14 sm:w-12 sm:text-2xl",
               error ? "border-error" : "border-border"
             )}
           />

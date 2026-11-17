@@ -11,6 +11,7 @@ import { useCartFeedbackStore } from "../store/useCartFeedbackStore";
 import { cartService } from "../services/cartService";
 import { guestCartService } from "@/features/guest/services/guestCartService";
 import { runWithGuestSession } from "@/features/guest/utils/guestErrors";
+import type { GuestCart, GuestCartLine } from "@/features/guest/types";
 import type { CartLineIdentity, DeliveryType } from "../types";
 
 type CartApiLine = {
@@ -21,7 +22,7 @@ type CartApiLine = {
   shipping_method?: string | null;
 };
 
-/** Resolve the requested line in the matching delivery group. */
+/** Resolve the requested line in the matching delivery group (auth cart). */
 function findCartLine(
   cart: { normal_items?: CartApiLine[]; fast_items?: CartApiLine[] } | null,
   productId: number,
@@ -29,6 +30,21 @@ function findCartLine(
 ): CartApiLine | null {
   const group = deliveryType === "fast" ? cart?.fast_items : cart?.normal_items;
   return group?.find((item) => item.product_id === productId) ?? null;
+}
+
+/** Resolve the requested line in the flat guest cart. */
+function findGuestCartLine(
+  cart: GuestCart | null,
+  productId: number,
+  deliveryType: DeliveryType,
+): GuestCartLine | null {
+  return (
+    cart?.items.find(
+      (item) =>
+        item.productId === productId &&
+        item.shippingMethod === deliveryType,
+    ) ?? null
+  );
 }
 
 /**
@@ -156,7 +172,7 @@ export function useCartActions(productId: number) {
                 locale,
               ),
             );
-            setTotalQuantity(cart.total_quantity);
+            setTotalQuantity(cart?.totalQuantity ?? 0);
           } catch (error) {
             reportError(error, "add");
             rollback(item.quantity);
@@ -229,17 +245,26 @@ export function useCartActions(productId: number) {
         adjustQuantity(1);
         setIsPending(true);
         try {
-          const cart = await runWithGuestSession(locale, () =>
-            guestCartService.addItem(
+          const cart = await runWithGuestSession(locale, async () => {
+            // Resolve the existing line so a variant line is incremented on
+            // the correct variant rather than the base product.
+            const current = await guestCartService.getCart(locale);
+            const line = findGuestCartLine(
+              current,
+              productId,
+              channelDeliveryType,
+            );
+            return guestCartService.addItem(
               {
                 product_id: productId,
                 quantity: 1,
+                product_variant_id: line?.productVariantId ?? null,
                 shipping_method: channelDeliveryType,
               },
               locale,
-            ),
-          );
-          setTotalQuantity(cart.total_quantity);
+            );
+          });
+          setTotalQuantity(cart?.totalQuantity ?? 0);
         } catch (error) {
           reportError(error, "update");
           rollback(1);
@@ -307,8 +332,14 @@ export function useCartActions(productId: number) {
         try {
           const cart = await runWithGuestSession(locale, async () => {
             const current = await guestCartService.getCart(locale);
-            const line = findCartLine(current, productId, channelDeliveryType);
-            if (!line) throw new Error("Guest cart line not found");
+            const line = findGuestCartLine(
+              current,
+              productId,
+              channelDeliveryType,
+            );
+            if (!line) {
+              return current;
+            }
             // `quantity` is a delta, not the target quantity.
             return line.quantity <= 1
               ? guestCartService.removeLine(
@@ -322,14 +353,14 @@ export function useCartActions(productId: number) {
                       product_id: productId,
                       quantity: 1,
                       operation: "decrement",
-                      product_variant_id: line.product_variant_id ?? null,
+                      product_variant_id: line.productVariantId,
                       shipping_method: channelDeliveryType,
                     },
                   },
                   locale,
                 );
           });
-          setTotalQuantity(cart?.total_quantity ?? 0);
+          setTotalQuantity(cart?.totalQuantity ?? 0);
         } catch (error) {
           reportError(error, "update");
           rollback(-1);

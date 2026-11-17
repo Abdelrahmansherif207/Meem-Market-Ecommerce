@@ -1,8 +1,6 @@
 import { notFound } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import Breadcrumb from "@/components/ui/Breadcrumb";
-import { getCachedSettings } from "@/features/settings/services/settingsService";
-import { resolveFastShippingStatus } from "@/features/fast-shipping/services/fastShippingService";
 import { isGuestCheckoutEnabled } from "@/shared/constants/guestCheckout";
 import { GuestCheckoutForm } from "./GuestCheckoutForm";
 
@@ -16,8 +14,6 @@ export async function GuestCheckoutPage({ locale }: GuestCheckoutPageProps) {
 
   const t = await getTranslations({ locale, namespace: "guestCheckout" });
   const tb = await getTranslations({ locale, namespace: "header.breadcrumb" });
-  const settings = await getCachedSettings(locale);
-  const fastShipping = await resolveFastShippingStatus(locale, settings);
 
   return (
     <div className="py-6">
@@ -33,11 +29,7 @@ export async function GuestCheckoutPage({ locale }: GuestCheckoutPageProps) {
         <p className="mt-1 text-sm text-text-secondary">{t("subtitle")}</p>
       </div>
 
-      <GuestCheckoutForm
-        taxEnabled={settings.order_tax_enabled}
-        taxRate={settings.order_tax_rate}
-        fastShippingFee={fastShipping.enabled ? fastShipping.fee : null}
-      />
+      <GuestCheckoutForm />
     </div>
   );
 }

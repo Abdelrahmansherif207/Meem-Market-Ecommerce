@@ -9,6 +9,7 @@ import { Link, usePathname, useRouter } from "@/i18n/navigation";
 import { useAuthModalStore, useAuthStore } from "@/features/auth";
 import { useGuestCartStore } from "@/features/cart/store/useGuestCartStore";
 import { useServerCartStore } from "@/features/cart/store/useServerCartStore";
+import { isGuestCheckoutEnabled } from "@/shared/constants/guestCheckout";
 import { useWishlistStore } from "@/features/wishlist/store/useWishlistStore";
 import type { CategoryMenuItem } from "@/features/categories/types";
 import MeemCategoriesPanel from "./MeemCategoriesPanel";
@@ -41,7 +42,10 @@ export default function MeemMobileNavRow({
   );
   const guestCartCount = useGuestCartStore((s) => s.getTotalItems());
   const serverCartCount = useServerCartStore((s) => s.totalQuantity);
-  const cartCount = isAuthenticated ? serverCartCount : guestCartCount;
+  const cartCount =
+    isAuthenticated || isGuestCheckoutEnabled()
+      ? serverCartCount
+      : guestCartCount;
   const wishlistCount = useWishlistStore((s) => s.count);
 
   const [panelOpen, setPanelOpen] = useState(false);

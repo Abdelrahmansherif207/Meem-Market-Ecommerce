@@ -9,6 +9,7 @@ import { NotificationBell } from "@/features/notifications";
 import { CurrencySwitcher } from "@/features/currencies";
 import { useGuestCartStore } from "@/features/cart/store/useGuestCartStore";
 import { useServerCartStore } from "@/features/cart/store/useServerCartStore";
+import { isGuestCheckoutEnabled } from "@/shared/constants/guestCheckout";
 import { useWishlistStore } from "@/features/wishlist/store/useWishlistStore";
 import { cn } from "@/shared/utils/cn";
 import MeemLocaleSwitcher from "./MeemLocaleSwitcher";
@@ -41,7 +42,12 @@ export default function MeemHeaderActions({
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
   const guestCartCount = useGuestCartStore((s) => s.getTotalItems());
   const serverCartCount = useServerCartStore((s) => s.totalQuantity);
-  const cartCount = isAuthenticated ? serverCartCount : guestCartCount;
+  // With the guest server cart enabled, the shared server counter is the only
+  // source of truth for anonymous badges too.
+  const cartCount =
+    isAuthenticated || isGuestCheckoutEnabled()
+      ? serverCartCount
+      : guestCartCount;
   const wishlistCount = useWishlistStore((s) => s.count);
 
   return (

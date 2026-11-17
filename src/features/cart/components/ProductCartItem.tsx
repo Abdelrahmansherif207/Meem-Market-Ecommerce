@@ -49,7 +49,7 @@ function PriceBlock({
         />
       )}
       {hasDiscount && (
-        <span className="shrink-0 rounded bg-discount/10 px-1 py-0.5 text-[10px] font-bold whitespace-nowrap text-discount">
+        <span className="shrink-0 rounded bg-discount/10 px-1 py-0.5 text-xs font-bold whitespace-nowrap text-discount">
           -{discountPercent}%
         </span>
       )}
@@ -103,12 +103,12 @@ export function ProductCartItem({
             </h4>
           </Link>
           {item.variant_label && (
-            <p className="line-clamp-1 text-[11px] text-text-secondary">{item.variant_label}</p>
+            <p className="line-clamp-1 text-xs text-text-secondary">{item.variant_label}</p>
           )}
           {item.sku && (
-            <p className="text-[11px] text-text-secondary">SKU: {item.sku}</p>
+            <p className="text-xs text-text-secondary">SKU: {item.sku}</p>
           )}
-          <p className={cn("text-[11px]", item.in_stock ? "text-success" : "text-error")}>
+          <p className={cn("text-xs", item.in_stock ? "text-success" : "text-error")}>
             {item.in_stock ? t("inStock") : t("outOfStock")}
             {item.in_stock && item.stock_quantity != null && ` (${item.stock_quantity})`}
           </p>

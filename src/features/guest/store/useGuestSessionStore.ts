@@ -38,11 +38,11 @@ export const useGuestSessionStore = create<GuestSessionState>((set, get) => ({
     set({ status: "initializing" });
     inflight = guestSessionService
       .init(lang)
-      .then((response) => {
+      .then((session) => {
         set({
           status: "ready",
-          csrfToken: response.data.csrf_token,
-          expiresAt: response.data.guest.expires_at,
+          csrfToken: session.csrfToken,
+          expiresAt: session.expiresAt,
           lastError: null,
         });
       })

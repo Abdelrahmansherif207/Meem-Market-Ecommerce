@@ -8,6 +8,7 @@ import { cn } from "@/shared/utils/cn";
 import { useAuthStore } from "@/features/auth";
 import { useGuestCartStore } from "@/features/cart/store/useGuestCartStore";
 import { useServerCartStore } from "@/features/cart/store/useServerCartStore";
+import { isGuestCheckoutEnabled } from "@/shared/constants/guestCheckout";
 
 type NavItem = {
   label: string;
@@ -48,7 +49,10 @@ export default function MobileBottomNav() {
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
   const guestCartCount = useGuestCartStore((s) => s.getTotalItems());
   const serverCartCount = useServerCartStore((s) => s.totalQuantity);
-  const cartCount = isAuthenticated ? serverCartCount : guestCartCount;
+  const cartCount =
+    isAuthenticated || isGuestCheckoutEnabled()
+      ? serverCartCount
+      : guestCartCount;
 
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-50 w-full border-t border-meem-border bg-meem-ivory lg:hidden">

@@ -5,15 +5,14 @@ import { useRouter } from "next/navigation";
 import type { ReactNode } from "react";
 import { Car, Zap, ShoppingBag, ChevronRight } from "lucide-react";
 import { cn } from "@/shared/utils/cn";
-import { formatMoney } from "@/shared/utils/formatMoney";
 import { Button } from "@/components/ui/Button";
 import { Price } from "@/components/ui/Price";
 import { useAuthStore } from "@/features/auth";
-import { useDisplayCurrency } from "@/features/currencies";
 import { isGuestCheckoutEnabled } from "@/shared/constants/guestCheckout";
 import type { CartLineIdentity, DeliveryType, HydratedCartItem } from "../types";
 import { getCartLineKey } from "../types";
 import { ProductCartItem } from "./ProductCartItem";
+import { MinimumOrderProgress } from "./MinimumOrderProgress";
 import { calcSubtotal, canCheckout } from "../utils";
 
 interface CartSectionProps {
@@ -25,6 +24,11 @@ interface CartSectionProps {
   minimumOrderAmount: number;
   /** Optional slot rendered at the bottom of the section (e.g. My Coupons). */
   couponSlot?: ReactNode;
+  /**
+   * Guest carts check out as one order, so per-section CTAs are hidden and
+   * the page renders a single cart-level CTA instead.
+   */
+  hideCheckout?: boolean;
 }
 
 /**
@@ -40,16 +44,11 @@ export function CartSection({
   onRemove,
   minimumOrderAmount,
   couponSlot,
+  hideCheckout = false,
 }: CartSectionProps) {
   const t = useTranslations("cartPage");
   const router = useRouter();
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
-  // Display currency comes from the backend (settings + currencies list).
-  const displayCurrency = useDisplayCurrency();
-  const minimumText = formatMoney(minimumOrderAmount, "en", {
-    symbol: displayCurrency.symbol,
-    decimalPlaces: displayCurrency.decimalPlaces,
-  });
 
   const isFast = deliveryType === "fast";
   const subtotal = calcSubtotal(
@@ -135,22 +134,29 @@ export function CartSection({
           />
         </div>
 
-        <Button
-          size="lg"
-          full
-          variant={isFast ? "accent" : "primary"}
-          disabled={!checkoutEnabled}
-          onClick={() => router.push(checkoutHref)}
-        >
-          <ShoppingBag className="h-4 w-4" aria-hidden />
-          {t(isFast ? "checkoutFast" : "checkoutScheduled")}
-          <ChevronRight className="h-4 w-4 rtl:rotate-180" aria-hidden />
-        </Button>
+        {!hideCheckout && (
+          <>
+            <Button
+              size="lg"
+              full
+              variant={isFast ? "accent" : "primary"}
+              disabled={!checkoutEnabled}
+              onClick={() => router.push(checkoutHref)}
+            >
+              <ShoppingBag className="h-4 w-4" aria-hidden />
+              {t(isFast ? "checkoutFast" : "checkoutScheduled")}
+              <ChevronRight className="h-4 w-4 rtl:rotate-180" aria-hidden />
+            </Button>
 
-        {!checkoutEnabled && (
-          <p className="text-center text-[11px] text-text-secondary">
-            {t("minimumOrder", { amount: minimumText })}
-          </p>
+            {!checkoutEnabled && (
+              <MinimumOrderProgress
+                subtotal={subtotal}
+                minimumOrderAmount={minimumOrderAmount}
+                compact
+                className="rounded-xl bg-surface px-3.5 py-3"
+              />
+            )}
+          </>
         )}
       </div>
     </div>

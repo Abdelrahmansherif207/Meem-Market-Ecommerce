@@ -32,7 +32,10 @@ export default async function Page({
 
   return (
     <div className="py-6">
-      <GuestOrderConfirmation orderId={id} paymentRetry={payment === "retry"} />
+      <GuestOrderConfirmation
+        orderId={id}
+        paymentRetry={payment === "retry" || payment === "failed"}
+      />
     </div>
   );
 }
