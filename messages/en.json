@@ -185,7 +185,6 @@
     "contact": {
       "whatsapp": "WhatsApp"
     },
-    "downloadApps": "Download our apps",
     "categories": {
       "electronics": "Electronics",
       "fashion": "Fashion",
@@ -210,12 +209,6 @@
       "affiliate": "Affiliate Program",
       "vendor": "Join us as a vendor",
       "contentCreator": "Register as a Content Creator"
-    },
-    "apps": {
-      "getTag": "GET IT ON",
-      "googlePlay": "Google Play",
-      "downloadOn": "Download on the",
-      "appStore": "App Store"
     }
   },
   "auth": {

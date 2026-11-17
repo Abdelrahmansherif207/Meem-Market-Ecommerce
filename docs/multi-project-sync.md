@@ -170,13 +170,13 @@ Example payload (values in the Kuwait table below):
   "site_desc": { "ar": "...", "en": "..." },
   "meta_desc": { "ar": "...", "en": "..." },
   "site_copy_right": { "ar": "...", "en": "..." },
-  "site_email": "admin@meem.market",
-  "email_support": "admin@meem.market",
+  "site_email": "info@meem.market",
+  "email_support": "info@meem.market",
   "facebook": "https://www.facebook.com/meemmarketkw1",
   "instagram": "https://www.instagram.com/meemmarketkw",
   "tiktok": "https://www.tiktok.com/@meemmarketkw",
   "snapchat": "https://www.snapchat.com/@meemmarketkw",
-  "youtube": "https://www.youtube.com/@meemmarket6493",
+  "youtube": "",
   "phone": "22281130",
   "minimum_order_amount": 5,
   "options": { "currency": "KWD", "...": "full options object" }
@@ -205,18 +205,36 @@ site and social profiles):
 | Setting | Kuwait value |
 | --- | --- |
 | Site name | `سوق ميم الكويت` / `Meem Market Kuwait` |
-| Email | `admin@meem.market` |
-| Phone | `22281130` (`+965 2228 1130`) |
-| WhatsApp | `https://wa.me/96522281130` |
+| Email | `info@meem.market` |
+| Phone (store line) | `22281130` (`+965 2228 1130`) |
+| WhatsApp (delivery) | `https://wa.me/96522281131` |
 | Instagram | `https://www.instagram.com/meemmarketkw` |
 | Facebook | `https://www.facebook.com/meemmarketkw1` |
 | TikTok | `https://www.tiktok.com/@meemmarketkw` |
 | Snapchat | `https://www.snapchat.com/@meemmarketkw` |
-| YouTube | `https://www.youtube.com/@meemmarket6493` |
-| Location | Al Rai, Kuwait |
+| YouTube | Not used — no icon in the footer and `youtube` is blank in settings |
+| LinkedIn | Not used — the placeholder `linkedin.com/company/example` was cleared in settings |
+| Location | Al Rai, next to Jarir Bookstore, overlooking Al Ghazali Street |
+| Branches | Al Rai, Qurain Markets, Egaila (Wadha Mall) |
 | Currency | KWD displayed by default (`options.currency`); backend base/catalog stays USD |
 | Delivery | Same day before 12:00 PM, next day after; fees from KWD 1.750 |
-| App (Android) | `https://play.google.com/store/apps/details?id=market.meem` |
+| Mobile app | None — the download-badges section is removed from the footer |
+
+Contact notes:
+
+- The settings API exposes a single `phone` field, used for calls and the
+  "Call us" action. Kuwait uses the main store line `22281130` — the number
+  printed in the header, Contact page, and footer of meem.market. The Al Rai
+  Google Maps / Waze listing additionally shows a mobile, `60707042`, which is
+  not used here.
+- The delivery WhatsApp is a different line (`22281131`). It is pinned as
+  `DEFAULT_WHATSAPP_URL` and in the footer payload because the backend has no
+  dedicated WhatsApp field.
+- YouTube is intentionally not rendered: it is dropped from the social
+  platform union, the icon map, and `settingsSocial`, so a backend value can
+  never resurrect the icon.
+- There is no storefront mobile app, so `FooterData.bottomRow` was removed
+  and the footer renders no app-store badges.
 
 Currency note: the backend stores prices in its base currency (USD here) and
 converts per request through `X-Currency`. Setting `options.currency: KWD`

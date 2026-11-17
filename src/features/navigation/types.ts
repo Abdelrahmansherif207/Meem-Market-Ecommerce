@@ -15,20 +15,12 @@ export interface SocialLink {
     | "facebook"
     | "twitter"
     | "instagram"
-    | "youtube"
     | "tiktok"
     | "snapchat"
     | "linkedin"
     | "whatsapp";
   url: string;
   label: string;
-}
-
-export interface AppStoreBadge {
-  platform: "ios" | "android";
-  imageSrc: string;
-  url: string;
-  alt?: string;
 }
 
 export interface ContactInfo {
@@ -44,11 +36,6 @@ export interface FooterData {
   columns: FooterColumn[];
   socialLinks: SocialLink[];
   contactInfo: ContactInfo;
-  bottomRow: {
-    title: string;
-    appStore: AppStoreBadge;
-    googlePlay: AppStoreBadge;
-  };
   cookieSettingsLabel: string;
 }
 

@@ -30,10 +30,17 @@ export const DEFAULT_LOGO = "/meem-new.png";
 export const DEFAULT_FOOTER_LOGO = "/new-footer-logo.png";
 export const DEFAULT_FAVICON = "/meem-icon.jpeg";
 
-export const DEFAULT_SITE_EMAIL = "admin@meem.market";
+export const DEFAULT_SITE_EMAIL = "info@meem.market";
+/** Main store line published on the official meem.market site. */
 export const DEFAULT_PHONE = "22281130";
 export const DEFAULT_COUNTRY_CODE = "965";
-export const DEFAULT_WHATSAPP_URL = "https://wa.me/96522281130";
+/**
+ * Meem Market delivery WhatsApp (separate from the store mobile — the
+ * backend settings only expose a single `phone` field, so the WhatsApp line
+ * is pinned here and in the footer payload).
+ */
+export const DEFAULT_WHATSAPP_NUMBER = "22281131";
+export const DEFAULT_WHATSAPP_URL = `https://wa.me/${DEFAULT_COUNTRY_CODE}${DEFAULT_WHATSAPP_NUMBER}`;
 
 /**
  * Kuwait branch social accounts. Used only when the backend returns no valid
@@ -62,13 +69,8 @@ export const DEFAULT_SOCIAL_LINKS = [
     label: "Snapchat",
   },
   {
-    platform: "youtube",
-    url: "https://www.youtube.com/@meemmarket6493",
-    label: "YouTube",
-  },
-  {
     platform: "whatsapp",
-    url: "https://wa.me/96522281130",
+    url: "https://wa.me/96522281131",
     label: "WhatsApp",
   },
 ] as const;

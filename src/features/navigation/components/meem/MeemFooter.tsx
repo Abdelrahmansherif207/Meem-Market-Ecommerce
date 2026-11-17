@@ -1,6 +1,6 @@
 import Image from "next/image";
 import { getTranslations } from "next-intl/server";
-import { FaApple, FaGooglePlay, FaWhatsapp } from "react-icons/fa6";
+import { FaWhatsapp } from "react-icons/fa6";
 import { Mail, Phone } from "lucide-react";
 import { Link } from "@/i18n/navigation";
 import { assembleFooterContent } from "../../services/footerService";
@@ -16,11 +16,11 @@ interface MeemFooterProps {
 
 /**
  * Site footer: cool surface 5-column grid (popular categories, company
- * links, profile links, social/contact, app badges) followed by the
- * copyright + payment strip. Social/contact/logo/copyright data comes from
- * the backend settings; popular categories come from the backend navigation
- * tree (with generic Meem fallbacks), and the remaining link columns are
- * static per the screen.
+ * links, profile links, social/contact) followed by the copyright + payment
+ * strip. There is no mobile app, so no app-store badges are rendered.
+ * Social/contact/logo/copyright data comes from the backend settings;
+ * popular categories come from the backend navigation tree (with generic
+ * Meem fallbacks), and the remaining link columns are static per the screen.
  */
 export default async function MeemFooter({ params }: MeemFooterProps) {
   const { locale } = await params;
@@ -32,8 +32,6 @@ export default async function MeemFooter({ params }: MeemFooterProps) {
   let copyright = "";
   let logoSrc = "";
   let paymentGateways: PaymentGatewaySettings[] | null = null;
-  let appStoreUrl = "";
-  let googlePlayUrl = "";
   let fastShippingPageEnabled = false;
 
   try {
@@ -48,8 +46,6 @@ export default async function MeemFooter({ params }: MeemFooterProps) {
     copyright = assembled.copyright;
     logoSrc = assembled.logoSrc;
     paymentGateways = assembled.paymentGateways;
-    appStoreUrl = assembled.data.bottomRow.appStore.url || "";
-    googlePlayUrl = assembled.data.bottomRow.googlePlay.url || "";
     fastShippingPageEnabled = assembled.fastShippingPageEnabled;
   } catch (e) {
     console.warn("[MeemFooter] Failed to assemble footer content", e);
@@ -106,15 +102,11 @@ export default async function MeemFooter({ params }: MeemFooterProps) {
   const hasContact = Boolean(contact.email || contact.phone || contact.whatsapp);
   const hasConnectColumn = hasSocialLinks || hasContact;
   const contactPhoneHref = contact.phone.replace(/\s+/g, "");
-  const hasGooglePlayUrl = Boolean(googlePlayUrl) && googlePlayUrl !== "#";
-  const hasAppStoreUrl = Boolean(appStoreUrl) && appStoreUrl !== "#";
-  const hasAppLinks = hasGooglePlayUrl || hasAppStoreUrl;
   const hasPaymentBadges = Boolean(
     paymentGateways?.some((gateway) => gateway.enabled),
   );
 
-  const desktopColumnCount =
-    3 + (hasConnectColumn ? 1 : 0) + (hasAppLinks ? 1 : 0);
+  const desktopColumnCount = 3 + (hasConnectColumn ? 1 : 0);
   const desktopGridClass =
     desktopColumnCount >= 5
       ? "md:grid-cols-5"
@@ -183,49 +175,6 @@ export default async function MeemFooter({ params }: MeemFooterProps) {
                 >
                   <FaWhatsapp className="h-3.5 w-3.5" aria-hidden />
                   <span>{t("contact.whatsapp")}</span>
-                </a>
-              )}
-            </div>
-          </div>
-        )}
-
-        {/* Download apps */}
-        {hasAppLinks && (
-          <div className="space-y-2.5">
-            <h3 className="text-xs font-extrabold tracking-tight text-meem-charcoal">
-              {t("downloadApps")}
-            </h3>
-            <div className="flex items-center justify-center gap-2.5">
-              {hasGooglePlayUrl && (
-                <a
-                  href={googlePlayUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="transition-opacity hover:opacity-90"
-                >
-                  <span className="flex items-center gap-2 rounded-lg bg-meem-charcoal px-3 py-1.5 text-white">
-                    <FaGooglePlay className="h-4 w-4" />
-                    <span className="text-[9px] leading-tight">
-                      <span className="block">{t("apps.getTag")}</span>
-                      <span className="block text-[11px] font-bold">{t("apps.googlePlay")}</span>
-                    </span>
-                  </span>
-                </a>
-              )}
-              {hasAppStoreUrl && (
-                <a
-                  href={appStoreUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="transition-opacity hover:opacity-90"
-                >
-                  <span className="flex items-center gap-2 rounded-lg bg-meem-charcoal px-3 py-1.5 text-white">
-                    <FaApple className="h-4 w-4" />
-                    <span className="text-[9px] leading-tight">
-                      <span className="block">{t("apps.downloadOn")}</span>
-                      <span className="block text-[11px] font-bold">{t("apps.appStore")}</span>
-                    </span>
-                  </span>
                 </a>
               )}
             </div>
@@ -387,48 +336,6 @@ export default async function MeemFooter({ params }: MeemFooterProps) {
             </div>
           )}
 
-          {/* Column 5: Download apps */}
-          {hasAppLinks && (
-            <div className="space-y-3">
-              <h4 className="text-xs font-bold tracking-wider text-meem-charcoal">
-                {t("downloadApps")}
-              </h4>
-              <div className="space-y-2">
-                {hasGooglePlayUrl && (
-                  <a
-                    href={googlePlayUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-block transition-opacity hover:opacity-90"
-                  >
-                    <span className="flex w-36 items-center gap-2 rounded-lg bg-meem-charcoal px-3 py-1.5 text-white">
-                      <FaGooglePlay className="h-5 w-5" />
-                      <span className="text-[9px] leading-tight">
-                        <span className="block">{t("apps.getTag")}</span>
-                        <span className="block text-[11px] font-bold">{t("apps.googlePlay")}</span>
-                      </span>
-                    </span>
-                  </a>
-                )}
-                {hasAppStoreUrl && (
-                  <a
-                    href={appStoreUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="block transition-opacity hover:opacity-90"
-                  >
-                    <span className="flex w-36 items-center gap-2 rounded-lg bg-meem-charcoal px-3 py-1.5 text-white">
-                      <FaApple className="h-5 w-5" />
-                      <span className="text-[9px] leading-tight">
-                        <span className="block">{t("apps.downloadOn")}</span>
-                        <span className="block text-[11px] font-bold">{t("apps.appStore")}</span>
-                      </span>
-                    </span>
-                  </a>
-                )}
-              </div>
-            </div>
-          )}
         </div>
       </footer>
 

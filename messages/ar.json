@@ -185,7 +185,6 @@
     "contact": {
       "whatsapp": "واتساب"
     },
-    "downloadApps": "حمل تطبيقاتنا",
     "categories": {
       "electronics": "إلكترونيات",
       "fashion": "أزياء",
@@ -210,12 +209,6 @@
       "affiliate": "برنامج التسويق بالعمولة",
       "vendor": "انضم إلينا كتاجر",
       "contentCreator": "سجل كصانع محتوى"
-    },
-    "apps": {
-      "getTag": "احصل عليه من",
-      "googlePlay": "Google Play",
-      "downloadOn": "حمّل من",
-      "appStore": "App Store"
     }
   },
   "auth": {

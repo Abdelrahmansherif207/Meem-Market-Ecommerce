@@ -3,7 +3,7 @@ import { TriangleAlert, Mail, Phone, MessageCircle } from "lucide-react";
 import type { ReactNode } from "react";
 import { Link } from "@/i18n/navigation";
 import { getCachedSettings } from "@/features/settings/services/settingsService";
-import { buildWhatsAppUrl } from "@/features/settings/lib/normalize";
+import { DEFAULT_WHATSAPP_URL } from "@/features/settings/constants";
 
 function HelpOptionLink({ href, children }: { href: string; children: ReactNode }) {
   const className =
@@ -26,8 +26,9 @@ function HelpOptionLink({ href, children }: { href: string; children: ReactNode 
 
 /**
  * Meem Market Kuwait "Do you need help?" banner — deep blue strip with the four
- * existing contact options. Email, phone and WhatsApp all come from the
- * normalized site settings (with Meem Market Kuwait fallbacks).
+ * existing contact options. Email and phone come from the normalized site
+ * settings; the delivery WhatsApp is a dedicated line (the settings API only
+ * exposes one `phone` field).
  */
 export default async function MeemHelpBanner({ locale }: { locale: string }) {
   const t = await getTranslations("meemHome");
@@ -35,7 +36,8 @@ export default async function MeemHelpBanner({ locale }: { locale: string }) {
 
   const email = settings.email_support || settings.site_email;
   const phone = settings.phone;
-  const whatsappUrl = buildWhatsAppUrl(phone);
+  // Delivery WhatsApp is a dedicated line, not the store mobile.
+  const whatsappUrl = DEFAULT_WHATSAPP_URL;
 
   const options = [
     {

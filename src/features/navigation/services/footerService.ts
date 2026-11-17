@@ -4,6 +4,7 @@ import {
   DEFAULT_FOOTER_LOGO,
   DEFAULT_LOGO,
   DEFAULT_SOCIAL_LINKS,
+  DEFAULT_WHATSAPP_URL,
 } from "@/features/settings/constants";
 import { isLegacyBrandUrl } from "@/shared/utils/legacyBrand";
 import type { PaymentGatewaySettings } from "@/features/settings";
@@ -31,7 +32,6 @@ export async function assembleFooterContent(locale: string): Promise<AssembledFo
     facebook: "Facebook",
     tiktok: "TikTok",
     snapchat: "Snapchat",
-    youtube: "YouTube",
     linkedin: "LinkedIn",
     whatsapp: "WhatsApp",
   };
@@ -47,7 +47,6 @@ export async function assembleFooterContent(locale: string): Promise<AssembledFo
       ["facebook", settings.facebook],
       ["tiktok", settings.tiktok],
       ["snapchat", settings.snapchat],
-      ["youtube", settings.youtube],
       ["linkedin", settings.linkedin],
     ] as const
   )
@@ -80,13 +79,15 @@ export async function assembleFooterContent(locale: string): Promise<AssembledFo
           label: link.label,
         }));
 
+  // The delivery WhatsApp is a separate line from the store mobile and the
+  // settings API only exposes `phone`, so prefer the footer-configured
+  // WhatsApp link and derive one from the phone only as a fallback.
   const contactInfo: ContactInfo = {
     ...data.contactInfo,
     email: settings.email_support || settings.site_email,
     phoneNumber: settings.phone || data.contactInfo.phoneNumber,
-    whatsappUrl: settings.phone
-      ? buildWhatsAppUrl(settings.phone)
-      : data.contactInfo.whatsappUrl,
+    whatsappUrl:
+      data.contactInfo.whatsappUrl || buildWhatsAppUrl(settings.phone),
   };
 
   return {
@@ -177,26 +178,11 @@ function getMockFooterData(lang: string): FooterData {
     socialLinks: [],
     contactInfo: {
       stayInTouchText: isAr ? "ابق على تواصل معنا" : "Stay in touch with us",
-      whatsappUrl: "https://wa.me/96522281130",
+      whatsappUrl: DEFAULT_WHATSAPP_URL,
       assistanceText: isAr ? "تحدث معنا للمساعدة" : "Have a question? We are here to help.",
       callUsText: isAr ? "اتصل بنا للمساعدة" : "Call us for assistance",
       phoneNumber: "+965 2228 1130",
-      email: "",
-    },
-    bottomRow: {
-      title: isAr ? "حمل تطبيقنا" : "Download Our App",
-      appStore: {
-        platform: "ios",
-        imageSrc: "/images/badges/app-store.svg",
-        url: "",
-        alt: "App Store",
-      },
-      googlePlay: {
-        platform: "android",
-        imageSrc: "/images/badges/play-store.svg",
-        url: "https://play.google.com/store/apps/details?id=market.meem",
-        alt: "Google Play",
-      },
+      email: "info@meem.market",
     },
     cookieSettingsLabel: isAr ? "إعدادات ملفات تعريف الارتباط" : "Cookie Settings",
   };

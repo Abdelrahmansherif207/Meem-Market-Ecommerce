@@ -1,8 +1,7 @@
 import type { InfoPage } from "../types";
 
 // TODO(kuwait): contact details below use the public Meem Market Kuwait
-// values (Al Rai, +965 2228 1130, admin@meem.market). Legal registration
-// numbers remain placeholders — replace them before launch.
+// values (Al Rai, +965 2228 1130, info@meem.market).
 
 // All footer page slugs and their content (production-grade)
 const pageContents: Record<string, { en: InfoPage; ar: InfoPage }> = {
@@ -13,7 +12,7 @@ const pageContents: Record<string, { en: InfoPage; ar: InfoPage }> = {
       sections: [
         { type: "text", title: "Our Story", content: "<p>Meem Market started as a simple idea: to make quality everyday products accessible to every family in Kuwait. What began as a small store has grown into one of the country's most trusted retail destinations for groceries, home goods, electronics, toys, and more.</p><p>Founded in 2015, Meem Market has since partnered with over 500 local and international brands to offer a curated selection of groceries, household essentials, home goods, electronics, toys, and furniture. From everyday value to premium picks, we cater to every budget and preference.</p>" },
         { type: "image", src: "https://placehold.co/1200x600/EEE/999?text=Meem+Market+Team" },
-        { type: "text", title: "Why Shop With Us?", content: "<ul><li><strong>100% Authentic Products:</strong> Every product is sourced directly from authorized distributors and brands</li><li><strong>Competitive Prices:</strong> We offer the best prices in the market, backed by our price match guarantee</li><li><strong>Fast Delivery:</strong> Same-day delivery on orders before 12 PM, next-day delivery after, across Kuwait</li><li><strong>Easy Returns:</strong> 14-day return policy with free pickup for eligible items</li><li><strong>Dedicated Support:</strong> Our customer service team is available Sunday to Thursday, 9 AM to 9 PM</li></ul>" },
+        { type: "text", title: "Why Shop With Us?", content: "<ul><li><strong>100% Authentic Products:</strong> Every product is sourced directly from authorized distributors and brands</li><li><strong>Competitive Prices:</strong> We offer the best prices in the market, backed by our price match guarantee</li><li><strong>Fast Delivery:</strong> Same-day delivery on orders before 12 PM, next-day delivery after, across Kuwait</li><li><strong>Easy Returns:</strong> 14-day return policy with free pickup for eligible items</li><li><strong>Dedicated Support:</strong> Our customer service team is available daily, 9 AM to 12 AM</li></ul>" },
         { type: "text", title: "Our Vision", content: "<p>To become the most trusted and loved retail platform in the Middle East and North Africa, making everyday shopping simpler, fairer, and more enjoyable for every family.</p>" }
       ]
     },
@@ -34,7 +33,7 @@ const pageContents: Record<string, { en: InfoPage; ar: InfoPage }> = {
       slug: "anti-fraud",
       sections: [
         { type: "text", title: "Our Commitment to Security", content: "<p>Meem Market is committed to protecting our customers and our business from fraudulent activities. We employ advanced security measures and verification procedures to detect and prevent fraud.</p><h3>Fraud Prevention Measures</h3><ul><li><strong>Order Verification:</strong> We may verify high-value or suspicious orders via phone call before processing</li><li><strong>Address Verification:</strong> Orders are shipped only to verified addresses matching the billing or registered address</li><li><strong>Payment Security:</strong> All payment transactions are encrypted and processed through secure, PCI-compliant gateways</li><li><strong>Account Monitoring:</strong> Suspicious account activity is monitored and may result in account suspension</li></ul>" },
-        { type: "text", title: "Reporting Fraud", content: "<p>If you suspect fraudulent activity on your account or unauthorized use of your payment method, please contact us immediately at <strong>+965 2228 1130</strong> or email <strong>admin@meem.market</strong>. We take all reports seriously and will investigate promptly.</p><h3>Consequences of Fraud</h3><p>Fraudulent activities, including but not limited to using stolen payment methods, providing false information, or attempting to deceive our systems, will result in:</p><ul><li>Immediate cancellation of orders</li><li>Permanent account suspension</li><li>Reporting to relevant authorities</li><li>Legal action where applicable</li></ul>" }
+        { type: "text", title: "Reporting Fraud", content: "<p>If you suspect fraudulent activity on your account or unauthorized use of your payment method, please contact us immediately at <strong>+965 2228 1130</strong> or email <strong>info@meem.market</strong>. We take all reports seriously and will investigate promptly.</p><h3>Consequences of Fraud</h3><p>Fraudulent activities, including but not limited to using stolen payment methods, providing false information, or attempting to deceive our systems, will result in:</p><ul><li>Immediate cancellation of orders</li><li>Permanent account suspension</li><li>Reporting to relevant authorities</li><li>Legal action where applicable</li></ul>" }
       ]
     },
     ar: {
@@ -107,18 +106,18 @@ const pageContents: Record<string, { en: InfoPage; ar: InfoPage }> = {
       title: "Contact Us",
       slug: "contact",
       sections: [
-        { type: "text", title: "We Are Here to Help", content: "<p>Have a question, concern, or feedback? We would love to hear from you. Our customer service team is available to assist you with any inquiries.</p><h3>Customer Service</h3><ul><li><strong>Phone:</strong> +965 2228 1130 (Sunday to Thursday, 9:00 AM - 9:00 PM)</li><li><strong>Email:</strong> admin@meem.market</li></ul><h3>Corporate Office</h3><p>Meem Market Kuwait<br>Al Rai<br>Kuwait</p>" },
+        { type: "text", title: "We Are Here to Help", content: "<p>Have a question, concern, or feedback? We would love to hear from you. Our customer service team is available to assist you with any inquiries.</p><h3>Customer Service</h3><ul><li><strong>Phone:</strong> +965 2228 1130 (Daily, 9:00 AM - 12:00 AM)</li><li><strong>Email:</strong> info@meem.market</li></ul><h3>Corporate Office</h3><p>Meem Market LLC<br>Al Rai, next to Jarir Bookstore<br>Kuwait</p>" },
         { type: "image", src: "https://placehold.co/800x400/EEE/999?text=Map+-+Meem+Market+Location" },
-        { type: "text", title: "Working Hours", content: "<p><strong>Customer Service:</strong> Sunday to Thursday, 9:00 AM - 9:00 PM</p><p><strong>Al Rai Store:</strong> Daily, 9:00 AM - 12:00 AM</p><p>Emails and online inquiries will be responded to within 24 hours during business days.</p>" }
+        { type: "text", title: "Working Hours", content: "<p><strong>Customer Service:</strong> Daily, 9:00 AM - 12:00 AM</p><p><strong>Al Rai Store:</strong> Daily, 9:00 AM - 12:00 AM</p><p>Emails and online inquiries will be responded to within 24 hours.</p>" }
       ]
     },
     ar: {
       title: "اتصل بنا",
       slug: "contact",
       sections: [
-        { type: "text", title: "نحن هنا لمساعدتك", content: "<p>هل لديك سؤال أو استفسار أو ملاحظة؟ يسعدنا سماعك. فريق خدمة العملاء لدينا متاح لمساعدتك.</p><h3>خدمة العملاء</h3><ul><li><strong>الهاتف:</strong> +965 2228 1130 (الأحد إلى الخميس، 9:00 ص - 9:00 م)</li><li><strong>البريد الإلكتروني:</strong> admin@meem.market</li></ul><h3>المكتب الرئيسي</h3><p>سوق ميم الكويت<br>الري<br>الكويت</p>" },
+        { type: "text", title: "نحن هنا لمساعدتك", content: "<p>هل لديك سؤال أو استفسار أو ملاحظة؟ يسعدنا سماعك. فريق خدمة العملاء لدينا متاح لمساعدتك.</p><h3>خدمة العملاء</h3><ul><li><strong>الهاتف:</strong> +965 2228 1130 (يومياً، 9:00 ص - 12:00 م)</li><li><strong>البريد الإلكتروني:</strong> info@meem.market</li></ul><h3>المكتب الرئيسي</h3><p>سوق ميم ذ.م.م<br>الري، جوار مكتبة جرير<br>الكويت</p>" },
         { type: "image", src: "https://placehold.co/800x400/EEE/999?text=خريطة+-+موقع+ميم+ماركت" },
-        { type: "text", title: "ساعات العمل", content: "<p><strong>خدمة العملاء:</strong> الأحد إلى الخميس، 9:00 ص - 9:00 م</p><p><strong>فرع الري:</strong> يومياً من 9:00 صباحاً حتى 12:00 منتصف الليل</p>" }
+        { type: "text", title: "ساعات العمل", content: "<p><strong>خدمة العملاء:</strong> يومياً من 9:00 صباحاً حتى 12:00 منتصف الليل</p><p><strong>فرع الري:</strong> يومياً من 9:00 صباحاً حتى 12:00 منتصف الليل</p>" }
       ]
     }
   },
@@ -127,14 +126,14 @@ const pageContents: Record<string, { en: InfoPage; ar: InfoPage }> = {
       title: "Legal Disclosure",
       slug: "disclosure",
       sections: [
-        { type: "text", title: "Company Information", content: "<p>In compliance with Kuwaiti e-commerce regulations, the following information is provided for legal and regulatory purposes.</p><h3>Company Details</h3><ul><li><strong>Legal Name:</strong> Meem Market Kuwait</li><li><strong>Commercial Registration:</strong> 123456789</li><li><strong>Tax ID:</strong> 987-654-321</li><li><strong>Registered Address:</strong> Al Rai, Kuwait</li></ul><h3>Contact Information</h3><ul><li><strong>Phone:</strong> +965 2228 1130</li><li><strong>Email:</strong> admin@meem.market</li></ul><h3>Regulatory Compliance</h3><p>Meem Market operates in full compliance with Kuwaiti consumer protection laws, e-commerce regulations, and data privacy laws. All products sold on our platform meet the applicable quality and safety standards in Kuwait.</p>" }
+        { type: "text", title: "Company Information", content: "<p>In compliance with Kuwaiti e-commerce regulations, the following information is provided for legal and regulatory purposes.</p><h3>Company Details</h3><ul><li><strong>Legal Name:</strong> Meem Market LLC</li><li><strong>Registered Address:</strong> Al Rai, Kuwait</li></ul><h3>Contact Information</h3><ul><li><strong>Phone:</strong> +965 2228 1130</li><li><strong>Email:</strong> info@meem.market</li></ul><h3>Regulatory Compliance</h3><p>Meem Market operates in full compliance with Kuwaiti consumer protection laws, e-commerce regulations, and data privacy laws. All products sold on our platform meet the applicable quality and safety standards in Kuwait.</p>" }
       ]
     },
     ar: {
       title: "الإفصاح القانوني",
       slug: "disclosure",
       sections: [
-        { type: "text", title: "معلومات الشركة", content: "<p>امتثالاً للوائح التجارة الإلكترونية الكويتية، يتم توفير المعلومات التالية للأغراض القانونية والتنظيمية.</p><h3>بيانات الشركة</h3><ul><li><strong>الاسم القانوني:</strong> سوق ميم الكويت</li><li><strong>السجل التجاري:</strong> 123456789</li><li><strong>الرقم الضريبي:</strong> 987-654-321</li><li><strong>العنوان المسجل:</strong> الري، الكويت</li></ul><h3>معلومات الاتصال</h3><ul><li><strong>الهاتف:</strong> +965 2228 1130</li><li><strong>البريد الإلكتروني:</strong> admin@meem.market</li></ul><h3>الامتثال التنظيمي</h3><p>يعمل سوق ميم الكويت بالكامل وفق قوانين حماية المستهلك ولوائح التجارة الإلكترونية وحماية البيانات في الكويت، وتستوفي جميع المنتجات المعايير المعمول بها للجودة والسلامة.</p>" }
+        { type: "text", title: "معلومات الشركة", content: "<p>امتثالاً للوائح التجارة الإلكترونية الكويتية، يتم توفير المعلومات التالية للأغراض القانونية والتنظيمية.</p><h3>بيانات الشركة</h3><ul><li><strong>الاسم القانوني:</strong> سوق ميم ذ.م.م</li><li><strong>العنوان المسجل:</strong> الري، الكويت</li></ul><h3>معلومات الاتصال</h3><ul><li><strong>الهاتف:</strong> +965 2228 1130</li><li><strong>البريد الإلكتروني:</strong> info@meem.market</li></ul><h3>الامتثال التنظيمي</h3><p>يعمل سوق ميم الكويت بالكامل وفق قوانين حماية المستهلك ولوائح التجارة الإلكترونية وحماية البيانات في الكويت، وتستوفي جميع المنتجات المعايير المعمول بها للجودة والسلامة.</p>" }
       ]
     }
   },
@@ -144,7 +143,7 @@ const pageContents: Record<string, { en: InfoPage; ar: InfoPage }> = {
       slug: "extended-warranty",
       sections: [
         { type: "text", title: "Protect Your Purchase", content: "<p>Extend the life of your favorite products with the Meem Market Extended Warranty Program. For a small additional fee, you can double or triple the manufacturer's warranty on eligible items, giving you extra peace of mind.</p><h3>Coverage Details</h3><ul><li><strong>Duration:</strong> Choose between 1, 2, or 3 additional years of coverage</li><li><strong>What's Covered:</strong> Manufacturing defects, normal wear and tear, battery degradation (for electronics), and mechanical failures</li><li><strong>What's Not Covered:</strong> Accidental damage, misuse, unauthorized repairs, or loss/theft</li></ul>" },
-        { type: "text", title: "How to Purchase", content: "<p>Extended warranty can be added during checkout for eligible products. Simply select the warranty option when adding items to your cart. You will receive a warranty certificate via email within 48 hours of purchase.</p><p>To make a claim, contact our customer service team at <strong>+965 2228 1130</strong> or email us at admin@meem.market with your order number and warranty certificate.</p>" }
+        { type: "text", title: "How to Purchase", content: "<p>Extended warranty can be added during checkout for eligible products. Simply select the warranty option when adding items to your cart. You will receive a warranty certificate via email within 48 hours of purchase.</p><p>To make a claim, contact our customer service team at <strong>+965 2228 1130</strong> or email us at info@meem.market with your order number and warranty certificate.</p>" }
       ]
     },
     ar: {
@@ -233,7 +232,7 @@ const pageContents: Record<string, { en: InfoPage; ar: InfoPage }> = {
       title: "Privacy Policy",
       slug: "privacy",
       sections: [
-        { type: "text", title: "Introduction", content: "<p>At Meem Market, we take your privacy seriously. This Privacy Policy explains how we collect, use, disclose, and safeguard your personal information when you visit our website or make a purchase. Please read this policy carefully.</p><h3>Information We Collect</h3><p>We may collect the following types of information:</p><ul><li><strong>Personal Information:</strong> Name, email address, phone number, shipping/billing address, and payment information when you place an order</li><li><strong>Account Information:</strong> Username, password, order history, and preferences when you create an account</li><li><strong>Usage Data:</strong> IP address, browser type, device information, pages visited, and browsing behavior</li><li><strong>Cookies:</strong> We use cookies to enhance your browsing experience and analyze website traffic</li></ul><h3>How We Use Your Information</h3><ul><li>Process and fulfill your orders</li><li>Communicate with you about your orders and account</li><li>Send promotional offers and newsletters (with your consent)</li><li>Improve our website and services</li><li>Prevent fraud and ensure security</li><li>Comply with legal obligations</li></ul><h3>Information Sharing</h3><p>We do not sell your personal information to third parties. We may share your information with trusted service providers (such as payment processors and shipping companies) solely for the purpose of fulfilling your order. These partners are contractually obligated to protect your data.</p><h3>Data Security</h3><p>We implement appropriate technical and organizational measures to protect your personal information against unauthorized access, alteration, disclosure, or destruction. Our security practices include SSL encryption, secure servers, and regular security audits.</p><h3>Your Rights</h3><p>You have the right to access, correct, or delete your personal information at any time. You can manage your preferences through your account settings or contact us for assistance. You may also opt out of marketing communications at any time.</p><h3>Contact</h3><p>If you have questions about this Privacy Policy, please contact us at <strong>admin@meem.market</strong> or call <strong>+965 2228 1130</strong>.</p>" }
+        { type: "text", title: "Introduction", content: "<p>At Meem Market, we take your privacy seriously. This Privacy Policy explains how we collect, use, disclose, and safeguard your personal information when you visit our website or make a purchase. Please read this policy carefully.</p><h3>Information We Collect</h3><p>We may collect the following types of information:</p><ul><li><strong>Personal Information:</strong> Name, email address, phone number, shipping/billing address, and payment information when you place an order</li><li><strong>Account Information:</strong> Username, password, order history, and preferences when you create an account</li><li><strong>Usage Data:</strong> IP address, browser type, device information, pages visited, and browsing behavior</li><li><strong>Cookies:</strong> We use cookies to enhance your browsing experience and analyze website traffic</li></ul><h3>How We Use Your Information</h3><ul><li>Process and fulfill your orders</li><li>Communicate with you about your orders and account</li><li>Send promotional offers and newsletters (with your consent)</li><li>Improve our website and services</li><li>Prevent fraud and ensure security</li><li>Comply with legal obligations</li></ul><h3>Information Sharing</h3><p>We do not sell your personal information to third parties. We may share your information with trusted service providers (such as payment processors and shipping companies) solely for the purpose of fulfilling your order. These partners are contractually obligated to protect your data.</p><h3>Data Security</h3><p>We implement appropriate technical and organizational measures to protect your personal information against unauthorized access, alteration, disclosure, or destruction. Our security practices include SSL encryption, secure servers, and regular security audits.</p><h3>Your Rights</h3><p>You have the right to access, correct, or delete your personal information at any time. You can manage your preferences through your account settings or contact us for assistance. You may also opt out of marketing communications at any time.</p><h3>Contact</h3><p>If you have questions about this Privacy Policy, please contact us at <strong>info@meem.market</strong> or call <strong>+965 2228 1130</strong>.</p>" }
       ]
     },
     ar: {
@@ -303,14 +302,14 @@ const pageContents: Record<string, { en: InfoPage; ar: InfoPage }> = {
       title: "Our Stores",
       slug: "stores",
       sections: [
-        { type: "text", title: "Find a Meem Market Near You", content: "<p>Visit our Al Rai store to experience our products in person. Our friendly staff is ready to assist you with product recommendations and everyday shopping.</p><h3>Al Rai Store</h3><p><strong>Address:</strong> Al Rai, Kuwait<br><strong>Hours:</strong> Daily, 9:00 AM - 12:00 AM</p>" }
+        { type: "text", title: "Find a Meem Market Near You", content: "<p>Visit one of our Kuwait stores to experience our products in person. Our friendly staff is ready to assist you with product recommendations and everyday shopping.</p><h3>Al Rai</h3><p><strong>Address:</strong> Al Rai, next to Jarir Bookstore, overlooking Al Ghazali Street<br><strong>Hours:</strong> Daily, 9:00 AM - 12:00 AM</p><h3>Qurain</h3><p><strong>Address:</strong> Qurain Markets, Kuwait</p><h3>Egaila</h3><p><strong>Address:</strong> Wadha Mall, Egaila, Kuwait</p>" }
       ]
     },
     ar: {
       title: "فروعنا",
       slug: "stores",
       sections: [
-        { type: "text", title: "اعثر على فرع ميم ماركت بالقرب منك", content: "<p>قم بزيارة فرع الري لتجربة منتجاتنا شخصياً. فريقنا جاهز لمساعدتك في اختيار ما تحتاجه.</p><h3>فرع الري</h3><p><strong>العنوان:</strong> الري، الكويت<br><strong>المواعيد:</strong> يومياً من 9:00 صباحاً حتى 12:00 منتصف الليل</p>" }
+        { type: "text", title: "اعثر على فرع ميم ماركت بالقرب منك", content: "<p>قم بزيارة أحد فروعنا في الكويت لتجربة منتجاتنا شخصياً. فريقنا جاهز لمساعدتك في اختيار ما تحتاجه.</p><h3>الري</h3><p><strong>العنوان:</strong> الري، جوار مكتبة جرير، مطل على شارع الغزالي<br><strong>المواعيد:</strong> يومياً من 9:00 صباحاً حتى 12:00 منتصف الليل</p><h3>القرين</h3><p><strong>العنوان:</strong> أسواق القرين، الكويت</p><h3>العقيلة</h3><p><strong>العنوان:</strong> مجمع وضحة مول، العقيلة، الكويت</p>" }
       ]
     }
   },
