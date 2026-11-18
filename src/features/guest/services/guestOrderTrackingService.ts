@@ -1,4 +1,3 @@
-import { apiFetch } from "@/shared/lib/api";
 import type { ApiResponse } from "@/shared/types";
 import {
   GUEST_CANCEL,
@@ -16,9 +15,12 @@ import type {
   GuestCancelResult,
   GuestTrackResult,
 } from "../types";
+import { guestFetch } from "./guestFetch";
 
 /**
- * Public tracking + cancellation — no guest cookie required. Tokens travel in
+ * Public tracking + cancellation — no guest cookie required, but the calls go
+ * through `guestFetch` so the `X-CSRF-Token` header travels with every guest
+ * request when the browser already holds a guest session. Tokens travel in
  * the POST body. Shareable links keep them in the URL hash, which browsers
  * never send to the server. Invalid / expired / revoked / foreign tokens all
  * return 404 with the same message (no existence oracle).
@@ -29,7 +31,7 @@ import type {
  */
 export const guestOrderTrackingService = {
   track: (token: string, lang?: string): Promise<GuestTrackResult> =>
-    apiFetch<ApiResponse<unknown>>(GUEST_TRACK, {
+    guestFetch<ApiResponse<unknown>>(GUEST_TRACK, {
       method: "POST",
       body: JSON.stringify({ token }),
       lang,
@@ -40,7 +42,7 @@ export const guestOrderTrackingService = {
     lang?: string,
     phoneNumber?: string,
   ): Promise<GuestCancelOtpResult> =>
-    apiFetch<ApiResponse<unknown>>(GUEST_CANCEL_REQUEST_OTP, {
+    guestFetch<ApiResponse<unknown>>(GUEST_CANCEL_REQUEST_OTP, {
       method: "POST",
       body: JSON.stringify({
         token,
@@ -53,7 +55,7 @@ export const guestOrderTrackingService = {
     payload: GuestCancelOtpPayload,
     lang?: string,
   ): Promise<GuestCancelResult> =>
-    apiFetch<ApiResponse<unknown>>(GUEST_CANCEL, {
+    guestFetch<ApiResponse<unknown>>(GUEST_CANCEL, {
       method: "POST",
       body: JSON.stringify({
         token: payload.token,
