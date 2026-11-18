@@ -67,10 +67,4 @@ export const guestCartService = {
       lang,
       channel: channelForDelivery(deliveryType),
     }).then((response) => normalizeGuestCart(response.data)),
-
-  clear: (lang?: string): Promise<GuestCart | null> =>
-    guestFetch<ApiResponse<unknown>>(GUEST_CART, {
-      method: "DELETE",
-      lang,
-    }).then((response) => normalizeGuestCart(response.data)),
 };

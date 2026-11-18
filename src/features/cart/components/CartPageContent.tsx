@@ -3,7 +3,7 @@ import { useEffect, useRef, useReducer, useCallback, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import Link from "next/link";
 import { Link as LocaleLink } from "@/i18n/navigation";
-import { Loader2, AlertTriangle, RefreshCw, ShieldCheck } from "lucide-react";
+import { AlertTriangle, RefreshCw, ShieldCheck } from "lucide-react";
 import { useAuthStore } from "@/features/auth";
 import { useDisplayCurrency } from "@/features/currencies";
 import { isGuestCheckoutEnabled } from "@/shared/constants/guestCheckout";
@@ -34,7 +34,7 @@ import EmptyState from "@/components/ui/EmptyState";
 // ---------------------------------------------------------------------------
 // State machine
 // ---------------------------------------------------------------------------
-type CartSource = "guest" | "loading" | "syncing" | "server" | "error";
+type CartSource = "guest" | "loading" | "server" | "error";
 
 type CartState = {
   source: CartSource;
@@ -46,7 +46,6 @@ type CartState = {
 
 type CartAction =
   | { type: "SET_GUEST" }
-  | { type: "SET_SYNCING" }
   | { type: "SET_LOADING" }
   | { type: "SET_SERVER"; items: HydratedCartItem[] }
   | { type: "SET_ERROR"; error: string }
@@ -66,8 +65,6 @@ function cartReducer(state: CartState, action: CartAction): CartState {
         error: null,
         pendingItemIds: new Set(),
       };
-    case "SET_SYNCING":
-      return { ...state, source: "syncing", error: null };
     case "SET_LOADING":
       return { ...state, source: "loading", error: null };
     case "SET_SERVER":
@@ -114,12 +111,10 @@ function cartReducer(state: CartState, action: CartAction): CartState {
 
 function deriveInitialSource(
   isAuthenticated: boolean,
-  isSyncing: boolean,
   authHydrated: boolean,
 ): CartSource {
   if (!authHydrated) return "loading";
   if (!isAuthenticated) return "guest";
-  if (isSyncing) return "syncing";
   return "loading";
 }
 
@@ -141,17 +136,16 @@ export function CartPageContent({
   const locale = useLocale();
 
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
-  // Flag ON: anonymous shoppers use the server-backed guest cart — the same
-  // CartResource shape, so `processCart` handles it unchanged.
-  const guestServerMode = isGuestCheckoutEnabled();
+  // Flag ON + anonymous: use the server-backed guest cart. Once the shopper
+  // logs in, the guest cart is merged and destroyed — every read/mutation must
+  // switch to the authenticated `/cart` endpoints instead.
+  const guestServerMode = !isAuthenticated && isGuestCheckoutEnabled();
   // Effective display currency (backend-driven): silent server-cart refetches
   // key off it, matching the `X-Currency` header client `apiFetch` attaches.
   const displayCurrency = useDisplayCurrency();
   const guestItems = useGuestCartStore((s) => s.items);
   const guestRemoveItem = useGuestCartStore((s) => s.removeItem);
   const guestUpdateQuantity = useGuestCartStore((s) => s.updateQuantity);
-  const isSyncing = useGuestCartStore((s) => s.isSyncing);
-  const syncError = useGuestCartStore((s) => s.syncError);
   const setServerTotalQuantity = useServerCartStore((s) => s.setTotalQuantity);
 
   // The auth store rehydrates from localStorage asynchronously. Until that
@@ -164,13 +158,13 @@ export function CartPageContent({
     return unsub;
   }, []);
 
-  // Initialise source synchronously from store — prevents guest spinner flash
-  // and correctly shows "syncing" if the hook is mid-sync when the page opens.
+  // Initialise source synchronously from store — prevents a guest spinner
+  // flash while auth metadata rehydrates.
   const [state, dispatch] = useReducer(
     cartReducer,
     undefined,
     (): CartState => ({
-      source: deriveInitialSource(isAuthenticated, isSyncing, authHydrated),
+      source: deriveInitialSource(isAuthenticated, authHydrated),
       serverItems: [],
       error: null,
       pendingItemIds: new Set<string>(),
@@ -386,22 +380,10 @@ export function CartPageContent({
       return;
     }
 
-    if (isSyncing) {
-      // Guest cart is being bulk-uploaded. Show syncing UI; when isSyncing
-      // flips to false this effect will re-run and kick off loadServerCart().
-      dispatch({ type: "SET_SYNCING" });
-      return;
-    }
-
-    if (syncError) {
-      // Sync failed — fall back to guest items so the user can retry.
-      dispatch({ type: "SET_GUEST" });
-      return;
-    }
-
-    // Authenticated and sync complete (or no guest items): load from server.
+    // Authenticated: the backend has already merged the guest cart into this
+    // account, so the authenticated server cart is authoritative.
     loadServerCart();
-  }, [authHydrated, isAuthenticated, guestServerMode, isSyncing, syncError, loadServerCart]);
+  }, [authHydrated, isAuthenticated, guestServerMode, loadServerCart]);
 
   // Abort any in-flight request on unmount (navigation away).
   useEffect(() => {
@@ -538,34 +520,6 @@ export function CartPageContent({
   }, [loadServerCart]);
 
   // -------------------------------------------------------------------------
-  // Retry sync (when syncError is set)
-  // -------------------------------------------------------------------------
-  const handleRetrySync = useCallback(() => {
-    const { items, getSyncPayload, setSyncing, setSyncError, clearCart } =
-      useGuestCartStore.getState();
-
-    if (items.length === 0) {
-      loadServerCart();
-      return;
-    }
-
-    setSyncing(true);
-      cartService
-      .addBulkToCart(getSyncPayload(), locale)
-      .then(() => {
-        clearCart();
-        setSyncing(false);
-      })
-      .catch((err: unknown) => {
-        const message =
-          err instanceof Error
-            ? err.message
-            : "Failed to sync your cart. Please try again.";
-        setSyncError(message);
-      });
-  }, [loadServerCart, locale]);
-
-  // -------------------------------------------------------------------------
   // Derived display data
   // -------------------------------------------------------------------------
   const displayItems: HydratedCartItem[] =
@@ -597,7 +551,7 @@ export function CartPageContent({
 
   // Anonymous shoppers with the flag ON checkout their whole cart in one
   // guest order, so the CTA is cart-level instead of per delivery group.
-  const isGuestCart = guestServerMode && !isAuthenticated;
+  const isGuestCart = guestServerMode;
   const guestCheckoutReady = canCheckout(
     scheduledSubtotal + fastSubtotal,
     minimumOrderAmount,
@@ -608,17 +562,6 @@ export function CartPageContent({
   // -------------------------------------------------------------------------
   if (state.source === "loading") {
     return <CartPageContentSkeleton />;
-  }
-
-  if (state.source === "syncing") {
-    return (
-      <div className="flex flex-col items-center justify-center py-24 text-center">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
-        <p className="mt-4 text-sm font-medium text-text-secondary">
-          {t("syncing")}
-        </p>
-      </div>
-    );
   }
 
   if (state.source === "error") {
@@ -639,25 +582,6 @@ export function CartPageContent({
 
   return (
     <div className="space-y-6 sm:space-y-10">
-      {/* Sync error banner */}
-      {syncError && (
-        <div className="flex items-center justify-between gap-4 rounded-xl border border-red-200 bg-red-50 px-4 py-3">
-          <div className="flex items-center gap-2 text-sm text-red-700">
-            <AlertTriangle className="h-4 w-4 shrink-0" />
-            <span>
-              {t("syncPartialError")} <strong>{syncError}</strong>
-            </span>
-          </div>
-          <button
-            onClick={handleRetrySync}
-            className="inline-flex shrink-0 items-center gap-1.5 rounded-lg bg-red-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-red-700 transition-colors"
-          >
-            <RefreshCw className="h-3 w-3" />
-            {t("retrySync")}
-          </button>
-        </div>
-      )}
-
       <div className="flex items-center justify-between">
         <h2 className="text-lg sm:text-xl font-bold">{t("title")}</h2>
       </div>

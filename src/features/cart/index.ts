@@ -6,4 +6,4 @@ export {
 } from "./store/useCartFeedbackStore";
 export { useCartActions } from "./hooks/useCartActions";
 export { useServerCartStore } from "./store/useServerCartStore";
-export type { CartItemProduct, CartItem, GuestCartItem, HydratedCartItem, AddBulkPayload, CartApiItem, CartApiCart } from "./types";
+export type { CartItemProduct, CartItem, GuestCartItem, HydratedCartItem, CartApiItem, CartApiCart } from "./types";

@@ -1,41 +1,43 @@
 import { z } from "zod";
+import type { ContactField, ContactFieldError, ContactValues } from "../types";
 
+/**
+ * Mirror of the backend rules for `POST /contacts`:
+ * email `email|max:255`, subject `string|max:255`, message `min:3|max:5000`.
+ * Issue messages are translation keys consumed by the client.
+ */
 export const contactSchema = z.object({
-  name: z
-    .string()
-    .min(1, "Name is required.")
-    .max(255, "Name must be at most 255 characters."),
   email: z
     .string()
-    .min(1, "Email is required.")
-    .email("Please enter a valid email address.")
-    .max(255, "Email must be at most 255 characters."),
+    .trim()
+    .min(1, "emailRequired")
+    .email("emailInvalid")
+    .max(255, "emailTooLong"),
   subject: z
     .string()
-    .min(1, "Subject is required.")
-    .max(255, "Subject must be at most 255 characters."),
+    .trim()
+    .min(1, "subjectRequired")
+    .max(255, "subjectTooLong"),
   message: z
     .string()
-    .min(3, "Message must be at least 3 characters.")
-    .max(5000, "Message must be at most 5000 characters."),
+    .trim()
+    .min(1, "messageRequired")
+    .min(3, "messageTooShort")
+    .max(5000, "messageTooLong"),
 });
 
-export function validateContactForm(data: ContactFormData): Record<string, string> {
+export function validateContactForm(
+  data: ContactValues,
+): Partial<Record<ContactField, ContactFieldError>> {
   const result = contactSchema.safeParse(data);
   if (result.success) return {};
-  const errors: Record<string, string> = {};
+
+  const errors: Partial<Record<ContactField, ContactFieldError>> = {};
   for (const issue of result.error.issues) {
-    const path = issue.path[0] as string;
-    if (!errors[path]) {
-      errors[path] = issue.message;
+    const field = issue.path[0] as ContactField;
+    if (!errors[field]) {
+      errors[field] = issue.message as ContactFieldError;
     }
   }
   return errors;
-}
-
-interface ContactFormData {
-  name: string;
-  email: string;
-  subject: string;
-  message: string;
 }

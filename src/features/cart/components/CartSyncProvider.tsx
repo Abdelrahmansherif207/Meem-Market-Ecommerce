@@ -8,7 +8,6 @@ import { isGuestCheckoutEnabled } from "@/shared/constants/guestCheckout";
 import { guestCartService } from "@/features/guest/services/guestCartService";
 import { useGuestSessionStore } from "@/features/guest/store/useGuestSessionStore";
 import { runWithGuestSession } from "@/features/guest/utils/guestErrors";
-import { useSyncCartOnLogin } from "../hooks/useSyncCartOnLogin";
 import { useServerCartStore } from "../store/useServerCartStore";
 import { useGuestCartStore } from "../store/useGuestCartStore";
 
@@ -17,7 +16,6 @@ const MIGRATION_FLAG = "guest-cart-server-migrated";
 
 export function CartSyncProvider({ children }: { children: ReactNode }) {
   const locale = useLocale();
-  const { isSyncing } = useSyncCartOnLogin();
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
   const fetchCartCount = useServerCartStore((s) => s.fetchCartCount);
   const setTotalQuantity = useServerCartStore((s) => s.setTotalQuantity);
@@ -33,10 +31,10 @@ export function CartSyncProvider({ children }: { children: ReactNode }) {
   }, []);
 
   useEffect(() => {
-    if (isAuthenticated && !isSyncing) {
+    if (isAuthenticated) {
       fetchCartCount(locale);
     }
-  }, [isAuthenticated, isSyncing, fetchCartCount, locale]);
+  }, [isAuthenticated, fetchCartCount, locale]);
 
   // Anonymous shoppers with the flag ON use the server-backed guest cart —
   // hydrate the header badge from it (the localStorage store is empty).
