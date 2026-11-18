@@ -1,30 +1,61 @@
-import type { CartApiCart, CartApiItem } from "@/features/cart/types";
+/**
+ * Canonical guest contract models.
+ *
+ * The guest API has moved between field names (`subtotal` vs `sub_total`,
+ * `total` vs `total_price`, `items` vs `normal_items`). Everything the UI
+ * consumes is normalized once in `lib/contract.ts`, so components never read
+ * raw response fields again.
+ */
 
 /**
- * Guest cart line — the backend reuses the authenticated CartApiItem shape
- * (verified live 2026-11-11) plus per-line availability flags added by the
- * guest implementation.
+ * Catch's guest flow is scheduled-delivery only. The type stays a union with
+ * a single member so cart-line and payload shapes keep a named field without
+ * reintroducing the fast-delivery groups.
  */
-export interface GuestCartItem extends CartApiItem {
-  is_available?: boolean;
-  unavailable_reason?: string | null;
+export type GuestShippingMethod = "scheduled";
+
+export interface GuestCartLineAttribute {
+  attribute: string;
+  value: string;
+}
+
+/** One guest cart line, normalized from either contract revision. */
+export interface GuestCartLine {
+  /** Cart-item id used by the remove endpoint. */
+  id: number;
+  productId: number;
+  productVariantId: number | null;
+  quantity: number;
+  /** Server price for a single unit. Never computed on the client. */
+  unitPrice: number;
+  /** Server line total (`unitPrice * quantity`, after backend pricing). */
+  subtotal: number;
+  shippingMethod: GuestShippingMethod;
+  name: string;
+  slug: string;
+  image: string;
+  sku: string;
+  attributes: GuestCartLineAttribute[];
+  isAvailable: boolean;
+  unavailableReason: string | null;
 }
 
 /**
- * Live guest cart payload. Same CartResource shape as the authenticated cart
- * plus guest-specific retention/currency fields; `user_id` is always null and
- * coupons are never applied to guest carts.
+ * Flat guest cart. The backend owns every total; the client only displays
+ * them. `subtotal` excludes shipping; `total` is what the order is charged.
  */
-export interface GuestCart extends Omit<CartApiCart, "normal_items" | "user_id"> {
-  user_id: null;
-  normal_items: GuestCartItem[];
+export interface GuestCart {
+  id: number;
+  items: GuestCartLine[];
+  subtotal: number;
+  shippingCost: number;
+  total: number;
+  /** Derived sum of line quantities — always safe for badges. */
+  totalQuantity: number;
+  currency: string | null;
   /** Guest retention deadline (7 days from the last cart mutation). */
-  guest_expires_at: string | null;
-  /** Currency the totals are quoted in (matches the `X-Currency` request). */
-  currency?: string;
+  expiresAt: string | null;
 }
-
-export type GuestShippingMethod = "scheduled" | "fast";
 
 export interface GuestAddItemPayload {
   product_id: number;
@@ -41,133 +72,167 @@ export interface GuestUpdateItemPayload {
   shipping_method?: GuestShippingMethod;
 }
 
-/** Guests are limited to `online` | `cod` (contract §5). */
+/** Guests are limited to `online` | `cod`. */
 export type GuestPaymentMethod = "online" | "cod";
+
+/** Pickup is not offered to guests on Catch. */
+export type GuestFulfillmentType = "delivery";
+
+export interface GuestCheckoutAddress {
+  street: string;
+  city: string;
+  /** Optional address detail lines; omitted when empty. */
+  building?: string;
+  details?: string;
+}
 
 export interface GuestCheckoutRequest {
   name: string;
   user_phone: string;
   /** Optional — validated on the client only when provided. */
   user_email?: string;
-  address: {
-    street: string;
-    city: string;
-  };
+  address: GuestCheckoutAddress;
   notes?: string;
-  /** Required by the backend for delivery orders. */
-  governorate_id: number;
-  fulfillment_type?: "delivery" | "pickup";
-  payment_method?: GuestPaymentMethod;
+  /** Required for delivery orders. */
+  governorate_id?: number;
+  city_id?: number;
+  fulfillment_type: GuestFulfillmentType;
+  payment_method: GuestPaymentMethod;
   gateway?: string;
   shipping_type?: string;
 }
 
-export interface GuestOrderItemProduct {
-  id: number;
-  name: string;
-  slug: string;
-  /** Order items expose the image under `image.thumbnail` (CartResource style). */
-  image?: { thumbnail?: string; original?: unknown[] } | null;
-  /** Some payloads include a flat thumbnail instead. */
-  thumbnail?: string;
-  current_price?: number;
-  price?: number;
+export interface GuestOrderAddress {
+  street: string;
+  city: string;
+  building: string | null;
+  details: string | null;
 }
 
 export interface GuestOrderItem {
   id: number;
+  productId: number;
   quantity: number;
-  unit_price: number;
-  total_price: number;
-  converted_unit_price?: number;
-  converted_total_price?: number;
-  is_gift: boolean;
-  item_type: string;
-  product: GuestOrderItemProduct;
-  variant?: unknown | null;
+  unitPrice: number;
+  total: number;
+  name: string;
+  image: string;
+  slug: string;
+  variantLabel: string | null;
 }
 
-/** OrderResource subset the guest confirmation + tracking flows rely on. */
+/** Order subset the guest confirmation and tracking flows rely on. */
 export interface GuestOrder {
   id: number;
-  order_number: string;
+  orderNumber: string;
   status: string;
+  paymentStatus: string;
+  fulfillmentStatus: string;
+  paymentMethod: string;
+  fulfillmentType: string;
+  shippingType: string | null;
   subtotal: number;
+  shippingPrice: number;
   discount: number;
-  promotion_discount?: number;
   total: number;
-  converted_total?: number;
-  currency: string;
-  fulfillment_type: string;
-  payment_method: string;
-  payment_status: string;
-  fulfillment_status: string;
-  shipping_type?: string;
-  shipping_price?: number;
-  fast_shipping_fee?: number;
-  created_at: string;
-  notes?: string | null;
-  order_items: GuestOrderItem[];
-  /** Present on `GET /guest/orders/{id}` responses. */
-  can_cancel?: boolean;
+  currency: string | null;
+  createdAt: string;
+  notes: string | null;
+  customerName: string | null;
+  customerPhone: string | null;
+  customerEmail: string | null;
+  address: GuestOrderAddress | null;
+  items: GuestOrderItem[];
+  canCancel: boolean;
+}
+
+export interface GuestCheckoutPaymentNext {
+  method: string;
+  gateway: string | null;
+  /** e.g. `initiate_payment`, `paid`, `cod`. */
+  next: string;
+  /** Some deployments return the gateway URL directly on checkout. */
+  redirectUrl: string | null;
 }
 
 export interface GuestCheckoutResult {
   order: GuestOrder;
-  /** Raw tokens are returned once, on first creation only (contract §5). */
-  tracking_token: string | null;
-  cancellation_token: string | null;
-  payment: { method: string; gateway: string | null; next: string };
-  idempotent_replay: boolean;
+  /** Raw tokens are returned once, on first creation only. */
+  trackingToken: string | null;
+  cancellationToken: string | null;
+  payment: GuestCheckoutPaymentNext;
+  idempotentReplay: boolean;
 }
 
 export interface GuestPaymentResult {
-  url?: string;
-  order_id: number;
-  payment_method: string;
-  gateway?: string | null;
-  zero_value?: boolean;
+  /** Gateway redirect target (`redirect_url` or legacy `url`). */
+  url: string | null;
+  orderId: number;
+  paymentMethod: string;
+  gateway: string | null;
+  zeroValue: boolean;
 }
 
 export interface GuestOrderTokensResult {
-  order_id?: number;
-  tracking_token: string | null;
-  tracking_revoked: boolean;
-  cancellation_token: string | null;
-  tracking_expires_at: string | null;
+  orderId: number | null;
+  trackingToken: string | null;
+  trackingRevoked: boolean;
+  cancellationToken: string | null;
+  trackingExpiresAt: string | null;
+}
+
+export interface GuestTrackTimelineEntry {
+  timestamp: string;
+  /** Human title when the backend supplies one. */
+  title: string | null;
+  /** Machine status code when the backend only supplies `status`. */
+  status: string | null;
+  description: string | null;
 }
 
 export interface GuestTrackResult {
   order: {
-    order_number: string;
+    orderNumber: string;
     status: string;
-    payment_status: string;
-    fulfillment_status: string;
-    created_at: string;
-    last_updated_at: string;
+    paymentStatus: string;
+    fulfillmentStatus: string;
+    createdAt: string;
+    lastUpdatedAt: string;
   };
-  timeline: Array<{ timestamp: string; title: string; description: string }>;
-  tracking_expires_at: string | null;
+  timeline: GuestTrackTimelineEntry[];
+  trackingExpiresAt: string | null;
 }
 
 export interface GuestCancelResult {
-  order: { order_number: string; status: string };
+  order: { orderNumber: string; status: string };
 }
 
-/** `POST /guest/session` response payload. */
+/**
+ * `POST /general/guest/orders/cancel/request-otp` response. The backend sends
+ * a one-time code to the phone on file and returns the masked number so the
+ * UI can confirm where it went.
+ */
+export interface GuestCancelOtpResult {
+  otpId: string | null;
+  provider: string | null;
+  /** Masked phone, e.g. `+97*****5555`. */
+  phone: string | null;
+}
+
+export interface GuestCancelOtpPayload {
+  token: string;
+  code: string;
+  otpId?: string | null;
+}
+
+/** `POST /general/guest/session` response payload (normalized). */
 export interface GuestSessionData {
-  guest: { expires_at: string };
-  /** Mirrors the `meem_guest_csrf` cookie value; safe to hold in memory. */
-  csrf_token: string;
+  expiresAt: string | null;
+  /** Mirrors the guest CSRF cookie value; safe to hold in memory. */
+  csrfToken: string | null;
   cookies: {
-    session_cookie: string;
-    csrf_cookie: string;
-    csrf_header: string;
-    path: string;
-    domain: string | null;
-    same_site: string;
-    secure: boolean;
-    http_only: boolean;
-    ttl_days: number;
+    sessionName: string | null;
+    csrfName: string | null;
+    csrfHeader: string;
   };
 }
