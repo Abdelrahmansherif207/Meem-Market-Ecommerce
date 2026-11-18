@@ -5,6 +5,10 @@ import Link from "next/link";
 import { Loader2, AlertTriangle, RefreshCw } from "lucide-react";
 import { useAuthStore } from "@/features/auth";
 import { useDisplayCurrency } from "@/features/currencies";
+import { isGuestCheckoutEnabled } from "@/shared/constants/guestCheckout";
+import { guestCartService } from "@/features/guest/services/guestCartService";
+import { useGuestSessionStore } from "@/features/guest/store/useGuestSessionStore";
+import { runWithGuestSession } from "@/features/guest/utils/guestErrors";
 import { CartPageContentSkeleton } from "./skeletons/CartPageContentSkeleton";
 import { useGuestCartStore } from "../store/useGuestCartStore";
 import { useServerCartStore } from "../store/useServerCartStore";
@@ -20,6 +24,7 @@ import { couponService } from "@/features/coupons/services/couponService";
 import { ApiError } from "@/shared/lib/api";
 import type { HydratedCartItem, CartApiItem, CartApiCart, CartLineIdentity } from "../types";
 import { getCartLineKey, matchesCartLine } from "../types";
+import type { GuestCart, GuestCartLine } from "@/features/guest/types";
 import EmptyState from "@/components/ui/EmptyState";
 
 
@@ -133,6 +138,9 @@ export function CartPageContent({
   const locale = useLocale();
 
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
+  // Flag ON: anonymous shoppers use the server-backed guest cart — the same
+  // CartResource shape, so `processCart` handles it unchanged.
+  const guestServerMode = isGuestCheckoutEnabled();
   // Effective display currency (backend-driven): silent server-cart refetches
   // key off it, matching the `X-Currency` header client `apiFetch` attaches.
   const displayCurrency = useDisplayCurrency();
@@ -198,7 +206,13 @@ export function CartPageContent({
   // -------------------------------------------------------------------------
   // processCart — map server cart data into all local state
   // -------------------------------------------------------------------------
-  const processCart = useCallback((cart: CartApiCart) => {
+  const processCart = useCallback((cart: CartApiCart | GuestCart | null) => {
+    if (!cart) {
+      dispatch({ type: "SET_SERVER", items: [] });
+      setAppliedCoupon(null);
+      return;
+    }
+
     const mapItem = (item: CartApiItem): HydratedCartItem => {
       return {
         product_id: item.product_id,
@@ -224,11 +238,38 @@ export function CartPageContent({
       };
     };
 
-    const items: HydratedCartItem[] = [];
+    const mapGuestItem = (item: GuestCartLine): HydratedCartItem => ({
+      product_id: item.productId,
+      product_variant_id: item.productVariantId,
+      cartItemId: item.id,
+      quantity: item.quantity,
+      variant_label: item.attributes.length
+        ? item.attributes.map((a) => `${a.attribute}: ${a.value}`).join(" / ")
+        : null,
+      name: item.name,
+      image: item.image,
+      price: item.unitPrice,
+      current_price:
+        item.quantity > 0 ? item.subtotal / item.quantity : item.unitPrice,
+      total_price: item.subtotal,
+      discount_amount: 0,
+      promotion_id: null,
+      slug: item.slug,
+      sku: item.sku,
+      in_stock: item.isAvailable,
+      stock_quantity: undefined,
+    });
 
-    if (cart.normal_items) {
-      items.push(...cart.normal_items.map((i) => mapItem(i)));
+    // Guest carts are already normalized; authenticated carts still use the
+    // API field names. The single discriminator is `totalQuantity`.
+    if ("totalQuantity" in cart) {
+      dispatch({ type: "SET_SERVER", items: cart.items.map(mapGuestItem) });
+      setAppliedCoupon(null);
+      return;
     }
+
+    const items: HydratedCartItem[] = [];
+    items.push(...(cart.normal_items ?? []).map((i) => mapItem(i)));
     // Defensive: backend may still return legacy fast_items — merge into the
     // single cart instead of dropping them.
     const legacyFast = (cart as unknown as { fast_items?: CartApiItem[] }).fast_items;
@@ -254,12 +295,14 @@ export function CartPageContent({
   // -------------------------------------------------------------------------
   const refreshCart = useCallback(async () => {
     try {
-      const cart = await cartService.getCart(locale);
+      const cart = guestServerMode
+        ? await runWithGuestSession(locale, () => guestCartService.getCart(locale))
+        : await cartService.getCart(locale);
       if (cart) processCart(cart);
     } catch {
       // silent — cart data stays as-is
     }
-  }, [locale, processCart]);
+  }, [guestServerMode, locale, processCart]);
 
   // -------------------------------------------------------------------------
   // loadServerCart — initial fetch with loading state + abort support
@@ -272,7 +315,14 @@ export function CartPageContent({
     dispatch({ type: "SET_LOADING" });
 
     try {
-      const cart = await cartService.getCart(locale);
+      const cart = guestServerMode
+        ? await (async () => {
+            await useGuestSessionStore.getState().ensureSession(locale);
+            return runWithGuestSession(locale, () =>
+              guestCartService.getCart(locale),
+            );
+          })()
+        : await cartService.getCart(locale);
       if (controller.signal.aborted) return;
 
       if (cart) {
@@ -288,7 +338,7 @@ export function CartPageContent({
         : err instanceof Error ? err.message : "Failed to load cart";
       dispatch({ type: "SET_ERROR", error: msg });
     }
-  }, [locale, processCart]);
+  }, [guestServerMode, locale, processCart]);
 
   // -------------------------------------------------------------------------
   // Auth / sync state machine effect
@@ -305,6 +355,12 @@ export function CartPageContent({
 
     if (!isAuthenticated) {
       abortRef.current?.abort();
+      // Flag ON: anonymous users load the server-backed guest cart (the
+      // legacy localStorage path remains the fallback when disabled).
+      if (guestServerMode) {
+        loadServerCart(); // eslint-disable-line react-hooks/set-state-in-effect
+        return;
+      }
       dispatch({ type: "SET_GUEST" });
       return;
     }
@@ -323,8 +379,8 @@ export function CartPageContent({
     }
 
     // Authenticated and sync complete (or no guest items): load from server.
-    loadServerCart(); // eslint-disable-line react-hooks/set-state-in-effect
-  }, [authHydrated, isAuthenticated, isSyncing, syncError, loadServerCart]);
+    loadServerCart();
+  }, [authHydrated, isAuthenticated, guestServerMode, isSyncing, syncError, loadServerCart]);
 
   // Abort any in-flight request on unmount (navigation away).
   useEffect(() => {
@@ -372,22 +428,49 @@ export function CartPageContent({
 
       const item = state.serverItems.find((i) => matchesCartLine(i, productId, line));
       if (!item || !item.cartItemId) return;
+      const itemId = item.cartItemId;
       const pendingKey = getCartLineKey(productId, {
         productVariantId: item.product_variant_id ?? null,
       });
       if (state.pendingItemIds.has(pendingKey)) return;
 
       const snapshot = state.serverItems;
+      // The update endpoint treats `quantity` as a delta for both authenticated
+      // and guest carts — send the absolute difference, never the target.
+      const delta = Math.abs(quantity - item.quantity);
+      if (delta === 0) return;
+
       dispatch({ type: "ITEM_PENDING", key: pendingKey });
 
       try {
         if (quantity <= 0) {
           dispatch({ type: "REMOVE_ITEM", productId, line });
-          await cartService.removeItem(item.cartItemId, locale);
+          if (guestServerMode) {
+            const cart = await runWithGuestSession(locale, () =>
+              guestCartService.removeLine(itemId, locale),
+            );
+            if (cart) processCart(cart);
+            else dispatch({ type: "SET_SERVER", items: [] });
+          } else {
+            await cartService.removeItem(itemId, locale);
+          }
         } else {
           dispatch({ type: "UPDATE_ITEM", productId, quantity, line });
           const operation = quantity > item.quantity ? "increment" : "decrement";
-          const updatedCart = await cartService.updateItem({ item: { product_id: productId, quantity: item.quantity, operation, product_variant_id: item.product_variant_id ?? null, shipping_method: "scheduled" } }, locale);
+          const payload = {
+            item: {
+              product_id: productId,
+              quantity: delta,
+              operation,
+              product_variant_id: item.product_variant_id ?? null,
+              shipping_method: "scheduled",
+            },
+          } as const;
+          const updatedCart = guestServerMode
+            ? await runWithGuestSession(locale, () =>
+                guestCartService.updateItem(payload, locale),
+              )
+            : await cartService.updateItem(payload, locale);
           processCart(updatedCart);
         }
       } catch {
@@ -400,6 +483,7 @@ export function CartPageContent({
       state.source,
       state.serverItems,
       state.pendingItemIds,
+      guestServerMode,
       locale,
       guestRemoveItem,
       guestUpdateQuantity,
@@ -549,10 +633,12 @@ export function CartPageContent({
               onRemove={handleRemove}
               minimumOrderAmount={minimumOrderAmount}
               couponSlot={
-                <MyCouponsList
-                  appliedCouponCode={appliedCoupon?.code ?? null}
-                  onApplied={refreshCart}
-                />
+                isAuthenticated ? (
+                  <MyCouponsList
+                    appliedCouponCode={appliedCoupon?.code ?? null}
+                    onApplied={refreshCart}
+                  />
+                ) : null
               }
             />
           </div>
@@ -571,21 +657,25 @@ export function CartPageContent({
                 taxRate={taxRate}
                 onCouponApplied={async () => { await refreshCart(); }}
               />
-              <MyAvailableCoupons
-                appliedCouponCode={appliedCoupon?.code ?? null}
-                onCouponApplied={async () => {
-                  await refreshCart();
-                }}
-              />
-              <AvailableCoupons
-                onSelectCoupon={async (coupon) => {
-                  if (isAuthenticated) {
-                    await couponService.removeCoupon(locale);
-                  }
-                  await couponService.applyCoupon(coupon.code, locale);
-                  await refreshCart();
-                }}
-              />
+              {isAuthenticated && (
+                <>
+                  <MyAvailableCoupons
+                    appliedCouponCode={appliedCoupon?.code ?? null}
+                    onCouponApplied={async () => {
+                      await refreshCart();
+                    }}
+                  />
+                  <AvailableCoupons
+                    onSelectCoupon={async (coupon) => {
+                      if (isAuthenticated) {
+                        await couponService.removeCoupon(locale);
+                      }
+                      await couponService.applyCoupon(coupon.code, locale);
+                      await refreshCart();
+                    }}
+                  />
+                </>
+              )}
             </div>
           </div>
         </div>

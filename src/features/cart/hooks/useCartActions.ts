@@ -2,14 +2,50 @@
 import { useCallback, useMemo, useState } from "react";
 import { useLocale } from "next-intl";
 import { useAuthStore } from "@/features/auth";
+import { isGuestCheckoutEnabled } from "@/shared/constants/guestCheckout";
 import { useGuestCartStore } from "../store/useGuestCartStore";
 import { useServerCartStore } from "../store/useServerCartStore";
 import { cartService } from "../services/cartService";
+import { guestCartService } from "@/features/guest/services/guestCartService";
+import { runWithGuestSession } from "@/features/guest/utils/guestErrors";
+import type { GuestCart, GuestCartLine } from "@/features/guest/types";
+
+type ScheduledCartLine = {
+  id: number;
+  product_id: number;
+  quantity: number;
+  product_variant_id?: number | null;
+  shipping_method?: string | null;
+};
+
+/** Finds the scheduled line for a product in an authenticated cart. */
+function findScheduledLine(
+  cart: { normal_items?: ScheduledCartLine[] } | null,
+  productId: number,
+): ScheduledCartLine | null {
+  return (
+    cart?.normal_items?.find(
+      (item) =>
+        item.product_id === productId &&
+        (item.shipping_method ?? "").toLowerCase() === "scheduled",
+    ) ?? null
+  );
+}
+
+/** Finds the (single) guest line for a product; guests only have one cart. */
+function findGuestLine(
+  cart: GuestCart | null,
+  productId: number,
+): GuestCartLine | null {
+  return cart?.items.find((item) => item.productId === productId) ?? null;
+}
 
 /**
  * Unified cart-mutation hook (single cart).
  *
- * - **Guest:** reads/writes localStorage via `useGuestCartStore`.
+ * - **Guest (legacy):** reads/writes localStorage via `useGuestCartStore`.
+ * - **Guest (flag ON):** writes to the server-backed guest cart (`/general/guest/*`)
+ *   with optimistic badge/quantity updates, mirroring the authenticated path.
  * - **Authenticated:** maintains optimistic per-card quantity state so the UI
  *   responds instantly, calls the server API in the background, and rolls back
  *   on failure. The header badge is kept in sync via `useServerCartStore`.
@@ -20,8 +56,9 @@ import { cartService } from "../services/cartService";
 export function useCartActions(productId: number) {
   const locale = useLocale();
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
+  const guestServerMode = !isAuthenticated && isGuestCheckoutEnabled();
 
-  // ── Guest store (only used when not authenticated) ──────────────────────
+  // ── Legacy guest store (flag OFF) ────────────────────────────────────────
   const guestAddItem = useGuestCartStore((s) => s.addItem);
   const guestRemoveItem = useGuestCartStore((s) => s.removeItem);
   const guestUpdateQuantity = useGuestCartStore((s) => s.updateQuantity);
@@ -33,19 +70,28 @@ export function useCartActions(productId: number) {
 
   // ── Server store — header badge counter ─────────────────────────────────
   const adjustQuantity = useServerCartStore((s) => s.adjustQuantity);
+  const setTotalQuantity = useServerCartStore((s) => s.setTotalQuantity);
 
-  // ── Optimistic quantity for authenticated users ──────────────────────────
+  // ── Optimistic quantity (authenticated + guest-server) ───────────────────
   // Each ProductCard instance tracks its own in-session quantity so the UI
   // shows +/- controls and animates immediately without waiting for the API.
   // This resets to 0 when the component unmounts (navigation), which is fine —
   // the cart page is the authoritative view for server items.
-  const [authQuantity, setAuthQuantity] = useState(0);
+  const [optimisticQuantity, setOptimisticQuantity] = useState(0);
   const [isPending, setIsPending] = useState(false);
 
   // The quantity the card should display.
-  const quantity = isAuthenticated
-    ? authQuantity
+  const quantity = isAuthenticated || guestServerMode
+    ? optimisticQuantity
     : guestQuantity;
+
+  const rollback = useCallback(
+    (delta: number) => {
+      setOptimisticQuantity((q) => Math.max(0, q - delta));
+      adjustQuantity(-delta);
+    },
+    [adjustQuantity],
+  );
 
   // ── addItem ──────────────────────────────────────────────────────────────
   const addItem = useCallback(
@@ -62,6 +108,31 @@ export function useCartActions(productId: number) {
       stock_quantity: number;
     }) => {
       if (!isAuthenticated) {
+        if (guestServerMode) {
+          // Server-backed guest cart — optimistic like the auth path.
+          setOptimisticQuantity((q) => q + item.quantity);
+          adjustQuantity(item.quantity);
+          setIsPending(true);
+          try {
+            const cart = await runWithGuestSession(locale, () =>
+              guestCartService.addItem(
+                {
+                  product_id: productId,
+                  quantity: item.quantity,
+                  product_variant_id: item.product_variant_id ?? null,
+                  shipping_method: "scheduled",
+                },
+                locale,
+              ),
+            );
+            setTotalQuantity(cart?.totalQuantity ?? 0);
+          } catch {
+            rollback(item.quantity);
+          } finally {
+            setIsPending(false);
+          }
+          return;
+        }
         guestAddItem({
           product_id: productId,
           quantity: item.quantity,
@@ -79,7 +150,7 @@ export function useCartActions(productId: number) {
       }
 
       // Optimistically update UI and badge immediately.
-      setAuthQuantity((q) => q + item.quantity);
+      setOptimisticQuantity((q) => q + item.quantity);
       adjustQuantity(item.quantity);
       setIsPending(true);
 
@@ -92,18 +163,36 @@ export function useCartActions(productId: number) {
         }, locale);
       } catch {
         // Rollback on failure.
-        setAuthQuantity((q) => Math.max(0, q - item.quantity));
-        adjustQuantity(-item.quantity);
+        rollback(item.quantity);
       } finally {
         setIsPending(false);
       }
     },
-    [isAuthenticated, productId, guestAddItem, adjustQuantity, locale],
+    [isAuthenticated, guestServerMode, productId, guestAddItem, adjustQuantity, setTotalQuantity, locale, rollback],
   );
 
   // ── increment ────────────────────────────────────────────────────────────
   const increment = useCallback(async () => {
     if (!isAuthenticated) {
+      if (guestServerMode) {
+        setOptimisticQuantity((q) => q + 1);
+        adjustQuantity(1);
+        setIsPending(true);
+        try {
+          const cart = await runWithGuestSession(locale, () =>
+            guestCartService.addItem(
+              { product_id: productId, quantity: 1, shipping_method: "scheduled" },
+              locale,
+            ),
+          );
+          setTotalQuantity(cart?.totalQuantity ?? 0);
+        } catch {
+          rollback(1);
+        } finally {
+          setIsPending(false);
+        }
+        return;
+      }
       const target = useGuestCartStore
         .getState()
         .items.find((i) => i.product_id === productId);
@@ -115,7 +204,7 @@ export function useCartActions(productId: number) {
       return;
     }
 
-    setAuthQuantity((q) => q + 1);
+    setOptimisticQuantity((q) => q + 1);
     adjustQuantity(1);
     setIsPending(true);
 
@@ -125,61 +214,111 @@ export function useCartActions(productId: number) {
         locale,
       );
     } catch {
-      setAuthQuantity((q) => Math.max(0, q - 1));
-      adjustQuantity(-1);
+      rollback(1);
     } finally {
       setIsPending(false);
     }
-  }, [isAuthenticated, productId, guestUpdateQuantity, adjustQuantity, locale]);
+  }, [isAuthenticated, guestServerMode, productId, guestUpdateQuantity, adjustQuantity, setTotalQuantity, locale, rollback]);
 
   // ── decrement ────────────────────────────────────────────────────────────
-  const decrement = useCallback(
-    async (cartItemId?: number) => {
-      if (!isAuthenticated) {
-        const target = useGuestCartStore
-          .getState()
-          .items.find((i) => i.product_id === productId);
-        if (!target) return;
-        const line = {
-          productVariantId: target.product_variant_id ?? null,
-        };
-        if (target.quantity <= 1) guestRemoveItem(productId, line);
-        else guestUpdateQuantity(productId, target.quantity - 1, line);
+  const decrement = useCallback(async () => {
+    if (!isAuthenticated) {
+      if (guestServerMode) {
+        // Resolve the line from the server cart (cards don't carry line ids).
+        setOptimisticQuantity((q) => Math.max(0, q - 1));
+        adjustQuantity(-1);
+        setIsPending(true);
+        try {
+          const cart = await runWithGuestSession(locale, async () => {
+            const current = await guestCartService.getCart(locale);
+            const line = findGuestLine(current, productId);
+            if (!line) throw new Error("Guest cart line not found");
+            // `quantity` is a delta, not the target quantity.
+            return line.quantity <= 1
+              ? guestCartService.removeLine(line.id, locale)
+              : guestCartService.updateItem(
+                  {
+                    item: {
+                      product_id: productId,
+                      quantity: 1,
+                      operation: "decrement",
+                      product_variant_id: line.productVariantId ?? null,
+                      shipping_method: "scheduled",
+                    },
+                  },
+                  locale,
+                );
+          });
+          setTotalQuantity(cart?.totalQuantity ?? 0);
+        } catch {
+          rollback(-1);
+        } finally {
+          setIsPending(false);
+        }
         return;
       }
 
-      const currentQty = authQuantity;
-      const newQty = currentQty - 1;
+      const target = useGuestCartStore
+        .getState()
+        .items.find((i) => i.product_id === productId);
+      if (!target) return;
+      const line = {
+        productVariantId: target.product_variant_id ?? null,
+      };
+      if (target.quantity <= 1) guestRemoveItem(productId, line);
+      else guestUpdateQuantity(productId, target.quantity - 1, line);
+      return;
+    }
 
-      setAuthQuantity((q) => Math.max(0, q - 1));
-      adjustQuantity(-1);
+    const currentQty = optimisticQuantity;
+    setOptimisticQuantity((q) => Math.max(0, q - 1));
+    adjustQuantity(-1);
+    setIsPending(true);
 
-      if (newQty <= 0 || cartItemId === undefined) return;
-
-      setIsPending(true);
-      try {
-        if (newQty === 0) {
-          await cartService.removeItem(cartItemId, locale);
-        } else {
-          await cartService.updateItem({ item: { product_id: productId, quantity: currentQty, operation: "decrement", product_variant_id: undefined, shipping_method: "scheduled" } }, locale);
+    try {
+      if (currentQty <= 1) {
+        const cart = await cartService.getCart(locale);
+        const line = findScheduledLine(cart, productId);
+        if (!line) {
+          setTotalQuantity(cart?.total_quantity ?? 0);
+          return;
         }
-      } catch {
-        setAuthQuantity((q) => q + 1);
-        adjustQuantity(1);
-      } finally {
-        setIsPending(false);
+        await cartService.removeItem(line.id, locale);
+        setTotalQuantity(
+          Math.max(0, (cart?.total_quantity ?? line.quantity) - line.quantity),
+        );
+      } else {
+        const updatedCart = await cartService.updateItem(
+          {
+            item: {
+              product_id: productId,
+              quantity: 1,
+              operation: "decrement",
+              product_variant_id: undefined,
+              shipping_method: "scheduled",
+            },
+          },
+          locale,
+        );
+        setTotalQuantity(updatedCart.total_quantity);
       }
-    },
-    [
-      isAuthenticated,
-      productId,
-      authQuantity,
-      locale,
-      guestRemoveItem,
-      guestUpdateQuantity,
-      adjustQuantity,
-    ],
-  );
+    } catch {
+      rollback(-1);
+    } finally {
+      setIsPending(false);
+    }
+  }, [
+    isAuthenticated,
+    guestServerMode,
+    productId,
+    optimisticQuantity,
+    locale,
+    guestRemoveItem,
+    guestUpdateQuantity,
+    adjustQuantity,
+    setTotalQuantity,
+    rollback,
+  ]);
 
   return useMemo(
     () => ({ quantity, isPending, addItem, increment, decrement }),
