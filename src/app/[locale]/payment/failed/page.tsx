@@ -17,9 +17,9 @@ export default async function Page({
   searchParams,
 }: {
   params: Promise<{ locale: string }>;
-  searchParams: Promise<{ error?: string }>;
+  searchParams: Promise<{ error?: string; order_id?: string }>;
 }) {
   const { locale } = await params;
-  const { error } = await searchParams;
-  return <PaymentFailedPage locale={locale} error={error} />;
+  const { error, order_id } = await searchParams;
+  return <PaymentFailedPage locale={locale} error={error} orderId={order_id} />;
 }

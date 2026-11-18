@@ -41,7 +41,7 @@ export function CartSyncProvider({ children }: { children: ReactNode }) {
 
     runWithGuestSession(locale, () => guestCartService.getCart(locale))
       .then((cart) => {
-        if (!cancelled) setTotalQuantity(cart?.total_quantity ?? 0);
+        if (!cancelled) setTotalQuantity(cart?.totalQuantity ?? 0);
       })
       .catch(() => {
         // Best-effort — the badge simply stays as-is.
