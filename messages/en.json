@@ -319,10 +319,7 @@
     "removeItem": "Remove item",
     "decreaseQuantity": "Decrease quantity",
     "increaseQuantity": "Increase quantity",
-    "syncing": "Syncing your cart…",
     "retry": "Retry",
-    "retrySync": "Retry sync",
-    "syncPartialError": "Some items from your guest cart couldn't be synced:",
     "loadFailed": "We couldn't load your cart. Please try again.",
     "sessionExpired": "Your session has expired. Please sign in again.",
     "guestCheckoutTitle": "Guest checkout",
@@ -689,8 +686,6 @@
   "contact": {
     "title": "Contact Us",
     "description": "Have a question or feedback? We'd love to hear from you.",
-    "name": "Name",
-    "namePlaceholder": "Your name",
     "email": "Email",
     "emailPlaceholder": "your@email.com",
     "subject": "Subject",
@@ -699,7 +694,25 @@
     "messagePlaceholder": "Tell us more about your inquiry...",
     "send": "Send Message",
     "sending": "Sending...",
-    "success": "Your message has been sent successfully. We'll get back to you soon."
+    "toast": {
+      "successTitle": "Message sent",
+      "successMessage": "Thanks for reaching out. We'll get back to you by email soon.",
+      "errorTitle": "Message not sent",
+      "dismiss": "Dismiss"
+    },
+    "errors": {
+      "emailRequired": "Please enter your email address.",
+      "emailInvalid": "Please enter a valid email address.",
+      "emailTooLong": "Email must be 255 characters or fewer.",
+      "subjectRequired": "Please enter a subject.",
+      "subjectTooLong": "Subject must be 255 characters or fewer.",
+      "messageRequired": "Please write your message.",
+      "messageTooShort": "Message must be at least 3 characters.",
+      "messageTooLong": "Message must be 5000 characters or fewer.",
+      "rateLimited": "Too many messages were sent. Please try again in a minute.",
+      "network": "We couldn't reach the server. Check your connection and try again.",
+      "server": "Something went wrong while sending your message. Please try again."
+    }
   },
   "locationPicker": {
     "title": "Add Delivery Location",

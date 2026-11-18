@@ -1,9 +1,10 @@
 import { apiFetch, type RequestChannel } from "@/shared/lib/api";
+import { GUEST_CSRF_HEADER } from "@/shared/constants/guestCheckout";
+import { useGuestSessionStore } from "@/features/guest/store/useGuestSessionStore";
 import type { ApiResponse, PaginatedData } from "@/shared/types";
 import type {
   CartApiCart,
   CartItem,
-  AddBulkPayload,
   DeliveryType,
 } from "../types";
 
@@ -20,7 +21,17 @@ function channelForDelivery(
 
 export const cartService = {
   getCart: async (lang?: string): Promise<CartApiCart | null> => {
-    const response = await apiFetch<ApiResponse<PaginatedData<CartApiCart>>>("/cart", { lang });
+    // The backend merges the server guest cart into the account on the first
+    // authenticated cart read. Send the live guest CSRF token so the backend
+    // can resolve the guest session even when its cookie name differs.
+    const csrfToken = useGuestSessionStore.getState().csrfToken;
+    const headers = new Headers();
+    if (csrfToken) headers.set(GUEST_CSRF_HEADER, csrfToken);
+
+    const response = await apiFetch<ApiResponse<PaginatedData<CartApiCart>>>("/cart", {
+      lang,
+      headers,
+    });
     return response.data.data[0] ?? null;
   },
 
@@ -73,19 +84,6 @@ export const cartService = {
       body: JSON.stringify({ item_id: itemId }),
       lang,
       channel: channelForDelivery(deliveryType),
-    });
-  },
-
-  /**
-   * Guest → authenticated bulk upload. Guests are scheduled-only, so this is
-   * intentionally channel-agnostic.
-   */
-  addBulkToCart: async (payload: AddBulkPayload, lang?: string): Promise<void> => {
-    await apiFetch<ApiResponse<{ message: string }>>("/cart/bulk-items", {
-      method: "POST",
-      body: JSON.stringify(payload),
-      lang,
-      channel: false,
     });
   },
 };

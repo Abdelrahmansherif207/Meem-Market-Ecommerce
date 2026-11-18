@@ -44,7 +44,7 @@ export default async function MeemHelpBanner({ locale }: { locale: string }) {
       icon: TriangleAlert,
       label: t("help.helpingCenter"),
       value: t("help.helpCenterCta"),
-      href: "/faq",
+      href: "/contact",
     },
     { icon: Mail, label: t("help.email"), value: email, href: `mailto:${email}` },
     {

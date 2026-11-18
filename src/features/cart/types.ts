@@ -84,15 +84,6 @@ export interface HydratedCartItem extends GuestCartItem {
   promotion_id?: number | null;
 }
 
-export interface AddBulkPayload {
-  items: Array<{
-    product_id: number;
-    quantity: number;
-    product_variant_id?: number | null;
-    shipping_method?: "scheduled" | "fast";
-  }>;
-}
-
 import type { Coupon } from "@/features/coupons/types";
 
 // --- API response types matching the actual /cart endpoint ---
