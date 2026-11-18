@@ -1,5 +1,6 @@
 /** Raw values accepted by the public contact endpoint (`POST /contacts`). */
 export interface ContactValues {
+  name: string;
   email: string;
   subject: string;
   message: string;
@@ -12,6 +13,8 @@ export type ContactField = keyof ContactValues;
  * user-facing copy) so the client can translate them for both locales.
  */
 export type ContactFieldError =
+  | "nameRequired"
+  | "nameTooLong"
   | "emailRequired"
   | "emailInvalid"
   | "emailTooLong"

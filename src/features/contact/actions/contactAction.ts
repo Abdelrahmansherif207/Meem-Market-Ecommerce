@@ -6,8 +6,8 @@ import { validateContactForm } from "../schemas/contactSchema";
 import type { ActionState, ContactValues } from "../types";
 
 /**
- * Public contact endpoint — validated against the backend contract
- * (`POST /api/v1/contacts`, body: `{ email, subject, message }`).
+ * Public contact endpoint — validated against the live backend contract
+ * (`POST /api/v1/contacts`, body: `{ name, email, subject, message }`).
  *
  * Returns translation codes instead of copy so the client can render the
  * result in the active locale.
@@ -17,6 +17,7 @@ export async function contactAction(
   formData: FormData,
 ): Promise<ActionState> {
   const values: ContactValues = {
+    name: String(formData.get("name") ?? "").trim(),
     email: String(formData.get("email") ?? "").trim(),
     subject: String(formData.get("subject") ?? "").trim(),
     message: String(formData.get("message") ?? "").trim(),
@@ -39,6 +40,12 @@ export async function contactAction(
       if (error.status === 429) {
         return { success: false, errorCode: "rateLimited", values };
       }
+      // Keep the real cause in the server logs — the client only shows a
+      // translated, non-technical message.
+      console.error(
+        `[contactAction] POST /contacts failed (${error.status}): ${error.message}`,
+        error.fields,
+      );
       return { success: false, errorCode: "server", values };
     }
     return { success: false, errorCode: "network", values };
