@@ -3,10 +3,16 @@ import type { ContactField, ContactFieldError, ContactValues } from "../types";
 
 /**
  * Mirror of the backend rules for `POST /contacts`:
- * email `email|max:255`, subject `string|max:255`, message `min:3|max:5000`.
- * Issue messages are translation keys consumed by the client.
+ * name `required|max:255`, email `email|max:255`, subject `string|max:255`,
+ * message `min:3|max:5000`. Issue messages are translation keys consumed by
+ * the client.
  */
 export const contactSchema = z.object({
+  name: z
+    .string()
+    .trim()
+    .min(1, "nameRequired")
+    .max(255, "nameTooLong"),
   email: z
     .string()
     .trim()

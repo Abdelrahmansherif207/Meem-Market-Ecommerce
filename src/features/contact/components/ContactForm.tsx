@@ -61,11 +61,12 @@ export default function ContactForm() {
 
   const values = state?.values;
 
-  const fieldError = (field: "email" | "subject" | "message") => {
+  const fieldError = (field: "name" | "email" | "subject" | "message") => {
     const code = state?.fieldErrors?.[field];
     return code ? t(`errors.${code}`) : undefined;
   };
 
+  const nameError = fieldError("name");
   const emailError = fieldError("email");
   const subjectError = fieldError("subject");
   const messageError = fieldError("message");
@@ -77,6 +78,30 @@ export default function ContactForm() {
         onSubmit={handleSubmit}
         className="flex w-full flex-col gap-5 rounded-2xl border border-border bg-white p-5 shadow-sm sm:p-8"
       >
+        <div className="flex flex-col gap-1.5">
+          <label htmlFor="name" className={labelClass}>
+            {t("name")}
+          </label>
+          <input
+            id="name"
+            name="name"
+            type="text"
+            required
+            maxLength={255}
+            autoComplete="name"
+            defaultValue={values?.name ?? ""}
+            aria-invalid={Boolean(nameError)}
+            aria-describedby={nameError ? "name-error" : undefined}
+            placeholder={t("namePlaceholder")}
+            className={fieldClass}
+          />
+          {nameError && (
+            <p id="name-error" className={errorClass}>
+              {nameError}
+            </p>
+          )}
+        </div>
+
         <div className="flex flex-col gap-1.5">
           <label htmlFor="email" className={labelClass}>
             {t("email")}
