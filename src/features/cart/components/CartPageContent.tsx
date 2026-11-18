@@ -24,7 +24,7 @@ import { couponService } from "@/features/coupons/services/couponService";
 import { ApiError } from "@/shared/lib/api";
 import type { HydratedCartItem, CartApiItem, CartApiCart, CartLineIdentity } from "../types";
 import { getCartLineKey, matchesCartLine } from "../types";
-import type { GuestCart } from "@/features/guest/types";
+import type { GuestCart, GuestCartLine } from "@/features/guest/types";
 import EmptyState from "@/components/ui/EmptyState";
 
 
@@ -206,7 +206,13 @@ export function CartPageContent({
   // -------------------------------------------------------------------------
   // processCart — map server cart data into all local state
   // -------------------------------------------------------------------------
-  const processCart = useCallback((cart: CartApiCart | GuestCart) => {
+  const processCart = useCallback((cart: CartApiCart | GuestCart | null) => {
+    if (!cart) {
+      dispatch({ type: "SET_SERVER", items: [] });
+      setAppliedCoupon(null);
+      return;
+    }
+
     const mapItem = (item: CartApiItem): HydratedCartItem => {
       return {
         product_id: item.product_id,
@@ -232,11 +238,38 @@ export function CartPageContent({
       };
     };
 
-    const items: HydratedCartItem[] = [];
+    const mapGuestItem = (item: GuestCartLine): HydratedCartItem => ({
+      product_id: item.productId,
+      product_variant_id: item.productVariantId,
+      cartItemId: item.id,
+      quantity: item.quantity,
+      variant_label: item.attributes.length
+        ? item.attributes.map((a) => `${a.attribute}: ${a.value}`).join(" / ")
+        : null,
+      name: item.name,
+      image: item.image,
+      price: item.unitPrice,
+      current_price:
+        item.quantity > 0 ? item.subtotal / item.quantity : item.unitPrice,
+      total_price: item.subtotal,
+      discount_amount: 0,
+      promotion_id: null,
+      slug: item.slug,
+      sku: item.sku,
+      in_stock: item.isAvailable,
+      stock_quantity: undefined,
+    });
 
-    if (cart.normal_items) {
-      items.push(...cart.normal_items.map((i) => mapItem(i)));
+    // Guest carts are already normalized; authenticated carts still use the
+    // API field names. The single discriminator is `totalQuantity`.
+    if ("totalQuantity" in cart) {
+      dispatch({ type: "SET_SERVER", items: cart.items.map(mapGuestItem) });
+      setAppliedCoupon(null);
+      return;
     }
+
+    const items: HydratedCartItem[] = [];
+    items.push(...(cart.normal_items ?? []).map((i) => mapItem(i)));
     // Defensive: backend may still return legacy fast_items — merge into the
     // single cart instead of dropping them.
     const legacyFast = (cart as unknown as { fast_items?: CartApiItem[] }).fast_items;

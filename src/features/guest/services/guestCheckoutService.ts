@@ -1,4 +1,16 @@
 import type { ApiResponse } from "@/shared/types";
+import {
+  GUEST_CHECKOUT,
+  guestOrderEndpoint,
+  guestOrderPaymentEndpoint,
+  guestOrderTokensEndpoint,
+} from "../lib/endpoints";
+import {
+  normalizeGuestCheckout,
+  normalizeGuestOrder,
+  normalizeGuestOrderTokens,
+  normalizeGuestPayment,
+} from "../lib/contract";
 import type {
   GuestCheckoutRequest,
   GuestCheckoutResult,
@@ -9,16 +21,26 @@ import type {
 } from "../types";
 import { guestFetch } from "./guestFetch";
 
-const BASE = "/general/guest";
+/**
+ * Both header spellings are sent: the guide documents `X-Idempotency-Key`
+ * while the OAS/legacy builds read `Idempotency-Key`. The backend ignores the
+ * one it does not use, and retries keep the same value either way.
+ */
+function idempotencyHeaders(key: string): Record<string, string> {
+  return {
+    "Idempotency-Key": key,
+    "X-Idempotency-Key": key,
+  };
+}
 
 /**
- * Guest checkout / order access (contract §5–§6).
+ * Guest checkout / order access.
  *
- * `checkout` and `initiatePayment` must carry an `Idempotency-Key` — the
- * caller generates/reuses it via `utils/idempotency`. CSRF is injected by the
- * proxy or `guestFetch`. `getOrder` is cookie-owned (confirmation page);
- * access tokens can be re-issued for the owning browser when the raw tokens
- * were lost after a refresh.
+ * `checkout` and `initiatePayment` must carry an idempotency key — the caller
+ * generates/reuses it via `utils/idempotency`. CSRF is injected by the proxy
+ * or `guestFetch`. `getOrder` is cookie-owned (confirmation page); access
+ * tokens can be re-issued for the owning browser when the raw tokens were
+ * lost after a refresh.
  */
 export const guestCheckoutService = {
   checkout: (
@@ -26,12 +48,12 @@ export const guestCheckoutService = {
     idempotencyKey: string,
     lang?: string,
   ): Promise<GuestCheckoutResult> =>
-    guestFetch<ApiResponse<GuestCheckoutResult>>(`${BASE}/checkout`, {
+    guestFetch<ApiResponse<unknown>>(GUEST_CHECKOUT, {
       method: "POST",
       body: JSON.stringify(payload),
-      headers: { "Idempotency-Key": idempotencyKey },
+      headers: idempotencyHeaders(idempotencyKey),
       lang,
-    }).then((response) => response.data),
+    }).then((response) => normalizeGuestCheckout(response.data)),
 
   initiatePayment: (
     orderId: number,
@@ -39,33 +61,26 @@ export const guestCheckoutService = {
     idempotencyKey: string,
     lang?: string,
   ): Promise<GuestPaymentResult> =>
-    guestFetch<ApiResponse<GuestPaymentResult>>(
-      `${BASE}/orders/${orderId}/payment`,
-      {
-        method: "POST",
-        body: JSON.stringify(payment),
-        headers: { "Idempotency-Key": idempotencyKey },
-        lang,
-      },
-    ).then((response) => response.data),
+    guestFetch<ApiResponse<unknown>>(guestOrderPaymentEndpoint(orderId), {
+      method: "POST",
+      body: JSON.stringify(payment),
+      headers: idempotencyHeaders(idempotencyKey),
+      lang,
+    }).then((response) => normalizeGuestPayment(response.data)),
 
   /** Cookie-owned order fetch for the confirmation page. */
-  getOrder: (
-    orderId: number,
-    lang?: string,
-  ): Promise<{ order: GuestOrder; can_cancel: boolean }> =>
-    guestFetch<ApiResponse<{ order: GuestOrder; can_cancel: boolean }>>(
-      `${BASE}/orders/${orderId}`,
-      { lang },
-    ).then((response) => response.data),
+  getOrder: (orderId: number, lang?: string): Promise<GuestOrder> =>
+    guestFetch<ApiResponse<unknown>>(guestOrderEndpoint(orderId), {
+      lang,
+    }).then((response) => normalizeGuestOrder(response.data)),
 
-  /** Re-issues public tokens for the owning browser (contract §5). */
+  /** Re-issues public tokens for the owning browser. */
   issueAccessTokens: (
     orderId: number,
     lang?: string,
   ): Promise<GuestOrderTokensResult> =>
-    guestFetch<ApiResponse<GuestOrderTokensResult>>(
-      `${BASE}/orders/${orderId}/access-tokens`,
-      { method: "POST", lang },
-    ).then((response) => response.data),
+    guestFetch<ApiResponse<unknown>>(guestOrderTokensEndpoint(orderId), {
+      method: "POST",
+      lang,
+    }).then((response) => normalizeGuestOrderTokens(response.data)),
 };

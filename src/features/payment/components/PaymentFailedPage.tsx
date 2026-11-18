@@ -1,17 +1,36 @@
+import { cookies } from "next/headers";
 import { getTranslations } from "next-intl/server";
 import { XCircle } from "lucide-react";
 import Link from "next/link";
 import Breadcrumb from "@/components/ui/Breadcrumb";
+import { SESSION_COOKIE_NAME } from "@/features/auth/session/constants";
+import { GuestPaymentReturn } from "@/features/guest";
+import { isGuestCheckoutEnabled } from "@/shared/constants/guestCheckout";
 
 interface PaymentFailedPageProps {
   locale: string;
   error?: string;
+  /** `order_id` from the gateway return URL (used to forward guests). */
+  orderId?: string;
 }
 
 export async function PaymentFailedPage({
   locale,
   error,
+  orderId,
 }: PaymentFailedPageProps) {
+  const cookieStore = await cookies();
+  const hasSession = Boolean(cookieStore.get(SESSION_COOKIE_NAME)?.value);
+
+  // Guests continue on their confirmation page, where payment can be retried.
+  if (!hasSession && isGuestCheckoutEnabled()) {
+    return (
+      <div className="py-6">
+        <GuestPaymentReturn orderId={orderId} outcome="failed" />
+      </div>
+    );
+  }
+
   const t = await getTranslations({ locale, namespace: "payment" });
   const tb = await getTranslations({ locale, namespace: "header.breadcrumb" });
 

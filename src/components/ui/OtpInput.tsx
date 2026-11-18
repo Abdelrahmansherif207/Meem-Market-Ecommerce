@@ -38,7 +38,7 @@ export default function OtpInput({
   }, [autoFocus]);
 
   function updateValue(input: string, index: number) {
-    const cleaned = input.replace(/D/g, "");
+    const cleaned = input.replace(/\D/g, "");
     if (!cleaned && input !== "") return;
     if (!cleaned) {
       const next = value.split("");
@@ -85,7 +85,7 @@ export default function OtpInput({
   }
 
   function handlePaste(event: React.ClipboardEvent<HTMLInputElement>) {
-    const clipboard = event.clipboardData.getData("text").replace(/D/g, "").slice(0, length);
+    const clipboard = event.clipboardData.getData("text").replace(/\D/g, "").slice(0, length);
     if (!clipboard) return;
     event.preventDefault();
     const digitsArr = value.split("").slice(0, length);
