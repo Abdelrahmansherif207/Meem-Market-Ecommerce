@@ -82,8 +82,9 @@ function apiBridge(request: NextRequest) {
   const token = request.cookies.get(SESSION_COOKIE_NAME)?.value;
   // Guest CSRF double-submit: the csrf cookie is scoped to `Path=/api`, so
   // page JS can never read it — the proxy attaches it as the `X-CSRF-Token`
-  // header for every proxied guest call instead. Names vary by deployment
-  // (catch_* here, meem_* in the contract default).
+  // header for every proxied guest call instead. The cookie value is
+  // authoritative: it always overrides any client-supplied X-CSRF-Token.
+  // Names vary by deployment (catch_* here, meem_* in the contract default).
   const guestCsrf = GUEST_CSRF_COOKIE_CANDIDATES.find(
     (name) => name && request.cookies.get(name)?.value,
   );
@@ -109,7 +110,7 @@ function apiBridge(request: NextRequest) {
   if (token && !headers.has("Authorization")) {
     headers.set("Authorization", `Bearer ${token}`);
   }
-  if (guestCsrfValue && !headers.has(GUEST_CSRF_HEADER)) {
+  if (guestCsrfValue) {
     headers.set(GUEST_CSRF_HEADER, guestCsrfValue);
   }
 

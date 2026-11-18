@@ -7,7 +7,6 @@ import CatchHeroVideoPlayer from "./CatchHeroVideoPlayer";
 
 interface CatchPromotionVideoProps {
   video: PromotionVideo;
-  poster: string;
   title?: string;
   videoClassName?: string;
   /** Start playback automatically when visible (CMS `autoplay`). */
@@ -29,7 +28,6 @@ interface CatchPromotionVideoProps {
  */
 export default function CatchPromotionVideo({
   video,
-  poster,
   title,
   videoClassName,
   autoplay = true,
@@ -41,7 +39,6 @@ export default function CatchPromotionVideo({
       <CatchHeroVideoPlayer
         desktopSrc={video.src}
         mobileSrc={video.src}
-        poster={poster}
         videoClassName={videoClassName}
         autoplay={autoplay}
         loop={loop}

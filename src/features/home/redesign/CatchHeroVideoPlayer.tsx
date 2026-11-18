@@ -11,7 +11,6 @@ const VISIBILITY_THRESHOLD = 0.2;
 interface CatchHeroVideoPlayerProps {
   desktopSrc: string;
   mobileSrc: string;
-  poster: string;
   className?: string;
   /** Extra classes for the `<video>` itself (crop, object-position). */
   videoClassName?: string;
@@ -27,12 +26,11 @@ interface CatchHeroVideoPlayerProps {
  * Campaign hero video. The art-directed source is chosen after mount so the
  * server HTML stays identical for both breakpoints. Playback behavior comes
  * from the CMS hero settings; it pauses off-screen or when the tab is hidden,
- * and never autoplays for reduced-motion users (they get the poster instead).
+ * and never autoplays for reduced-motion users (they see the paused frame).
  */
 export default function CatchHeroVideoPlayer({
   desktopSrc,
   mobileSrc,
-  poster,
   className,
   videoClassName,
   autoplay = true,
@@ -119,7 +117,6 @@ export default function CatchHeroVideoPlayer({
       <video
         ref={videoRef}
         src={source ?? undefined}
-        poster={poster}
         muted={muted}
         loop={loop}
         playsInline

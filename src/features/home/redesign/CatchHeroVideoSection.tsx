@@ -8,7 +8,6 @@ import CatchPromotionVideo from "./CatchPromotionVideo";
 const HERO_HREF = "/sliders/new-collection-s2";
 const DESKTOP_VIDEO_SRC = "/hero/catch-hero-desktop.mp4";
 const MOBILE_VIDEO_SRC = "/hero/catch-hero-mobile.mp4";
-const HERO_POSTER_SRC = "/hero/catch-hero-poster.jpg";
 
 interface CatchHeroVideoSectionProps {
   locale: string;
@@ -41,7 +40,6 @@ export default async function CatchHeroVideoSection({
           {promotionVideo ? (
             <CatchPromotionVideo
               video={promotionVideo}
-              poster={HERO_POSTER_SRC}
               title={title || t("title")}
               videoClassName="md:object-[center_40%]"
             />
@@ -49,7 +47,6 @@ export default async function CatchHeroVideoSection({
             <CatchHeroVideoPlayer
               desktopSrc={DESKTOP_VIDEO_SRC}
               mobileSrc={MOBILE_VIDEO_SRC}
-              poster={HERO_POSTER_SRC}
               videoClassName="md:object-[center_40%]"
             />
           )}

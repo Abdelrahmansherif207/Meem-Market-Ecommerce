@@ -11,7 +11,6 @@ import type { SectionFrontSetting } from "../types";
 const DEFAULT_CTA_HREF = "/sliders/new-collection-s2";
 const DEFAULT_VIDEO_DESKTOP = "/hero/catch-hero-desktop.mp4";
 const DEFAULT_VIDEO_MOBILE = "/hero/catch-hero-mobile.mp4";
-const DEFAULT_POSTER = "/hero/catch-hero-poster.jpg";
 
 interface CatchHeroSectionProps {
   locale: string;
@@ -61,12 +60,14 @@ export default async function CatchHeroSection({
   const cmsVideoMobile = front?.video_mobile?.trim() || cmsVideoDesktop;
   const videoDesktop = cmsVideoDesktop || DEFAULT_VIDEO_DESKTOP;
   const videoMobile = cmsVideoMobile || DEFAULT_VIDEO_MOBILE;
-  const poster = front?.poster?.trim() || DEFAULT_POSTER;
   const imageDesktop =
-    front?.image_desktop?.trim() || poster || videoDesktop;
+    front?.image_desktop?.trim() || front?.image_mobile?.trim() || "";
   const imageMobile = front?.image_mobile?.trim() || imageDesktop;
 
-  const renderImage = front?.media_type === "image";
+  // Only render artwork when the CMS actually supplies an image; otherwise
+  // fall through to the video sources instead of placing an .mp4 in an <img>.
+  const renderImage =
+    front?.media_type === "image" && imageDesktop.length > 0;
   // Priority: CMS artwork → CMS video → settings promotion video → local cut.
   const renderPromotionVideo =
     !renderImage && !cmsVideoDesktop && Boolean(promotionVideo);
@@ -131,7 +132,6 @@ export default async function CatchHeroSection({
           ) : renderPromotionVideo && promotionVideo ? (
             <CatchPromotionVideo
               video={promotionVideo}
-              poster={poster}
               title={heading}
               videoClassName="md:object-[center_40%]"
               autoplay={autoplay}
@@ -142,7 +142,6 @@ export default async function CatchHeroSection({
             <CatchHeroVideoPlayer
               desktopSrc={videoDesktop}
               mobileSrc={videoMobile}
-              poster={poster}
               videoClassName="md:object-[center_40%]"
               autoplay={autoplay}
               loop={loop}
