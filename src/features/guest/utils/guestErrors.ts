@@ -20,6 +20,13 @@ export async function runWithGuestSession<T>(
 
     useGuestSessionStore.getState().reset();
     await useGuestSessionStore.getState().ensureSession(locale);
+
+    // ensureSession records the init failure instead of throwing so mounts
+    // stay quiet. Rethrow it here so the real cause (e.g. 429) reaches the
+    // caller's error message rather than the generic retried request error.
+    const { status, lastError } = useGuestSessionStore.getState();
+    if (status === "failed") throw lastError ?? error;
+
     return operation();
   }
 }

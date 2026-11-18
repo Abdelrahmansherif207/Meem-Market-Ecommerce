@@ -8,6 +8,7 @@ import { useServerCartStore } from "../store/useServerCartStore";
 import { cartService } from "../services/cartService";
 import { guestCartService } from "@/features/guest/services/guestCartService";
 import { runWithGuestSession } from "@/features/guest/utils/guestErrors";
+import type { GuestCart, GuestCartLine } from "@/features/guest/types";
 
 type ScheduledCartLine = {
   id: number;
@@ -17,7 +18,7 @@ type ScheduledCartLine = {
   shipping_method?: string | null;
 };
 
-/** Finds the scheduled line for a product (guests only use scheduled here). */
+/** Finds the scheduled line for a product in an authenticated cart. */
 function findScheduledLine(
   cart: { normal_items?: ScheduledCartLine[] } | null,
   productId: number,
@@ -29,6 +30,14 @@ function findScheduledLine(
         (item.shipping_method ?? "").toLowerCase() === "scheduled",
     ) ?? null
   );
+}
+
+/** Finds the (single) guest line for a product; guests only have one cart. */
+function findGuestLine(
+  cart: GuestCart | null,
+  productId: number,
+): GuestCartLine | null {
+  return cart?.items.find((item) => item.productId === productId) ?? null;
 }
 
 /**
@@ -116,7 +125,7 @@ export function useCartActions(productId: number) {
                 locale,
               ),
             );
-            setTotalQuantity(cart.total_quantity);
+            setTotalQuantity(cart?.totalQuantity ?? 0);
           } catch {
             rollback(item.quantity);
           } finally {
@@ -176,7 +185,7 @@ export function useCartActions(productId: number) {
               locale,
             ),
           );
-          setTotalQuantity(cart.total_quantity);
+          setTotalQuantity(cart?.totalQuantity ?? 0);
         } catch {
           rollback(1);
         } finally {
@@ -222,7 +231,7 @@ export function useCartActions(productId: number) {
         try {
           const cart = await runWithGuestSession(locale, async () => {
             const current = await guestCartService.getCart(locale);
-            const line = findScheduledLine(current, productId);
+            const line = findGuestLine(current, productId);
             if (!line) throw new Error("Guest cart line not found");
             // `quantity` is a delta, not the target quantity.
             return line.quantity <= 1
@@ -233,14 +242,14 @@ export function useCartActions(productId: number) {
                       product_id: productId,
                       quantity: 1,
                       operation: "decrement",
-                      product_variant_id: line.product_variant_id ?? null,
+                      product_variant_id: line.productVariantId ?? null,
                       shipping_method: "scheduled",
                     },
                   },
                   locale,
                 );
           });
-          setTotalQuantity(cart?.total_quantity ?? 0);
+          setTotalQuantity(cart?.totalQuantity ?? 0);
         } catch {
           rollback(-1);
         } finally {

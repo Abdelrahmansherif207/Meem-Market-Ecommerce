@@ -6,6 +6,7 @@ import { SESSION_COOKIE_NAME } from "@/features/auth/session/constants";
 import {
   GUEST_CSRF_COOKIE_CANDIDATES,
   GUEST_CSRF_HEADER,
+  isGuestCheckoutEnabled,
 } from "@/shared/constants/guestCheckout";
 
 const intlMiddleware = createMiddleware(routing);
@@ -14,6 +15,29 @@ const KNOWN_LOCALES = routing.locales as readonly string[];
 
 /** Second path segments that require an authenticated session. */
 const PROTECTED_SEGMENTS = ["profile", "checkout", "payment"];
+
+/**
+ * Public sub-routes under a protected segment. Payment gateway returns land
+ * here for guests too — the feature then forwards them to their guest order
+ * confirmation (the backend verifies the payment state).
+ */
+const PUBLIC_SUB_SEGMENTS: Record<string, readonly string[]> = {
+  payment: ["success", "failed"],
+};
+
+function isProtectedRoute(parts: string[]): boolean {
+  const routeSegment = parts[2];
+  if (!routeSegment || !PROTECTED_SEGMENTS.includes(routeSegment)) {
+    return false;
+  }
+  const publicChildren = PUBLIC_SUB_SEGMENTS[routeSegment];
+  if (publicChildren && parts[3] && publicChildren.includes(parts[3])) {
+    // Gateway return pages only need to be public for the guest flow; when the
+    // flag is off, anonymous visitors still authenticate first.
+    return !isGuestCheckoutEnabled();
+  }
+  return true;
+}
 
 /** Replicates the committed intl-middleware matcher exclusions. */
 function isBypassPath(pathname: string): boolean {
@@ -65,7 +89,7 @@ export default function proxy(request: NextRequest) {
       return NextResponse.redirect(new URL(`/${localeSegment}${target}`, request.url));
     }
 
-    if (PROTECTED_SEGMENTS.includes(routeSegment) && !hasSession) {
+    if (isProtectedRoute(parts) && !hasSession) {
       const returnTo = encodeURIComponent(
         pathname.replace(/^\/[^/]+/, "") + request.nextUrl.search,
       );

@@ -9,7 +9,7 @@ import { ApiError } from "@/shared/lib/api";
 import { guestCartService } from "../services/guestCartService";
 import { guestSessionService } from "../services/guestSessionService";
 import { useGuestSessionStore } from "../store/useGuestSessionStore";
-import type { GuestCartItem } from "../types";
+import type { GuestCart } from "../types";
 
 const MERGE_ATTEMPTS = 3;
 const MERGE_RETRY_DELAY_MS = 1000;
@@ -48,53 +48,60 @@ export function GuestSessionProvider() {
 
     let cancelled = false;
 
-    const mergeGuestCart = async (): Promise<GuestCartItem[] | null> => {
+    const readGuestCart = async (): Promise<
+      GuestCart | null | "unavailable"
+    > => {
       for (let attempt = 1; attempt <= MERGE_ATTEMPTS; attempt += 1) {
         try {
-          const cart = await guestCartService.getCart(locale);
-          if (cancelled) return null;
-          return cart?.normal_items ?? [];
+          return await guestCartService.getCart(locale);
         } catch (error) {
           // A missing/expired guest session means there is nothing to merge.
-          if (error instanceof ApiError && error.status === 401) return [];
-          if (attempt === MERGE_ATTEMPTS) return null;
+          if (error instanceof ApiError && error.status === 401) return null;
+          if (attempt === MERGE_ATTEMPTS) return "unavailable";
           await delay(MERGE_RETRY_DELAY_MS * attempt);
         }
       }
-      return null;
+      return "unavailable";
     };
 
     (async () => {
-      const items = await mergeGuestCart();
+      const cart = await readGuestCart();
       if (cancelled) return;
+      // Never revoke when the guest cart could not be read — that would
+      // discard items without a successful merge.
+      if (cart === "unavailable") {
+        useServerCartStore.getState().fetchCartCount(locale);
+        return;
+      }
 
-      let merged = items !== null;
-      if (items && items.length > 0) {
+      let merged = true;
+
+      if (cart && cart.items.length > 0) {
         try {
-          // Bulk endpoint is scheduled-only; fast lines migrate as scheduled.
+          // One bulk call moves the guest cart into the account; Catch uses a
+          // single scheduled-delivery group, so every line carries that
+          // `shipping_method`.
           await cartService.addBulkToCart(
             {
-              items: items.map((item) => ({
-                product_id: item.product_id,
+              items: cart.items.map((item) => ({
+                product_id: item.productId,
                 quantity: item.quantity,
-                product_variant_id: item.product_variant_id ?? null,
-                shipping_method: "scheduled" as const,
+                product_variant_id: item.productVariantId,
+                shipping_method: item.shippingMethod,
               })),
             },
             locale,
           );
         } catch {
-          // Keep the guest session: the next attempt can retry the migration.
+          // Keep the guest session: a later login can retry the migration.
           merged = false;
         }
 
-        // The items are now in the authenticated cart. Clearing is
-        // best-effort — revoking the session also drops the guest cart.
         if (merged) {
           try {
             await guestCartService.clear(locale);
           } catch {
-            // Ignored — see above.
+            // Best-effort — revoking the session also drops the guest cart.
           }
         }
       }
@@ -105,9 +112,11 @@ export function GuestSessionProvider() {
         try {
           await guestSessionService.revoke(locale);
         } catch {
-          // Revoking is best-effort; the local session is cleared regardless.
+          // Revoking is best-effort; local state is cleared regardless.
         }
-        if (!cancelled) useGuestSessionStore.getState().reset();
+        if (!cancelled) {
+          useGuestSessionStore.getState().reset();
+        }
       }
 
       // The authenticated badge may have been fetched before the merge
