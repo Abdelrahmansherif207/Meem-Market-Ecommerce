@@ -11,9 +11,8 @@ interface CatchProductShelfSectionProps {
 }
 
 /**
- * Catch Beauty product shelf: CMS title + a fluid product rail. Data flow is
- * identical to the previous ProductSliderSection (fetchSectionData →
- * toProductItem → currency island).
+ * Catch Beauty product shelf: CMS title + a fluid product rail. Data flow:
+ * fetchSectionData → toProductItem → currency island.
  */
 export default async function CatchProductShelfSection({
   title,

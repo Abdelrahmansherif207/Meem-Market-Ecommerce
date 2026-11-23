@@ -107,8 +107,7 @@ function getSectionSkeleton(type: string, setting?: SectionFrontSetting): React.
 }
 
 /**
- * Screen-matched replacement for the shared SectionSuspense: same
- * streaming + error-boundary pattern, Catch design components.
+ * Streaming + error-boundary wrapper shared by the home page and CMS pages.
  */
 export function CatchSectionSuspense({
   section,

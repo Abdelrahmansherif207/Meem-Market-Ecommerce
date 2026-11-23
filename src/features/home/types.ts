@@ -13,26 +13,6 @@ export type LocalizedText =
       ar?: string;
     };
 
-export interface BannerItem {
-  id: string;
-  imageSrc: string;
-  alt: string;
-  title?: string;
-  href?: string;
-  priority?: boolean;
-}
-
-export interface CardSlideItem {
-  id: number | string;
-  image: {
-    desktop: string;
-    mobile: string;
-  };
-  title: string;
-  borderColor?: string;
-  href?: string;
-}
-
 export interface ApiFlashSale {
   id: number;
   name: string;
@@ -91,15 +71,6 @@ export interface ApiProduct {
  */
 export type ProductItem = ProductCardItem;
 
-export interface BannerProps {
-  type?: string;
-  title?: string;
-  locale: string;
-  promotion?: Promotion;
-  setting?: SectionFrontSetting;
-  endpoint?: string;
-}
-
 export interface BannerArrowsProps {
   onPrevious: () => void;
   onNext: () => void;
@@ -111,63 +82,6 @@ export interface BannerArrowsProps {
   isRtl?: boolean;
   variant?: "hero" | "card";
   strokeWidth?: number;
-}
-
-export interface BannerPaginationProps {
-  total: number;
-  currentIndex: number;
-  onSelect: (index: number) => void;
-  className?: string;
-}
-
-export interface CardSliderProps {
-  title?: string;
-  items: CardSlideItem[];
-  autoplay?: boolean;
-  sliderSpeed?: number;
-  className?: string;
-  cardClassName?: string;
-  imageClassName?: string;
-  slideSizes?: string;
-  showArrows?: boolean;
-  slidesPerView?: number;
-}
-
-export interface CardGridProps {
-  title?: string;
-  items: CardSlideItem[];
-  className?: string;
-  gridClassName?: string;
-  cardClassName?: string;
-  imageClassName?: string;
-  slideSizes?: string;
-}
-
-export interface ContentSectionProps {
-  title: string;
-  type: string;
-  locale: string;
-  setting?: SectionFrontSetting;
-  endpoint?: string;
-}
-
-export interface ContentItemProps {
-  item: HomeCategory;
-  isCircle?: boolean;
-}
-
-export interface ProductSliderProps {
-  title?: string;
-  items: ProductItem[];
-  columnsCount?: number;
-  badgeText?: string;
-  showTimer?: boolean;
-  timerEndAt?: string;
-  theme?: "light" | "dark";
-  autoplay?: boolean;
-  sliderSpeed?: number;
-  /** When true, card price numbers render as skeleton bars. */
-  pricesLoading?: boolean;
 }
 
 export interface SectionFrontSetting {
@@ -241,28 +155,6 @@ export interface HomeContentPage {
   sections: HomePageSection[];
 }
 
-export interface HeroBannerImage {
-  desktop: string;
-  mobile: string;
-}
-
-export interface HeroBanner {
-  id: number;
-  title: string;
-  slug: string;
-  description: string;
-  image: HeroBannerImage;
-  status: boolean;
-}
-
-export interface HeroSwiperProps {
-  type: string;
-  title?: string;
-  locale: string;
-  setting?: SectionFrontSetting;
-  endpoint?: string;
-}
-
 export interface PromotionImage {
   desktop: string;
   mobile: string;
@@ -283,28 +175,6 @@ export interface ApiBrandWithProducts {
   image: PromotionImage;
   status: boolean;
   products: ApiProduct[];
-}
-
-export interface ApiCoupon {
-  id: number;
-  code: string;
-  name: string;
-  image: {
-    desktop: string;
-    mobile: string;
-  };
-  borderColor: string;
-  borderless: boolean;
-  discount: string;
-  discount_type: string;
-  max_discount_amount: string | null;
-  start_date: string;
-  end_date: string;
-  limiter: number;
-  used: number;
-  status: boolean;
-  is_valid: boolean;
-  created_at: string;
 }
 
 

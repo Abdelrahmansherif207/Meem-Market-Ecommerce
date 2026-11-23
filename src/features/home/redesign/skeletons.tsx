@@ -251,3 +251,24 @@ export function CatchCouponsSkeleton() {
     </section>
   );
 }
+
+/**
+ * Route-level placeholder for `app/[locale]/loading.tsx`, built from the
+ * redesign skeletons so navigation never pulls in the retired home sections.
+ */
+export function CatchPageSkeleton({ sections = 4 }: { sections?: number }) {
+  const blocks = [
+    <CatchHeroSkeleton key="hero" />,
+    <CatchShelfSkeleton key="shelf" />,
+    <CatchCategoriesSkeleton key="categories" />,
+    <CatchCouponsSkeleton key="coupons" />,
+  ];
+
+  return (
+    <main className="mx-auto flex w-full max-w-[1440px] flex-col gap-y-10 px-3 py-6 sm:gap-y-12 sm:px-4 lg:gap-y-16 lg:px-8">
+      {Array.from({ length: sections }).map((_, i) => (
+        <div key={i}>{blocks[i % blocks.length]}</div>
+      ))}
+    </main>
+  );
+}

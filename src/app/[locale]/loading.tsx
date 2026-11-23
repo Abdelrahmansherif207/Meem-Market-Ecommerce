@@ -1,5 +1,5 @@
-import { PageSkeleton } from "@/features/pages/components/SectionRenderer";
+import { CatchPageSkeleton } from "@/features/home/redesign/skeletons";
 
 export default function Loading() {
-  return <PageSkeleton />;
+  return <CatchPageSkeleton />;
 }
