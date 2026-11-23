@@ -81,7 +81,7 @@ export interface CategoryProductsResponse {
 }
 
 /** Laravel cursor paginator `links` — no totals, only navigation URLs. */
-export interface CursorLinks {
+interface CursorLinks {
   path?: string;
   per_page?: number;
   /** Absolute backend URL for the next page; `null` = end of list. */
