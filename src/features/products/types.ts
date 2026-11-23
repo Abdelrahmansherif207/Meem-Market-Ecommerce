@@ -9,6 +9,8 @@ import type { ProductCurrency } from "@/features/currencies";
 export interface ProductCardItem {
   id: number;
   image: string;
+  /** Second product image revealed on card hover (instant swap). */
+  hoverImage?: string;
   title: string;
   price: number;
   originalPrice: number;

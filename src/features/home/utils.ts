@@ -1,4 +1,5 @@
 import type { ApiProduct, LocalizedText, ProductItem } from "./types";
+import { getHoverImage } from "@/features/products/utils";
 
 /**
  * Resolve CMS front-setting copy for the active locale. Falls back to the
@@ -27,13 +28,14 @@ function slugify(name: string): string {
 
 export function toProductItem(p: ApiProduct): ProductItem {
   const originalImage =
-    Object.values(p.image.original)[0] || p.image.thumbnail;
+    Object.values(p.image?.original ?? {})[0] || p.image?.thumbnail || "";
   const hasFlashSale = p.price_after_flash_sale != null;
 
   return {
     id: p.id,
     slug: p.slug ?? `${slugify(p.name)}-${p.id}`,
     image: originalImage,
+    hoverImage: getHoverImage(p.image, originalImage),
     title: p.name,
     price: hasFlashSale ? p.price_after_flash_sale! : (p.current_price ?? p.price_after_discount ?? p.price ?? 0),
     originalPrice: p.price ?? 0,

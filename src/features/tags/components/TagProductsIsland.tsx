@@ -2,6 +2,7 @@
 
 import { useCallback } from "react";
 import ProductCard from "@/features/products/components/ProductCard";
+import { getHoverImage } from "@/features/products/utils";
 import { getCategoryPageDataAction } from "@/features/categories/actions/categoryPageData";
 import { useCurrencyRefetch } from "@/features/currencies";
 import type { CategoryProduct } from "@/features/categories/types";
@@ -47,6 +48,10 @@ export function TagProductsIsland({
             id: product.id,
             title: product.name,
             image: product.image?.thumbnail ?? "",
+            hoverImage: getHoverImage(
+              product.image,
+              product.image?.thumbnail ?? "",
+            ),
             price:
               product.price_after_flash_sale ??
               product.price_after_discount ??
