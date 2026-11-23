@@ -38,6 +38,67 @@ function titleBrand(title: string): string {
   return first ?? "";
 }
 
+const CARD_IMAGE_SIZES =
+  "(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 20vw";
+
+const CARD_IMAGE_CLASS =
+  "object-contain p-3 transition-transform duration-300 group-hover:scale-[1.03]";
+
+/**
+ * Square product media. The second image is mounted up-front (so the browser
+ * caches it) and revealed with a plain opacity flip — no fade, so the swap is
+ * instant. `showHover` is owned by the card instance, so state is per product
+ * and mouse-leave restores the primary image.
+ */
+function ProductCardImage({
+  src,
+  hoverSrc,
+  alt,
+  showHover,
+}: {
+  src: string;
+  hoverSrc?: string;
+  alt: string;
+  showHover: boolean;
+}) {
+  const hoverImage = hoverSrc && hoverSrc !== src ? hoverSrc : undefined;
+  const showSecondImage = Boolean(hoverImage) && showHover;
+
+  return (
+    <div className="relative aspect-square w-full">
+      {src ? (
+        <>
+          <Image
+            src={src}
+            alt={alt}
+            fill
+            sizes={CARD_IMAGE_SIZES}
+            className={cn(CARD_IMAGE_CLASS, showSecondImage && "opacity-0")}
+          />
+          {hoverImage ? (
+            <Image
+              src={hoverImage}
+              alt=""
+              aria-hidden
+              fill
+              sizes={CARD_IMAGE_SIZES}
+              className={cn(
+                CARD_IMAGE_CLASS,
+                showSecondImage ? "opacity-100" : "opacity-0",
+              )}
+            />
+          ) : null}
+        </>
+      ) : (
+        <div
+          className="absolute inset-3 rounded-lg bg-catch-surface"
+          aria-hidden
+        />
+      )}
+    </div>
+  );
+}
+
 /**
  * Canonical Catch Beauty product card.
  *
@@ -66,6 +127,10 @@ export default function ProductCard({
     initialInWishlist: item.inWishlist,
   });
   const [animating, setAnimating] = useState(false);
+  const [isImageHovered, setIsImageHovered] = useState(false);
+  const hasHoverImage = Boolean(
+    item.hoverImage && item.hoverImage !== item.image,
+  );
 
   const safePrice = item.price ?? 0;
   const safeOriginalPrice = item.originalPrice ?? 0;
@@ -110,6 +175,10 @@ export default function ProductCard({
 
   return (
     <article
+      onMouseEnter={() => {
+        if (hasHoverImage) setIsImageHovered(true);
+      }}
+      onMouseLeave={() => setIsImageHovered(false)}
       className={cn(
         "group relative h-full overflow-hidden rounded-2xl border border-catch-border-soft bg-white transition-[box-shadow,transform] duration-200 hover:-translate-y-0.5 hover:shadow-elev-2",
         isList
@@ -175,22 +244,12 @@ export default function ProductCard({
             : "mx-3 mt-2",
         )}
       >
-        <div className="relative aspect-square w-full">
-          {item.image ? (
-            <Image
-              src={item.image}
-              alt={item.title}
-              fill
-              sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 20vw"
-              className="object-contain p-3 transition-transform duration-300 group-hover:scale-[1.03]"
-            />
-          ) : (
-            <div
-              className="absolute inset-3 rounded-lg bg-catch-surface"
-              aria-hidden
-            />
-          )}
-        </div>
+        <ProductCardImage
+          src={item.image}
+          hoverSrc={item.hoverImage}
+          alt={item.title}
+          showHover={isImageHovered}
+        />
 
         <div className="absolute bottom-2 end-2 z-20">
           {item.isInStock === false && quantity === 0 ? (

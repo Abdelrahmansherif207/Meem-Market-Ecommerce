@@ -1,5 +1,6 @@
 import { homePageService } from "../services/homePageService";
 import { flashSaleService } from "@/features/flash-sales/services/flashSaleService";
+import { getHoverImage } from "@/features/products/utils";
 import { resolveLocalizedText } from "../utils";
 import { normalizeList } from "./normalize";
 import CatchShelfIsland from "./CatchShelfIsland";
@@ -8,9 +9,12 @@ import type { SectionFrontSetting, ApiFlashSale, ProductItem } from "../types";
 import type { FlashSaleProduct } from "@/features/flash-sales/types";
 
 function flashProductToProductItem(p: FlashSaleProduct): ProductItem {
+  const image =
+    Object.values(p.image?.original ?? {})[0] || p.image?.thumbnail || "";
   return {
     id: p.id,
-    image: Object.values(p.image.original)[0] || p.image.thumbnail,
+    image,
+    hoverImage: getHoverImage(p.image, image),
     title: p.name,
     price: p.current_price,
     originalPrice: p.price,

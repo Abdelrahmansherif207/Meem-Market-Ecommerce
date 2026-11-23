@@ -1,6 +1,7 @@
 import type { CSSProperties } from "react";
 import { Link } from "@/i18n/navigation";
 import { CampaignImage } from "@/components/ui/CampaignImage";
+import { getHoverImage } from "@/features/products/utils";
 import { homePageService } from "../services/homePageService";
 import { normalizeList } from "./normalize";
 import CatchHeroSlider from "./CatchHeroSlider";
@@ -21,9 +22,12 @@ interface CatchHeroSliderSectionProps {
 }
 
 function sliderProductToProductItem(p: SliderProduct): ProductItem {
+  const image =
+    Object.values(p.image?.original ?? {})[0] || p.image?.thumbnail || "";
   return {
     id: p.id,
-    image: Object.values(p.image.original)[0] || p.image.thumbnail,
+    image,
+    hoverImage: getHoverImage(p.image, image),
     title: p.name,
     price: p.current_price,
     originalPrice: p.price,

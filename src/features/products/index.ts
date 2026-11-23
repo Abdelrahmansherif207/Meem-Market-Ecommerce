@@ -6,6 +6,7 @@ export {
   getDisplayPrice,
   getOriginalPrice,
   getDiscountPercent,
+  getHoverImage,
   getVariantPriceRange,
 } from "./utils";
 export type {

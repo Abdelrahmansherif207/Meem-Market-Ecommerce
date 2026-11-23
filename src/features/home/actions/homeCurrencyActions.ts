@@ -2,6 +2,7 @@
 
 import { homePageService } from "../services/homePageService";
 import { flashSaleService } from "@/features/flash-sales/services/flashSaleService";
+import { getHoverImage } from "@/features/products/utils";
 import { toProductItem } from "../utils";
 import type {
   ApiBrandWithProducts,
@@ -32,9 +33,12 @@ function normalizeProducts(
 }
 
 function flashProductToProductItem(p: FlashSaleProduct): ProductItem {
+  const image =
+    Object.values(p.image?.original ?? {})[0] || p.image?.thumbnail || "";
   return {
     id: p.id,
-    image: Object.values(p.image.original)[0] || p.image.thumbnail,
+    image,
+    hoverImage: getHoverImage(p.image, image),
     title: p.name,
     price: p.current_price,
     originalPrice: p.price,
@@ -90,25 +94,30 @@ export async function getBannerSectionItemsAction(
     BannerDetail | BannerDetail[]
   >(endpoint, locale, currency ?? undefined);
   const banner = Array.isArray(data) ? data[0] : data;
-  return (banner?.products ?? []).map((p) => ({
-    id: p.id,
-    image: Object.values(p.image.original)[0] || p.image.thumbnail,
-    title: p.name,
-    price: p.current_price,
-    originalPrice: p.price,
-    slug: p.slug,
-    hasVariants: p.has_variants,
-    isInStock: p.in_stock ?? p.quantity > 0,
-    flashSaleActive: p.flash_sale_active ?? false,
-    inWishlist: p.in_wishlist,
-    ratings: p.ratings,
-    reviewsCount: p.ratings_count,
-    brands: p.brands,
-    inStock: p.quantity,
-    stockQuantity: p.quantity,
-    tags: p.tags,
-    currency: p.currency,
-  }));
+  return (banner?.products ?? []).map((p) => {
+    const image =
+      Object.values(p.image?.original ?? {})[0] || p.image?.thumbnail || "";
+    return {
+      id: p.id,
+      image,
+      hoverImage: getHoverImage(p.image, image),
+      title: p.name,
+      price: p.current_price,
+      originalPrice: p.price,
+      slug: p.slug,
+      hasVariants: p.has_variants,
+      isInStock: p.in_stock ?? p.quantity > 0,
+      flashSaleActive: p.flash_sale_active ?? false,
+      inWishlist: p.in_wishlist,
+      ratings: p.ratings,
+      reviewsCount: p.ratings_count,
+      brands: p.brands,
+      inStock: p.quantity,
+      stockQuantity: p.quantity,
+      tags: p.tags,
+      currency: p.currency,
+    };
+  });
 }
 
 export interface BrandProductBlock {
