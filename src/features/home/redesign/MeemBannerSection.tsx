@@ -1,6 +1,7 @@
 import type { CSSProperties } from "react";
 import { Link } from "@/i18n/navigation";
 import { CampaignImage } from "@/components/ui/CampaignImage";
+import { getHoverImage } from "@/features/products/utils";
 import { homePageService } from "../services/homePageService";
 import MeemShelfIsland from "./MeemShelfIsland";
 import type { SectionFrontSetting } from "../types";
@@ -78,25 +79,30 @@ export default async function MeemBannerSection({
   const artWidth = artOverride?.width ?? 1500;
   const artHeight = artOverride?.height ?? 377;
 
-  const productItems: ProductItem[] = (products ?? []).map((p) => ({
-    id: p.id,
-    image: Object.values(p.image.original)[0] || p.image.thumbnail,
-    title: p.name,
-    price: p.current_price,
-    originalPrice: p.price,
-    slug: p.slug,
-    hasVariants: p.has_variants,
-    isInStock: p.in_stock ?? p.quantity > 0,
-    flashSaleActive: p.flash_sale_active ?? false,
-    inWishlist: p.in_wishlist,
-    ratings: p.ratings,
-    reviewsCount: p.ratings_count,
-    brands: p.brands,
-    inStock: p.quantity,
-    stockQuantity: p.quantity,
-    tags: p.tags,
-    currency: p.currency,
-  }));
+  const productItems: ProductItem[] = (products ?? []).map((p) => {
+    const image =
+      Object.values(p.image?.original ?? {})[0] || p.image?.thumbnail || "";
+    return {
+      id: p.id,
+      image,
+      hoverImage: getHoverImage(p.image, image),
+      title: p.name,
+      price: p.current_price,
+      originalPrice: p.price,
+      slug: p.slug,
+      hasVariants: p.has_variants,
+      isInStock: p.in_stock ?? p.quantity > 0,
+      flashSaleActive: p.flash_sale_active ?? false,
+      inWishlist: p.in_wishlist,
+      ratings: p.ratings,
+      reviewsCount: p.ratings_count,
+      brands: p.brands,
+      inStock: p.quantity,
+      stockQuantity: p.quantity,
+      tags: p.tags,
+      currency: p.currency,
+    };
+  });
 
   return (
     <section className="w-full space-y-6">

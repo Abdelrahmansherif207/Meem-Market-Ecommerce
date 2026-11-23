@@ -1,4 +1,5 @@
 import { homePageService } from "@/features/home/services/homePageService";
+import { getHoverImage } from "@/features/products/utils";
 import SectionTitle from "@/components/ui/SectionTitle";
 import ProductSliderIsland from "@/features/home/components/ProductSliderIsland";
 import type { BannerDetail } from "../types";
@@ -28,22 +29,27 @@ export default async function BannerSection({ endpoint, locale, title, setting }
 
   const { title: bannerTitle, description, image, products } = banner;
 
-  const productItems: ProductItem[] = (products ?? []).map((p) => ({
-    id: p.id,
-    image: Object.values(p.image.original)[0] || p.image.thumbnail,
-    title: p.name,
-    price: p.current_price,
-    originalPrice: p.price,
-    slug: p.slug,
-    hasVariants: p.has_variants,
-    isInStock: p.in_stock ?? p.quantity > 0,
-    flashSaleActive: p.flash_sale_active ?? false,
-    inWishlist: p.in_wishlist,
-    inStock: p.quantity,
-    stockQuantity: p.quantity,
-    tags: p.tags,
-    currency: p.currency,
-  }));
+  const productItems: ProductItem[] = (products ?? []).map((p) => {
+    const image =
+      Object.values(p.image?.original ?? {})[0] || p.image?.thumbnail || "";
+    return {
+      id: p.id,
+      image,
+      hoverImage: getHoverImage(p.image, image),
+      title: p.name,
+      price: p.current_price,
+      originalPrice: p.price,
+      slug: p.slug,
+      hasVariants: p.has_variants,
+      isInStock: p.in_stock ?? p.quantity > 0,
+      flashSaleActive: p.flash_sale_active ?? false,
+      inWishlist: p.in_wishlist,
+      inStock: p.quantity,
+      stockQuantity: p.quantity,
+      tags: p.tags,
+      currency: p.currency,
+    };
+  });
 
   return (
     <section className="w-full flex flex-col gap-4">

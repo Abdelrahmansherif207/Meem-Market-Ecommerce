@@ -1,4 +1,5 @@
 import ProductCard from "@/features/products/components/ProductCard";
+import { getHoverImage } from "@/features/products/utils";
 import EmptyCategory from "./EmptyCategory";
 import { ProductsGridSkeletonRow } from "./skeletons/ProductsGridSkeletonRow";
 import type { CategoryProduct } from "../types";
@@ -44,6 +45,10 @@ export default function CategoryProducts({
                 id: product.id,
                 title: product.name,
                 image: product.image?.thumbnail ?? "",
+                hoverImage: getHoverImage(
+                  product.image,
+                  product.image?.thumbnail ?? "",
+                ),
                 price: displayPrice,
                 originalPrice: basePrice,
                 slug: product.slug,

@@ -2,6 +2,7 @@
 
 import { useCallback } from "react";
 import ProductCard from "@/features/products/components/ProductCard";
+import { getHoverImage } from "@/features/products/utils";
 import { getPromotionProductsAction } from "../actions/promotionCurrencyActions";
 import { useCurrencyRefetch } from "@/features/currencies";
 import type { PromotionProduct } from "../types";
@@ -44,6 +45,10 @@ export function PromotionProductsIsland({
             id: product.id,
             title: product.name,
             image: product.image?.thumbnail ?? "",
+            hoverImage: getHoverImage(
+              product.image,
+              product.image?.thumbnail ?? "",
+            ),
             price: product.current_price,
             originalPrice: product.price,
             slug: product.slug,
