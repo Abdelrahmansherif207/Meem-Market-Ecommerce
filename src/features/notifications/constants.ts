@@ -16,7 +16,7 @@ import {
 import type { NotificationItem } from "./types";
 
 /** Single landing route for every notification click (inbox page). */
-export const NOTIFICATIONS_INBOX_PATH = "/notifications";
+const NOTIFICATIONS_INBOX_PATH = "/notifications";
 
 export interface NotificationTypeConfig {
   icon: LucideIcon;
@@ -30,7 +30,7 @@ const DEFAULT_CONFIG: NotificationTypeConfig = {
   getActionUrl: () => NOTIFICATIONS_INBOX_PATH,
 };
 
-export const NOTIFICATION_TYPE_MAP: Record<string, NotificationTypeConfig> = {
+const NOTIFICATION_TYPE_MAP: Record<string, NotificationTypeConfig> = {
   "order.created": {
     icon: ShoppingCart,
     className: "bg-primary/10 text-primary",
