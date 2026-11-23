@@ -1,6 +1,6 @@
 import type { PageMeta } from "@/shared/types";
 
-export interface CouponImage {
+interface CouponImage {
   desktop: string;
   mobile: string;
 }
@@ -63,7 +63,7 @@ export interface MyCouponsData {
   claims?: CouponClaim[];
 }
 
-export type AvailableCouponAction = "apply" | "claim";
+type AvailableCouponAction = "apply" | "claim";
 
 /**
  * Coupon shell from `GET /general/coupons/available` — a personalized,
@@ -88,10 +88,6 @@ export interface AvailableCouponsData {
   data: AvailableCoupon[];
   meta: PageMeta;
 }
-
-export type AvailableCouponsResult =
-  | { success: true; items: AvailableCoupon[]; meta: PageMeta }
-  | { success: false; message?: string; status?: number };
 
 export type MyCouponsResult =
   | { success: true; assignments: CouponAssignment[]; claims: CouponClaim[] }

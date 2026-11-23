@@ -17,8 +17,8 @@ export type RemoveCouponResult =
   | { success: true }
   | { success: false; message: string; status?: number };
 
-export const clampPage = (page: number): number => Math.max(1, Math.trunc(page) || 1);
-export const clampLimit = (limit: number): number => Math.min(50, Math.max(1, Math.trunc(limit) || 1));
+const clampPage = (page: number): number => Math.max(1, Math.trunc(page) || 1);
+const clampLimit = (limit: number): number => Math.min(50, Math.max(1, Math.trunc(limit) || 1));
 
 export const couponService = {
   /**
