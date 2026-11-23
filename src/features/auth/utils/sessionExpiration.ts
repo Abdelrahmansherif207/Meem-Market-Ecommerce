@@ -1,4 +1,4 @@
-export const AUTH_EXPIRY_BUFFER_MS = 15_000;
+const AUTH_EXPIRY_BUFFER_MS = 15_000;
 export const MAX_TIMEOUT_MS = 2_147_000_000;
 
 /** Normalizes API timestamps with microseconds for consistent browser parsing. */
