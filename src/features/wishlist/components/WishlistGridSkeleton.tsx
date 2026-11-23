@@ -1,6 +1,6 @@
 import Skeleton from "@/components/ui/Skeleton";
 
-export function WishlistItemSkeleton() {
+function WishlistItemSkeleton() {
   return (
     <div className="flex gap-3 rounded-xl border border-border bg-white p-3 sm:gap-4">
       <Skeleton className="h-20 w-20 shrink-0 rounded-lg sm:h-24 sm:w-24" />

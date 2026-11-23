@@ -59,7 +59,7 @@ export interface WishlistResponse {
   meta?: WishlistMeta;
 }
 
-export interface WishlistResponseLinks {
+interface WishlistResponseLinks {
   current_page: number;
   from: number | null;
   to: number | null;
