@@ -1,7 +1,7 @@
 import { Link } from "@/i18n/navigation";
 import { cn } from "@/shared/utils/cn";
 
-export interface NiceOneBreadcrumbItem {
+interface NiceOneBreadcrumbItem {
   label: string;
   href?: string;
 }
