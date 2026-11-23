@@ -15,7 +15,6 @@ export default function ProductSlider({
   items,
   columnsCount,
   badgeText,
-  theme,
   autoplay = true,
   sliderSpeed = 4500,
   pricesLoading = false,
