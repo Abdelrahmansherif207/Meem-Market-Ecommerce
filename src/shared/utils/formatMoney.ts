@@ -24,7 +24,7 @@ export interface FormatMoneyOptions {
  * localized Arabic symbol (e.g. "د.ك") even when English is requested; those
  * fall back to the provided label (the English list symbol or the code).
  */
-export function englishCurrencySymbol(
+function englishCurrencySymbol(
   symbol: string | null | undefined,
   fallback: string = "",
 ): string {
@@ -70,11 +70,4 @@ export function formatMoney(
   const formatted = formatNumber(amount, locale, decimals);
   const symbol = opts?.symbol?.trim();
   return symbol ? `${formatted} ${symbol}` : formatted;
-}
-
-/** Currency label for split int/decimal price layouts (e.g. ProductCard). */
-export function currencyLabel(locale = "en", symbol?: string): string {
-  // Kept for call-site compatibility; labels are always English.
-  void locale;
-  return englishCurrencySymbol(symbol);
 }
