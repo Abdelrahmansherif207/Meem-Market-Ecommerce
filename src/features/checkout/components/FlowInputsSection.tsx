@@ -33,7 +33,7 @@ export function isCheckoutRequired(input: OrderFlowInput): boolean {
 }
 
 /** Admin-side transition requirements are skipped entirely in the storefront. */
-export function isTransitionInput(input: OrderFlowInput): boolean {
+function isTransitionInput(input: OrderFlowInput): boolean {
   return typeof input.required_at === "string" && input.required_at.startsWith("transition:");
 }
 
