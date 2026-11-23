@@ -3,7 +3,7 @@
 import { useTranslations } from "next-intl";
 import { useCountdown } from "@/features/flash-sales/hooks/useCountdown";
 
-interface CatchCountdownProps {
+interface SaleCountdownProps {
   endsAt: string;
 }
 
@@ -11,7 +11,7 @@ interface CatchCountdownProps {
  * Catch Beauty countdown chip (tabular numerals, warm ivory pill) used on
  * flash-sale and timed product shelves. Reuses the existing useCountdown hook.
  */
-export default function CatchCountdown({ endsAt }: CatchCountdownProps) {
+export default function SaleCountdown({ endsAt }: SaleCountdownProps) {
   const t = useTranslations("catchHome");
   const { days, hours, minutes, seconds, isExpired, isReady, hasValidTarget } =
     useCountdown(endsAt);

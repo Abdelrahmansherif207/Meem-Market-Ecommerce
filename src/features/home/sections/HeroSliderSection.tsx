@@ -4,8 +4,8 @@ import { CampaignImage } from "@/components/ui/CampaignImage";
 import { getHoverImage } from "@/features/products/utils";
 import { homePageService } from "../services/homePageService";
 import { normalizeList } from "./normalize";
-import CatchHeroSlider from "./CatchHeroSlider";
-import CatchShelfIsland from "./CatchShelfIsland";
+import HeroSlider from "./HeroSlider";
+import ProductShelfIsland from "./ProductShelfIsland";
 import type { SectionFrontSetting, ProductItem } from "../types";
 import type { Slider, SliderDetail, SliderProduct } from "@/features/sliders/types";
 
@@ -14,7 +14,7 @@ const SLIDER_MEDIA_STYLE = {
   "--media-aspect-mobile": "1150 / 368",
 } as CSSProperties;
 
-interface CatchHeroSliderSectionProps {
+interface HeroSliderSectionProps {
   locale: string;
   title?: string;
   setting?: SectionFrontSetting;
@@ -51,12 +51,12 @@ function sliderProductToProductItem(p: SliderProduct): ProductItem {
  * - a slider detail (`general/sliders?slug=...`) → single hero image
  *   with its products rendered as the screen's shelf below.
  */
-export default async function CatchHeroSliderSection({
+export default async function HeroSliderSection({
   locale,
   title,
   setting,
   endpoint,
-}: CatchHeroSliderSectionProps) {
+}: HeroSliderSectionProps) {
   if (!endpoint) return null;
 
   let payload: Slider[] | SliderDetail | { data?: Slider[] } | null = null;
@@ -64,7 +64,7 @@ export default async function CatchHeroSliderSection({
     // Home is CMS-driven: section endpoints always bypass the Data Cache.
     payload = await homePageService.fetchSectionData<Slider[] | SliderDetail | { data?: Slider[] }>(endpoint, locale);
   } catch (error) {
-    console.warn("[CatchHeroSliderSection] Failed to fetch sliders:", error);
+    console.warn("[HeroSliderSection] Failed to fetch sliders:", error);
     return null;
   }
 
@@ -72,7 +72,7 @@ export default async function CatchHeroSliderSection({
   const validSliders = list.filter((s) => s.image?.desktop && s.image?.mobile);
   if (validSliders.length > 1) {
     return (
-      <CatchHeroSlider
+      <HeroSlider
         sliders={validSliders}
         autoplay={setting?.autoplay}
         sliderSpeed={setting?.slider_speed}
@@ -116,7 +116,7 @@ export default async function CatchHeroSliderSection({
       </Link>
 
       {products.length > 0 && (
-        <CatchShelfIsland
+        <ProductShelfIsland
           // "banner" kind: the slider-detail payload ({ image, products })
           // has the same shape the banner currency action already handles.
           fetchKind="banner"

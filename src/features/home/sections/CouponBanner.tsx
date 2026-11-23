@@ -6,7 +6,7 @@ import { Check } from "lucide-react";
 import { cn } from "@/shared/utils/cn";
 import type { Coupon } from "@/features/coupons/types";
 
-interface CatchCouponBannerProps {
+interface CouponBannerProps {
   coupon: Coupon;
   /** "full" spans the grid width; "half" is one of a 2-column row. */
   variant?: "full" | "half";
@@ -18,11 +18,11 @@ interface CatchCouponBannerProps {
  * image covers the tile, clicking copies the code when the API provides
  * one (many coupons ship `code: null` — click is a no-op then).
  */
-export default function CatchCouponBanner({
+export default function CouponBanner({
   coupon,
   variant = "half",
   className,
-}: CatchCouponBannerProps) {
+}: CouponBannerProps) {
   const [copied, setCopied] = useState(false);
   const imageSrc = coupon.image?.desktop || coupon.image?.mobile;
 

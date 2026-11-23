@@ -14,7 +14,7 @@ import {
 } from "./categoryGrid";
 import type { SectionFrontSetting, HomeCategory } from "../types";
 
-interface CatchCategoriesSectionProps {
+interface CategoriesSectionProps {
   title: string;
   locale: string;
   setting?: SectionFrontSetting;
@@ -31,12 +31,12 @@ interface CatchCategoriesSectionProps {
  * tiles can span multiple rows). The old rail remains available with
  * `layout: "slider"`.
  */
-export default async function CatchCategoriesSection({
+export default async function CategoriesSection({
   title,
   locale,
   setting,
   endpoint,
-}: CatchCategoriesSectionProps) {
+}: CategoriesSectionProps) {
   if (!endpoint) return null;
   const t = await getTranslations("catchHome");
 
@@ -48,7 +48,7 @@ export default async function CatchCategoriesSection({
       >(endpoint, locale),
     );
   } catch (error) {
-    console.error("[CatchCategoriesSection] Failed to fetch categories:", error);
+    console.error("[CategoriesSection] Failed to fetch categories:", error);
     return null;
   }
 

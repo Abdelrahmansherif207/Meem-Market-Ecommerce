@@ -14,7 +14,7 @@ import { CampaignImage } from "@/components/ui/CampaignImage";
 import { usePrefersReducedMotion } from "@/shared/hooks/usePrefersReducedMotion";
 import type { Slider } from "@/features/sliders/types";
 
-interface CatchHeroSliderProps {
+interface HeroSliderProps {
   sliders: Slider[];
   autoplay?: boolean;
   sliderSpeed?: number;
@@ -32,11 +32,11 @@ const HERO_MEDIA_STYLE = {
  * Autoplay and speed come from the CMS section settings; reduced-motion
  * users get a static first slide.
  */
-export default function CatchHeroSlider({
+export default function HeroSlider({
   sliders,
   autoplay = true,
   sliderSpeed = 5000,
-}: CatchHeroSliderProps) {
+}: HeroSliderProps) {
   const t = useTranslations("catchHome");
   const locale = useLocale();
   const isRtl = locale === "ar";

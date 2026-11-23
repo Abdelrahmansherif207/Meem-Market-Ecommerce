@@ -8,7 +8,7 @@ import { usePrefersReducedMotion } from "@/shared/hooks/usePrefersReducedMotion"
 const MOBILE_MEDIA_QUERY = "(max-width: 767px)";
 const VISIBILITY_THRESHOLD = 0.2;
 
-interface CatchHeroVideoPlayerProps {
+interface HeroVideoPlayerProps {
   desktopSrc: string;
   mobileSrc: string;
   className?: string;
@@ -28,7 +28,7 @@ interface CatchHeroVideoPlayerProps {
  * from the CMS hero settings; it pauses off-screen or when the tab is hidden,
  * and never autoplays for reduced-motion users (they see the paused frame).
  */
-export default function CatchHeroVideoPlayer({
+export default function HeroVideoPlayer({
   desktopSrc,
   mobileSrc,
   className,
@@ -36,7 +36,7 @@ export default function CatchHeroVideoPlayer({
   autoplay = true,
   loop = true,
   muted = true,
-}: CatchHeroVideoPlayerProps) {
+}: HeroVideoPlayerProps) {
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const isInViewRef = useRef(false);
   const [source, setSource] = useState<string | null>(null);

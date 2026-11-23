@@ -4,7 +4,7 @@ import { CampaignImage } from "@/components/ui/CampaignImage";
 import { getHoverImage } from "@/features/products/utils";
 import { homePageService } from "../services/homePageService";
 import { resolveLocalizedText } from "../utils";
-import CatchShelfIsland from "./CatchShelfIsland";
+import ProductShelfIsland from "./ProductShelfIsland";
 import { parseBooleanSetting } from "./categoryGrid";
 import type { SectionFrontSetting } from "../types";
 import type { BannerDetail } from "@/features/banners/types";
@@ -43,7 +43,7 @@ const BANNER_ART_OVERRIDES: Record<
   },
 };
 
-interface CatchBannerSectionProps {
+interface BannerSectionProps {
   endpoint?: string;
   locale: string;
   title?: string;
@@ -59,13 +59,13 @@ interface CatchBannerSectionProps {
  * same front settings a `products` section supports (`show_title`, `subtitle`,
  * `columns_count`, `badge_text`, `layout`, `show_timer`, `timer_end_at`).
  */
-export default async function CatchBannerSection({
+export default async function BannerSection({
   endpoint,
   locale,
   title,
   setting,
   back,
-}: CatchBannerSectionProps) {
+}: BannerSectionProps) {
   if (!endpoint) return null;
 
   let data: BannerDetail | BannerDetail[] | null = null;
@@ -152,7 +152,7 @@ export default async function CatchBannerSection({
       </Link>
 
       {withProducts && productItems.length > 0 && (
-        <CatchShelfIsland
+        <ProductShelfIsland
           key={endpoint}
           fetchKind="banner"
           endpoint={endpoint}

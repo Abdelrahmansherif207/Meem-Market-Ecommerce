@@ -8,7 +8,7 @@ import {
 const shimmer = "animate-pulse rounded-xl bg-catch-border-soft";
 
 /** Hero placeholder: the same reserved media well as the real hero/slider. */
-export function CatchHeroSkeleton({
+export function HeroSkeleton({
   variant = "hero",
 }: {
   variant?: "hero" | "sliders";
@@ -28,7 +28,7 @@ export function CatchHeroSkeleton({
 }
 
 /** Dark hashtag strip placeholder. */
-export function CatchTagsSkeleton() {
+export function TagsSkeleton() {
   return (
     <section
       className="w-full overflow-hidden rounded-2xl bg-black py-3"
@@ -49,9 +49,9 @@ export function CatchTagsSkeleton() {
 
 /**
  * Shelf placeholder: title row + 2 mobile / 3 tablet / CMS desktop card grid,
- * matching `CatchShelfIsland`'s literal column count.
+ * matching `ProductShelfIsland`'s literal column count.
  */
-export function CatchShelfSkeleton({
+export function ShelfSkeleton({
   setting,
 }: {
   setting?: SectionFrontSetting;
@@ -91,7 +91,7 @@ export function CatchShelfSkeleton({
 }
 
 /** Wide-banner placeholder with the live artwork ratio. */
-export function CatchBannerSkeleton() {
+export function BannerSkeleton() {
   return (
     <section className="w-full" aria-hidden>
       <div
@@ -112,7 +112,7 @@ export function CatchBannerSkeleton() {
  * per-breakpoint caps) so the skeleton occupies the same shape as the real
  * section. The rail layout keeps the old single-row placeholder.
  */
-export function CatchCategoriesSkeleton({
+export function CategoriesSkeleton({
   setting,
 }: {
   setting?: SectionFrontSetting;
@@ -180,7 +180,7 @@ export function CatchCategoriesSkeleton({
 }
 
 /** Brand grid placeholder: 2 mobile / 4 tablet / CMS desktop columns. */
-export function CatchBrandsSkeleton({
+export function BrandsSkeleton({
   setting,
 }: {
   setting?: SectionFrontSetting;
@@ -214,7 +214,7 @@ export function CatchBrandsSkeleton({
 }
 
 /** Promotions placeholder: five full-bleed tiles, 2 columns, odd last spans both. */
-export function CatchPromotionsSkeleton() {
+export function PromotionsSkeleton() {
   return (
     <section className="space-y-4" aria-hidden>
       <div className={`h-6 w-40 ${shimmer}`} />
@@ -239,7 +239,7 @@ export function CatchPromotionsSkeleton() {
 }
 
 /** Coupon placeholder: contained 2:1 tiles, 2 / 2 / 4. */
-export function CatchCouponsSkeleton() {
+export function CouponsSkeleton() {
   return (
     <section className="space-y-4" aria-hidden>
       <div className={`h-6 w-48 ${shimmer}`} />
@@ -254,14 +254,14 @@ export function CatchCouponsSkeleton() {
 
 /**
  * Route-level placeholder for `app/[locale]/loading.tsx`, built from the
- * redesign skeletons so navigation never pulls in the retired home sections.
+ * section skeletons so navigation never pulls in the retired home sections.
  */
-export function CatchPageSkeleton({ sections = 4 }: { sections?: number }) {
+export function PageSkeleton({ sections = 4 }: { sections?: number }) {
   const blocks = [
-    <CatchHeroSkeleton key="hero" />,
-    <CatchShelfSkeleton key="shelf" />,
-    <CatchCategoriesSkeleton key="categories" />,
-    <CatchCouponsSkeleton key="coupons" />,
+    <HeroSkeleton key="hero" />,
+    <ShelfSkeleton key="shelf" />,
+    <CategoriesSkeleton key="categories" />,
+    <CouponsSkeleton key="coupons" />,
   ];
 
   return (

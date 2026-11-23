@@ -4,9 +4,9 @@ import { SectionHeader } from "@/components/ui/SectionHeader";
 import type { SectionFrontSetting } from "../types";
 import { resolveLocalizedText } from "../utils";
 import { parseBooleanSetting } from "./categoryGrid";
-import CatchCouponBanner from "./CatchCouponBanner";
+import CouponBanner from "./CouponBanner";
 
-interface CatchCouponsSectionProps {
+interface CouponsSectionProps {
   title: string;
   locale: string;
   setting?: SectionFrontSetting;
@@ -57,17 +57,17 @@ function planLayout(coupons: Coupon[]): CouponPlacement[] {
  * Screen-matched Coupons & Vouchers: adaptive full/half banner grid using
  * the existing couponService data.
  */
-export default async function CatchCouponsSection({
+export default async function CouponsSection({
   title,
   locale,
   setting,
   endpoint,
-}: CatchCouponsSectionProps) {
+}: CouponsSectionProps) {
   let coupons: Coupon[] = [];
   try {
     coupons = await couponService.getCoupons(locale, endpoint || "/general/coupons");
   } catch (error) {
-    console.warn("[CatchCouponsSection] Failed to fetch coupons:", error);
+    console.warn("[CouponsSection] Failed to fetch coupons:", error);
     return null;
   }
 
@@ -84,7 +84,7 @@ export default async function CatchCouponsSection({
       ) : null}
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
         {placements.map(({ coupon, variant }) => (
-          <CatchCouponBanner
+          <CouponBanner
             key={coupon.id}
             coupon={coupon}
             variant={variant}

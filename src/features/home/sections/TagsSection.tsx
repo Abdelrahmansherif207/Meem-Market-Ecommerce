@@ -3,7 +3,7 @@ import { tagService } from "@/features/tags/services/tagService";
 import { parseBooleanSetting } from "./categoryGrid";
 import type { SectionFrontSetting } from "../types";
 
-interface CatchTagsSectionProps {
+interface TagsSectionProps {
   title: string;
   locale: string;
   setting?: SectionFrontSetting;
@@ -14,12 +14,12 @@ interface CatchTagsSectionProps {
  * Screen-matched tags strip: dark pill row of hashtag links, following
  * the screen's black announcement-strip language.
  */
-export default async function CatchTagsSection({
+export default async function TagsSection({
   title,
   locale,
   setting,
   endpoint,
-}: CatchTagsSectionProps) {
+}: TagsSectionProps) {
   void locale;
 
   let tags;
@@ -28,7 +28,7 @@ export default async function CatchTagsSection({
       ? await tagService.getTagsByEndpoint(endpoint, locale)
       : [];
   } catch (error) {
-    console.error("[CatchTagsSection] Failed to load tags", error);
+    console.error("[TagsSection] Failed to load tags", error);
     return null;
   }
 

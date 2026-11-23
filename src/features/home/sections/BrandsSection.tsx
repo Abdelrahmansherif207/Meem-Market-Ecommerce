@@ -13,7 +13,7 @@ import {
 } from "./categoryGrid";
 import type { SectionFrontSetting, ApiBrandWithProducts } from "../types";
 
-interface CatchBrandsSectionProps {
+interface BrandsSectionProps {
   title: string;
   locale: string;
   setting?: SectionFrontSetting;
@@ -24,12 +24,12 @@ interface CatchBrandsSectionProps {
  * Catch Beauty brand rail/grid: every brand the CMS returns, using the
  * section's `columns_count` on desktop, with a real "View all" destination.
  */
-export default async function CatchBrandsSection({
+export default async function BrandsSection({
   title,
   locale,
   setting,
   endpoint,
-}: CatchBrandsSectionProps) {
+}: BrandsSectionProps) {
   if (!endpoint) return null;
   const t = await getTranslations("catchHome");
 
@@ -41,7 +41,7 @@ export default async function CatchBrandsSection({
       >(endpoint, locale),
     );
   } catch (error) {
-    console.warn("[CatchBrandsSection] Failed to fetch brands:", error);
+    console.warn("[BrandsSection] Failed to fetch brands:", error);
     return null;
   }
 

@@ -4,15 +4,15 @@ import { CampaignImage } from "@/components/ui/CampaignImage";
 import { cn } from "@/shared/utils/cn";
 import type { PromotionVideo } from "@/features/settings";
 import { resolveLocalizedText } from "../utils";
-import CatchHeroVideoPlayer from "./CatchHeroVideoPlayer";
-import CatchPromotionVideo from "./CatchPromotionVideo";
+import HeroVideoPlayer from "./HeroVideoPlayer";
+import PromotionVideoPlayer from "./PromotionVideoPlayer";
 import type { SectionFrontSetting } from "../types";
 
 const DEFAULT_CTA_HREF = "/sliders/new-collection-s2";
 const DEFAULT_VIDEO_DESKTOP = "/hero/catch-hero-desktop.mp4";
 const DEFAULT_VIDEO_MOBILE = "/hero/catch-hero-mobile.mp4";
 
-interface CatchHeroSectionProps {
+interface HeroSectionProps {
   locale: string;
   /** CMS section title; used when the front setting has no localized heading. */
   title?: string;
@@ -27,12 +27,12 @@ interface CatchHeroSectionProps {
  * controls, and configurable alignment/height. When the CMS has no hero
  * section yet, HomePage keeps the static fallback hero in place.
  */
-export default async function CatchHeroSection({
+export default async function HeroSection({
   locale,
   title,
   setting,
   promotionVideo,
-}: CatchHeroSectionProps) {
+}: HeroSectionProps) {
   const t = await getTranslations({ locale, namespace: "catchHome.hero" });
   const front = setting && !Array.isArray(setting) ? setting : undefined;
 
@@ -130,7 +130,7 @@ export default async function CatchHeroSection({
               className="object-cover"
             />
           ) : renderPromotionVideo && promotionVideo ? (
-            <CatchPromotionVideo
+            <PromotionVideoPlayer
               video={promotionVideo}
               title={heading}
               videoClassName="md:object-[center_40%]"
@@ -139,7 +139,7 @@ export default async function CatchHeroSection({
               muted={muted}
             />
           ) : (
-            <CatchHeroVideoPlayer
+            <HeroVideoPlayer
               desktopSrc={videoDesktop}
               mobileSrc={videoMobile}
               videoClassName="md:object-[center_40%]"

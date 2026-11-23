@@ -3,8 +3,8 @@ import { flashSaleService } from "@/features/flash-sales/services/flashSaleServi
 import { getHoverImage } from "@/features/products/utils";
 import { resolveLocalizedText } from "../utils";
 import { normalizeList } from "./normalize";
-import CatchShelfIsland from "./CatchShelfIsland";
-import CatchCountdown from "./CatchCountdown";
+import ProductShelfIsland from "./ProductShelfIsland";
+import SaleCountdown from "./SaleCountdown";
 import type { SectionFrontSetting, ApiFlashSale, ProductItem } from "../types";
 import type { FlashSaleProduct } from "@/features/flash-sales/types";
 
@@ -64,7 +64,7 @@ function selectActiveFlashSale(
   );
 }
 
-interface CatchFlashSaleSectionProps {
+interface FlashSaleSectionProps {
   title: string;
   type: string;
   locale: string;
@@ -76,12 +76,12 @@ interface CatchFlashSaleSectionProps {
  * Screen-matched flash-sale shelf: the first active sale's products in a
  * product grid with a countdown chip when the CMS requests a timer.
  */
-export default async function CatchFlashSaleSection({
+export default async function FlashSaleSection({
   title,
   locale,
   setting,
   endpoint,
-}: CatchFlashSaleSectionProps) {
+}: FlashSaleSectionProps) {
   if (!endpoint) return null;
 
   let flashSales: ApiFlashSale[] = [];
@@ -90,7 +90,7 @@ export default async function CatchFlashSaleSection({
       await homePageService.fetchSectionData<ApiFlashSale[] | { data: ApiFlashSale[] }>(endpoint, locale),
     );
   } catch (error) {
-    console.error("[CatchFlashSaleSection] Failed to fetch flash sales:", error);
+    console.error("[FlashSaleSection] Failed to fetch flash sales:", error);
     return null;
   }
 
@@ -106,18 +106,18 @@ export default async function CatchFlashSaleSection({
       products = detail.products.map(flashProductToProductItem);
     }
   } catch (e) {
-    console.warn("[CatchFlashSaleSection] Failed to fetch flash sale products:", e);
+    console.warn("[FlashSaleSection] Failed to fetch flash sale products:", e);
   }
 
   if (!products.length) return null;
 
   const headerAction =
     setting?.show_timer && setting?.timer_end_at ? (
-      <CatchCountdown endsAt={setting.timer_end_at} />
+      <SaleCountdown endsAt={setting.timer_end_at} />
     ) : undefined;
 
   return (
-    <CatchShelfIsland
+    <ProductShelfIsland
       key={endpoint}
       fetchKind="flash-sales"
       endpoint={endpoint}

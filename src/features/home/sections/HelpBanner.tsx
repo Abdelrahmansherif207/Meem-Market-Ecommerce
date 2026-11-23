@@ -29,7 +29,7 @@ function HelpOptionLink({ href, children }: { href: string; children: ReactNode 
  * existing contact options. Email, phone and WhatsApp all come from the
  * normalized site settings (with Catch Beauty fallbacks).
  */
-export default async function CatchHelpBanner({ locale }: { locale: string }) {
+export default async function HelpBanner({ locale }: { locale: string }) {
   const t = await getTranslations("catchHome");
   const settings = await getCachedSettings(locale);
 

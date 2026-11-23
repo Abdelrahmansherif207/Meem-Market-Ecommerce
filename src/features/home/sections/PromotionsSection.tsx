@@ -9,7 +9,7 @@ import { normalizeList } from "./normalize";
 import { parseBooleanSetting } from "./categoryGrid";
 import type { SectionFrontSetting, Promotion } from "../types";
 
-interface CatchPromotionsSectionProps {
+interface PromotionsSectionProps {
   title: string;
   locale: string;
   setting?: SectionFrontSetting;
@@ -27,12 +27,12 @@ const PROMO_MEDIA_STYLE = {
  * the artwork aspect so the wide campaign images are never cropped. When the
  * count is odd, the last tile spans both columns.
  */
-export default async function CatchPromotionsSection({
+export default async function PromotionsSection({
   title,
   locale,
   setting,
   endpoint,
-}: CatchPromotionsSectionProps) {
+}: PromotionsSectionProps) {
   let promotions: Promotion[] = [];
   try {
     promotions = endpoint
@@ -43,7 +43,7 @@ export default async function CatchPromotionsSection({
         )
       : [];
   } catch (error) {
-    console.warn("[CatchPromotionsSection] Failed to fetch promotions:", error);
+    console.warn("[PromotionsSection] Failed to fetch promotions:", error);
     return null;
   }
 

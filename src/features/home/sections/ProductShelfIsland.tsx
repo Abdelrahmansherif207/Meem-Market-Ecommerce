@@ -19,9 +19,9 @@ import {
 import { resolveLocalizedText } from "../utils";
 import { parseIntegerSetting } from "./categoryGrid";
 import type { LocalizedText, ProductItem } from "../types";
-import CatchCountdown from "./CatchCountdown";
+import SaleCountdown from "./SaleCountdown";
 
-interface CatchShelfIslandProps {
+interface ProductShelfIslandProps {
   fetchKind: "products" | "flash-sales" | "banner";
   endpoint: string;
   locale: string;
@@ -50,7 +50,7 @@ interface CatchShelfIslandProps {
  * refetches and optional CMS countdown. Presentation only — all card behavior
  * lives in ProductCard.
  */
-export default function CatchShelfIsland({
+export default function ProductShelfIsland({
   fetchKind,
   endpoint,
   locale,
@@ -64,7 +64,7 @@ export default function CatchShelfIsland({
   showTimer,
   timerEndAt,
   layout,
-}: CatchShelfIslandProps) {
+}: ProductShelfIslandProps) {
   const t = useTranslations("catchHome");
   const locale_ = useLocale();
   const isRtl = locale_ === "ar";
@@ -100,7 +100,7 @@ export default function CatchShelfIsland({
 
   const action =
     headerAction ??
-    (showTimer && timerEndAt ? <CatchCountdown endsAt={timerEndAt} /> : null);
+    (showTimer && timerEndAt ? <SaleCountdown endsAt={timerEndAt} /> : null);
 
   const resolvedSubtitle = subtitle?.trim();
   const showHeader = showTitle ? Boolean(title) : false;

@@ -3,7 +3,7 @@ import { getTranslations } from "next-intl/server";
 import { guardLoad } from "@/shared/lib/guardedFetch";
 import { getInfoPageContent, InfoPageRenderer } from "@/features/info";
 import { pageService } from "../services/pageService";
-import { CatchSectionSuspense } from "@/features/home/redesign/CatchSectionRenderer";
+import { SectionSuspense } from "@/features/home/sections/SectionRenderer";
 import ErrorState from "@/components/ui/ErrorState";
 import RetryButton from "@/components/ui/RetryButton";
 
@@ -73,7 +73,7 @@ export default async function PageRenderer({ slug, locale }: PageRendererProps) 
   return (
     <main className="flex flex-col gap-y-5">
       {page.sections.map((section) => (
-        <CatchSectionSuspense key={section.id} section={section} locale={locale} />
+        <SectionSuspense key={section.id} section={section} locale={locale} />
       ))}
     </main>
   );

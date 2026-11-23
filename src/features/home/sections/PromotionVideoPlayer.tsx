@@ -3,9 +3,9 @@ import {
   buildYouTubeEmbedUrl,
   type PromotionVideo,
 } from "@/features/settings";
-import CatchHeroVideoPlayer from "./CatchHeroVideoPlayer";
+import HeroVideoPlayer from "./HeroVideoPlayer";
 
-interface CatchPromotionVideoProps {
+interface PromotionVideoPlayerProps {
   video: PromotionVideo;
   title?: string;
   videoClassName?: string;
@@ -26,17 +26,17 @@ interface CatchPromotionVideoProps {
  * the CMS hero settings. Invalid or placeholder URLs are rejected upstream by
  * `resolvePromotionVideo`.
  */
-export default function CatchPromotionVideo({
+export default function PromotionVideoPlayer({
   video,
   title,
   videoClassName,
   autoplay = true,
   loop = true,
   muted = true,
-}: CatchPromotionVideoProps) {
+}: PromotionVideoPlayerProps) {
   if (video.kind === "file") {
     return (
-      <CatchHeroVideoPlayer
+      <HeroVideoPlayer
         desktopSrc={video.src}
         mobileSrc={video.src}
         videoClassName={videoClassName}

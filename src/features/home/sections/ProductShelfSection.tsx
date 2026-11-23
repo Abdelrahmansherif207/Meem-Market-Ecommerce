@@ -1,9 +1,9 @@
 import { homePageService } from "../services/homePageService";
 import { resolveLocalizedText, toProductItem } from "../utils";
-import CatchShelfIsland from "./CatchShelfIsland";
+import ProductShelfIsland from "./ProductShelfIsland";
 import type { SectionFrontSetting, ApiProduct } from "../types";
 
-interface CatchProductShelfSectionProps {
+interface ProductShelfSectionProps {
   title: string;
   locale: string;
   setting?: SectionFrontSetting;
@@ -14,19 +14,19 @@ interface CatchProductShelfSectionProps {
  * Catch Beauty product shelf: CMS title + a fluid product rail. Data flow:
  * fetchSectionData → toProductItem → currency island.
  */
-export default async function CatchProductShelfSection({
+export default async function ProductShelfSection({
   title,
   locale,
   setting,
   endpoint,
-}: CatchProductShelfSectionProps) {
+}: ProductShelfSectionProps) {
   if (!endpoint) return null;
 
   let response: ApiProduct[] | { data: ApiProduct[] } | null = null;
   try {
     response = await homePageService.fetchSectionData<ApiProduct[] | { data: ApiProduct[] }>(endpoint, locale);
   } catch (error) {
-    console.error("[CatchProductShelfSection] Failed to fetch products:", error);
+    console.error("[ProductShelfSection] Failed to fetch products:", error);
     return null;
   }
 
@@ -42,7 +42,7 @@ export default async function CatchProductShelfSection({
   const items = products.map(toProductItem);
 
   return (
-    <CatchShelfIsland
+    <ProductShelfIsland
       key={endpoint}
       fetchKind="products"
       endpoint={endpoint}
