@@ -2,7 +2,7 @@
 import { create } from "zustand";
 import { guestSessionService } from "../services/guestSessionService";
 
-export type GuestSessionStatus = "idle" | "initializing" | "ready" | "failed";
+type GuestSessionStatus = "idle" | "initializing" | "ready" | "failed";
 
 type GuestSessionState = {
   status: GuestSessionStatus;

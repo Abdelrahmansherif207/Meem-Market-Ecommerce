@@ -23,7 +23,7 @@ export function saveGuestPaymentReturnNote(orderId: number): void {
   } catch {}
 }
 
-export function peekGuestPaymentReturnNote(): GuestPaymentReturnNote | null {
+function peekGuestPaymentReturnNote(): GuestPaymentReturnNote | null {
   if (typeof window === "undefined") return null;
   try {
     const raw = window.sessionStorage.getItem(STORAGE_KEY);

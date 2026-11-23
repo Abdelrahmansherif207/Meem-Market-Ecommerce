@@ -2,11 +2,11 @@
  * Guest API endpoints. Every guest route lives under `/general/guest` — the
  * integration guide omits the `/general` segment, but the live API keeps it.
  */
-export const GUEST_BASE = "/general/guest";
+const GUEST_BASE = "/general/guest";
 export const GUEST_CART = `${GUEST_BASE}/cart`;
 export const GUEST_CART_ITEMS = `${GUEST_BASE}/cart/items`;
 export const GUEST_CHECKOUT = `${GUEST_BASE}/checkout`;
-export const GUEST_ORDERS = `${GUEST_BASE}/orders`;
+const GUEST_ORDERS = `${GUEST_BASE}/orders`;
 export const GUEST_SESSION = `${GUEST_BASE}/session`;
 
 export const guestCartLineEndpoint = (itemId: number): string =>
