@@ -1,4 +1,4 @@
-export interface InfoSection {
+interface InfoSection {
   type: "text" | "image" | "video";
   title?: string;
   content?: string;
