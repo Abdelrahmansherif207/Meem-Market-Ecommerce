@@ -5,6 +5,7 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { cn } from "@/shared/utils/cn";
 import ProductCard from "./ProductCard";
+import { getHoverImage } from "../utils";
 import type { ProductTag, ProductBrand } from "@/shared/types";
 import type { ProductCurrency } from "@/features/currencies";
 
@@ -88,6 +89,10 @@ export default function PaginatedProductGrid({
               id: product.id,
               title: product.name,
               image: product.image?.thumbnail ?? "",
+              hoverImage: getHoverImage(
+                product.image,
+                product.image?.thumbnail ?? "",
+              ),
               price: product.current_price,
               originalPrice: product.price,
               slug: product.slug,

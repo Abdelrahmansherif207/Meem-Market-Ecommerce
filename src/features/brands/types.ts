@@ -26,6 +26,7 @@ export interface BrandProduct {
   in_wishlist?: boolean;
   image: {
     thumbnail: string;
+    original?: Record<string, string>;
   };
   tags?: ProductTag[];
   /** Converted-prices metadata returned by the API alongside prices. */

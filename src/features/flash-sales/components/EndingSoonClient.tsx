@@ -2,6 +2,7 @@
 
 import { useCallback } from "react";
 import ProductCard from "@/features/products/components/ProductCard";
+import { getHoverImage } from "@/features/products/utils";
 import SectionTitle from "@/components/ui/SectionTitle";
 import { getEndingSoonAction } from "../actions/flashSaleCurrencyActions";
 import { useCurrencyRefetch } from "@/features/currencies";
@@ -36,6 +37,10 @@ export default function EndingSoonClient({ products: initialProducts, period, lo
               id: product.id,
               title: product.name,
               image: product.image?.thumbnail ?? "",
+              hoverImage: getHoverImage(
+                product.image,
+                product.image?.thumbnail ?? "",
+              ),
               price: product.current_price,
               originalPrice: product.price,
               slug: product.slug,

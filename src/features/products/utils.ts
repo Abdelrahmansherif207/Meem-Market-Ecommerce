@@ -28,6 +28,44 @@ export function getSortedImages(product: { images: { original: Record<string, st
   return keys.map((k) => product.images.original[k]);
 }
 
+/** Loose product-image shape shared by every listing payload. */
+export interface ProductImageSource {
+  thumbnail?: string | null;
+  original?: Record<string, string> | null;
+}
+
+/** Non-empty original image URLs in numeric key order (`1`, `2`, ...). */
+function getSortedOriginalImages(
+  image?: ProductImageSource | null,
+): string[] {
+  const original = image?.original;
+  if (!original || typeof original !== "object") return [];
+  return Object.keys(original)
+    .sort((a, b) => {
+      const diff = Number(a) - Number(b);
+      return Number.isNaN(diff) || diff === 0 ? a.localeCompare(b) : diff;
+    })
+    .map((key) => original[key])
+    .filter(
+      (url): url is string =>
+        typeof url === "string" && url.trim().length > 0,
+    );
+}
+
+/**
+ * Second image for the card hover swap: the next original image that differs
+ * from the one already displayed. Returns `undefined` when the product has no
+ * `original` map, no extra image, or the payload only repeats the primary —
+ * the card then keeps its single image (no broken/empty swap).
+ */
+export function getHoverImage(
+  image?: ProductImageSource | null,
+  primaryImage?: string | null,
+): string | undefined {
+  const primary = primaryImage?.trim() ?? "";
+  return getSortedOriginalImages(image).find((url) => url !== primary);
+}
+
 export function getAverageRating(reviews: { rating: number }[]): number {
   if (reviews.length === 0) return 0;
   const sum = reviews.reduce((acc, r) => acc + r.rating, 0);
