@@ -1,4 +1,3 @@
-import { cache } from "react";
 import { apiFetch } from "@/shared/lib/api";
 import { CACHE_TTL } from "@/shared/constants/cache";
 import type { ApiResponse } from "@/shared/types";
@@ -27,5 +26,3 @@ export const brandService = {
     return response.data;
   },
 };
-
-export const getCachedBrands = cache(brandService.getBrands);

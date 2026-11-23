@@ -17,7 +17,7 @@ const LEGACY_STATUS_COLORS: Record<string, string> = {
 };
 
 /** `customs_clearance` → "Customs Clearance" (code itself is never translated). */
-export function prettifyStatusCode(code: string): string {
+function prettifyStatusCode(code: string): string {
   return code
     .replace(/[_-]+/g, " ")
     .trim()
@@ -27,7 +27,7 @@ export function prettifyStatusCode(code: string): string {
 type FlowLocalized = { en?: string; ar?: string } | null | undefined;
 
 /** Localized object → display string with en↔ar fallback. */
-export function resolveLocalizedName(name: FlowLocalized, locale: string): string {
+function resolveLocalizedName(name: FlowLocalized, locale: string): string {
   if (!name) return "";
   const primary = locale === "ar" ? name.ar : name.en;
   const fallback = locale === "ar" ? name.en : name.ar;
@@ -53,7 +53,7 @@ export function resolveShippingChipLabel(
   return translate("shippingChip", { value });
 }
 
-export function resolveOrderStatusCode(order: {
+function resolveOrderStatusCode(order: {
   status: string;
   current_status?: { code: string } | null;
 }): string {
@@ -67,7 +67,7 @@ function resolveStatusName(name: Localized, locale: string): string {
   return primary || fallback || "";
 }
 
-export function resolveOrderStatusLabel(
+function resolveOrderStatusLabel(
   order: { status: string; current_status?: { code: string; name?: Localized } | null },
   locale: string,
   translate: (key: string) => string,

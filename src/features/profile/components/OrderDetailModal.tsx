@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Image from "next/image";
 import { useLocale, useTranslations } from "next-intl";
 import { X, Package, MapPin, CreditCard, Truck, Store, ExternalLink } from "lucide-react";
 import { Price } from "@/components/ui/Price";
@@ -114,9 +115,11 @@ export function OrderDetailModal({ order, open, onClose, onViewInvoice }: OrderD
                   <div key={item.id} className="flex items-center gap-3">
                     <div className="h-14 w-14 rounded-lg bg-white shrink-0 overflow-hidden border border-border">
                       {item.product.image.thumbnail && (
-                        <img
+                        <Image
                           src={item.product.image.thumbnail}
                           alt={item.product.name}
+                          width={56}
+                          height={56}
                           className="h-full w-full object-cover"
                         />
                       )}

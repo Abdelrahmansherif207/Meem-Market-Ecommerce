@@ -124,7 +124,7 @@ function normalizeGateways(value: RawPaymentGateways | null | undefined): Record
   return result;
 }
 
-export interface LocaleSettingsDefaults {
+interface LocaleSettingsDefaults {
   siteName: string;
   description: string;
   copyright: string;

@@ -8,12 +8,3 @@ export function CouponCardSkeleton() {
     </div>
   );
 }
-
-export function CouponInputSkeleton() {
-  return (
-    <div className="flex gap-2">
-      <Skeleton className="h-10 flex-1 rounded-lg" />
-      <Skeleton className="h-10 w-24 rounded-lg" />
-    </div>
-  );
-}

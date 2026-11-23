@@ -5,7 +5,7 @@
  */
 const INTENT_TTL_MS = 30 * 60 * 1000;
 
-export function newIdempotencyKey(): string {
+function newIdempotencyKey(): string {
   if (typeof crypto !== "undefined" && typeof crypto.randomUUID === "function") {
     return crypto.randomUUID();
   }

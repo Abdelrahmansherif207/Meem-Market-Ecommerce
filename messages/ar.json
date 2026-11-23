@@ -1,55 +1,17 @@
 {
   "header": {
-    "mainNav": {
-      "shop": "المتجر",
-      "deals": "العروض",
-      "about": "معلومات عنا",
-      "contact": "اتصل بنا",
-      "help": "المساعدة والدعم",
-      "blog": "المدونة",
-      "loginRegister": "تسجيل الدخول",
-      "account": "حسابي",
-      "myOrders": "طلباتي",
-      "wishlist": "قائمة الرغبات",
-      "signIn": "تسجيل الدخول",
-      "signUp": "إنشاء حساب",
-      "logout": "تسجيل الخروج"
-    },
     "categoryNav": {
-      "allCategories": "جميع الفئات",
       "all": "الجميع",
       "allProducts": "كل المنتجات",
-      "electronics": "الإلكترونيات",
-      "fashion": "الموضة والملابس",
-      "home": "المنزل والحديقة",
-      "sports": "الرياضة والأنشطة الخارجية",
-      "books": "الكتب والوسائط",
-      "toys": "الألعاب",
-      "beauty": "الجمال والعناية الشخصية",
-      "grocery": "البقالة والطعام",
       "viewAll": "عرض جميع الفئات"
     },
     "search": {
-      "placeholder": "ابحث عن المنتجات...",
-      "mainPlaceholderPrefix": "ابحث عن ",
-      "mainPlaceholderHighlight": "50,000+ منتج",
-      "button": "بحث",
       "noResults": "لم يتم العثور على منتجات",
       "searching": "جاري البحث..."
     },
-    "cart": {
-      "label": "سلة التسوق",
-      "itemCount": "{count, plural, =0 {السلة} one {عنصر واحد} other {# عناصر}}"
-    },
     "common": {
       "language": "اللغة",
-      "english": "English",
-      "arabic": "العربية",
-      "currency": "العملة",
-      "usd": "USD",
-      "sar": "ريال سعودي",
-      "openMenu": "فتح القائمة",
-      "closeMenu": "إغلاق القائمة"
+      "currency": "العملة"
     },
     "breadcrumb": {
       "home": "الرئيسية"
@@ -77,27 +39,17 @@
       "showFilters": "عرض الفلاتر",
       "noFiltersTitle": "لا توجد فلاتر متاحة",
       "noFiltersDesc": "لا يوجد ما يمكن تخصيصه هنا بعد.",
-      "searchPlaceholder": "ابحث في هذه الفئة…",
-      "clearSearch": "مسح البحث",
       "sortLabel": "ترتيب المنتجات",
       "sortDefault": "الافتراضي",
       "sortPriceAsc": "السعر: من الأقل للأعلى",
-      "sortPriceDesc": "السعر: من الأعلى للأقل",
-      "sortNewest": "الأحدث",
-      "sortRating": "الأعلى تقييماً",
-      "resultsCount": "عرض {from}–{to} من {total}"
+      "sortPriceDesc": "السعر: من الأعلى للأقل"
     },
     "location": {
       "loading": "جاري التحديد..."
     }
   },
-  "home": {
-    "metaDescription": "تسوق أفضل المنتجات - إلكترونيات، أزياء، منتجات المنزل والمزيد"
-  },
   "catchHeader": {
     "announcement": "خصم 20% على طلبك الأول باستخدام الكود NEW20",
-    "brandNameAr": "كاتش بيوتي",
-    "brandNameEn": "CATCH BEAUTY",
     "searchPlaceholder": "ماذا تبحث عنه ؟",
     "awardBadge": "أفضل موقع مكياج في قطر",
     "deliverTo": "التوصيل إلى",
@@ -115,11 +67,6 @@
     "addToWishlist": "أضف إلى المفضلة",
     "inWishlist": "في المفضلة",
     "outOfStock": "غير متوفر",
-    "selectOptions": "اختر الخيارات",
-    "lowStock": "بقي {count} فقط",
-    "flashSale": "عرض سريع",
-    "copyCode": "نسخ كود القسيمة",
-    "copied": "تم النسخ",
     "hero": {
       "eyebrow": "كاتش بيوتي",
       "title": "المجموعة الجديدة",
@@ -173,9 +120,6 @@
       "lenses": "عدسات"
     },
     "company": {
-      "blogs": "المدونة",
-      "companyWebsite": "موقع الشركة",
-      "careers": "الوظائف",
       "terms": "الشروط والأحكام",
       "returnRefund": "سياسة الإرجاع والاسترداد",
       "privacy": "الخصوصية",
@@ -184,10 +128,7 @@
     "profileLinks": {
       "profile": "الملف الشخصي",
       "orders": "طلباتي",
-      "favourites": "المفضلة",
-      "affiliate": "برنامج التسويق بالعمولة",
-      "vendor": "انضم إلينا كتاجر",
-      "contentCreator": "سجل كصانع محتوى"
+      "favourites": "المفضلة"
     },
     "apps": {
       "getTag": "احصل عليه من",
@@ -201,7 +142,6 @@
     "metaDescription": "أنشئ حسابًا أو سجل الدخول لبدء التسوق",
     "email": "البريد الإلكتروني",
     "phone": "رقم الهاتف",
-    "password": "كلمة المرور",
     "emailPlaceholder": "example@domain.com",
     "phonePlaceholder": "أدخل رقم هاتفك",
     "passwordPlaceholder": "أدخل كلمة المرور",
@@ -221,7 +161,6 @@
     "alreadyHaveAccount": "لديك حساب بالفعل؟",
     "creatingAccount": "جاري إنشاء الحساب...",
     "welcomeHeading": "أهلاً! لنبدأ",
-    "termsAgreement": "بالمتابعة، أنت توافق على <terms>شروط الاستخدام</terms> و<privacy>سياسة الخصوصية</privacy>.",
     "close": "إغلاق",
     "or": "أو",
     "continueWithGoogle": "المتابعة عبر جوجل",
@@ -267,18 +206,12 @@
     "emptyTitle": "سلة التسوق فارغة",
     "emptyDescription": "ابدأ بإضافة منتجات إلى سلة التسوق",
     "startShopping": "تسوق الآن",
-    "subtotal": "المجموع الفرعي",
-    "shipping": "الشحن",
     "total": "الإجمالي",
     "tax": "الضريبة",
     "taxWithRate": "الضريبة ({rate}%)",
     "checkout": "إتمام الشراء",
     "minimumOrder": "الحد الأدنى للطلب هو {amount}",
-    "youMightAlsoLike": "قد يعجبك أيضاً",
-    "remove": "إزالة",
-    "quantity": "الكمية",
     "outOfStock": "غير متوفر",
-    "loading": "جاري تحميل السلة...",
     "cartItems": "{count, plural, =0 {0 عناصر} one {# عنصر} other {# عناصر}}",
     "scheduledTitle": "توصيل عادي",
     "scheduledEta": "3-5 أيام عمل",
@@ -339,34 +272,22 @@
   },
   "product": {
     "home": "الرئيسية",
-    "reviews": "تقييم",
     "reviewsTitle": "تقييمات العملاء",
     "noReviews": "لا توجد تقييمات بعد",
     "noReviewsDescription": "كن أول من يشارك رأيه حول هذا المنتج.",
     "inStock": "متوفر: {count} قطعة",
     "outOfStock": "غير متوفر",
     "sku": "رمز المنتج",
-    "quantity": "الكمية",
-    "addToCart": "أضف إلى السلة",
     "description": "الوصف",
-    "additionalInfo": "معلومات إضافية",
     "height": "الارتفاع",
     "width": "العرض",
     "length": "الطول",
     "weight": "الوزن",
     "cm": "سم",
     "g": "جم",
-    "deliveryTitle": "التوصيل",
-    "deliveryDesc": "التوصيل خلال 2-5 أيام عمل",
-    "shippingTitle": "الشحن",
-    "shippingDesc": "يُحسب عند إتمام الطلب حسب المحافظة.",
-    "returnsTitle": "إرجاع سهل",
-    "returnsDesc": "إرجاع مجاني خلال 14 يوم",
     "options": "الخيارات",
     "fromPrice": "{min} – {max}",
-    "relatedProducts": "منتجات ذات صلة",
     "anonymous": "مجهول",
-    "writeReview": "اكتب تقييماً",
     "yourRating": "تقييمك",
     "yourReview": "مراجعتك",
     "submitReview": "إرسال التقييم",
@@ -374,7 +295,6 @@
     "reviewPlaceholder": "شارك رأيك في هذا المنتج...",
     "reviewSubmitted": "تم إرسال تقييمك بنجاح!",
     "reviewUpdated": "تم تحديث تقييمك بنجاح!",
-    "signInToReview": "سجل الدخول لكتابة تقييم",
     "editReview": "تعديل",
     "cancelEdit": "إلغاء",
     "increaseQuantity": "زيادة الكمية",
@@ -389,10 +309,7 @@
     "viewAll": "عرض الكل",
     "authenticProducts": "منتجات أصلية 100%",
     "description": "الوصف",
-    "howToUse": "طريقة الاستخدام",
-    "aboutBrand": "عن العلامة التجارية",
     "specifications": "المواصفات",
-    "size": "المقاس",
     "usuallyBoughtTogether": "يُشترى عادةً معًا",
     "recommendedProducts": "منتجات موصى بها",
     "seeMore": "شاهد المزيد",
@@ -403,7 +320,6 @@
     "lowestRating": "الأدنى تقييمًا",
     "helpful": "مفيد ({count})",
     "reply": "رد",
-    "endsIn": "ينتهي خلال {time}",
     "endsInLabel": "ينتهي خلال",
     "flashDeal": "عرض فلاش",
     "previousSlide": "السابق",
@@ -423,8 +339,7 @@
     "exploreLabel": "استكشف وسومنا",
     "exploreTitle": "تسوق حسب الوسم",
     "exploreSubtitle": "اكتشف منتجات تناسب نمط حياتك",
-    "viewAll": "عرض جميع الوسوم",
-    "noProducts": "لا توجد منتجات لهذا الوسم."
+    "viewAll": "عرض جميع الوسوم"
   },
   "payment": {
     "metaTitle": "إتمام الطلب",
@@ -483,15 +398,9 @@
   },
   "pickupLocation": {
     "title": "موقع الاستلام",
-    "description": "اختر موقع استلام أو تابع مع الشحن العادي",
-    "selectLocation": "اختر موقع الاستلام",
-    "selectedLocation": "الموقع المحدد",
     "workingHours": "ساعات العمل",
     "getDirections": "الحصول على الاتجاهات",
-    "phone": "الهاتف",
-    "email": "البريد الإلكتروني",
     "noLocations": "لا توجد مواقع استلام متاحة، سيتم استخدام الشحن العادي",
-    "loadError": "فشل تحميل مواقع الاستلام",
     "standardShipping": "الشحن العادي (التوصيل إلى عنواني)",
     "day": "اليوم",
     "open": "الافتتاح",
@@ -990,17 +899,12 @@
       "description": "تصفح المنتجات الموسومة بـ #{name}."
     },
     "category": {
-      "title": "الفئة",
       "description": "تسوق {name} — أفضل الأسعار من أبرز العلامات التجارية."
     },
     "search": {
       "title": "البحث",
       "titleWithQuery": "البحث: {query}",
       "description": "نتائج البحث عن \"{query}\"."
-    },
-    "contact": {
-      "title": "اتصل بنا",
-      "description": "هل لديك سؤال أو اقتراح؟ يسعدنا سماعك."
     },
     "about": {
       "title": "من نحن",
@@ -1033,10 +937,6 @@
     "info": {
       "title": "{name}",
       "description": "{name}"
-    },
-    "notFound": {
-      "title": "الصفحة غير موجودة",
-      "description": "عذرًا، لم نتمكن من العثور على الصفحة التي تبحث عنها."
     }
   },
   "notFound": {
@@ -1082,16 +982,8 @@
     "noProductsForPromotion": "لا توجد منتجات متاحة لهذا العرض بعد.",
     "noBrands": "لا توجد ماركات بعد.",
     "noBrandsMatch": "لا توجد ماركات تطابق \"{search}\".",
-    "noOrdersTitle": "لا توجد طلبات بعد.",
-    "noOrdersDescription": "عندما تقوم بطلب، سيظهر هنا.",
-    "noAddressesTitle": "لا توجد عناوين محفوظة بعد.",
-    "noAddressesDescription": "أضف عنوانًا لتسريع عملية الدفع.",
     "noSearchResults": "لا توجد نتائج",
-    "tryDifferentSearch": "جرّب بحثًا مختلفًا أو تصفح مجموعتنا الكاملة.",
-    "noReviewTitle": "لا توجد تقييمات بعد.",
-    "noReviewDescription": "كن أول من يشارك رأيه حول هذا المنتج.",
-    "noSuggestions": "لا توجد نتائج",
-    "noMapResults": "لا توجد نتائج. جرّب بحثًا مختلفًا."
+    "tryDifferentSearch": "جرّب بحثًا مختلفًا أو تصفح مجموعتنا الكاملة."
   },
   "notifications": {
     "title": "الإشعارات",
@@ -1100,8 +992,6 @@
     "empty": "لا توجد إشعارات بعد",
     "emptyDescription": "عندما تصلك إشعارات جديدة، ستظهر هنا.",
     "markAllRead": "تحديد الكل كمقروء",
-    "markRead": "تحديد كمقروء",
-    "delete": "حذف",
     "viewAll": "عرض الكل",
     "loginRequired": "سجّل الدخول لعرض إشعاراتك.",
     "login": "تسجيل الدخول",
@@ -1110,12 +1000,6 @@
     "loadMore": "تحميل المزيد",
     "loading": "جارٍ التحميل...",
     "showing": "عرض {shown} من {total}",
-    "error": "فشل تحميل الإشعارات.",
-    "justNow": "الآن",
-    "minAgo": "منذ {count} دقيقة",
-    "hrAgo": "منذ {count} ساعة",
-    "dayAgo": "منذ {count} يوم",
-    "weekAgo": "منذ {count} أسبوع",
     "retry": "إعادة المحاولة",
     "claim": "استلام",
     "claimed": "تم الاستلام",

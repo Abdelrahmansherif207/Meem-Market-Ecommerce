@@ -1,6 +1,6 @@
 import type { Governorate } from "../types";
 
-export const stripGovernorateSuffix = (s: string) =>
+const stripGovernorateSuffix = (s: string) =>
   s.replace(/governorate|محافظة/gi, "").trim().toLowerCase();
 
 export function matchGovernorateByName(

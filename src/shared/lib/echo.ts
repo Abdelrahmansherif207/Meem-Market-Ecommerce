@@ -79,7 +79,7 @@ function attachPusherLogging(instance: Echo<"pusher">): void {
   }
 }
 
-export function getEcho(): Echo<"pusher"> {
+function getEcho(): Echo<"pusher"> {
   if (echo) return echo;
 
   if (typeof window === "undefined") {

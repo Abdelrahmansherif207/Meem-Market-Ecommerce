@@ -2,7 +2,7 @@ import { Link } from "@/i18n/navigation";
 import { cn } from "@/shared/utils/cn";
 import { CaretRightIcon } from "./CaretRightIcon";
 
-export interface BreadcrumbItem {
+interface BreadcrumbItem {
   label: string;
   href?: string;
 }

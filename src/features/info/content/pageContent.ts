@@ -333,7 +333,3 @@ export function getInfoPageContent(slug: string, locale: string): InfoPage | nul
   if (!page) return null;
   return locale === "ar" ? page.ar : page.en;
 }
-
-export function getAllInfoPageSlugs(): string[] {
-  return Object.keys(pageContents);
-}

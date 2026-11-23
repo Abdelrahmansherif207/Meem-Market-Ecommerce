@@ -235,7 +235,7 @@ export function normalizeGuestCart(payload: unknown): GuestCart | null {
 }
 
 /** `payment-pending` / `pending_payment` → `pending`; keeps other states. */
-export function normalizeStatus(value: unknown, fallback = "pending"): string {
+function normalizeStatus(value: unknown, fallback = "pending"): string {
   const raw = str(value)?.toLowerCase();
   if (!raw) return fallback;
   return raw.replace(/^payment[-_]/, "").replace(/\s+/g, "_");
@@ -541,7 +541,7 @@ export function normalizeGuestSession(payload: unknown): GuestSessionData {
 }
 
 /** Helpers shared with the UI. */
-export function isGuestOrderCancelled(order: GuestOrder): boolean {
+function isGuestOrderCancelled(order: GuestOrder): boolean {
   return order.status === "cancelled";
 }
 
@@ -554,5 +554,3 @@ export function isGuestPaymentPending(order: GuestOrder): boolean {
   if (isGuestOrderCancelled(order)) return false;
   return !isGuestOrderPaid(order) && order.paymentStatus !== "failed";
 }
-
-export { normalizeAttributes };

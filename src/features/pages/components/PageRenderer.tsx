@@ -3,7 +3,7 @@ import { getTranslations } from "next-intl/server";
 import { guardLoad } from "@/shared/lib/guardedFetch";
 import { getInfoPageContent, InfoPageRenderer } from "@/features/info";
 import { pageService } from "../services/pageService";
-import { SectionSuspense } from "./SectionRenderer";
+import { SectionSuspense } from "@/features/home/sections/SectionRenderer";
 import ErrorState from "@/components/ui/ErrorState";
 import RetryButton from "@/components/ui/RetryButton";
 
@@ -78,5 +78,3 @@ export default async function PageRenderer({ slug, locale }: PageRendererProps) 
     </main>
   );
 }
-
-export { PageSkeleton } from "./SectionRenderer";

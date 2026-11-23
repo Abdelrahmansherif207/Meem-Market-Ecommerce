@@ -1,7 +1,7 @@
 import { ApiError } from "@/shared/lib/api";
 import { withRetry } from "@/shared/utils/retry";
 
-export type ServerLoadKind = "not-found" | "server-down" | "generic";
+type ServerLoadKind = "not-found" | "server-down" | "generic";
 
 export type LoadResult<T> =
   | { ok: true; data: T }
@@ -21,7 +21,7 @@ export async function guardLoad<T>(
   }
 }
 
-export function classifyServerError(err: unknown): ServerLoadKind {
+function classifyServerError(err: unknown): ServerLoadKind {
   if (err instanceof ApiError) {
     if (err.status === 404) return "not-found";
     if (err.status >= 500) return "server-down";

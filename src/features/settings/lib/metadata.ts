@@ -55,7 +55,7 @@ function getMetadataBase(): URL | undefined {
   }
 }
 
-export interface BuildMetadataOptions {
+interface BuildMetadataOptions {
   locale: string;
   title?: string;
   description?: string;

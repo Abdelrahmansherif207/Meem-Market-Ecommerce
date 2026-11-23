@@ -468,18 +468,8 @@ button {
   .header-gradient {
     background: linear-gradient(var(--header-gradient-start), var(--header-gradient-end));
   }
-  .header-shadow {
-    box-shadow: 0 4px 24px 0 rgba(0, 0, 0, 0.06);
-  }
   .card-shadow {
     box-shadow: var(--shadow-elev-1);
-  }
-  .card-shadow-hover {
-    transition: box-shadow 0.2s ease, transform 0.2s ease;
-  }
-  .card-shadow-hover:hover {
-    box-shadow: var(--shadow-elev-3);
-    transform: translateY(-2px);
   }
   .no-scrollbar {
     scrollbar-width: none;

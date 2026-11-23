@@ -3,7 +3,6 @@ export { AuthModal } from "./components/AuthModal";
 export { AuthSyncHandler } from "./components/AuthSyncHandler";
 export { AuthPageSkeleton } from "./components/skeletons/AuthPageSkeleton";
 export { GoogleLoginButton } from "./components/GoogleLoginButton";
-export { MobileAuthButton } from "./components/MobileAuthButton";
 export { UserMenu } from "./components/UserMenu";
 export { useAuthStore } from "./store/useAuthStore";
 export { useAuthModalStore } from "./store/useAuthModalStore";

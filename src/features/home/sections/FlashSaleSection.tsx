@@ -1,0 +1,135 @@
+import { homePageService } from "../services/homePageService";
+import { flashSaleService } from "@/features/flash-sales/services/flashSaleService";
+import { getHoverImage } from "@/features/products/utils";
+import { resolveLocalizedText } from "../utils";
+import { normalizeList } from "./normalize";
+import ProductShelfIsland from "./ProductShelfIsland";
+import SaleCountdown from "./SaleCountdown";
+import type { SectionFrontSetting, ApiFlashSale, ProductItem } from "../types";
+import type { FlashSaleProduct } from "@/features/flash-sales/types";
+
+function flashProductToProductItem(p: FlashSaleProduct): ProductItem {
+  const image =
+    Object.values(p.image?.original ?? {})[0] || p.image?.thumbnail || "";
+  return {
+    id: p.id,
+    image,
+    hoverImage: getHoverImage(p.image, image),
+    title: p.name,
+    price: p.current_price,
+    originalPrice: p.price,
+    slug: p.slug,
+    hasVariants: p.has_variants,
+    isInStock: p.in_stock ?? p.quantity > 0,
+    flashSaleActive: p.flash_sale_active ?? false,
+    inWishlist: p.in_wishlist,
+    ratings: p.ratings,
+    reviewsCount: p.ratings_count,
+    brands: p.brands,
+    inStock: p.quantity,
+    stockQuantity: p.quantity,
+    tags: p.tags,
+    currency: p.currency,
+  };
+}
+
+/**
+ * The CMS can list several sales (including expired ones). Show the active
+ * sale that matches the configured countdown day; otherwise the first active
+ * sale in CMS order. Never surface an expired sale's products.
+ */
+function selectActiveFlashSale(
+  sales: ApiFlashSale[],
+  timerEndAt?: string,
+): ApiFlashSale | undefined {
+  const now = Date.now();
+  const activeSales = sales.filter((sale) => {
+    const end = Date.parse(sale.end_date);
+    return Number.isFinite(end) && end > now;
+  });
+  const timerEnd = Date.parse(timerEndAt ?? "");
+  const timerDate = Number.isFinite(timerEnd) ? new Date(timerEnd) : null;
+  const isSameDay = (date: Date) =>
+    timerDate !== null &&
+    date.getFullYear() === timerDate.getFullYear() &&
+    date.getMonth() === timerDate.getMonth() &&
+    date.getDate() === timerDate.getDate();
+  return (
+    (timerDate
+      ? activeSales.find((sale) => {
+          const end = Date.parse(sale.end_date);
+          return Number.isFinite(end) && isSameDay(new Date(end));
+        })
+      : undefined) ?? activeSales[0]
+  );
+}
+
+interface FlashSaleSectionProps {
+  title: string;
+  type: string;
+  locale: string;
+  setting?: SectionFrontSetting;
+  endpoint?: string;
+}
+
+/**
+ * Screen-matched flash-sale shelf: the first active sale's products in a
+ * product grid with a countdown chip when the CMS requests a timer.
+ */
+export default async function FlashSaleSection({
+  title,
+  locale,
+  setting,
+  endpoint,
+}: FlashSaleSectionProps) {
+  if (!endpoint) return null;
+
+  let flashSales: ApiFlashSale[] = [];
+  try {
+    flashSales = normalizeList(
+      await homePageService.fetchSectionData<ApiFlashSale[] | { data: ApiFlashSale[] }>(endpoint, locale),
+    );
+  } catch (error) {
+    console.error("[FlashSaleSection] Failed to fetch flash sales:", error);
+    return null;
+  }
+
+  if (!flashSales.length) return null;
+
+  const selectedSale = selectActiveFlashSale(flashSales, setting?.timer_end_at);
+  if (!selectedSale?.slug) return null;
+
+  let products: ProductItem[] = [];
+  try {
+    const detail = await flashSaleService.getFlashSale(selectedSale.slug, locale);
+    if (detail.products?.length > 0) {
+      products = detail.products.map(flashProductToProductItem);
+    }
+  } catch (e) {
+    console.warn("[FlashSaleSection] Failed to fetch flash sale products:", e);
+  }
+
+  if (!products.length) return null;
+
+  const headerAction =
+    setting?.show_timer && setting?.timer_end_at ? (
+      <SaleCountdown endsAt={setting.timer_end_at} />
+    ) : undefined;
+
+  return (
+    <ProductShelfIsland
+      key={endpoint}
+      fetchKind="flash-sales"
+      endpoint={endpoint}
+      locale={locale}
+      title={title}
+      subtitle={resolveLocalizedText(setting?.subtitle, locale)}
+      showTitle={setting?.show_title}
+      initialItems={products}
+      columnsCount={setting?.columns_count}
+      badgeText={setting?.badge_text}
+      layout={setting?.layout}
+      headerAction={headerAction}
+    />
+  );
+}

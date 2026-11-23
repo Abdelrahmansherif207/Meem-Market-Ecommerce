@@ -1,7 +1,7 @@
 import type { ProductBrand, ProductTag } from "@/shared/types";
 import type { ProductCurrency } from "@/features/currencies";
 
-export interface FlashSaleImage {
+interface FlashSaleImage {
   desktop: string;
   mobile: string;
 }

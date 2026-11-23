@@ -39,7 +39,7 @@ function resolveBaseUrl(): string {
  * Auth travels via `Authorization: Bearer` from localStorage. Keep
  * `"same-origin"` unless a cross-origin deployment requires otherwise.
  */
-export const API_REQUEST_CREDENTIALS: RequestCredentials = "same-origin";
+const API_REQUEST_CREDENTIALS: RequestCredentials = "same-origin";
 
 function hasClientSession(): boolean {
   if (typeof window === "undefined") return false;

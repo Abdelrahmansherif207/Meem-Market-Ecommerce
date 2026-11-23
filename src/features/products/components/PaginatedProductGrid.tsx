@@ -9,7 +9,7 @@ import { getHoverImage } from "../utils";
 import type { ProductTag, ProductBrand } from "@/shared/types";
 import type { ProductCurrency } from "@/features/currencies";
 
-export interface PaginatedProductItem {
+interface PaginatedProductItem {
   id: number;
   name: string;
   slug: string;

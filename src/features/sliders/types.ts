@@ -1,7 +1,7 @@
 import type { ProductBrand } from "@/shared/types";
 import type { ProductCurrency } from "@/features/currencies";
 
-export interface SliderImage {
+interface SliderImage {
   desktop: string;
   mobile: string;
 }
