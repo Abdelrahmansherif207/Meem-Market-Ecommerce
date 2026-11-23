@@ -1,22 +1,10 @@
-export interface NavbarMenu {
-  id: number;
-  name: string;
-  slug: string;
-  level: number;
-  image: {
-    desktop: string;
-    mobile: string;
-  };
-  children: NavbarMenu[];
-}
-
-export interface FooterLink {
+interface FooterLink {
   id: number;
   label: string;
   slug: string;
 }
 
-export interface FooterColumn {
+interface FooterColumn {
   id: number;
   title: string | null;
   links: FooterLink[];
@@ -28,7 +16,7 @@ export interface SocialLink {
   label: string;
 }
 
-export interface AppStoreBadge {
+interface AppStoreBadge {
   platform: "ios" | "android";
   imageSrc: string;
   url: string;
