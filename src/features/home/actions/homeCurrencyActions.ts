@@ -4,12 +4,7 @@ import { homePageService } from "../services/homePageService";
 import { flashSaleService } from "@/features/flash-sales/services/flashSaleService";
 import { getHoverImage } from "@/features/products/utils";
 import { toProductItem } from "../utils";
-import type {
-  ApiBrandWithProducts,
-  ApiFlashSale,
-  ApiProduct,
-  ProductItem,
-} from "../types";
+import type { ApiFlashSale, ApiProduct, ProductItem } from "../types";
 import type { BannerDetail } from "@/features/banners/types";
 import type { FlashSaleProduct } from "@/features/flash-sales/types";
 
@@ -118,46 +113,4 @@ export async function getBannerSectionItemsAction(
       currency: p.currency,
     };
   });
-}
-
-export interface BrandProductBlock {
-  id: number;
-  name: string;
-  items: ProductItem[];
-}
-
-export async function getBrandProductBlocksAction(
-  endpoint: string,
-  kind: "banners" | "brands",
-  locale: string,
-  currency: string | null | undefined,
-): Promise<BrandProductBlock[]> {
-  const code = currency ?? undefined;
-  if (kind === "banners") {
-    const banner = await homePageService.fetchSectionData<{
-      id: number;
-      title: string;
-      slug: string;
-      image: { desktop: string; mobile: string };
-      status: boolean;
-      products: ApiProduct[];
-    }>(endpoint, locale, code);
-    return [
-      {
-        id: banner.id,
-        name: banner.title,
-        items: (banner.products ?? []).map(toProductItem),
-      },
-    ];
-  }
-  const brands = await homePageService.fetchSectionData<ApiBrandWithProducts[]>(
-    endpoint,
-    locale,
-    code,
-  );
-  return brands.map((brand) => ({
-    id: brand.id,
-    name: brand.name,
-    items: (brand.products ?? []).map(toProductItem),
-  }));
 }

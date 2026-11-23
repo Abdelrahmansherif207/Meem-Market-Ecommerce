@@ -10,11 +10,11 @@ import type { SectionFrontSetting } from "../types";
  * requested rows while desktop can keep more tiles than phones.
  */
 
-export type CategoryLayout = "grid" | "slider";
-export type CategoryShape = "square" | "circle";
-export type CategoryTileMode = "circle" | "card";
+type CategoryLayout = "grid" | "slider";
+type CategoryShape = "square" | "circle";
+type CategoryTileMode = "circle" | "card";
 
-export interface CategoryBreakpointLayout {
+interface CategoryBreakpointLayout {
   columns: number;
   rows: number;
   /** Maximum tiles this breakpoint can show (`columns × rows`). */
@@ -104,7 +104,7 @@ export function parseBooleanSetting(value: unknown, fallback: boolean): boolean 
 }
 
 /** Only `slider` opts into the old rail; every other value is grid. */
-export function parseCategoryLayout(value: unknown): CategoryLayout {
+function parseCategoryLayout(value: unknown): CategoryLayout {
   return typeof value === "string" && value.trim().toLowerCase() === "slider"
     ? "slider"
     : "grid";

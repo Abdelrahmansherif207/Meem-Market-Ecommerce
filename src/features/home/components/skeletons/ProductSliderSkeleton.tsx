@@ -6,7 +6,7 @@ import type { SectionFrontSetting } from "../../types";
  * ProductSlider): 2 cols base, 3 at 480px, 4 at 768px, N at 1024px.
  * Full literal class strings are required for the Tailwind scanner.
  */
-export const PRODUCT_SLIDER_ROW_WIDTH_CLASSES: Record<number, string> = {
+const PRODUCT_SLIDER_ROW_WIDTH_CLASSES: Record<number, string> = {
   1: "w-full",
   2: "w-[calc((100%-8px)/2)]",
   3: "w-[calc((100%-8px)/2)] min-[480px]:w-[calc((100%-16px)/3)] md:w-[calc((100%-16px)/3)] lg:w-[calc((100%-16px)/3)]",
