@@ -1,7 +1,7 @@
 import EmptyState from "./EmptyState";
 import type { EmptyStateVariant } from "./EmptyState";
 
-export type ErrorStateVariant = "serverError" | "notFound" | "generic";
+type ErrorStateVariant = "serverError" | "notFound" | "generic";
 
 interface ErrorStateProps {
   variant: ErrorStateVariant;
