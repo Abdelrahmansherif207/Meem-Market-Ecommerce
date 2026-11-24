@@ -6,9 +6,8 @@ const OUTER_HEART =
   "M12.1068 0.614624C13.5986 -0.192937 15.2541 -0.0986813 16.763 0.879272C18.3016 1.87505 19.2407 3.52527 19.2093 5.18884C19.1749 7.01174 18.214 9.10185 16.8382 11.0863C15.4611 13.0727 13.6613 14.9631 11.9349 16.3871C11.2697 16.936 10.4543 17.2103 9.64 17.2103C8.82488 17.2103 8.01033 16.936 7.34508 16.3871C5.61885 14.9632 3.81889 13.0735 2.44176 11.0873C1.06595 9.10289 0.105097 7.01216 0.0706635 5.18884C0.0401394 3.52532 0.979307 1.87505 2.51695 0.879272C4.02594 -0.0989231 5.68124 -0.193836 7.1732 0.614624C8.27162 1.21034 9.14144 2.22865 9.64 3.41345C10.1393 2.22864 11.0091 1.21035 12.1068 0.614624Z";
 
 /**
- * Heart icon from `public/favourite.svg` (same path data), inlined so the
- * active state can restyle it via props:
- * - outline: hollow charcoal heart, identical to the SVG file
+ * Heart icon, inlined so the active state can restyle it via props:
+ * - outline: hollow charcoal heart
  * - filled: solid crimson heart (wishlist active)
  */
 export default function FavouriteHeartIcon({

@@ -3,8 +3,8 @@
 import { cn } from "@/shared/utils/cn";
 
 /**
- * "Add to cart" icon from `public/add.svg` (same path data), inlined with
- * `currentColor` so it follows the button's text color and states.
+ * "Add to cart" icon, inlined with `currentColor` so it follows the
+ * button's text color and states.
  */
 export default function AddToCartIcon({ className }: { className?: string }) {
   return (
