@@ -1,10 +1,11 @@
 "use client";
 
-import { useCallback } from "react";
+import { useCallback, useMemo } from "react";
 import ProductCard from "@/features/products/components/ProductCard";
 import { getHoverImage } from "@/features/products/utils";
 import { getBrandProductsAction } from "../actions/brandCurrencyActions";
 import { useCurrencyRefetch } from "@/features/currencies";
+import { buildGA4Item, useListImpression } from "@/features/analytics";
 import type { BrandProduct } from "../types";
 
 interface BrandProductsIslandProps {
@@ -36,6 +37,24 @@ export function BrandProductsIsland({
     initialCurrency,
   );
 
+  const ga4Items = useMemo(
+    () =>
+      products.map((product, index) =>
+        buildGA4Item({
+          id: product.id,
+          name: product.name,
+          price:
+            product.price_after_discount > 0
+              ? product.price_after_discount
+              : product.price,
+          originalPrice: product.price,
+          index,
+        }),
+      ),
+    [products],
+  );
+  useListImpression(ga4Items, `brand_${slug}`);
+
   return (
     <div className="grid grid-cols-2 gap-3 sm:gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6">
       {products.map((product) => (
@@ -60,6 +79,7 @@ export function BrandProductsIsland({
             reviewsCount: product.ratings_count,
             brands: product.brands,
           }}
+          itemListId={`brand_${slug}`}
           pricesLoading={isRefreshing}
         />
       ))}

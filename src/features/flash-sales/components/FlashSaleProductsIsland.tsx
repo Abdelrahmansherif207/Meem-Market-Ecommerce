@@ -1,10 +1,11 @@
 "use client";
 
-import { useCallback } from "react";
+import { useCallback, useMemo } from "react";
 import ProductCard from "@/features/products/components/ProductCard";
 import { getHoverImage } from "@/features/products/utils";
 import { getFlashSaleProductsAction } from "../actions/flashSaleCurrencyActions";
 import { useCurrencyRefetch } from "@/features/currencies";
+import { buildGA4Item, useListImpression } from "@/features/analytics";
 import type { FlashSaleProduct } from "../types";
 
 interface FlashSaleProductsIslandProps {
@@ -42,6 +43,21 @@ export function FlashSaleProductsIsland({
     initialCurrency,
   );
 
+  const ga4Items = useMemo(
+    () =>
+      products.map((product, index) =>
+        buildGA4Item({
+          id: product.id,
+          name: product.name,
+          price: product.current_price,
+          originalPrice: product.price,
+          index,
+        }),
+      ),
+    [products],
+  );
+  useListImpression(ga4Items, `flash_sale_${slug}`);
+
   return (
     <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 md:grid-cols-4 lg:grid-cols-6">
       {products.map((product) => (
@@ -70,6 +86,7 @@ export function FlashSaleProductsIsland({
             brands: product.brands,
             tags: product.tags,
           }}
+          itemListId={`flash_sale_${slug}`}
           pricesLoading={isRefreshing}
         />
       ))}

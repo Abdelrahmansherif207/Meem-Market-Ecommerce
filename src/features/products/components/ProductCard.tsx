@@ -15,6 +15,7 @@ import {
 } from "@/components/ui/icons";
 import { useCartActions } from "@/features/cart/hooks/useCartActions";
 import { showCartFeedback } from "@/features/cart/store/useCartFeedbackStore";
+import { fromProductCardItem, trackSelectItem } from "@/features/analytics";
 import { useWishlistActions } from "@/features/wishlist/hooks/useWishlistActions";
 import { NiceOneCountdown } from "./niceone/NiceOneCountdown";
 import type { ProductCardItem } from "../types";
@@ -23,6 +24,9 @@ interface ProductCardProps {
   item: ProductCardItem;
   /** Static CMS badge text (e.g. "NEW", "FLASH SALE"). */
   badgeText?: string;
+  /** GA4 list context — propagated to `view_item_list`/`select_item` when set. */
+  itemListId?: string;
+  itemListName?: string;
   /** When true, price numbers render as skeleton bars while converted prices load. */
   pricesLoading?: boolean;
   className?: string;
@@ -115,6 +119,8 @@ function ProductCardImage({
 export default function ProductCard({
   item,
   badgeText,
+  itemListId,
+  itemListName,
   pricesLoading = false,
   className,
   variant = "grid",
@@ -123,7 +129,12 @@ export default function ProductCard({
   const t = useTranslations("meemHome");
   const tPdp = useTranslations("niceOnePdp");
   const { quantity, isPending, addItem, increment, decrement } =
-    useCartActions(item.id);
+    useCartActions(item.id, {
+      name: item.title,
+      price: item.price ?? 0,
+      originalPrice: item.originalPrice,
+      sku: item.sku,
+    });
   const {
     inWishlist,
     isPending: wishlistPending,
@@ -165,6 +176,11 @@ export default function ProductCard({
       .replace(/^-+|-+$/g, "")}-${item.id}`
   }`;
 
+  /** GA4 `select_item` — the card (or its option link) was clicked. */
+  const handleSelectItem = useCallback(() => {
+    trackSelectItem(fromProductCardItem(item), { itemListId, itemListName });
+  }, [item, itemListId, itemListName]);
+
   const handleAdd = useCallback(async () => {
     const added = await addItem({
       quantity: 1,
@@ -203,6 +219,7 @@ export default function ProductCard({
       <Link
         href={productHref}
         aria-label={item.title}
+        onClick={handleSelectItem}
         className="absolute inset-0 z-10 rounded-2xl focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-primary"
       />
 
@@ -293,6 +310,7 @@ export default function ProductCard({
             <Link
               href={productHref}
               aria-label={t("selectOptions")}
+              onClick={handleSelectItem}
               className={cn(
                 floatingButtonClass,
                 "bg-primary text-white shadow-md hover:bg-primary-active",

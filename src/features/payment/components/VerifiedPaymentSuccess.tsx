@@ -5,6 +5,12 @@ import { useLocale, useTranslations } from "next-intl";
 import { CheckCircle, Clock3, HelpCircle, Loader2 } from "lucide-react";
 import Link from "next/link";
 import { orderService } from "@/features/profile";
+import type { OrderDetail } from "@/features/profile/types";
+import {
+  fromOrderItem,
+  trackPurchase,
+  useOncePerKeyEffect,
+} from "@/features/analytics";
 import { QRDisplay } from "./QRDisplay";
 
 type VerifyState = "loading" | "success" | "verifying" | "unconfirmed";
@@ -19,6 +25,17 @@ const PAY_LATER_METHODS = new Set(["cod", "pay_at_cashier"]);
 const VERIFY_POLL_INTERVAL_MS = 2_500;
 const VERIFY_POLL_MAX_ATTEMPTS = 6;
 
+/**
+ * The order payload types `coupon` loosely; extract the code only when the
+ * backend actually ships one (never invent a coupon value).
+ */
+function extractCouponCode(coupon: unknown): string | null {
+  if (!coupon || typeof coupon !== "object") return null;
+  const record = coupon as Record<string, unknown>;
+  const code = record.code ?? record.coupon_code;
+  return typeof code === "string" && code.trim() ? code.trim() : null;
+}
+
 export function VerifiedPaymentSuccess({ orderId, transactionId }: VerifiedPaymentSuccessProps) {
   const t = useTranslations("payment");
   const locale = useLocale();
@@ -31,6 +48,29 @@ export function VerifiedPaymentSuccess({ orderId, transactionId }: VerifiedPayme
     parsedOrderId === null ? "unconfirmed" : "loading",
   );
   const [paymentMethod, setPaymentMethod] = useState<string | null>(null);
+  /** Full order kept for the GA4 purchase event. */
+  const [order, setOrder] = useState<OrderDetail | null>(null);
+
+  // GA4 purchase — ONLY when the backend confirms the order (completed/
+  // delivered/processing, or COD/pay-at-cashier which confirm immediately).
+  // trackPurchase deduplicates by transaction_id, so polls, Strict Mode and
+  // page refreshes never repeat the event.
+  useOncePerKeyEffect(
+    state === "success" && order ? `purchase_${order.order_number || order.id}` : null,
+    () => {
+      if (!order) return;
+      // Shipping = delivery fee + fast-shipping surcharge, as charged.
+      const shipping = (order.shipping_price || 0) + (order.fast_shipping_fee || 0);
+      trackPurchase({
+        transactionId: String(order.order_number || order.id),
+        value: order.converted_total > 0 ? order.converted_total : order.total,
+        currency: order.currency,
+        shipping: Math.round(shipping * 1000) / 1000,
+        coupon: extractCouponCode(order.coupon),
+        items: (order.order_items ?? []).map(fromOrderItem),
+      });
+    },
+  );
 
   useEffect(() => {
     if (!parsedOrderId) return;
@@ -43,6 +83,7 @@ export function VerifiedPaymentSuccess({ orderId, transactionId }: VerifiedPayme
     try {
       const order = await orderService.getById(parsedOrderId, locale);
       if (cancelled) return;
+      setOrder(order);
       setPaymentMethod(order.payment_method);
 
       // New order-flow catalog codes may be present in current_status.code;

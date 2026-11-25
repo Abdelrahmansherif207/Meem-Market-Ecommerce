@@ -20,6 +20,15 @@ import type {
 } from "../types";
 import { SHIPPING_TYPE_CODES } from "../types";
 
+export interface CheckoutCartItem {
+  productId: number;
+  name: string;
+  /** Single-unit price in the display currency. */
+  unitPrice: number;
+  quantity: number;
+  variantId: number | null;
+}
+
 export interface CartCheckoutData {
   subtotal: number;
   totalQuantity: number;
@@ -30,6 +39,8 @@ export interface CartCheckoutData {
   couponDiscount: number;
   appliedCoupon: AppliedCoupon | null;
   expired: boolean;
+  /** The ordered group's lines (summaries + GA4 checkout events). */
+  items: CheckoutCartItem[];
 }
 
 const EMPTY_CART: CartCheckoutData = {
@@ -40,6 +51,7 @@ const EMPTY_CART: CartCheckoutData = {
   couponDiscount: 0,
   appliedCoupon: null,
   expired: true,
+  items: [],
 };
 
 function toCartData(
@@ -53,6 +65,13 @@ function toCartData(
   const items = deliveryType === "fast" ? cart.fast_items ?? [] : cart.normal_items ?? [];
   const subtotal = items.reduce((sum, item) => sum + item.total_price, 0);
   const totalQuantity = items.reduce((sum, item) => sum + item.quantity, 0);
+  const checkoutItems: CheckoutCartItem[] = items.map((item) => ({
+    productId: item.product_id,
+    name: item.product.name,
+    unitPrice: item.quantity > 0 ? item.total_price / item.quantity : item.price,
+    quantity: item.quantity,
+    variantId: item.product_variant_id ?? null,
+  }));
 
   // Coupons are scheduled-only; NOW checkout never claims a discount.
   const appliedCoupon: AppliedCoupon | null =
@@ -74,6 +93,7 @@ function toCartData(
     couponDiscount: deliveryType === "scheduled" ? cart.coupon_discount : 0,
     appliedCoupon,
     expired: false,
+    items: checkoutItems,
   };
 }
 

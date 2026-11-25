@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { useLocale, useTranslations } from "next-intl";
@@ -9,6 +9,7 @@ import { cn } from "@/shared/utils/cn";
 import { QuantityStepper } from "@/components/ui/QuantityStepper";
 import { useCartActions } from "@/features/cart/hooks/useCartActions";
 import { showCartFeedback } from "@/features/cart/store/useCartFeedbackStore";
+import { fromRelatedProduct, useListImpression } from "@/features/analytics";
 import { useDisplayCurrency } from "@/features/currencies";
 import { formatNumber } from "@/shared/utils/formatMoney";
 import Skeleton from "@/components/ui/Skeleton";
@@ -40,6 +41,13 @@ export function NiceOneBundleSection({ items, pricesLoading = false }: NiceOneBu
   const t = useTranslations("niceOnePdp");
   const locale = useLocale();
   const isRtl = locale === "ar";
+
+  // GA4 view_item_list — PDP "usually bought together" band.
+  const ga4Items = useMemo(
+    () => items.map((item, index) => fromRelatedProduct(item, index)),
+    [items],
+  );
+  useListImpression(ga4Items, "pdp_bundle");
 
   const viewportRef = useRef<HTMLDivElement | null>(null);
   const [viewportW, setViewportW] = useState(0);
@@ -235,11 +243,15 @@ function NiceOneBundleCard({
   const tProduct = useTranslations("product");
   const locale = useLocale();
   const { symbol: currencySymbol, decimalPlaces } = useDisplayCurrency(item.currency);
-  const { quantity: cartQuantity, isPending, addItem, increment, decrement } = useCartActions(item.id);
   const inStock = item.in_stock ?? item.quantity > 0;
 
   const displayPrice = getDisplayPrice(item);
   const originalPrice = getOriginalPrice(item);
+  const { quantity: cartQuantity, isPending, addItem, increment, decrement } = useCartActions(item.id, {
+    name: item.name,
+    price: displayPrice,
+    originalPrice,
+  });
   const discountPercent = getDiscountPercent(item);
   const formatPrice = (v: number) => formatNumber(v, locale, decimalPlaces);
 

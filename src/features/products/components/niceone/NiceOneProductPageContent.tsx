@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useLocale } from "next-intl";
 import { useRouter } from "@/i18n/navigation";
 
@@ -17,6 +17,8 @@ import { NiceOneBundleSection } from "./NiceOneBundleSection";
 import { NiceOneRecommendedRail } from "./NiceOneRecommendedRail";
 import { NiceOneReviewsSection } from "./NiceOneReviewsSection";
 import { NiceOneStickyBar } from "./NiceOneStickyBar";
+import { fromProductDetail, trackViewItem } from "@/features/analytics";
+import { useDisplayCurrency } from "@/features/currencies";
 import type { ProductDetail } from "../../types";
 import { getSortedImages } from "../../utils";
 
@@ -57,6 +59,25 @@ export function NiceOneProductPageContent({
   // unavailable state instead of silently rolling back.
   const optionsUnavailable =
     product.product_type === "variable" && product.variants.length === 0;
+
+  const { code: currencyCode } = useDisplayCurrency(product.currency);
+
+  // GA4 view_item — once per product per page view. Variant changes are not
+  // re-tracked; the event carries the initially displayed variant price.
+  const viewItemTrackedRef = useRef<number | null>(null);
+  useEffect(() => {
+    if (viewItemTrackedRef.current === product.id) return;
+    viewItemTrackedRef.current = product.id;
+    trackViewItem(
+      fromProductDetail(product, {
+        variantId: selectedVariantId,
+        variantPrice: selectedVariant?.current_price ?? null,
+      }),
+      currencyCode,
+    );
+    // Currency-driven refetches keep the same product id: no re-fire.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [product.id]);
 
   const handleReviewSuccess = useCallback(() => {
     router.refresh();

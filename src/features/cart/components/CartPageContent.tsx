@@ -21,14 +21,55 @@ import AvailableCoupons from "@/features/coupons/components/AvailableCoupons";
 import MyAvailableCoupons from "@/features/coupons/components/MyAvailableCoupons";
 import { MyCouponsList } from "@/features/coupons/components/MyCouponsList";
 import { calcSubtotal, calcTotalQuantity, canCheckout } from "../utils";
+import {
+  fromHydratedCartItem,
+  trackAddToCart,
+  trackRemoveFromCart,
+  trackViewCart,
+  useOncePerKeyEffect,
+} from "@/features/analytics";
 import type { AppliedCoupon } from "@/features/coupons/types";
 import { couponService } from "@/features/coupons/services/couponService";
 import { ApiError } from "@/shared/lib/api";
-import type { HydratedCartItem, CartApiItem, CartApiCart, CartLineIdentity, DeliveryType } from "../types";
+import type { HydratedCartItem, CartApiItem, CartApiCart, CartLineIdentity, DeliveryType, GuestCartItem } from "../types";
 import { getCartLineKey, matchesCartLine } from "../types";
 import type { GuestCart, GuestCartLine } from "@/features/guest/types";
 import { formatGuestDate } from "@/features/guest/lib/format";
 import EmptyState from "@/components/ui/EmptyState";
+
+
+// ---------------------------------------------------------------------------
+// GA4 helpers (module scope — used by handlers declared before derived data)
+// ---------------------------------------------------------------------------
+
+/** Maps a legacy localStorage guest item into the display cart-item shape. */
+function toDisplayGuestItem(g: GuestCartItem): HydratedCartItem {
+  return {
+    ...g,
+    deliveryType: g.deliveryType ?? "scheduled",
+    name: g.name ?? `Product #${g.product_id}`,
+    image: g.image ?? "",
+    price: g.price ?? 0,
+    current_price: g.current_price ?? 0,
+    slug: g.slug ?? "",
+    sku: g.sku ?? "",
+    in_stock: g.in_stock ?? false,
+    stock_quantity: g.stock_quantity ?? 0,
+  };
+}
+
+/** Cart-page quantity deltas fire add/remove with the difference only. */
+function trackCartQuantityChange(
+  item: HydratedCartItem,
+  eventQuantity: number,
+  direction: "add" | "remove",
+  currency: string,
+): void {
+  const ga4Item = { ...fromHydratedCartItem(item), quantity: eventQuantity };
+  const params = { item: ga4Item, currency };
+  if (direction === "add") trackAddToCart(params);
+  else trackRemoveFromCart(params);
+}
 
 
 // ---------------------------------------------------------------------------
@@ -421,10 +462,23 @@ export function CartPageContent({
     async (productId: number, quantity: number, line: CartLineIdentity) => {
       // Guest path — mutate store
       if (state.source !== "server") {
+        const item = guestItems
+          .map(toDisplayGuestItem)
+          .find((i) => matchesCartLine(i, productId, line));
         if (quantity <= 0) {
           guestRemoveItem(productId, line);
+          if (item) trackCartQuantityChange(item, item.quantity, "remove", displayCurrency.code);
         } else {
           guestUpdateQuantity(productId, quantity, line);
+          const delta = Math.abs(quantity - (item?.quantity ?? 0));
+          if (item && delta > 0) {
+            trackCartQuantityChange(
+              item,
+              delta,
+              quantity > item.quantity ? "add" : "remove",
+              displayCurrency.code,
+            );
+          }
         }
         return;
       }
@@ -464,6 +518,8 @@ export function CartPageContent({
           } else {
             await cartService.removeItem(itemId, deliveryType, locale);
           }
+          // Whole line removed — report the pre-mutation line quantity.
+          trackCartQuantityChange(item, item.quantity, "remove", displayCurrency.code);
         } else {
           dispatch({ type: "UPDATE_ITEM", productId, quantity, line });
           const operation = quantity > item.quantity ? "increment" : "decrement";
@@ -491,6 +547,13 @@ export function CartPageContent({
             const updatedCart = await cartService.updateItem(payload, locale);
             processCart(updatedCart);
           }
+          // Difference-only add/remove after the mutation succeeded.
+          trackCartQuantityChange(
+            item,
+            delta,
+            quantity > item.quantity ? "add" : "remove",
+            displayCurrency.code,
+          );
         }
       } catch {
         dispatch({ type: "SET_ITEM_ROLLBACK", items: snapshot });
@@ -507,6 +570,8 @@ export function CartPageContent({
       guestRemoveItem,
       guestUpdateQuantity,
       processCart,
+      guestItems,
+      displayCurrency.code,
     ],
   );
 
@@ -523,18 +588,7 @@ export function CartPageContent({
   // Derived display data
   // -------------------------------------------------------------------------
   const displayItems: HydratedCartItem[] =
-    state.source === "server" ? state.serverItems : guestItems.map((g) => ({
-      ...g,
-      deliveryType: g.deliveryType ?? "scheduled",
-      name: g.name ?? `Product #${g.product_id}`,
-      image: g.image ?? "",
-      price: g.price ?? 0,
-      current_price: g.current_price ?? 0,
-      slug: g.slug ?? "",
-      sku: g.sku ?? "",
-      in_stock: g.in_stock ?? false,
-      stock_quantity: g.stock_quantity ?? 0,
-    }));
+    state.source === "server" ? state.serverItems : guestItems.map(toDisplayGuestItem);
 
   const scheduledItems = displayItems.filter(
     (i) => i.deliveryType === "scheduled",
@@ -548,6 +602,23 @@ export function CartPageContent({
   );
   const scheduledQty = calcTotalQuantity(scheduledItems);
   const fastQty = calcTotalQuantity(fastItems);
+
+  // GA4 view_cart — once per cart page view, only when the cart actually
+  // loaded with items (after auth hydration / cart fetch resolved).
+  useOncePerKeyEffect(
+    (state.source === "server" || state.source === "guest") &&
+      displayItems.length > 0
+      ? "view_cart"
+      : null,
+    () => {
+      trackViewCart({
+        items: displayItems.map(fromHydratedCartItem),
+        value: Math.round((scheduledSubtotal + fastSubtotal) * 1000) / 1000,
+        currency: displayCurrency.code,
+        coupon: appliedCoupon?.code,
+      });
+    },
+  );
 
   // Anonymous shoppers with the flag ON checkout their whole cart in one
   // guest order, so the CTA is cart-level instead of per delivery group.

@@ -22,6 +22,7 @@ import {
 } from "@/features/notifications";
 import { IBM_Plex_Sans_Arabic } from "next/font/google";
 import { cn } from "@/shared/utils/cn";
+import { GtmScript } from "@/features/analytics";
 import { getSiteMeta } from "@/features/settings/lib/metadata";
 import { getCachedSettings } from "@/features/settings/services/settingsService";
 import {
@@ -141,6 +142,7 @@ export default async function RootLayout({
         style={fontStyle}
       >
       <body className="flex min-h-dvh flex-col overflow-x-clip">
+        <GtmScript />
         <link rel="preconnect" href={process.env.NEXT_PUBLIC_API_URL} />
         {font?.source_type === "file" ? (
           <>

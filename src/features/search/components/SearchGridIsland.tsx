@@ -4,6 +4,7 @@ import { useCallback } from "react";
 import CategoryProducts from "@/features/categories/components/CategoryProducts";
 import { getSearchPageDataAction } from "@/features/categories/actions/categoryPageData";
 import { useCurrencyRefetch } from "@/features/currencies";
+import { trackSearch, useOncePerKeyEffect } from "@/features/analytics";
 import type { CategoryProduct } from "@/features/categories/types";
 import SearchEmptyState from "./SearchEmptyState";
 
@@ -13,6 +14,15 @@ interface SearchGridIslandProps {
   initialProducts: CategoryProduct[];
   /** Currency code the server-rendered prices are in (catalog fallback). */
   initialCurrency?: string;
+}
+
+/** First `q` param value, trimmed (the storefront product search term). */
+function readSearchTerm(
+  searchParams: Record<string, string | string[] | undefined>,
+): string {
+  const q = searchParams.q;
+  const raw = Array.isArray(q) ? q[0] : q;
+  return raw?.trim() ?? "";
 }
 
 /**
@@ -26,6 +36,12 @@ export default function SearchGridIsland({
   initialProducts,
   initialCurrency,
 }: SearchGridIslandProps) {
+  const searchTerm = readSearchTerm(searchParams);
+
+  // GA4 `search` — once per term per page view. Fires for the submitted
+  // product query only (no filters, no personal data).
+  useOncePerKeyEffect(searchTerm || null, () => trackSearch(searchTerm));
+
   const fetchAction = useCallback(
     (currency: string) =>
       getSearchPageDataAction(locale, searchParams, currency).then(
@@ -44,6 +60,11 @@ export default function SearchGridIsland({
   }
 
   return (
-    <CategoryProducts products={products} pricesLoading={isRefreshing} />
+    <CategoryProducts
+      products={products}
+      pricesLoading={isRefreshing}
+      itemListId="search_results"
+      itemListName={searchTerm}
+    />
   );
 }

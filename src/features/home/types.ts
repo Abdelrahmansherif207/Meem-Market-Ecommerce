@@ -168,6 +168,9 @@ export interface ProductSliderProps {
   sliderSpeed?: number;
   /** When true, card price numbers render as skeleton bars. */
   pricesLoading?: boolean;
+  /** GA4 list context — `view_item_list` + `select_item` when set. */
+  itemListId?: string;
+  itemListName?: string;
 }
 
 export interface SectionFrontSetting {

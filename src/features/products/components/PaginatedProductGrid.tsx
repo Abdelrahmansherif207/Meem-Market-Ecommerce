@@ -6,6 +6,7 @@ import { useTranslations } from "next-intl";
 import { cn } from "@/shared/utils/cn";
 import ProductCard from "./ProductCard";
 import { getHoverImage } from "../utils";
+import { buildGA4Item, useListImpression } from "@/features/analytics";
 import type { ProductTag, ProductBrand } from "@/shared/types";
 import type { ProductCurrency } from "@/features/currencies";
 
@@ -37,6 +38,9 @@ interface PaginatedProductGridProps {
   itemsPerPage?: number;
   /** When true, card price numbers render as skeleton bars. */
   pricesLoading?: boolean;
+  /** GA4 list context — `view_item_list` + `select_item` when set. */
+  itemListId?: string;
+  itemListName?: string;
 }
 
 function getPageNumbers(current: number, total: number): (number | "...")[] {
@@ -64,10 +68,28 @@ export default function PaginatedProductGrid({
   products,
   itemsPerPage = 12,
   pricesLoading = false,
+  itemListId,
+  itemListName,
 }: PaginatedProductGridProps) {
   const t = useTranslations("meemHome");
   const [currentPage, setCurrentPage] = useState(1);
   const totalPages = Math.ceil(products.length / itemsPerPage);
+
+  // view_item_list — once per unique list content (Strict Mode-safe).
+  const ga4Items = useMemo(
+    () =>
+      products.map((product, index) =>
+        buildGA4Item({
+          id: product.id,
+          name: product.name,
+          price: product.current_price,
+          originalPrice: product.price,
+          index,
+        }),
+      ),
+    [products],
+  );
+  useListImpression(ga4Items, itemListId ?? "products_grid", itemListName);
 
   const visibleProducts = useMemo(() => {
     const start = (currentPage - 1) * itemsPerPage;
@@ -107,6 +129,8 @@ export default function PaginatedProductGrid({
               ratings: product.ratings,
               reviewsCount: product.ratings_count,
             }}
+            itemListId={itemListId}
+            itemListName={itemListName}
             pricesLoading={pricesLoading}
           />
         ))}

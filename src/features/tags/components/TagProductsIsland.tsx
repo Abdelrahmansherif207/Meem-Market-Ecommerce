@@ -1,10 +1,11 @@
 "use client";
 
-import { useCallback } from "react";
+import { useCallback, useMemo } from "react";
 import ProductCard from "@/features/products/components/ProductCard";
 import { getHoverImage } from "@/features/products/utils";
 import { getCategoryPageDataAction } from "@/features/categories/actions/categoryPageData";
 import { useCurrencyRefetch } from "@/features/currencies";
+import { fromCategoryProduct, useListImpression } from "@/features/analytics";
 import type { CategoryProduct } from "@/features/categories/types";
 
 interface TagProductsIslandProps {
@@ -39,6 +40,12 @@ export function TagProductsIsland({
     initialCurrency,
   );
 
+  const ga4Items = useMemo(
+    () => products.map((product, index) => fromCategoryProduct(product, index)),
+    [products],
+  );
+  useListImpression(ga4Items, `tag_${slug}`);
+
   return (
     <div className="grid grid-cols-2 gap-3 sm:gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6">
       {products.map((product) => (
@@ -69,6 +76,7 @@ export function TagProductsIsland({
             flashSaleActive: product.flash_sale_active ?? false,
             tags: product.tags,
           }}
+          itemListId={`tag_${slug}`}
           pricesLoading={isRefreshing}
         />
       ))}

@@ -37,6 +37,13 @@ import {
   clearIdempotencyKey,
   getOrCreateIdempotencyKey,
 } from "../utils/idempotency";
+import {
+  buildGA4Item,
+  trackAddPaymentInfo,
+  trackAddShippingInfo,
+  trackBeginCheckout,
+  useOncePerKeyEffect,
+} from "@/features/analytics";
 import { runWithGuestSession } from "../utils/guestErrors";
 import {
   consumeGuestPaymentReturnNote,
@@ -173,6 +180,38 @@ export function GuestCheckoutForm() {
         : { ...prev, fulfillment_type: "delivery" },
     );
   }, [hasFastItems]);
+
+  // GA4 item list for guest checkout events.
+  const guestGA4Items = useMemo(
+    () =>
+      (cart?.items ?? []).map((line, index) => {
+        const item = buildGA4Item({
+          id: line.productId,
+          name: line.name,
+          price: line.unitPrice,
+          quantity: line.quantity,
+          variantId: line.productVariantId,
+          sku: line.sku,
+        });
+        item.index = index + 1;
+        return item;
+      }),
+    [cart?.items],
+  );
+
+  // GA4 begin_checkout — the guest cart loaded with items.
+  useOncePerKeyEffect(
+    cart && cart.totalQuantity > 0
+      ? `begin_checkout_guest_${cart.id}_${displayCurrency.code}`
+      : null,
+    () => {
+      trackBeginCheckout({
+        items: guestGA4Items,
+        value: cart?.subtotal ?? 0,
+        currency: cart?.currency ?? displayCurrency.code,
+      });
+    },
+  );
 
   const setField = useCallback(
     (field: keyof GuestFormState, value: string | number | null) => {
@@ -394,8 +433,7 @@ export function GuestCheckoutForm() {
           guestCheckoutService.checkout(payload, checkoutKey, locale),
         );
         clearIdempotencyKey(intent);
-      } catch (error) {
-        if (error instanceof ApiError) {
+      } catch (error) {        if (error instanceof ApiError) {
           // A rejected checkout must not keep its intent key — only genuine
           // in-progress states (409) and network failures should reuse it.
           if (error.status === 400 || error.status === 422) {
@@ -434,6 +472,23 @@ export function GuestCheckoutForm() {
 
       // The cart is consumed from here on. Never resubmit checkout; only
       // payment initiation may be retried (from the confirmation page).
+      // GA4: the single-page guest form validated and the order was created
+      // — shipping and payment info both succeeded.
+      const guestCurrency = cart.currency ?? displayCurrency.code;
+      trackAddShippingInfo({
+        items: guestGA4Items,
+        value: cart.subtotal,
+        currency: guestCurrency,
+        shippingTier: form.fulfillment_type,
+      });
+      trackAddPaymentInfo({
+        items: guestGA4Items,
+        value: cart.subtotal,
+        currency: guestCurrency,
+        paymentType:
+          form.payment_method === "online" ? gateway ?? "online" : form.payment_method,
+      });
+
       const orderId = result.order.id;
       const orderNumber = result.order.orderNumber;
       setCartBadge(0);
@@ -541,6 +596,8 @@ export function GuestCheckoutForm() {
       t,
       tc,
       loadCart,
+      guestGA4Items,
+      displayCurrency,
     ],
   );
 
