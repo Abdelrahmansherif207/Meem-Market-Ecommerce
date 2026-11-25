@@ -76,7 +76,12 @@ export default function ProductCard({
   const isDark = theme === "dark";
   const locale = useLocale();
   const isRtl = locale === "ar";
-  const { quantity, isPending, addItem, increment, decrement } = useCartActions(productId);
+  const { quantity, isPending, addItem, increment, decrement } = useCartActions(productId, {
+    name: title,
+    price: price ?? 0,
+    originalPrice: originalPrice,
+    sku,
+  });
   const [animating, setAnimating] = useState(false);
 
   const safePrice = price ?? 0;

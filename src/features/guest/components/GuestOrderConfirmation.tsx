@@ -18,6 +18,11 @@ import { Button } from "@/components/ui/Button";
 import { Price } from "@/components/ui/Price";
 import { checkoutService, isGatewayEligible } from "@/features/checkout";
 import { ApiError } from "@/shared/lib/api";
+import {
+  fromGuestOrderItem,
+  trackPurchase,
+  useOncePerKeyEffect,
+} from "@/features/analytics";
 import { guestCheckoutService } from "../services/guestCheckoutService";
 import { guestOrderTrackingService } from "../services/guestOrderTrackingService";
 import {
@@ -162,7 +167,6 @@ export function GuestOrderConfirmation({
     if (!order) return;
     if (tokensAttemptedRef.current) return;
     tokensAttemptedRef.current = true;
-
     let cancelled = false;
 
     const syncTokens = async () => {
@@ -206,6 +210,28 @@ export function GuestOrderConfirmation({
       cancelled = true;
     };
   }, [order, orderId, locale]);
+
+  // GA4 purchase — ONLY from backend-confirmed state (the gateway redirect
+  // is never proof of payment): online orders must be paid, COD orders are
+  // confirmed at creation, cancelled orders never count. trackPurchase
+  // deduplicates by transaction id across polls, Strict Mode and revisits.
+  useOncePerKeyEffect(
+    order && order.status !== "cancelled" && !isGuestPaymentPending(order) &&
+      (isGuestOrderPaid(order) || order.paymentMethod === "cod")
+      ? `purchase_${order.orderNumber || order.id}`
+      : null,
+    () => {
+      if (!order || order.status === "cancelled") return;
+      const shipping = (order.shippingPrice || 0) + (order.fastShippingFee || 0);
+      trackPurchase({
+        transactionId: String(order.orderNumber || order.id),
+        value: order.total,
+        currency: order.currency ?? undefined,
+        shipping: Math.round(shipping * 1000) / 1000,
+        items: order.items.map(fromGuestOrderItem),
+      });
+    },
+  );
 
   const openCancelDialog = useCallback(async () => {
     if (!order || cancelPreparing) return;

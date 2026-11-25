@@ -10,7 +10,7 @@ import { useDisplayCurrency } from "@/features/currencies";
 import { formatNumber } from "@/shared/utils/formatMoney";
 import Skeleton from "@/components/ui/Skeleton";
 import type { ProductDetail, ProductVariant } from "../../types";
-import { getDisplayPrice, getStockStatus } from "../../utils";
+import { getDisplayPrice, getOriginalPrice, getStockStatus } from "../../utils";
 
 interface NiceOneBuyBoxProps {
   product: ProductDetail;
@@ -54,10 +54,16 @@ export function NiceOneBuyBox({
   /** Fixed initial add quantity (design decision — see section-mapping doc). */
   const [addQuantity] = useState(1);
 
-  const { addItem, increment, decrement, quantity: cartQuantity, isPending } = useCartActions(product.id);
-
   const price = selectedVariant ? selectedVariant.current_price : getDisplayPrice(product);
   const productImage = product.images?.thumbnail ?? "";
+
+  const { addItem, increment, decrement, quantity: cartQuantity, isPending } = useCartActions(product.id, {
+    name: product.name,
+    price,
+    originalPrice: getOriginalPrice(product),
+    sku: product.sku,
+    variantId: selectedVariant?.id ?? null,
+  });
 
   async function handleAddToCart() {
     if (optionsUnavailable) return;

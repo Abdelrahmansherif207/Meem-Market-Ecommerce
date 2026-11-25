@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import Image from "next/image";
+import { useMemo } from "react";
 import { ShoppingBag, Star } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import { cn } from "@/shared/utils/cn";
@@ -9,6 +10,7 @@ import { WishlistButton } from "@/features/wishlist/components/WishlistButton";
 import { QuantityStepper } from "@/components/ui/QuantityStepper";
 import { useCartActions } from "@/features/cart/hooks/useCartActions";
 import { showCartFeedback } from "@/features/cart/store/useCartFeedbackStore";
+import { fromRelatedProduct, useListImpression } from "@/features/analytics";
 import { useDisplayCurrency } from "@/features/currencies";
 import { formatNumber } from "@/shared/utils/formatMoney";
 import Skeleton from "@/components/ui/Skeleton";
@@ -34,6 +36,13 @@ interface NiceOneRecommendedRailProps {
  */
 export function NiceOneRecommendedRail({ items, pricesLoading = false, seeMoreHref }: NiceOneRecommendedRailProps) {
   const t = useTranslations("niceOnePdp");
+
+  // GA4 view_item_list — PDP "related products" rail.
+  const ga4Items = useMemo(
+    () => items.map((item, index) => fromRelatedProduct(item, index)),
+    [items],
+  );
+  useListImpression(ga4Items, "related_products");
 
   if (items.length === 0) return null;
 
@@ -78,7 +87,11 @@ function NiceOneRecommendedCard({
   const discountPercent = getDiscountPercent(item);
   const inStock = item.in_stock ?? item.quantity > 0;
 
-  const { quantity: cartQuantity, isPending, addItem, increment, decrement } = useCartActions(item.id);
+  const { quantity: cartQuantity, isPending, addItem, increment, decrement } = useCartActions(item.id, {
+    name: item.name,
+    price: displayPrice,
+    originalPrice,
+  });
 
   async function handleAdd() {
     if (item.has_variants) return;

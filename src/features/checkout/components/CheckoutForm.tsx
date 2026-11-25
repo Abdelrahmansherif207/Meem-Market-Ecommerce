@@ -39,6 +39,13 @@ import {
   consumePaymentReturnNote,
   peekPaymentReturnNote,
 } from "../utils/paymentReturn";
+import {
+  buildGA4Item,
+  trackAddPaymentInfo,
+  trackAddShippingInfo,
+  trackBeginCheckout,
+  useOncePerKeyEffect,
+} from "@/features/analytics";
 import { orderService } from "@/features/profile";
 import { useOnlineStatus } from "@/shared/hooks/useOnlineStatus";
 
@@ -208,6 +215,37 @@ export function CheckoutForm({
     promotionsError,
     retryPromotions,
   } = data;
+
+  // GA4 item list for checkout events (the ordered delivery group's lines).
+  const checkoutGA4Items = useMemo(
+    () =>
+      (cartData?.items ?? []).map((item) =>
+        buildGA4Item({
+          id: item.productId,
+          name: item.name,
+          price: item.unitPrice,
+          quantity: item.quantity,
+          variantId: item.variantId,
+        }),
+      ),
+    [cartData?.items],
+  );
+
+  // GA4 begin_checkout — once the cart group loaded with items and checkout
+  // is actually startable (not expired).
+  useOncePerKeyEffect(
+    cartData && !cartData.expired && cartData.totalQuantity > 0
+      ? `begin_checkout_${isFast ? "fast" : "scheduled"}_${displayCode}`
+      : null,
+    () => {
+      trackBeginCheckout({
+        items: checkoutGA4Items,
+        value: cartData?.subtotal ?? 0,
+        currency: displayCode,
+        coupon: cartData?.appliedCoupon?.code,
+      });
+    },
+  );
 
   // NOW checkout forces delivery + online payment; the payment step is hidden.
   useEffect(() => {
@@ -426,9 +464,30 @@ export function CheckoutForm({
         (firstEl as HTMLElement)?.focus();
         return;
       }
+      // GA4: the step's data validated — the step succeeded.
+      if (step === "delivery") {
+        trackAddShippingInfo({
+          items: checkoutGA4Items,
+          value: cartData?.subtotal ?? 0,
+          currency: displayCode,
+          shippingTier: form.shipping_type,
+          coupon: cartData?.appliedCoupon?.code,
+        });
+      } else if (step === "payment") {
+        trackAddPaymentInfo({
+          items: checkoutGA4Items,
+          value: cartData?.subtotal ?? 0,
+          currency: displayCode,
+          paymentType:
+            form.payment_method === "online"
+              ? selectedGateway ?? "online"
+              : form.payment_method,
+          coupon: cartData?.appliedCoupon?.code,
+        });
+      }
       goToStep(stepIndex + 1);
     },
-    [runStepValidation, controller, goToStep, stepIndex, t],
+    [runStepValidation, controller, goToStep, stepIndex, t, checkoutGA4Items, cartData, displayCode, form.shipping_type, form.payment_method, selectedGateway],
   );
 
   // ---- Submission (contracts unchanged) -------------------------------------
@@ -548,6 +607,14 @@ export function CheckoutForm({
             notes: form.notes.trim() || undefined,
             governorate_id: selectedGovernorateId,
           });
+          // NOW checkout skips the payment step — report the payment info
+          // together with the successful order creation.
+          trackAddPaymentInfo({
+            items: checkoutGA4Items,
+            value: cartData?.subtotal ?? 0,
+            currency: displayCode,
+            paymentType: "online",
+          });
           if (result.url) {
             if (result.order_id) paymentOrderIdRef.current = result.order_id;
             savePaymentReturnNote(result.order_id);
@@ -601,7 +668,7 @@ export function CheckoutForm({
         setSubmitting(false);
       }
     },
-    [form, vt, selectedGovernorateId, flow, controller, selectedGateway, gatewaysError, t, locale, flowLabel, selectedLocationId, goToStep, steps, intlRouter, isFast, routeToPaymentSuccess],
+    [form, vt, selectedGovernorateId, flow, controller, selectedGateway, gatewaysError, t, locale, flowLabel, selectedLocationId, goToStep, steps, intlRouter, isFast, routeToPaymentSuccess, checkoutGA4Items, cartData, displayCode],
   );
 
   // ---- Map pick (unchanged behavior) ----------------------------------------

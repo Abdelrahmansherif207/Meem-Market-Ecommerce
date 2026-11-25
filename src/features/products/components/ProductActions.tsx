@@ -11,7 +11,7 @@ import { useDisplayCurrency } from "@/features/currencies";
 import { formatNumber } from "@/shared/utils/formatMoney";
 import Skeleton from "@/components/ui/Skeleton";
 import type { ProductDetail, ProductVariant } from "../types";
-import { getStockStatus, getDisplayPrice } from "../utils";
+import { getStockStatus, getDisplayPrice, getOriginalPrice } from "../utils";
 
 interface ProductActionsProps {
   product: ProductDetail;
@@ -34,16 +34,22 @@ export function ProductActions({ product, selectedVariant, pricesLoading = false
   const maxQuantity = Math.min(stock.remaining, 99);
   const [selectedQuantity, setSelectedQuantity] = useState(1);
 
+  const price = variant ? variant.current_price : getDisplayPrice(product);
+  const productImage = product.images?.thumbnail ?? '';
+
   const {
     addItem,
     increment,
     decrement,
     quantity: cartQuantity,
     isPending,
-  } = useCartActions(product.id);
-
-  const price = variant ? variant.current_price : getDisplayPrice(product);
-  const productImage = product.images?.thumbnail ?? '';
+  } = useCartActions(product.id, {
+    name: product.name,
+    price,
+    originalPrice: getOriginalPrice(product),
+    sku: product.sku,
+    variantId: variant?.id ?? null,
+  });
 
   async function handleAddToCart() {
     await addItem({

@@ -78,6 +78,8 @@ export default function ProductSliderIsland({
             badgeText={resolvedBadgeText}
             theme="dark"
             pricesLoading={isRefreshing}
+            itemListId={`home_slider_${fetchKind}_${endpoint}`}
+            itemListName={title}
           />
         </div>
       </section>
@@ -96,6 +98,8 @@ export default function ProductSliderIsland({
       autoplay={autoplay}
       sliderSpeed={sliderSpeed}
       pricesLoading={isRefreshing}
+      itemListId={`home_slider_${fetchKind}_${endpoint}`}
+      itemListName={title}
     />
   );
 }

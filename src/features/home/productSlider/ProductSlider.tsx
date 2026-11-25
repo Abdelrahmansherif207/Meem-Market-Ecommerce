@@ -8,6 +8,7 @@ import { Autoplay, Navigation, Pagination } from "swiper/modules";
 import "swiper/css";
 import { Swiper, SwiperSlide } from "swiper/react";
 import type { Swiper as SwiperType } from "swiper/types";
+import { fromProductCardItem, useListImpression } from "@/features/analytics";
 import type { ProductSliderProps } from "../types";
 
 export default function ProductSlider({
@@ -19,6 +20,8 @@ export default function ProductSlider({
   autoplay = true,
   sliderSpeed = 4500,
   pricesLoading = false,
+  itemListId,
+  itemListName,
 }: ProductSliderProps) {
   const locale = useLocale();
   const isRtl = locale === "ar";
@@ -31,6 +34,14 @@ export default function ProductSlider({
   const onNext = () => swiper?.slideNext();
 
   const safeItems = Array.isArray(items) ? items : [];
+
+  // GA4 list context: callers with a CMS section pass it; others fall back
+  // to a slider id derived from the title.
+  useListImpression(
+    safeItems.map(fromProductCardItem),
+    itemListId ?? (title ? `home_slider_${title}` : "home_slider"),
+    itemListName ?? title,
+  );
 
   if (safeItems.length === 0) {
     return null;

@@ -8,7 +8,7 @@ import { useDisplayCurrency } from "@/features/currencies";
 import { formatNumber } from "@/shared/utils/formatMoney";
 import Skeleton from "@/components/ui/Skeleton";
 import type { ProductDetail, ProductVariant } from "../../types";
-import { getDisplayPrice, getStockStatus } from "../../utils";
+import { getDisplayPrice, getOriginalPrice, getStockStatus } from "../../utils";
 
 interface NiceOneStickyBarProps {
   product: ProductDetail;
@@ -47,11 +47,17 @@ export function NiceOneStickyBar({
   const maxQuantity = Math.min(stock.remaining, 99);
   const canPurchase = stock.inStock && !optionsUnavailable;
 
-  const { addItem, increment, decrement, quantity: cartQuantity, isPending } = useCartActions(product.id);
-
   const price = selectedVariant ? selectedVariant.current_price : getDisplayPrice(product);
   const productImage = product.images?.thumbnail ?? "";
   const variant = selectedVariant;
+
+  const { addItem, increment, decrement, quantity: cartQuantity, isPending } = useCartActions(product.id, {
+    name: product.name,
+    price,
+    originalPrice: getOriginalPrice(product),
+    sku: product.sku,
+    variantId: variant?.id ?? null,
+  });
 
   async function handleAddToCart() {
     if (optionsUnavailable) return;

@@ -11,6 +11,7 @@ import "swiper/css";
 import { cn } from "@/shared/utils/cn";
 import { SectionHeader } from "@/components/ui/SectionHeader";
 import ProductCard from "@/features/products/components/ProductCard";
+import { fromProductCardItem, useListImpression } from "@/features/analytics";
 import {
   getBannerSectionItemsAction,
   getFlashSaleHomeItemsAction,
@@ -96,6 +97,12 @@ export default function MeemShelfIsland({
   );
 
   const safeItems = Array.isArray(items) ? items : [];
+
+  // Stable list id from the CMS endpoint; the localized section title is the
+  // human-readable list name. (Hook stays above the empty-list early return.)
+  const shelfListId = `home_shelf_${fetchKind}_${endpoint}`;
+  useListImpression(safeItems.map(fromProductCardItem), shelfListId, title);
+
   if (safeItems.length === 0) return null;
 
   const action =

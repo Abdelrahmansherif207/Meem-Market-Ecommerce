@@ -1,5 +1,7 @@
 import ProductCard from "@/features/products/components/ProductCard";
 import { getHoverImage } from "@/features/products/utils";
+import { fromCategoryProduct, useListImpression } from "@/features/analytics";
+import { useMemo } from "react";
 import EmptyCategory from "./EmptyCategory";
 import { ProductsGridSkeletonRow } from "./skeletons/ProductsGridSkeletonRow";
 import type { CategoryProduct } from "../types";
@@ -10,6 +12,9 @@ interface CategoryProductsProps {
   isLoadingMore?: boolean;
   /** When true, card price numbers render as skeleton bars. */
   pricesLoading?: boolean;
+  /** GA4 list context — `view_item_list` + `select_item` when set. */
+  itemListId?: string;
+  itemListName?: string;
 }
 
 /**
@@ -23,7 +28,16 @@ export default function CategoryProducts({
   products,
   isLoadingMore = false,
   pricesLoading = false,
+  itemListId,
+  itemListName,
 }: CategoryProductsProps) {
+  // view_item_list — once per unique list content (Strict Mode-safe).
+  const ga4Items = useMemo(
+    () => products.map((product, index) => fromCategoryProduct(product, index)),
+    [products],
+  );
+  useListImpression(ga4Items, itemListId ?? "category_products", itemListName);
+
   if (products.length === 0) {
     return <EmptyCategory />;
   }
@@ -63,6 +77,8 @@ export default function CategoryProducts({
                 flashSaleActive: product.flash_sale_active ?? false,
                 tags: product.tags,
               }}
+              itemListId={itemListId}
+              itemListName={itemListName}
               pricesLoading={pricesLoading}
             />
           );

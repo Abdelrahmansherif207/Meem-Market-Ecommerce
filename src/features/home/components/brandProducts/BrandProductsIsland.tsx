@@ -66,6 +66,8 @@ export default function BrandProductsIsland({
                 items={block.items}
                 columnsCount={columnsCount}
                 pricesLoading={isRefreshing}
+                itemListId={`home_brand_${endpoint}_${block.id}`}
+                itemListName={block.name}
               />
             )}
           </div>

@@ -192,6 +192,8 @@ export default function ProductsGridIsland({
         products={items}
         pricesLoading={isRefreshing}
         isLoadingMore={isLoadingMore && !paused}
+        itemListId={filterKey ? `${filterKey}_${slug}` : `category_${slug}`}
+        itemListName={slug}
       />
       {paused && nextCursor ? (
         <div className="flex flex-col items-center gap-2 py-4 text-center">

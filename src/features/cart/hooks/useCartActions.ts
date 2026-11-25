@@ -11,6 +11,8 @@ import { useCartFeedbackStore } from "../store/useCartFeedbackStore";
 import { cartService } from "../services/cartService";
 import { guestCartService } from "@/features/guest/services/guestCartService";
 import { runWithGuestSession } from "@/features/guest/utils/guestErrors";
+import { buildGA4Item, trackAddToCart, trackRemoveFromCart } from "@/features/analytics";
+import { useDisplayCurrency } from "@/features/currencies";
 import type { GuestCart, GuestCartLine } from "@/features/guest/types";
 import type { CartLineIdentity, DeliveryType } from "../types";
 
@@ -48,6 +50,18 @@ function findGuestCartLine(
 }
 
 /**
+ * Product descriptor for analytics (name/price/variant as shown in the UI).
+ * Optional — without it, quantity events still fire with item_id only.
+ */
+export interface CartActionProductDescriptor {
+  name: string;
+  price: number;
+  originalPrice?: number | null;
+  sku?: string | null;
+  variantId?: number | null;
+}
+
+/**
  * Unified cart-mutation hook (mixed scheduled + fast cart).
  *
  * - **Guest (legacy):** reads/writes localStorage via `useGuestCartStore`.
@@ -60,9 +74,13 @@ function findGuestCartLine(
  * The browsing channel only sets the *default* delivery type for card
  * actions; an explicit `deliveryType` on `addItem` always wins.
  */
-export function useCartActions(productId: number) {
+export function useCartActions(
+  productId: number,
+  product?: CartActionProductDescriptor,
+) {
   const locale = useLocale();
   const tFeedback = useTranslations("cartPage.feedback");
+  const { code: currencyCode } = useDisplayCurrency();
   const showFeedback = useCartFeedbackStore((s) => s.showFeedback);
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
   const guestServerMode = !isAuthenticated && isGuestCheckoutEnabled();
@@ -154,6 +172,22 @@ export function useCartActions(productId: number) {
       // An explicit per-call delivery type always wins over the channel.
       const deliveryType: DeliveryType = item.deliveryType ?? channelDeliveryType;
 
+      // GA4 item for the add_to_cart event (only pushed after success).
+      const trackAddedItem = () => {
+        trackAddToCart({
+          item: buildGA4Item({
+            id: productId,
+            name: item.name,
+            price: item.current_price,
+            originalPrice: item.price,
+            quantity: item.quantity,
+            variantId: item.product_variant_id ?? null,
+            sku: item.sku,
+          }),
+          currency: currencyCode,
+        });
+      };
+
       if (!isAuthenticated) {
         if (guestServerMode) {
           // Server-backed guest cart — optimistic like the auth path.
@@ -180,6 +214,7 @@ export function useCartActions(productId: number) {
           } finally {
             setIsPending(false);
           }
+          trackAddedItem();
           return true;
         }
         guestAddItem({
@@ -196,6 +231,7 @@ export function useCartActions(productId: number) {
           in_stock: item.in_stock,
           stock_quantity: item.stock_quantity,
         });
+        trackAddedItem();
         return true;
       }
 
@@ -214,7 +250,6 @@ export function useCartActions(productId: number) {
           },
           locale,
         );
-        return true;
       } catch (error) {
         reportError(error, "add");
         rollback(item.quantity);
@@ -222,6 +257,8 @@ export function useCartActions(productId: number) {
       } finally {
         setIsPending(false);
       }
+      trackAddedItem();
+      return true;
     },
     [
       isAuthenticated,
@@ -234,11 +271,28 @@ export function useCartActions(productId: number) {
       locale,
       rollback,
       reportError,
+      currencyCode,
     ],
   );
 
   // ── increment ────────────────────────────────────────────────────────────
   const increment = useCallback(async () => {
+    // GA4 item for the +1 add event (only pushed after success).
+    const trackIncrement = (variantId?: number | null) => {
+      trackAddToCart({
+        item: buildGA4Item({
+          id: productId,
+          name: product?.name ?? "",
+          price: product?.price,
+          originalPrice: product?.originalPrice,
+          quantity: 1,
+          variantId: variantId ?? product?.variantId ?? null,
+          sku: product?.sku,
+        }),
+        currency: currencyCode,
+      });
+    };
+
     if (!isAuthenticated) {
       if (guestServerMode) {
         setOptimisticQuantity((q) => q + 1);
@@ -268,9 +322,11 @@ export function useCartActions(productId: number) {
         } catch (error) {
           reportError(error, "update");
           rollback(1);
+          return;
         } finally {
           setIsPending(false);
         }
+        trackIncrement(product?.variantId ?? null);
         return;
       }
       const target = useGuestCartStore
@@ -286,6 +342,7 @@ export function useCartActions(productId: number) {
         deliveryType: channelDeliveryType,
         productVariantId: target.product_variant_id ?? null,
       });
+      trackIncrement(target.product_variant_id);
       return;
     }
 
@@ -305,9 +362,11 @@ export function useCartActions(productId: number) {
     } catch (error) {
       reportError(error, "update");
       rollback(1);
+      return;
     } finally {
       setIsPending(false);
     }
+    trackIncrement(product?.variantId ?? null);
   }, [
     isAuthenticated,
     guestServerMode,
@@ -319,10 +378,29 @@ export function useCartActions(productId: number) {
     locale,
     rollback,
     reportError,
+    product,
+    currencyCode,
   ]);
 
   // ── decrement ────────────────────────────────────────────────────────────
   const decrement = useCallback(async () => {
+    // GA4 item for the remove event (only pushed after success). A decrement
+    // removes exactly one unit; removing the last unit reports the line qty.
+    const trackDecrement = (quantity: number, variantId?: number | null) => {
+      trackRemoveFromCart({
+        item: buildGA4Item({
+          id: productId,
+          name: product?.name ?? "",
+          price: product?.price,
+          originalPrice: product?.originalPrice,
+          quantity,
+          variantId: variantId ?? product?.variantId ?? null,
+          sku: product?.sku,
+        }),
+        currency: currencyCode,
+      });
+    };
+
     if (!isAuthenticated) {
       if (guestServerMode) {
         // Resolve the line from the server cart (cards don't carry line ids).
@@ -364,9 +442,11 @@ export function useCartActions(productId: number) {
         } catch (error) {
           reportError(error, "update");
           rollback(-1);
+          return;
         } finally {
           setIsPending(false);
         }
+        trackDecrement(1, product?.variantId ?? null);
         return;
       }
 
@@ -384,6 +464,7 @@ export function useCartActions(productId: number) {
       };
       if (target.quantity <= 1) guestRemoveItem(productId, line);
       else guestUpdateQuantity(productId, target.quantity - 1, line);
+      trackDecrement(1, target.product_variant_id);
       return;
     }
 
@@ -423,9 +504,12 @@ export function useCartActions(productId: number) {
     } catch (error) {
       reportError(error, "update");
       rollback(-1);
+      return;
     } finally {
       setIsPending(false);
     }
+    // Whole-line removal reports the full line quantity, else a single unit.
+    trackDecrement(currentQty <= 1 ? currentQty : 1, product?.variantId ?? null);
   }, [
     isAuthenticated,
     guestServerMode,
@@ -439,6 +523,8 @@ export function useCartActions(productId: number) {
     setTotalQuantity,
     rollback,
     reportError,
+    product,
+    currencyCode,
   ]);
 
   return useMemo(
